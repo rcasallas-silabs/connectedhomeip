@@ -112,38 +112,6 @@ def runInWorkspace(Map args, Closure cl)
     }
 }
 
-def bootstrapWorkspace()
-{
-    actionWithRetry {
-        node(buildFarmLabel)
-        {
-            def workspaceTmpDir = createWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
-                                                            buildOverlayDir)
-            def dirPath = workspaceTmpDir + createWorkspaceOverlay.overlayMatterPath
-            def saveDir = 'matter/'
-            dir(dirPath) {
-
-                withDockerContainer(image: "connectedhomeip/chip-build-efr32:0.5.64", args: "-u root ")
-                {
-                    try {
-                        sh './scripts/build/gn_bootstrap.sh'
-                    } catch (e) {
-                        deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
-                                                    workspaceTmpDir,
-                                                    saveDir,
-                                                    '-name no-files')
-                        throw e
-                    }
-                }
-            }
-            deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
-                                       workspaceTmpDir,
-                                       'matter/',
-                                       '-name "*" ! -name "*.lock"')
-        }
-    }
-}
-
 def buildOpenThreadExample(app, board)
 {
     actionWithRetry {
@@ -704,18 +672,6 @@ def pipeline()
             // export the NFS overlay
             sh 'sudo exportfs -af'
         }
-    }
-
-
-    stage('Bootstrap Workspace')
-    {
-        advanceStageMarker()
-
-        def parallelNodes = [:]
-        parallelNodes['Bootstrap']  = { this.bootstrapWorkspace()   }
-
-        parallelNodes.failFast = false
-        parallel parallelNodes
     }
 
     stage('Build OpenThread Examples')
