@@ -19,7 +19,7 @@ BUILDS = {"OpenThread"}
 BUILD_TYPES = {("standard", "")}
 building_command = './scripts/examples/gn_efr32_example.sh ./silabs_examples/{app}/efr32 ./out/custom/{app}/{network} {board} {buildArguments}'
 
-for examples in glob.glob("./silabs_examples/*"):
+for examples in glob.glob("./silabs_examples/*/efr32"):
     for build in BUILDS:
         for board in BOARDS:
             for build_type in BUILD_TYPES:
