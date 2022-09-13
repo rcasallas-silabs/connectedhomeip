@@ -43,8 +43,6 @@ def initWorkspaceAndScm()
         sh 'cd ../../../'
         sh 'git submodule set-url ./third_party/silabs/gecko_sdk https://stash.silabs.com/scm/embsw/gecko_sdk_release.git'
 
-
-
         // Matter Init --Checkout relevant submodule
         sh 'scripts/checkout_submodules.py --shallow --recursive --platform efr32'
     }
@@ -187,10 +185,9 @@ def buildSilabsCustomOpenThreadExamples(board)
                         }
                     }
                 }
-                stash name: 'CustomOpenThreadExamples', includes:  'out/**/*.map ,'+
-                                                                    'out/**/*.s37 '
-
-
+                stash name: 'CustomOpenThreadExamples', includes:  'out/**/*.s37 ' 
+                                                               
+                                                               
             }
             deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
                                        workspaceTmpDir,
@@ -318,10 +315,9 @@ def exportIoTReports()
     }
 }
 
-def openThreadTestSuite(String name, String board)
+def openThreadTestSuite(name, board)
 {
-   // lock(label: 'Matter-Testbed', quantity: 1,  variable: 'matter-testbed', skipIfLocked : true)
-    lock('Matter-Testbed')
+    lock('Matter-Testbed') 
     {
         node('gsdkBostonNode')
         {
@@ -344,10 +340,10 @@ def openThreadTestSuite(String name, String board)
                                 git pull
                             '''
                         }
-                        catchError(buildResult: 'UNSTABLE',
-                                    catchInterruptions: false,
-                                    message: "[ERROR] One or more openthread tests have failed",
-                                    stageResult: 'SUCCESS')
+                        catchError(buildResult: 'UNSTABLE', 
+                                    catchInterruptions: false, 
+                                    message: "[ERROR] One or more openthread tests have failed", 
+                                    stageResult: 'UNSTABLE')
                         {
                             dir('matter')
                             {
@@ -408,7 +404,7 @@ def openThreadTestSuite(String name, String board)
     }
 }
 
-def utfThreadTestSuite(String devicegoup,String testbed_name,String app_name, String  matter_type , String board, String test_suite, String manifestyaml, String testsequenceyaml )
+def utfThreadTestSuite(devicegoup,testbed_name,app_name, matter_type , board, test_suite, manifestyaml,  testsequenceyaml )
 {
     globalLock(credentialsId: 'hwmux_token_matterci', deviceGroup: devicegoup) {
        node("gsdkMontrealNode")
@@ -490,10 +486,10 @@ def utfThreadTestSuite(String devicegoup,String testbed_name,String app_name, St
                                     'DEBUG=true'
                                 ])
                                 {
-                                    catchError(buildResult: 'UNSTABLE',
-                                               catchInterruptions: false,
-                                               message: "[ERROR] One or more tests have failed",
-                                               stageResult: 'SUCCESS')
+                                    catchError(buildResult: 'UNSTABLE', 
+                                               catchInterruptions: false, 
+                                               message: "[ERROR] One or more tests have failed", 
+                                               stageResult: 'UNSTABLE')
                                     {
                                         sh """
                                             echo ${TESTBED_NAME}
@@ -512,7 +508,7 @@ def utfThreadTestSuite(String devicegoup,String testbed_name,String app_name, St
 }
 
 
-def utfWiFiTestSuite(String devicegoup,String testbed_name,String app_name,String matter_type, String board,  String wifi_module, String test_suite, String manifestyaml, String testsequenceyaml)
+def utfWiFiTestSuite(devicegoup, testbed_name, app_name, matter_type, board, wifi_module, test_suite,manifestyaml,  testsequenceyaml)
 {
     globalLock(credentialsId: 'hwmux_token_matterci', deviceGroup: devicegoup) {
        node("gsdkMontrealNode")
@@ -593,10 +589,10 @@ def utfWiFiTestSuite(String devicegoup,String testbed_name,String app_name,Strin
                                     'DEBUG=true'
                                 ])
                                 {
-                                    catchError(buildResult: 'UNSTABLE',
-                                               catchInterruptions: false,
-                                               message: "[ERROR] One or more tests have failed",
-                                               stageResult: 'SUCCESS')
+                                    catchError(buildResult: 'UNSTABLE', 
+                                               catchInterruptions: false, 
+                                               message: "[ERROR] One or more tests have failed", 
+                                               stageResult: 'UNSTABLE')
                                     {
                                       //  pytestParam="\"pytest --tb=native tests${test_suite} --manifest manifest${manifestyaml}.yaml ${testsequenceyaml}\""
                                         sh """
@@ -626,7 +622,7 @@ def pushToNexus()
             def saveDir = 'matter/'
             dir(dirPath) {
 
-                withVault([vaultSecrets: secrets])
+                 withCredentials([usernamePassword(credentialsId: 'svc_gsdk', passwordVariable: 'SL_PASSWORD', usernameVariable: 'SL_USERNAME')])
                  {
 
                     sh '''#!/usr/bin/env bash
