@@ -320,7 +320,7 @@ def exportIoTReports()
                                     --target_part efr32mg24b210f1536im48 \
                                     --compiler gcc \
                                     --target_board BRD4187C \
-                                    --app_name ${app}-MG24 \
+                                    --app_name ${app}-${version}-MG24 \
                                     --service_url https://code-size-analyzer.silabs.net \
                                     --branch_name ${env.BRANCH_NAME} \
                                     --build_number b${env.BUILD_NUMBER} \
@@ -340,12 +340,12 @@ def exportIoTReports()
                                 --stack_name matter \
                                 --target_part efr32mg12p432f1024gl125 \
                                 --compiler gcc \
-                                --target_board BRD4186C \
-                                --app_name window-app-MG24 \
+                                --target_board BRD4161A \
+                                --app_name window-app-${version}-MG12 \
                                 --service_url https://code-size-analyzer.silabs.net \
                                 --branch_name ${env.BRANCH_NAME} \
                                 --build_number b${env.BUILD_NUMBER} \
-                                --output_file window-app-MG24.json \
+                                --output_file window-app-MG12.json \
                                 --store_results True \
                                 --verify_ssl False
                             """
