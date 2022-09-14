@@ -288,24 +288,101 @@ def exportIoTReports()
             def dirPath = workspaceTmpDir + createWorkspaceOverlay.overlayMatterPath
             def saveDir = 'matter/'
             dir(dirPath) {
+                withDockerContainer(image: "connectedhomeip/chip-build-efr32:0.5.64", args: "-u root")
+                {
+                    try {
+                        // sh 'apt-get install python3-venv'
+                        sh 'python3 -m venv code_size_analysis_venv'
+                        sh '. code_size_analysis_venv/bin/activate'
+                        sh 'python3 -m pip install --upgrade pip'
+                        sh 'pip3 install code_size_analyzer_client-python>=0.4.1'
 
-                sh 'pip3 install code_size_analyzer_client-python'
-                sh 'python3 ./silabs_ci_scripts/iot_reports.py'
-                sh 'find ./ -name "*.json"'
+                        sh "echo ${env.BUILD_NUMBER}"
 
-                    if (env.BRANCH_NAME == "silabs") {
-                        // TODO : @Gabe Ash When you got time.
-                        // Path to samba share : smb://usfs01/Shared/QA/ArchiveBuilds/code_size/matter_non-gsdk
+                        // This set of Applications to track code size was 
+                        // approved by Rob Alexander on September 7 2022
+                        // Light --> MG24 (BRD4187C)
+                        // Lock ---> MG24 (BRD4187C) (Thread and RS9116)
+                        // Window ---> MG12 (BRD4161A) + MG24 (BRD4187C)
+                        // Thermostat ---> MG24 (BRD4187C) (Thread and RS9116)
 
-                        // sh 'cp -rf ./out/iot_reports/*  <path to samba share/b${BUILD_NUMBER}/>'
-                        // sh 'touch <path to samba share/b${BUILD_NUMBER}/COMPLETE'
-                    }
-                    else {
-                        sh 'echo "Not uploading reports"'
+                        def wifiSizeTrackingApp = [ "lock-app", "thermostat"]
+                        def openThreadMG24Apps = ["lighting-app", "lock-app", "window-app"]
+                        def appVersion = ["standard", "release"]
+
+                        // Generate report for MG24 (BRD4187C) apps
+                        openThreadMG24Apps.each { app -> 
+                            appVersion.each { version ->
+                                sh """unset OTEL_EXPORTER_OTLP_ENDPOINT
+                                    code_size_analyzer_cli \
+                                    --map_file ./out/CSA/${app}/OpenThread/${version}/BRD4187C/*.map \
+                                    --stack_name matter \
+                                    --target_part efr32mg24b210f1536im48 \
+                                    --compiler gcc \
+                                    --target_board BRD4187C \
+                                    --app_name ${app}-MG24 \
+                                    --service_url https://code-size-analyzer.silabs.net \
+                                    --branch_name ${env.BRANCH_NAME} \
+                                    --build_number b${env.BUILD_NUMBER} \
+                                    --output_file ${app}-MG24.json \
+                                    --store_results True \
+                                    --verify_ssl False
+                                """
+
+                            }
+                        }
+
+                        // Generate report for MG12 (BRD4161A) Window-app only
+                        appVersion.each { version ->
+                            sh """unset OTEL_EXPORTER_OTLP_ENDPOINT
+                                code_size_analyzer_cli \
+                                --map_file ./out/CSA/window-app/OpenThread/${version}/BRD4161A/*.map \
+                                --stack_name matter \
+                                --target_part efr32mg12p432f1024gl125 \
+                                --compiler gcc \
+                                --target_board BRD4186C \
+                                --app_name window-app-MG24 \
+                                --service_url https://code-size-analyzer.silabs.net \
+                                --branch_name ${env.BRANCH_NAME} \
+                                --build_number b${env.BUILD_NUMBER} \
+                                --output_file window-app-MG24.json \
+                                --store_results True \
+                                --verify_ssl False
+                            """
+                        }
+
+                        // Generate report for WiFi implementation MG24 BRD4186C + RS9116
+                        wifiSizeTrackingApp.each { app -> 
+                            sh """unset OTEL_EXPORTER_OTLP_ENDPOINT
+                                code_size_analyzer_cli \
+                                --map_file out/${app}_wifi_rs911x/BRD4186C/*.map \
+                                --stack_name matter \
+                                --target_part efr32mg24b210f1536im48 \
+                                --compiler gcc \
+                                --target_board BRD4186C \
+                                --app_name ${app}-WiFi-MG24 \
+                                --service_url https://code-size-analyzer.silabs.net \
+                                --branch_name ${env.BRANCH_NAME} \
+                                --build_number b${env.BUILD_NUMBER} \
+                                --output_file ${app}-WiFi-MG24.json \
+                                --store_results True \
+                                --verify_ssl False
+                            """
+                        }
+
+
+                    } catch (e) {
+                        deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
+                                                    workspaceTmpDir,
+                                                    saveDir,
+                                                    '-name no-files')
+                        throw e
                     }
 
                     // Create dummy files to forward workspace to next stage
                     sh 'touch ./bugfix.txt'
+
+                }
             }
             deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
                                        workspaceTmpDir,
@@ -764,14 +841,13 @@ def pipeline()
 
     }
 
-    // TODO JIRA : MATTER-69
-    // if (env.BRANCH_NAME == "silabs") {
-    //     stage("Code Size analysis")
-    //     {
-    //         advanceStageMarker()
-    //         exportIoTReports()
-    //     }
-    // }
+    if (env.BRANCH_NAME == "silabs" ) {
+        stage("Code Size analysis")
+        {
+            advanceStageMarker()
+            exportIoTReports()
+        }
+    }
 
     stage("Push to Nexus")
     {
