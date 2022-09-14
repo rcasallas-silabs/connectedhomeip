@@ -246,7 +246,7 @@ def buildChipTool()
             def dirPath = workspaceTmpDir + createWorkspaceOverlay.overlayMatterPath
             def saveDir = 'matter/'
             dir(dirPath) {
-                withDockerContainer(image: "nexus.silabs.net/connectedhomeip/chip-build-crosscompile:latest",args: "-u root")
+                withDockerContainer(image: "nexus.silabs.net/connectedhomeip/chip-build-crosscompile:22",args: "-u root")
                 {
                   	withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
                     {
