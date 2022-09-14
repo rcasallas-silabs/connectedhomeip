@@ -678,9 +678,9 @@ def pipeline()
         def openThreadBoards = [:]
 
         if (env.BRANCH_NAME == "silabs") {
-            openThreadBoards = ["BRD4161A", "BRD4162A", "BRD4163A", "BRD4164A", "BRD4166A", "BRD4186C", "BRD4187A", "BRD4187C", "BRD2703A"]
+            openThreadBoards = ["BRD4161A", "BRD4162A", "BRD4163A", "BRD4164A", "BRD4166A", "BRD4186C", "BRD4187C", "BRD2703A"]
         } else {
-            openThreadBoards = ["BRD4161A", "BRD4166A", "BRD4187A", "BRD4187C", "BRD2703A" ]
+            openThreadBoards = ["BRD4161A", "BRD4166A", "BRD4187C", "BRD2703A" ]
         }
         def openThreadApps = ["lighting-app", "lock-app", "light-switch-app", "window-app"]
 
@@ -785,7 +785,9 @@ def pipeline()
         def parallelNodes = [:]
 
         parallelNodes['Junit lighting BRD4161A']       = { this.openThreadTestSuite("lighting","BRD4161A") }
-        parallelNodes['Junit lighting BRD4187A']       = { this.openThreadTestSuite("lighting","BRD4187A")   }
+
+        // Disabled until test bed switch to a BRD4187C
+        // parallelNodes['Junit lighting BRD4187A']       = { this.openThreadTestSuite("lighting","BRD4187A")   }
 
         parallelNodes['lighting Thread BRD4187C']   = { this.utfThreadTestSuite('utf_matter_thread','matter_thread','lighting','thread','BRD4187C','',"/manifest-4187-thread","--tmconfig tests/.sequence_manager/test_execution_definitions/matterci_test_sequence_thread.yaml") }
         parallelNodes['lighting Thread BRD4161A']   = { this.utfThreadTestSuite('utf_matter_thread','matter_thread','lighting','thread','BRD4161A','',"/manifest-4161-thread","--tmconfig tests/.sequence_manager/test_execution_definitions/matterci_test_sequence_thread_4161.yaml") }
