@@ -6,27 +6,27 @@
 @@@CICD @gbash @yushu @shmakdis @jepenven
 
 # Pipeline rule
-./Jenkinsfile @@MatterWatt @@CICD
-./silabs_ci_scripts/ @@MatterWatt @@CICD
+Jenkinsfile @@MatterWatt @@CICD
+silabs_ci_scripts/ @@MatterWatt @@CICD
 
 # Documentation is everyone business
 **/*.md @@Documentation
 
-./examples/ @@MatterCSA
-./src/ @@MatterCSA
+examples/ @@MatterCSA
+src/ @@MatterCSA
 
-./silabs_examples/ @@MatterWatt @@MatterWifi
+silabs_examples/ @@MatterWatt @@MatterWifi
 
-./silabs_examples/unify-matter-bridge/ @@Unify @@MatterWatt
+silabs_examples/unify-matter-bridge/ @@Unify @@MatterWatt
 
 CODEOWNERS               @@MatterWatt
 
 
 
 # If a group is involved, at least one reviewer of the group must approve
-Check(@@MatterCSA >= 1)
-Check(@@Unify >= 1)
+(Check(@@MatterCSA >= 1))
+(Check(@@Unify >= 1))
 (Check(@@MatterWifi >= 1) | Check(@@MatterWatt >= 1))
-Check(@@CICD >= 1)
+(Check(@@CICD >= 1))
 
 OverallCheck(2)
