@@ -12,12 +12,23 @@ silabs_ci_scripts/ @@MatterWatt @@CICD
 # Documentation is everyone business
 **/*.md @@Documentation
 
+# Shared folder with CSA
+build/ @@MatterCSA
+build_overrides/ @@MatterCSA
+config/ @@MatterCSA
+credentials/ @@MatterCSA
+docs/ @@MatterCSA
 examples/ @@MatterCSA
+integrations/ @@MatterCSA
+scripts/ @@MatterCSA
 src/ @@MatterCSA
+third_party/ @@MatterCSA
+zzz_generated/ @@MatterCSA
+
 
 silabs_examples/ @@MatterWatt @@MatterWifi
 
-silabs_examples/unify-matter-bridge/ @@Unify @@MatterWatt
+silabs_examples/unify-matter-bridge/ @@Unify
 
 CODEOWNERS               @@MatterWatt
 
