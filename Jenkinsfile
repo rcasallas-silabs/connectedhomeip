@@ -839,27 +839,27 @@ def pipeline()
     }
 
 
-    // TODO re-enable when PR #70 is merged
-    // stage("Build Custom examples")
-    // {
-    //     advanceStageMarker()
-    //     // build library dependencies
-    //     def parallelNodes = [:]
-    //     def boardsForCustom = [:]
 
-    //     if (env.BRANCH_NAME == "silabs") {
-    //         boardsForCustom = ["BRD4161A", "BRD4186C", "BRD4187C"]
-    //     } else {
-    //         boardsForCustom = ["BRD4161A", "BRD4186C"]
-    //     }
+    stage("Build Custom examples")
+    {
+        advanceStageMarker()
+   
+        def parallelNodes = [:]
+        def boardsForCustom = [:]
 
-    //     boardsForCustom.each { board ->
-    //         parallelNodes[board]      = { this.buildSilabsCustomOpenThreadExamples(board)   }
-    //     }
+        if (env.BRANCH_NAME == "silabs") {
+            boardsForCustom = ["BRD4161A", "BRD4186C", "BRD4187C", "BRD4166A"]
+        } else {
+             boardsForCustom = ["BRD4161A", "BRD4186C", "BRD4166A"]
+        }
 
-    //     parallelNodes.failFast = false
-    //     parallel parallelNodes
-    // }
+        boardsForCustom.each { board ->
+             parallelNodes[board]      = { this.buildSilabsCustomOpenThreadExamples(board)   }
+         }
+
+         parallelNodes.failFast = false
+         parallel parallelNodes
+     }
 
     stage("Build Tooling")
     {
