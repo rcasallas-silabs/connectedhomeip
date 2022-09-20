@@ -788,7 +788,8 @@ def pipeline()
         def parallelNodes = [:]
         def openThreadBoards = [:]
 
-        if (env.BRANCH_NAME == "silabs") {
+        // Build only for release candidate branch
+        if (env.BRANCH_NAME.startsWith('RC_')) {      
             openThreadBoards = ["BRD4161A", "BRD4162A", "BRD4163A", "BRD4164A", "BRD4166A", "BRD4186C", "BRD4187C", "BRD2703A"]
         } else {
             openThreadBoards = ["BRD4161A", "BRD4166A", "BRD4187C", "BRD2703A" ]
@@ -813,7 +814,8 @@ def pipeline()
         def parallelNodes = [:]
         def wifiBoards = [:]
 
-        if (env.BRANCH_NAME == "silabs") {
+        // Build only for release candidate branch
+        if (env.BRANCH_NAME.startsWith('RC_')) {      
             wifiBoards = ["BRD4161A", "BRD4186C", "BRD4187C"]
         } else {
             wifiBoards = ["BRD4161A", "BRD4186C"]
