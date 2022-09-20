@@ -432,7 +432,7 @@ def openThreadTestSuite(devicegoup, name, board)
                             dir('matter')
                             {
                                 sh 'pwd '
-                                stashFolder = 'OpenThreadExamples-'+name+"-app-"+board
+                                stashFolder = 'OpenThreadExamples-'+name+'-'+board
                                 echo "unstash folder: "+stashFolder
                                 unstash stashFolder
                                 unstash 'ChipTool'
@@ -452,7 +452,7 @@ def openThreadTestSuite(devicegoup, name, board)
                             }
 
 
-                            def  ci_path="${WORKSPACE}/matter/out/CSA/"+name+"-app/OpenThread/standard/"
+                            def  ci_path="${WORKSPACE}/matter/out/CSA/"+name+"/OpenThread/standard/"
                             echo "ci_path: "+ci_path
 
                             withEnv([ 'TEST_SCRIPT_REPO=matter-scripts',
@@ -532,7 +532,7 @@ def utfThreadTestSuite(devicegoup,testbed_name,app_name, matter_type , board, te
                             dir('matter')
                             {
                                     sh 'pwd '
-                                    stashFolder = 'OpenThreadExamples-'+app_name+"-app-"+board
+                                    stashFolder = 'OpenThreadExamples-'+app_name+'-'+board
                                     echo "unstash folder: "+stashFolder
                                     unstash stashFolder
                                     unstash 'ChipTool'
@@ -547,7 +547,7 @@ def utfThreadTestSuite(devicegoup,testbed_name,app_name, matter_type , board, te
                                     echo $chiptoolPath
                                     '''
 
-                                    sh "cp out/CSA/${app_name}-app/OpenThread/standard/${board}/*.s37 ../manifest"
+                                    sh "cp out/CSA/${app_name}/OpenThread/standard/${board}/*.s37 ../manifest"
 
                             }
 
@@ -641,7 +641,7 @@ def utfWiFiTestSuite(devicegoup, testbed_name, app_name, matter_type, board, wif
 
                             dir('matter')
                             {
-                                stashFolder = 'WiFiExamples-'+app_name+'-app-'+board+'-'+wifi_module
+                                stashFolder = 'WiFiExamples-'+app_name+'-'+board+'-'+wifi_module
                                 unstash stashFolder
                                 unstash 'ChipTool'
                                 unstash 'BootLoader'
@@ -655,7 +655,7 @@ def utfWiFiTestSuite(devicegoup, testbed_name, app_name, matter_type, board, wif
                                   echo $chiptoolPath
                                  '''
                                 
-                                sh "cp out/${app_name}-app_wifi_${wifi_module}/${board}/*.s37 ../manifest"
+                                sh "cp out/${app_name}_wifi_${wifi_module}/${board}/*.s37 ../manifest"
 
                             }
 
@@ -894,14 +894,14 @@ def pipeline()
         //even openthread test in parallel, they actually run in sequence as they are using same raspi
         def parallelNodes = [:]
 
-        parallelNodes['Junit lighting BRD4161A']       = { this.openThreadTestSuite('qa-yinyi-1','lighting','BRD4161A') }
-       // parallelNodes['Junit lighting BRD4187A']       = { this.openThreadTestSuite('qa-yinyi-1','lighting','BRD4187A')   }
+        parallelNodes['Junit lighting BRD4161A']       = { this.openThreadTestSuite('qa-yinyi-1','lighting-app','BRD4161A') }
+       // parallelNodes['Junit lighting BRD4187A']       = { this.openThreadTestSuite('qa-yinyi-1','lighting-app','BRD4187A')   }
 
-        parallelNodes['lighting Thread BRD4187C']   = { this.utfThreadTestSuite('utf_matter_thread','matter_thread','lighting','thread','BRD4187C','',"/manifest-4187-thread","--tmconfig tests/.sequence_manager/test_execution_definitions/matterci_test_sequence_thread.yaml") }
-        parallelNodes['lighting Thread BRD4161A']   = { this.utfThreadTestSuite('utf_matter_thread','matter_thread','lighting','thread','BRD4161A','',"/manifest-4161-thread","--tmconfig tests/.sequence_manager/test_execution_definitions/matterci_test_sequence_thread_4161.yaml") }
-        parallelNodes['lighting Thread BRD2703A']   = { this.utfThreadTestSuite('utf_matter_thread_2','matter_thread_2','lighting','thread','BRD2703A','',"/manifest-2703-thread","--tmconfig tests/.sequence_manager/test_execution_definitions/matterci_test_sequence_thread.yaml") }
+        parallelNodes['lighting Thread BRD4187C']   = { this.utfThreadTestSuite('utf_matter_thread','matter_thread','lighting-app','thread','BRD4187C','',"/manifest-4187-thread","--tmconfig tests/.sequence_manager/test_execution_definitions/matterci_test_sequence_thread.yaml") }
+        parallelNodes['lighting Thread BRD4161A']   = { this.utfThreadTestSuite('utf_matter_thread','matter_thread','lighting-app','thread','BRD4161A','',"/manifest-4161-thread","--tmconfig tests/.sequence_manager/test_execution_definitions/matterci_test_sequence_thread_4161.yaml") }
+        parallelNodes['lighting Thread BRD2703A']   = { this.utfThreadTestSuite('utf_matter_thread_2','matter_thread_2','lighting-app','thread','BRD2703A','',"/manifest-2703-thread","--tmconfig tests/.sequence_manager/test_execution_definitions/matterci_test_sequence_thread.yaml") }
 
-        parallelNodes['lighting rs9116 BRD4161A']   = { this.utfWiFiTestSuite('utf_matter_ci','INT0014944','lighting','wifi','BRD4161A','rs911x','',"/manifest","--tmconfig tests/.sequence_manager/test_execution_definitions/matterci_test_sequence.yaml") }
+        parallelNodes['lighting rs9116 BRD4161A']   = { this.utfWiFiTestSuite('utf_matter_ci','INT0014944','lighting-app','wifi','BRD4161A','rs911x','',"/manifest","--tmconfig tests/.sequence_manager/test_execution_definitions/matterci_test_sequence.yaml") }
 
         parallelNodes.failFast = false
         parallel parallelNodes
