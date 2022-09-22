@@ -165,7 +165,7 @@ def buildOpenThreadExample(app, board)
 
 
 
-def buildSilabsCustomOpenThreadExamples(board)
+def buildSilabsCustomOpenThreadExamples(app, board)
 {
     actionWithRetry {
         node(buildFarmLargeLabel)
@@ -181,7 +181,7 @@ def buildSilabsCustomOpenThreadExamples(board)
                     withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
                     {
                         try {
-                            sh "python3 ./silabs_ci_scripts/build_custom_examples.py \"${board}\""
+                            sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/${app}/efr32 ./out/silabs/${app}/OpenThread/ ${board}"
                         } catch (e) {
                             deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
                                                        workspaceTmpDir,
@@ -848,16 +848,19 @@ def pipeline()
    
         def parallelNodes = [:]
         def boardsForCustom = [:]
+        def silabsExamples = ["onoff-plug-app", "sl-newLight", "template"]
 
-        if (env.BRANCH_NAME == "silabs") {
+        if (env.BRANCH_NAME.startsWith('RC_')) {
             boardsForCustom = ["BRD4161A", "BRD4186C", "BRD4187C", "BRD4166A"]
         } else {
              boardsForCustom = ["BRD4161A", "BRD4186C", "BRD4166A"]
         }
 
-        boardsForCustom.each { board ->
-             parallelNodes[board]      = { this.buildSilabsCustomOpenThreadExamples(board)   }
-         }
+        silabsExamples.each { example ->
+            boardsForCustom.each { board ->
+                parallelNodes[example + " " + board]      = { this.buildSilabsCustomOpenThreadExamples(example, board)   }
+            }
+        }
 
          parallelNodes.failFast = false
          parallel parallelNodes
