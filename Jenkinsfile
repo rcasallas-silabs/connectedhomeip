@@ -898,14 +898,9 @@ def pipeline()
       // advanceStageMarker()
         //even openthread test in parallel, they actually run in sequence as they are using same raspi
         def parallelNodes = [:]
-
-        parallelNodes['Junit lighting BRD4161A']       = { this.openThreadTestSuite('qa-yinyi-1','lighting-app','BRD4161A') }
-       // parallelNodes['Junit lighting BRD4187A']       = { this.openThreadTestSuite('qa-yinyi-1','lighting-app','BRD4187A')   }
-
         parallelNodes['lighting Thread BRD4187C']   = { this.utfThreadTestSuite('utf_matter_thread','matter_thread','lighting-app','thread','BRD4187C','',"/manifest-4187-thread","--tmconfig tests/.sequence_manager/test_execution_definitions/matterci_test_sequence_thread.yaml") }
         parallelNodes['lighting Thread BRD4161A']   = { this.utfThreadTestSuite('utf_matter_thread','matter_thread','lighting-app','thread','BRD4161A','',"/manifest-4161-thread","--tmconfig tests/.sequence_manager/test_execution_definitions/matterci_test_sequence_thread_4161.yaml") }
         parallelNodes['lighting Thread BRD2703A']   = { this.utfThreadTestSuite('utf_matter_thread_2','matter_thread_2','lighting-app','thread','BRD2703A','',"/manifest-2703-thread","--tmconfig tests/.sequence_manager/test_execution_definitions/matterci_test_sequence_thread.yaml") }
-
         parallelNodes['lighting rs9116 BRD4161A']   = { this.utfWiFiTestSuite('utf_matter_ci','INT0014944','lighting-app','wifi','BRD4161A','rs911x','',"/manifest","--tmconfig tests/.sequence_manager/test_execution_definitions/matterci_test_sequence.yaml") }
 
         parallelNodes.failFast = false
