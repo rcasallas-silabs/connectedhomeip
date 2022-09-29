@@ -50,9 +50,7 @@ def initWorkspaceAndScm()
         dir('third_party/silabs/matter_support/matter/efr32'){
              stash name: 'BootLoader', includes: 'bootloader_binaries/*.*'
         }
-       
         sh 'du -sk'
-        
     }
 
     dir(buildOverlayDir+'/matter-scripts'){
@@ -191,9 +189,9 @@ def buildSilabsCustomOpenThreadExamples(app, board)
                         }
                     }
                 }
-                stash name: 'CustomOpenThreadExamples', includes:  'out/**/*.s37 ' 
-                                                               
-                                                               
+                stash name: 'CustomOpenThreadExamples', includes:  'out/**/*.s37 '
+
+
             }
             deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
                                        workspaceTmpDir,
@@ -305,7 +303,7 @@ def exportIoTReports()
 
                         sh "echo ${env.BUILD_NUMBER}"
 
-                        // This set of Applications to track code size was 
+                        // This set of Applications to track code size was
                         // approved by Rob Alexander on September 7 2022
                         // Light --> MG24 (BRD4187C)
                         // Lock ---> MG24 (BRD4187C) (Thread and RS9116)
@@ -317,7 +315,7 @@ def exportIoTReports()
                         def appVersion = ["standard", "release"]
 
                         // Generate report for MG24 (BRD4187C) apps
-                        openThreadMG24Apps.each { app -> 
+                        openThreadMG24Apps.each { app ->
                             appVersion.each { version ->
                                 sh """unset OTEL_EXPORTER_OTLP_ENDPOINT
                                     code_size_analyzer_cli \
@@ -358,7 +356,7 @@ def exportIoTReports()
                         }
 
                         // Generate report for WiFi implementation MG24 BRD4186C + RS9116
-                        wifiSizeTrackingApp.each { app -> 
+                        wifiSizeTrackingApp.each { app ->
                             sh """unset OTEL_EXPORTER_OTLP_ENDPOINT
                                 code_size_analyzer_cli \
                                 --map_file out/${app}_wifi_rs911x/BRD4186C/*.map \
@@ -423,10 +421,10 @@ def openThreadTestSuite(devicegoup, name, board)
                                 git pull
                             '''
                         }
-                        
-                        catchError(buildResult: 'UNSTABLE', 
-                                    catchInterruptions: false, 
-                                    message: "[ERROR] One or more openthread tests have failed", 
+
+                        catchError(buildResult: 'UNSTABLE',
+                                    catchInterruptions: false,
+                                    message: "[ERROR] One or more openthread tests have failed",
                                     stageResult: 'UNSTABLE')
                         {
                             dir('matter')
@@ -437,7 +435,7 @@ def openThreadTestSuite(devicegoup, name, board)
                                 unstash stashFolder
                                 unstash 'ChipTool'
                                 unstash 'BootLoader'
- 
+
                                 bootloaderPath=pwd()+'/bootloader_binaries'
                                 echo 'bootloaderPath: '+bootloaderPath
 
@@ -445,7 +443,7 @@ def openThreadTestSuite(devicegoup, name, board)
                                  pwd && ls -R
                                  chiptoolPath=`find $PWD -name "chip-tool" -print `
                                  echo chiptoolPath
-                               
+
                                 '''
                             //  unstash 'CustomOpenThreadExamples'
 
@@ -582,9 +580,9 @@ def utfThreadTestSuite(devicegoup,testbed_name,app_name, matter_type , board, te
                                     'DEBUG=true'
                                 ])
                                 {
-                                    catchError(buildResult: 'UNSTABLE', 
-                                               catchInterruptions: false, 
-                                               message: "[ERROR] One or more tests have failed", 
+                                    catchError(buildResult: 'UNSTABLE',
+                                               catchInterruptions: false,
+                                               message: "[ERROR] One or more tests have failed",
                                                stageResult: 'UNSTABLE')
                                     {
                                         sh """
@@ -654,7 +652,7 @@ def utfWiFiTestSuite(devicegoup, testbed_name, app_name, matter_type, board, wif
                                   chiptoolPath=`find $PWD -name "chip-tool" -print `
                                   echo $chiptoolPath
                                  '''
-                                
+
                                 sh "cp out/${app_name}_wifi_${wifi_module}/${board}/*.s37 ../manifest"
 
                             }
@@ -691,9 +689,9 @@ def utfWiFiTestSuite(devicegoup, testbed_name, app_name, matter_type, board, wif
                                     'DEBUG=true'
                                 ])
                                 {
-                                    catchError(buildResult: 'UNSTABLE', 
-                                               catchInterruptions: false, 
-                                               message: "[ERROR] One or more tests have failed", 
+                                    catchError(buildResult: 'UNSTABLE',
+                                               catchInterruptions: false,
+                                               message: "[ERROR] One or more tests have failed",
                                                stageResult: 'UNSTABLE')
                                     {
                                       //  pytestParam="\"pytest --tb=native tests${test_suite} --manifest manifest${manifestyaml}.yaml ${testsequenceyaml}\""
@@ -722,7 +720,7 @@ def pushToNexus()
                                                             buildOverlayDir)
             def dirPath = workspaceTmpDir + createWorkspaceOverlay.overlayMatterPath
             def saveDir = 'matter/'
-            
+
             dir(dirPath) {
                 try{
                     withCredentials([usernamePassword(credentialsId: 'svc_gsdk', passwordVariable: 'SL_PASSWORD', usernameVariable: 'SL_USERNAME')])
@@ -750,7 +748,7 @@ def pushToNexus()
 
                         '''
                     }
-                } catch (e) 
+                } catch (e)
                 {
                         deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
                                   workspaceTmpDir,
@@ -759,9 +757,9 @@ def pushToNexus()
                         throw e
                 }
             }
-       
+
             deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(), workspaceTmpDir, 'matter/')
-            
+
         }
     }
 }
@@ -780,16 +778,19 @@ def pipeline()
             sh 'sudo exportfs -af'
         }
     }
-
-    stage('Build OpenThread Examples')
+    def parallelNodesBuild = [:]
+    stage("Build")
     {
         advanceStageMarker()
+
+        //---------------------------------------------------------------------
+        // Build OpenThread Examples
+        //---------------------------------------------------------------------
         // build library dependencies
-        def parallelNodes = [:]
         def openThreadBoards = [:]
 
         // Build only for release candidate branch
-        if (env.BRANCH_NAME.startsWith('RC_')) {      
+        if (env.BRANCH_NAME.startsWith('RC_')) {
             openThreadBoards = ["BRD4161A", "BRD4162A", "BRD4163A", "BRD4164A", "BRD4166A", "BRD4186C", "BRD4187C", "BRD2703A"]
         } else {
             openThreadBoards = ["BRD4161A", "BRD4166A", "BRD4187C", "BRD2703A" ]
@@ -798,24 +799,18 @@ def pipeline()
 
         openThreadApps.each { appName ->
             openThreadBoards.each { board ->
-                parallelNodes[appName + " " + board]      = { this.buildOpenThreadExample(appName, board)   }
+                parallelNodesBuild["OpenThread " + appName + " " + board]      = { this.buildOpenThreadExample(appName, board)   }
 
             }
         }
 
-
-        parallelNodes.failFast = false
-        parallel parallelNodes
-    }
-
-    stage("Build WiFi Examples")
-    {
-        advanceStageMarker()
-        def parallelNodes = [:]
+        //---------------------------------------------------------------------
+        // Build WiFi Examples
+        //---------------------------------------------------------------------
         def wifiBoards = [:]
 
         // Build only for release candidate branch
-        if (env.BRANCH_NAME.startsWith('RC_')) {      
+        if (env.BRANCH_NAME.startsWith('RC_')) {
             wifiBoards = ["BRD4161A", "BRD4186C", "BRD4187C"]
         } else {
             wifiBoards = ["BRD4161A", "BRD4186C"]
@@ -825,28 +820,19 @@ def pipeline()
 
         //TODO FIX ME Enable WF200 once silabs branch is updated with CSA for MG24 and WF200 support
         def wifiRCP = ["rs911x"]
-     //  def wifiRCP = ["rs911x", "wf200"]
+        //  def wifiRCP = ["rs911x", "wf200"]
 
         wifiApps.each { appName ->
             wifiBoards.each { board ->
                 wifiRCP.each { rcp ->
-                    parallelNodes[appName + " " + board + " " + rcp]      = { this.buildWiFiExample(appName, board, rcp)   }
+                    parallelNodesBuild["WiFi " + appName + " " + board + " " + rcp]      = { this.buildWiFiExample(appName, board, rcp)   }
                 }
             }
         }
 
-        parallelNodes.failFast = false
-        parallel parallelNodes
-
-    }
-
-
-
-    stage("Build Custom examples")
-    {
-        advanceStageMarker()
-   
-        def parallelNodes = [:]
+        //---------------------------------------------------------------------
+        // Build Custom examples
+        //---------------------------------------------------------------------
         def boardsForCustom = [:]
         def silabsExamples = ["onoff-plug-app", "sl-newLight", "template"]
 
@@ -858,25 +844,17 @@ def pipeline()
 
         silabsExamples.each { example ->
             boardsForCustom.each { board ->
-                parallelNodes[example + " " + board]      = { this.buildSilabsCustomOpenThreadExamples(example, board)   }
+                parallelNodesBuild["Custom " + example + " " + board]      = { this.buildSilabsCustomOpenThreadExamples(example, board)   }
             }
         }
 
-         parallelNodes.failFast = false
-         parallel parallelNodes
-     }
+        //---------------------------------------------------------------------
+        // Build Tooling
+        //---------------------------------------------------------------------
+        parallelNodesBuild['Build Chip-tool ']           = { this.buildChipTool()   }
 
-    stage("Build Tooling")
-    {
-        advanceStageMarker()
-        // build library dependencies
-        def parallelNodes = [:]
-
-
-        parallelNodes['Build Chip-tool ']           = { this.buildChipTool()   }
-
-        parallelNodes.failFast = false
-        parallel parallelNodes
+        parallelNodesBuild.failFast = false
+        parallel parallelNodesBuild
 
     }
 
