@@ -45,12 +45,14 @@ def initWorkspaceAndScm()
         sh 'git submodule set-url ./third_party/silabs/gecko_sdk https://stash.silabs.com/scm/embsw/gecko_sdk_release.git'
 
         // Matter Init --Checkout relevant submodule
-        sh 'scripts/checkout_submodules.py --shallow --recursive --platform efr32'
+        sh 'scripts/checkout_submodules.py --shallow --recursive --platform efr32 linux'
 
         dir('third_party/silabs/matter_support/matter/efr32'){
              stash name: 'BootLoader', includes: 'bootloader_binaries/*.*'
         }
+
         sh 'du -sk'
+
     }
 
     dir(buildOverlayDir+'/matter-scripts'){
@@ -72,7 +74,14 @@ def initWorkspaceAndScm()
                  userRemoteConfigs                : [[credentialsId: 'svc_gsdk',
                                                       url: 'https://stash.silabs.com/scm/wmn_sqa/sqa-tools.git']]]
     }
-
+    dir(buildOverlayDir+"/overlay/unify"){
+        checkout scm: [$class: 'GitSCM',
+                 branches:   [[name: 'ver_1.2.1-103-g34db9516-unify-matter-bridge']],
+                 extensions: [[$class: 'CloneOption', depth: 1, noTags: false, reference: '', shallow: true],
+                                [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true,
+                                recursiveSubmodules: true, reference: '', shallow: true, trackingSubmodules: false]],
+                    userRemoteConfigs: [[credentialsId: 'svc_gsdk', url: 'https://bitbucket-cph.silabs.com/scm/stash/uic/uic.git']]]
+    }
 }
 
 def runInWorkspace(Map args, Closure cl)
@@ -278,6 +287,58 @@ def buildChipTool()
                                        workspaceTmpDir,
                                        'matter/out/',
                                        '-name "chip-tool"')
+        }
+    }
+}
+
+def buildUnifyBridge()
+{
+    actionWithRetry {
+        node(buildFarmLargeLabel)
+        {
+            def workspaceTmpDir = createWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
+                                                            buildOverlayDir)
+            def dirPath = workspaceTmpDir + createWorkspaceOverlay.overlayMatterPath
+            def unifyCheckoutDir = workspaceTmpDir + "/overlay/unify"
+            def saveDir = 'matter/out/'
+            try {
+                def unify_bridge_docker = docker.image('nexus.silabs.net/unify-cache/unify-matter:1.0.1-armhf')
+                dir(dirPath)
+                {
+                    unify_bridge_docker.inside("-u root -v${unifyCheckoutDir}:/unify")
+                    {
+                        withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
+                        {
+                            echo "Build libunify"
+                            sh 'cd /unify && cmake -DCMAKE_INSTALL_PREFIX=$PWD/stage -GNinja -DCMAKE_TOOLCHAIN_FILE=../cmake/armhf_debian.cmake  -B build_unify_armhf/ -S components'
+                            sh 'cd /unify && cmake --build build_unify_armhf'
+                            sh 'cd /unify && cmake --install build_unify_armhf --prefix $PWD/stage'
+
+                            echo "Build Unify Matter Bridge"
+                            sh 'rm -rf ./.environment'
+                            sh 'git config --global --add safe.directory $(pwd)'
+                            sh 'git config --global --add safe.directory $(pwd)/third_party/pigweed/repo'
+                            dir ("silabs_examples/unify-matter-bridge/linux")
+                            {
+                                def out_path = "../../../out/silabs_examples/unify-matter-bridge/armhf_debian_buster"
+                                def pkg_config_export = "export PKG_CONFIG_PATH=:/unify/stage/share/pkgconfig:/usr/lib/arm-linux-gnueabihf/pkgconfig"
+                                sh "../../../scripts/run_in_build_env.sh \"${pkg_config_export}; gn gen ${out_path} --args='target_cpu=\\\"arm\\\"'\""
+                                sh "../../../scripts/run_in_build_env.sh \"${pkg_config_export}; ninja -C ${out_path}\""
+                            }
+                        }
+                    }
+                }
+            } catch (e) {
+                deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
+                                            workspaceTmpDir,
+                                            "matter",
+                                            '-name no-files')
+                throw e
+            }
+            deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
+                                            workspaceTmpDir,
+                                            saveDir,
+                                            '-name unify-matter-bridge')
         }
     }
 }
@@ -783,6 +844,11 @@ def pipeline()
     {
         advanceStageMarker()
 
+        //---------------------------------------------------------------------
+        // Build Unify Matter Bridge
+        //---------------------------------------------------------------------
+        parallelNodesBuild["Unify Matter Bridge"] = {this.buildUnifyBridge()}
+        
         //---------------------------------------------------------------------
         // Build OpenThread Examples
         //---------------------------------------------------------------------
