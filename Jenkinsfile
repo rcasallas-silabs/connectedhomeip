@@ -318,12 +318,18 @@ def buildUnifyBridge()
                             sh 'rm -rf ./.environment'
                             sh 'git config --global --add safe.directory $(pwd)'
                             sh 'git config --global --add safe.directory $(pwd)/third_party/pigweed/repo'
+                            def pkg_config_export = "export PKG_CONFIG_PATH=:/unify/stage/share/pkgconfig:/usr/lib/arm-linux-gnueabihf/pkgconfig"
                             dir ("silabs_examples/unify-matter-bridge/linux")
                             {
                                 def out_path = "../../../out/silabs_examples/unify-matter-bridge/armhf_debian_buster"
-                                def pkg_config_export = "export PKG_CONFIG_PATH=:/unify/stage/share/pkgconfig:/usr/lib/arm-linux-gnueabihf/pkgconfig"
                                 sh "../../../scripts/run_in_build_env.sh \"${pkg_config_export}; gn gen ${out_path} --args='target_cpu=\\\"arm\\\"'\""
                                 sh "../../../scripts/run_in_build_env.sh \"${pkg_config_export}; ninja -C ${out_path}\""
+                            }
+                            dir ("examples/chip-tool")
+                            {
+                                def out_path = "../../out/examples/chip-tool/armhf_debian_buster"
+                                sh "../../scripts/run_in_build_env.sh \"${pkg_config_export}; gn gen ${out_path} --args='target_cpu=\\\"arm\\\"'\""
+                                sh "../../scripts/run_in_build_env.sh \"${pkg_config_export}; ninja -C ${out_path}\""
                             }
                         }
                     }
@@ -338,7 +344,7 @@ def buildUnifyBridge()
             deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
                                             workspaceTmpDir,
                                             saveDir,
-                                            '-name unify-matter-bridge')
+                                            '-name "unify-matter-bridge" -o -type f -name "chip-tool"')
         }
     }
 }
