@@ -906,7 +906,7 @@ def pipeline()
         // Build Custom examples
         //---------------------------------------------------------------------
         def boardsForCustom = [:]
-        def silabsExamples = ["onoff-plug-app", "sl-newLight", "template"]
+        def silabsExamples = ["onoff-plug-app", "sl-newLight", "template", "lighting-lite-app"]
 
         if (env.BRANCH_NAME.startsWith('RC_')) {
             boardsForCustom = ["BRD4161A", "BRD4186C", "BRD4187C", "BRD4166A"]
