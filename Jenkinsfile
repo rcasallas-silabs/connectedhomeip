@@ -227,7 +227,11 @@ def buildWiFiExample(name, board, wifi_radio)
                     {
                         try {
                             // TODO remove enable_openthread_cli once master is updated.
-                            sh "./scripts/examples/gn_efr32_example.sh examples/${name}/efr32/ out/${name}_wifi_${wifi_radio} ${board} \" disable_lcd=true use_external_flash=false enable_openthread_cli=true\" --wifi ${wifi_radio}"
+                            if (board == "BRD4161A" && wifi_radio == "wf200") { // set is_debug=false, otherwise it does not fit
+                                sh "./scripts/examples/gn_efr32_example.sh examples/${name}/efr32/ out/${name}_wifi_${wifi_radio} ${board} \" is_debug=false disable_lcd=true use_external_flash=false enable_openthread_cli=true\" --wifi ${wifi_radio}"
+                            } else {
+                                sh "./scripts/examples/gn_efr32_example.sh examples/${name}/efr32/ out/${name}_wifi_${wifi_radio} ${board} \" disable_lcd=true use_external_flash=false enable_openthread_cli=true\" --wifi ${wifi_radio}"
+                            }
                         } catch (e) {
                             deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
                                                        workspaceTmpDir,
@@ -890,9 +894,7 @@ def pipeline()
 
         def wifiApps = [ "lighting-app", "lock-app", "thermostat"]
 
-        //TODO FIX ME Enable WF200 once silabs branch is updated with CSA for MG24 and WF200 support
-        def wifiRCP = ["rs911x"]
-        //  def wifiRCP = ["rs911x", "wf200"]
+        def wifiRCP = ["rs911x", "wf200"]
 
         wifiApps.each { appName ->
             wifiBoards.each { board ->
