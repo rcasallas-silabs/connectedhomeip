@@ -125,7 +125,7 @@ def runInWorkspace(Map args, Closure cl)
     }
 }
 
-def buildOpenThreadExample(app, board)
+def buildOpenThreadExample(app, board, args)
 {
     actionWithRetry {
         node(buildFarmLargeLabel)
@@ -148,6 +148,9 @@ def buildOpenThreadExample(app, board)
 
                             if(buildRelease) {
                                 sh "./scripts/examples/gn_efr32_example.sh ./examples/${app}/efr32 ./out/CSA/${app}/OpenThread/release ${board} ${releaseString}"
+                            }
+                            if(args) {
+                                sh "./scripts/examples/gn_efr32_example.sh ./examples/${app}/efr32 ./out/CSA/${app}/OpenThread/sleepy ${board} ${args}"
                             }
                         } catch (e) {
                             deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
@@ -873,9 +876,16 @@ def pipeline()
         }
         def openThreadApps = ["lighting-app", "lock-app", "light-switch-app", "window-app"]
 
+        def sleepyBoard = ["BRD4161A", "BRD4186C"]
+
         openThreadApps.each { appName ->
             openThreadBoards.each { board ->
-                parallelNodesBuild["OpenThread " + appName + " " + board]      = { this.buildOpenThreadExample(appName, board)   }
+                def arguments = ""
+                if (sleepyBoard.contains(board)) {
+                    arguments = "--sed"
+                }
+
+                parallelNodesBuild["OpenThread " + appName + " " + board + " " + arguments]      = { this.buildOpenThreadExample(appName, board, arguments)   }
 
             }
         }
