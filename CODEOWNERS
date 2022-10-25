@@ -18,6 +18,7 @@ build_overrides/ @@MatterCSA
 config/ @@MatterCSA
 credentials/ @@MatterCSA
 docs/ @@MatterCSA
+docs/silabs/ @@Documentation @@MatterCSA
 examples/ @@MatterCSA
 integrations/ @@MatterCSA
 scripts/ @@MatterCSA
@@ -38,6 +39,6 @@ CODEOWNERS               @@MatterWatt
 (Check(@@MatterCSA >= 1))
 (Check(@@Unify >= 1))
 (Check(@@MatterWifi >= 1) | Check(@@MatterWatt >= 1))
-(Check(@@CICD >= 1))
+(Check(@@CICD >= 1) | Check(@@MatterWatt >= 2))
 
 OverallCheck(2)
