@@ -213,7 +213,7 @@ def buildSilabsCustomOpenThreadExamples(app, board)
     }
 }
 
-def buildWiFiExample(name, board, wifi_radio)
+def buildWiFiExample(name, board, wifi_radio, args, radioName)
 {
     actionWithRetry {
         node(buildFarmLargeLabel)
@@ -222,19 +222,14 @@ def buildWiFiExample(name, board, wifi_radio)
                                                             buildOverlayDir)
             def dirPath = workspaceTmpDir + createWorkspaceOverlay.overlayMatterPath
             def saveDir = 'matter/'
-            dir(dirPath) {
+            dir(dirPath) {                            
                 withDockerContainer(image: "connectedhomeip/chip-build-efr32:0.5.64", args: "-u root")
                 {
                     // CSA Examples build
                     withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
                     {
                         try {
-                            // TODO remove enable_openthread_cli once master is updated.
-                            if (board == "BRD4161A" && wifi_radio == "wf200") { // set is_debug=false, otherwise it does not fit
-                                sh "./scripts/examples/gn_efr32_example.sh examples/${name}/efr32/ out/${name}_wifi_${wifi_radio} ${board} \" is_debug=false disable_lcd=true use_external_flash=false enable_openthread_cli=true\" --wifi ${wifi_radio}"
-                            } else {
-                                sh "./scripts/examples/gn_efr32_example.sh examples/${name}/efr32/ out/${name}_wifi_${wifi_radio} ${board} \" disable_lcd=true use_external_flash=false enable_openthread_cli=true\" --wifi ${wifi_radio}"
-                            }
+                            sh "./scripts/examples/gn_efr32_example.sh examples/${name}/efr32/ out/${name}_wifi_${radioName} ${board} ${args} --wifi ${wifi_radio}"
                         } catch (e) {
                             deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
                                                        workspaceTmpDir,
@@ -245,7 +240,7 @@ def buildWiFiExample(name, board, wifi_radio)
                     }
                 }
 
-                stash name: 'WiFiExamples-'+name+'-'+board+'-'+wifi_radio, includes: 'out/**/*.s37 '
+                stash name: 'WiFiExamples-' + name + '-' + board + '-' + radioName, includes: 'out/**/*.s37 '
 
             }
             deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
@@ -902,14 +897,38 @@ def pipeline()
             wifiBoards = ["BRD4161A", "BRD4186C"]
         }
 
-        def wifiApps = [ "lighting-app", "lock-app", "thermostat"]
+        def wifiApps = [ "lighting-app", "lock-app", "thermostat", "light-switch-app", "window-app"]
 
         def wifiRCP = ["rs911x", "wf200"]
 
         wifiApps.each { appName ->
             wifiBoards.each { board ->
                 wifiRCP.each { rcp ->
-                    parallelNodesBuild["WiFi " + appName + " " + board + " " + rcp]      = { this.buildWiFiExample(appName, board, rcp)   }
+                    // MG24 + 9116: name the example as "xxx_wifi_91x" so that it's common to RS9116 and SiWx917
+                    // MG12 + 9116: name the example as "xxx_wifi_rs9116" so that it only applies to RS9116 (we don't support MG12 + SiWx917)
+                    // MGxx + WF00: name the example as "xxx_wifi_wf200"
+                    def radioName = "${rcp}"  // MGxx + WF200
+                    if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "rs911x") { // MG24 + 9116
+                        radioName = "91x"
+                    } else if (board == "BRD4161A" && rcp == "rs911x") { // MG12 + 9116
+                        radioName = "rs9116"
+                    }
+
+                    // MG12 + WF200: set is_debug=false, otherwise it does not fit (not a problem for MG24 + WF200, also MG24 + WF200 init fails with is_debug=false)
+                    // All MG24 combos: disable LCD and ext flash due to common SPI pin multiplexing issue
+                    def args = ""
+                    if (board == "BRD4161A" && rcp == "wf200") {  // MG12 + WF200
+                        args = "is_debug=false"
+                    } else if (board == "BRD4186C" || board == "BRD4187C") {  // All MG24 combos
+                        args = "disable_lcd=true use_external_flash=false"
+                    }
+
+                    // MG24 + WF200: also disable libshell due to VCOM pin multiplexing issue
+                    if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "wf200") {
+                        args = "${additionalOptions} chip_build_libshell=false"
+                    }
+
+                    parallelNodesBuild["WiFi " + appName + " " + board + " " + rcp]      = { this.buildWiFiExample(appName, board, rcp, args, radioName)   }
                 }
             }
         }
@@ -966,7 +985,7 @@ def pipeline()
         parallelNodes['lighting Thread BRD4316A']   = { this.utfThreadTestSuite('utf_matter_thread_3','matter_thread_3','lighting-app','thread','BRD4316A','',"/manifest-4316-thread","--tmconfig tests/.sequence_manager/test_execution_definitions/matter_thread_ci_sequence.yaml") }
         parallelNodes['lighting Thread BRD4319A']   = { this.utfThreadTestSuite('utf_matter_thread_5','matter_thread_5','lighting-app','thread','BRD4319A','',"/manifest-4319-thread","--tmconfig tests/.sequence_manager/test_execution_definitions/matter_thread_ci_sequence.yaml") }
 
-        parallelNodes['lighting rs9116 BRD4161A']   = { this.utfWiFiTestSuite('utf_matter_ci','INT0014944','lighting-app','wifi','BRD4161A','rs911x','',"/manifest","--tmconfig tests/.sequence_manager/test_execution_definitions/matter_wifi_ci_sequence.yaml") }
+        parallelNodes['lighting rs9116 BRD4161A']   = { this.utfWiFiTestSuite('utf_matter_ci','INT0014944','lighting-app','wifi','BRD4161A','rs9116','',"/manifest","--tmconfig tests/.sequence_manager/test_execution_definitions/matter_wifi_ci_sequence.yaml") }
 
         parallelNodes.failFast = false
         parallel parallelNodes
