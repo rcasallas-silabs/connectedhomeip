@@ -271,7 +271,7 @@ def buildChipTool()
                             sh 'git config --global --add safe.directory $(pwd)'
                             sh 'git config --global --add safe.directory $(pwd)/third_party/pigweed/repo'
                             sh './scripts/build/gn_bootstrap.sh'
-                            sh './scripts/run_in_build_env.sh  "./scripts/build/build_examples.py --target linux-arm64-clang-chip-tool-ipv6only build"'
+                            sh './scripts/run_in_build_env.sh  "./scripts/build/build_examples.py --target linux-arm64-chip-tool-ipv6only-clang build"'
                         } catch (e) {
                             deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
                                                        workspaceTmpDir,
