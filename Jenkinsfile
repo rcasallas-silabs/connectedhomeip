@@ -925,7 +925,7 @@ def pipeline()
 
                     // MG24 + WF200: also disable libshell due to VCOM pin multiplexing issue
                     if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "wf200") {
-                        args = "${additionalOptions} chip_build_libshell=false"
+                        args = "${args} chip_build_libshell=false"
                     }
 
                     parallelNodesBuild["WiFi " + appName + " " + board + " " + rcp]      = { this.buildWiFiExample(appName, board, rcp, args, radioName)   }
