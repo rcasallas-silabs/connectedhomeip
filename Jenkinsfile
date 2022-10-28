@@ -914,11 +914,11 @@ def pipeline()
                         radioName = "rs9116"
                     }
 
-                    // MG12 + WF200: set is_debug=false, otherwise it does not fit (not a problem for MG24 + WF200, also MG24 + WF200 init fails with is_debug=false)
+                    // MG12 + WF200: set is_debug=false and chip_logging=false, otherwise it does not fit (not a problem for MG24 + WF200, also MG24 + WF200 init fails with is_debug=false)
                     // All MG24 combos: disable LCD and ext flash due to common SPI pin multiplexing issue
                     def args = ""
                     if (board == "BRD4161A" && rcp == "wf200") {  // MG12 + WF200
-                        args = "is_debug=false"
+                        args = "is_debug=false chip_logging=false"
                     } else if (board == "BRD4186C" || board == "BRD4187C") {  // All MG24 combos
                         args = "disable_lcd=true use_external_flash=false"
                     }
