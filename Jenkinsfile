@@ -47,12 +47,6 @@ def initWorkspaceAndScm()
         // Matter Init --Checkout relevant submodule
         sh 'scripts/checkout_submodules.py --shallow --recursive --platform efr32 linux'
 
-        dir('third_party/silabs/matter_support/matter/efr32'){
-             stash name: 'BootLoader', includes: 'bootloader_binaries/*.*'
-        }
-
-        sh 'du -sk'
-
     }
 
     dir(buildOverlayDir+'/matter-scripts'){
@@ -465,9 +459,9 @@ def exportIoTReports()
     }
 }
 
-def openThreadTestSuite(devicegoup, name, board)
+def openThreadTestSuite(devicegroup, name, board)
 {
-    globalLock(credentialsId: 'hwmux_token_matterci', deviceGroup: devicegoup)
+    globalLock(credentialsId: 'hwmux_token_matterci', deviceGroup: devicegroup)
     {
         node('gsdkBostonNode')
         {
@@ -503,19 +497,10 @@ def openThreadTestSuite(devicegoup, name, board)
                                 echo "unstash folder: "+stashFolder
                                 unstash stashFolder
                                 unstash 'ChipTool'
-                                unstash 'BootLoader'
-
-                                bootloaderPath=pwd()+'/bootloader_binaries'
-                                echo 'bootloaderPath: '+bootloaderPath
-
-                                sh '''
-                                 pwd && ls -R
-                                 chiptoolPath=`find $PWD -name "chip-tool" -print `
-                                 echo chiptoolPath
-
-                                '''
-                            //  unstash 'CustomOpenThreadExamples'
-
+                    
+                                chiptoolPath = sh(script: "find " + pwd() + " -name 'chip-tool' -print",returnStdout: true).trim()
+                                echo chiptoolPath
+  
                             }
 
 
@@ -534,7 +519,6 @@ def openThreadTestSuite(devicegoup, name, board)
                                     'DEBUG=true',
                                     "TEST_BUILD_NUMBER=${BUILD_NUMBER}",
                                     "MATTER_CHIP_TOOL_PATH=${chiptoolPath}" ,
-                                    "BOOTLOADER_PATH=${bootloaderPath}",
                                     "_JAVA_OPTIONS='-Xmx3072m'"
                                     ])
                                 {
@@ -562,10 +546,10 @@ def openThreadTestSuite(devicegoup, name, board)
     }
 }
 
-def utfThreadTestSuite(devicegoup,testbed_name,app_name, matter_type , board, test_suite, manifestyaml,  testsequenceyaml )
+def utfThreadTestSuite(nomadNode,devicegroup,testbed_name,app_name, matter_type , board, test_suite, manifestyaml,  testsequenceyaml )
 {
-    globalLock(credentialsId: 'hwmux_token_matterci', deviceGroup: devicegoup) {
-       node("gsdkMontrealNode")
+    globalLock(credentialsId: 'hwmux_token_matterci', deviceGroup: devicegroup) {
+       node(nomadNode)
        {
                     sh 'printenv'
                     ws('/home/dockerUser/qaWorkspace/')
@@ -586,16 +570,7 @@ def utfThreadTestSuite(devicegoup,testbed_name,app_name, matter_type , board, te
                             sh ''' git clean -ffdx
                                 git submodule foreach --recursive -q git reset --hard -q
                                 git submodule foreach --recursive -q git clean -ffdx -q '''
-
-                            // dir('utf_core')
-                            // {
-                                // sh '''
-                                // git checkout develop
-                                // git pull
-                            //    '''
-                            //
-                            // }
-
+ 
                             dir('matter')
                             {
                                     sh 'pwd '
@@ -603,17 +578,9 @@ def utfThreadTestSuite(devicegoup,testbed_name,app_name, matter_type , board, te
                                     echo "unstash folder: "+stashFolder
                                     unstash stashFolder
                                     unstash 'ChipTool'
-                                    unstash 'BootLoader'
-
-                                    bootloaderPath=pwd()+'/bootloader_binaries'
-                                    echo 'bootloaderPath: '+bootloaderPath
-
-                                    sh '''
-                                    pwd && ls -R
-                                    chiptoolPath=`find $PWD -name "chip-tool" -print `
-                                    echo $chiptoolPath
-                                    '''
-
+                                   
+                                    chiptoolPath = sh(script: "find " + pwd() + " -name 'chip-tool' -print",returnStdout: true).trim()
+                                    echo chiptoolPath
                                     sh "cp out/CSA/${app_name}/OpenThread/standard/${board}/*.s37 ../manifest"
 
                             }
@@ -637,15 +604,13 @@ def utfThreadTestSuite(devicegoup,testbed_name,app_name, matter_type , board, te
                                     "JENKINS_JOB_NAME=$JOB_NAME",
                                     "JENKINS_SERVER_NAME=$JENKINS_URL",
                                     "JENKINS_TEST_RESULTS_URL=$JOB_URL$BUILD_NUMBER/testReport",
-                                    // vars required for matter test execution (?)
                                     "BOARD_ID=${board}",
                                     "MATTER_APP_EXAMPLE=${app_name}",
                                     'RUN_SUITE=true',
-                                    "MATTER_TYPE = ${matter_type}",
+                                    "MATTER_TYPE=${matter_type}",
                                     'PUBLISH_RESULTS=true', // unneeded?
                                     'RUN_TCM_SETUP=false',  // unneeded?
                                     "MATTER_CHIP_TOOL_PATH=${chiptoolPath}" ,
-                                    "BOOTLOADER_PATH=${bootloaderPath}",
                                     'DEBUG=true'
                                 ])
                                 {
@@ -655,7 +620,8 @@ def utfThreadTestSuite(devicegoup,testbed_name,app_name, matter_type , board, te
                                                stageResult: 'UNSTABLE')
                                     {
                                         sh """
-                                            echo ${TESTBED_NAME}
+                                            echo ${MATTER_CHIP_TOOL_PATH}
+                                            ls -al ${MATTER_CHIP_TOOL_PATH}
                                             ./workspace_setup.sh
                                             executor/launch_utf_tests.sh --publish_test_results true --harness  ${TESTBED_NAME}.yaml --executor_type local --pytest_command "pytest --tb=native tests${test_suite} --manifest manifest${manifestyaml}.yaml ${testsequenceyaml}"
                                         """
@@ -671,10 +637,10 @@ def utfThreadTestSuite(devicegoup,testbed_name,app_name, matter_type , board, te
 }
 
 
-def utfWiFiTestSuite(devicegoup, testbed_name, app_name, matter_type, board, wifi_module, test_suite,manifestyaml,  testsequenceyaml)
+def utfWiFiTestSuite(nomadNode,devicegroup, testbed_name, app_name, matter_type, board, wifi_module, test_suite,manifestyaml,  testsequenceyaml)
 {
-    globalLock(credentialsId: 'hwmux_token_matterci', deviceGroup: devicegoup) {
-       node("gsdkMontrealNode")
+    globalLock(credentialsId: 'hwmux_token_matterci', deviceGroup: devicegroup) {
+       node(nomadNode)
        {
                     sh 'printenv'
                     ws('/home/dockerUser/qaWorkspace/')
@@ -697,30 +663,16 @@ def utfWiFiTestSuite(devicegoup, testbed_name, app_name, matter_type, board, wif
                                 git submodule foreach --recursive -q git reset --hard -q
                                 git submodule foreach --recursive -q git clean -ffdx -q '''
 
-                            // dir('utf_core')
-                            // {
-                                // sh '''
-                                // git checkout develop
-                                // git pull
-                            //    '''
-                            //
-                            // }
+                        
 
                             dir('matter')
                             {
                                 stashFolder = 'WiFiExamples-'+app_name+'-'+board+'-'+wifi_module
                                 unstash stashFolder
                                 unstash 'ChipTool'
-                                unstash 'BootLoader'
-
-                                bootloaderPath=pwd()+'/bootloader_binaries'
-                                echo 'bootloaderPath: '+bootloaderPath
-
-                                sh '''
-                                  pwd && ls -R
-                                  chiptoolPath=`find $PWD -name "chip-tool" -print `
-                                  echo $chiptoolPath
-                                 '''
+                           
+                                chiptoolPath = sh(script: "find " + pwd() + " -name 'chip-tool' -print",returnStdout: true).trim()
+                                echo chiptoolPath
 
                                 sh "cp out/${app_name}_wifi_${wifi_module}/${board}/*.s37 ../manifest"
 
@@ -749,12 +701,10 @@ def utfWiFiTestSuite(devicegoup, testbed_name, app_name, matter_type, board, wif
                                     "BOARD_ID=${board}",
                                     "MATTER_APP_EXAMPLE=${app_name}",
                                     'RUN_SUITE=true',
-                                 //   "MATTER_TYPE = ${matter_type}",
-                                    'MATTER_TYPE = wifi',
+                                    "MATTER_TYPE=${matter_type}",
                                     'PUBLISH_RESULTS=true', // unneeded?
                                     'RUN_TCM_SETUP=false',  // unneeded?
                                     "MATTER_CHIP_TOOL_PATH=${chiptoolPath}" ,
-                                    "BOOTLOADER_PATH=${bootloaderPath}",
                                     'DEBUG=true'
                                 ])
                                 {
@@ -763,7 +713,7 @@ def utfWiFiTestSuite(devicegoup, testbed_name, app_name, matter_type, board, wif
                                                message: "[ERROR] One or more tests have failed",
                                                stageResult: 'UNSTABLE')
                                     {
-                                      //  pytestParam="\"pytest --tb=native tests${test_suite} --manifest manifest${manifestyaml}.yaml ${testsequenceyaml}\""
+                                
                                         sh """
                                             echo ${TESTBED_NAME}
                                             ./workspace_setup.sh
@@ -780,7 +730,7 @@ def utfWiFiTestSuite(devicegoup, testbed_name, app_name, matter_type, board, wif
     }
 }
 
-def pushToNexus()
+def pushToNexusAndUbai()
 {
     actionWithRetry {
         node(buildFarmLabel)
@@ -794,7 +744,7 @@ def pushToNexus()
                 try{
                     withCredentials([usernamePassword(credentialsId: 'svc_gsdk', passwordVariable: 'SL_PASSWORD', usernameVariable: 'SL_USERNAME')])
                     {
-
+                   
                         sh '''#!/usr/bin/env bash
                             set -o pipefail
                             set -x
@@ -814,8 +764,8 @@ def pushToNexus()
                                     else
                                             echo "$file File upload was successful."
                                     fi
-
-                        '''
+                
+                       '''
                     }
                 } catch (e)
                 {
@@ -833,6 +783,33 @@ def pushToNexus()
     }
 }
 
+def triggerSqaSmokeTest()
+{
+    node(buildFarmLabel)
+        {
+            def workspaceTmpDir = createWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
+                                                            buildOverlayDir)
+               // def dirPath = workspaceTmpDir + createWorkspaceOverlay.overlayMatterPath
+            def saveDir = 'matter/'
+            catchError(buildResult: 'SUCCESS',
+                        catchInterruptions: false,
+                        message: "[ERROR] SQA smoke trigger branch doesn't exist",
+                        stageResult: 'SUCCESS')
+            {
+               
+                ws(workspaceTmpDir+createWorkspaceOverlay.overlaySqaPipelinesPath) 
+                { 
+                        sh 'pwd && ls -al'  
+                            if(sqaFunctions.isProductionJenkinsServer())
+                            {
+                                echo 'in product jenkin.... '
+                                sqaFunctions.commitToMatterSqaPipelines()
+                            }
+                }
+            }
+            deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(), workspaceTmpDir, 'matter/')
+        }
+}
 // pipeline definition and execution
 def pipeline()
 {
@@ -868,6 +845,7 @@ def pipeline()
             openThreadBoards = ["BRD4161A", "BRD4162A", "BRD4163A", "BRD4164A", "BRD4166A", "BRD4186C", "BRD4187C", "BRD2703A", "BRD2601B", "BRD4316A", "BRD4317A", "BRD4319A"]
         } else {
             openThreadBoards = ["BRD4161A", "BRD4166A", "BRD4187C", "BRD2703A","BRD4316A", "BRD4319A" ]
+          
         }
         def openThreadApps = ["lighting-app", "lock-app", "light-switch-app", "window-app"]
 
@@ -928,7 +906,7 @@ def pipeline()
                         args = "${args} chip_build_libshell=false"
                     }
 
-                    parallelNodesBuild["WiFi " + appName + " " + board + " " + rcp]      = { this.buildWiFiExample(appName, board, rcp, args, radioName)   }
+                   parallelNodesBuild["WiFi " + appName + " " + board + " " + rcp]      = { this.buildWiFiExample(appName, board, rcp, args, radioName)   }
                 }
             }
         }
@@ -969,28 +947,44 @@ def pipeline()
         }
     }
 
-    stage("Push to Nexus")
+    stage("Push to Nexus and UBAI")
     {
         advanceStageMarker()
-        pushToNexus()
+        pushToNexusAndUbai()
     }
      stage('SQA')
     {
       // advanceStageMarker()
         //even openthread test in parallel, they actually run in sequence as they are using same raspi
         def parallelNodes = [:]
-        parallelNodes['lighting Thread BRD4187C']   = { this.utfThreadTestSuite('utf_matter_thread','matter_thread','lighting-app','thread','BRD4187C','',"/manifest-4187-thread","--tmconfig tests/.sequence_manager/test_execution_definitions/matter_thread_ci_sequence.yaml") }
-        //comment out until we can communicate with the board from wstk buttons
-        //parallelNodes['lighting Thread BRD2703A']   = { this.utfThreadTestSuite('utf_matter_thread_2','matter_thread_2','lighting-app','thread','BRD2703A','',"/manifest-2703-thread","--tmconfig tests/.sequence_manager/test_execution_definitions/matter_thread_ci_sequence.yaml") }
-        parallelNodes['lighting Thread BRD4316A']   = { this.utfThreadTestSuite('utf_matter_thread_3','matter_thread_3','lighting-app','thread','BRD4316A','',"/manifest-4316-thread","--tmconfig tests/.sequence_manager/test_execution_definitions/matter_thread_ci_sequence.yaml") }
-        parallelNodes['lighting Thread BRD4161A']   = { this.utfThreadTestSuite('utf_matter_thread_4','matter_thread_4','lighting-app','thread','BRD4161A','',"/manifest-4161-thread","--tmconfig tests/.sequence_manager/test_execution_definitions/matter_thread_ci_sequence.yaml") }
-        parallelNodes['lighting Thread BRD4319A']   = { this.utfThreadTestSuite('utf_matter_thread_5','matter_thread_5','lighting-app','thread','BRD4319A','',"/manifest-4319-thread","--tmconfig tests/.sequence_manager/test_execution_definitions/matter_thread_ci_sequence.yaml") }
+        parallelNodes['lighting Thread BRD4187C']   = { this.utfThreadTestSuite('gsdkMontrealNode','utf_matter_thread','matter_thread','lighting-app','thread','BRD4187C','',"/manifest-4187-thread","--tmconfig tests/.sequence_manager/test_execution_definitions/matter_thread_ci_sequence.yaml") }
+        // parallelNodes['lighting Thread BRD2703A']   = { this.utfThreadTestSuite('gsdkMontrealNode','utf_matter_thread_2',
+        //                                                                         'matter_thread_2','lighting-app','thread','BRD2703A','',
+        //                                                                         "/manifest-2703-thread",
+        //                                                                         "--tmconfig tests/.sequence_manager/test_execution_definitions/matter_thread_ci_sequence.yaml") }
+        parallelNodes['lighting Thread BRD4316A']   = { this.utfThreadTestSuite('gsdkMontrealNode','utf_matter_thread_3',
+                                                                                'matter_thread_3','lighting-app','thread','BRD4316A','',
+                                                                                "/manifest-4316-thread",
+                                                                                "--tmconfig tests/.sequence_manager/test_execution_definitions/matter_thread_ci_sequence.yaml") }
+        parallelNodes['lighting Thread BRD4161A']   = { this.utfThreadTestSuite('gsdkMontrealNode','utf_matter_thread_4',
+                                                                                'matter_thread_4','lighting-app','thread','BRD4161A','',
+                                                                                "/manifest-4161-thread",
+                                                                                "--tmconfig tests/.sequence_manager/test_execution_definitions/matter_thread_ci_sequence.yaml") }
+        parallelNodes['lighting Thread BRD4319A']   = { this.utfThreadTestSuite('gsdkMontrealNode','utf_matter_thread_5',
+                                                                                'matter_thread_5','lighting-app','thread','BRD4319A','',
+                                                                                "/manifest-4319-thread",
+                                                                                "--tmconfig tests/.sequence_manager/test_execution_definitions/matter_thread_ci_sequence.yaml") }
 
-        parallelNodes['lighting rs9116 BRD4161A']   = { this.utfWiFiTestSuite('utf_matter_ci','INT0014944','lighting-app','wifi','BRD4161A','rs9116','',"/manifest","--tmconfig tests/.sequence_manager/test_execution_definitions/matter_wifi_ci_sequence.yaml") }
+       parallelNodes['lighting rs9116 BRD4161A']   = { this.utfWiFiTestSuite('gsdkMontrealNode','utf_matter_ci','INT0014944','lighting-app','wifi','BRD4161A','rs9116','',"/manifest","--tmconfig tests/.sequence_manager/test_execution_definitions/matter_wifi_ci_sequence.yaml") }
 
         parallelNodes.failFast = false
         parallel parallelNodes
 
+    }
+    stage("Trigger SQA Smoke")
+    {
+        advanceStageMarker()
+        triggerSqaSmokeTest()
     }
 
     currentBuild.result = 'SUCCESS'
