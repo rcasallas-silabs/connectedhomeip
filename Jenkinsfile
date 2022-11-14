@@ -872,7 +872,7 @@ def pipeline()
         if (env.BRANCH_NAME.startsWith('RC_')) {
             wifiBoards = ["BRD4161A", "BRD4186C", "BRD4187C"]
         } else {
-            wifiBoards = ["BRD4161A", "BRD4186C"]
+            wifiBoards = ["BRD4161A", "BRD4187C"]
         }
 
         def wifiApps = [ "lighting-app", "lock-app", "thermostat", "light-switch-app", "window-app"]
@@ -976,7 +976,7 @@ def pipeline()
                                                                                 "--tmconfig tests/.sequence_manager/test_execution_definitions/matter_thread_ci_sequence.yaml") }
 
        parallelNodes['lighting rs9116 BRD4161A']   = { this.utfWiFiTestSuite('gsdkMontrealNode','utf_matter_ci','INT0014944','lighting-app','wifi','BRD4161A','rs9116','',"/manifest","--tmconfig tests/.sequence_manager/test_execution_definitions/matter_wifi_ci_sequence.yaml") }
-
+       parallelNodes['lighting 917-exp BRD4187C']   = { this.utfWiFiTestSuite('gsdkMontrealNode','utf_matter_wifi','matter_wifi','lighting-app','wifi','BRD4187C','91x','',"/manifest-4187-917","--tmconfig tests/.sequence_manager/test_execution_definitions/matter_wifi_ci_sequence.yaml") }
         parallelNodes.failFast = false
         parallel parallelNodes
 
