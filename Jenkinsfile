@@ -459,9 +459,9 @@ def exportIoTReports()
     }
 }
 
-def openThreadTestSuite(devicegroup, name, board)
+def openThreadTestSuite(deviceGroup,name,board)
 {
-    globalLock(credentialsId: 'hwmux_token_matterci', deviceGroup: devicegroup)
+    globalLock(credentialsId: 'hwmux_token_matterci', deviceGroup: deviceGroup)
     {
         node('gsdkBostonNode')
         {
@@ -546,9 +546,9 @@ def openThreadTestSuite(devicegroup, name, board)
     }
 }
 
-def utfThreadTestSuite(nomadNode,devicegroup,testbed_name,app_name, matter_type , board, test_suite, manifestyaml,  testsequenceyaml )
+def utfThreadTestSuite(nomadNode,deviceGroup,testBedName,appName,matterType,board,testSuite,manifestYaml,testSequenceYaml )
 {
-    globalLock(credentialsId: 'hwmux_token_matterci', deviceGroup: devicegroup) {
+    globalLock(credentialsId: 'hwmux_token_matterci', deviceGroup: deviceGroup) {
        node(nomadNode)
        {
                     sh 'printenv'
@@ -574,14 +574,14 @@ def utfThreadTestSuite(nomadNode,devicegroup,testbed_name,app_name, matter_type 
                             dir('matter')
                             {
                                     sh 'pwd '
-                                    stashFolder = 'OpenThreadExamples-'+app_name+'-'+board
+                                    stashFolder = 'OpenThreadExamples-'+appName+'-'+board
                                     echo "unstash folder: "+stashFolder
                                     unstash stashFolder
                                     unstash 'ChipTool'
                                    
                                     chiptoolPath = sh(script: "find " + pwd() + " -name 'chip-tool' -print",returnStdout: true).trim()
                                     echo chiptoolPath
-                                    sh "cp out/CSA/${app_name}/OpenThread/standard/${board}/*.s37 ../manifest"
+                                    sh "cp out/CSA/${appName}/OpenThread/standard/${board}/*.s37 ../manifest"
 
                             }
 
@@ -598,16 +598,16 @@ def utfThreadTestSuite(nomadNode,devicegroup,testbed_name,app_name, matter_type 
                                     "STUDIO_URL=N/A",     // ?
                                     "BRANCH_NAME=${JOB_BASE_NAME}", // ?
                                     "SDK_BUILD_NUM=$BUILD_NUMBER",
-                                    "TESTBED_NAME=${testbed_name}",
+                                    "TESTBED_NAME=${testBedName}",
                                     "BUILD_URL=$BUILD_URL",
                                     "JENKIN_RUN_NUM=$BUILD_NUMBER",
                                     "JENKINS_JOB_NAME=$JOB_NAME",
                                     "JENKINS_SERVER_NAME=$JENKINS_URL",
                                     "JENKINS_TEST_RESULTS_URL=$JOB_URL$BUILD_NUMBER/testReport",
                                     "BOARD_ID=${board}",
-                                    "MATTER_APP_EXAMPLE=${app_name}",
+                                    "MATTER_APP_EXAMPLE=${appName}",
                                     'RUN_SUITE=true',
-                                    "MATTER_TYPE=${matter_type}",
+                                    "MATTER_TYPE=${matterType}",
                                     'PUBLISH_RESULTS=true', // unneeded?
                                     'RUN_TCM_SETUP=false',  // unneeded?
                                     "MATTER_CHIP_TOOL_PATH=${chiptoolPath}" ,
@@ -623,7 +623,7 @@ def utfThreadTestSuite(nomadNode,devicegroup,testbed_name,app_name, matter_type 
                                             echo ${MATTER_CHIP_TOOL_PATH}
                                             ls -al ${MATTER_CHIP_TOOL_PATH}
                                             ./workspace_setup.sh
-                                            executor/launch_utf_tests.sh --publish_test_results true --harness  ${TESTBED_NAME}.yaml --executor_type local --pytest_command "pytest --tb=native tests${test_suite} --manifest manifest${manifestyaml}.yaml ${testsequenceyaml}"
+                                            executor/launch_utf_tests.sh --publish_test_results true --harness  ${TESTBED_NAME}.yaml --executor_type local --pytest_command "pytest --tb=native tests${testSuite} --manifest manifest${manifestYaml}.yaml ${testSequenceYaml}"
                                         """
                                     }
                                 }
@@ -637,9 +637,9 @@ def utfThreadTestSuite(nomadNode,devicegroup,testbed_name,app_name, matter_type 
 }
 
 
-def utfWiFiTestSuite(nomadNode,devicegroup, testbed_name, app_name, matter_type, board, wifi_module, test_suite,manifestyaml,  testsequenceyaml)
+def utfWiFiTestSuite(nomadNode,deviceGroup,testBedName,appName,matterType,board,wifi_module,testSuite,manifestYaml,testSequenceYaml)
 {
-    globalLock(credentialsId: 'hwmux_token_matterci', deviceGroup: devicegroup) {
+    globalLock(credentialsId: 'hwmux_token_matterci', deviceGroup: deviceGroup) {
        node(nomadNode)
        {
                     sh 'printenv'
@@ -667,14 +667,14 @@ def utfWiFiTestSuite(nomadNode,devicegroup, testbed_name, app_name, matter_type,
 
                             dir('matter')
                             {
-                                stashFolder = 'WiFiExamples-'+app_name+'-'+board+'-'+wifi_module
+                                stashFolder = 'WiFiExamples-'+appName+'-'+board+'-'+wifi_module
                                 unstash stashFolder
                                 unstash 'ChipTool'
                            
                                 chiptoolPath = sh(script: "find " + pwd() + " -name 'chip-tool' -print",returnStdout: true).trim()
                                 echo chiptoolPath
 
-                                sh "cp out/${app_name}_wifi_${wifi_module}/${board}/*.s37 ../manifest"
+                                sh "cp out/${appName}_wifi_${wifi_module}/${board}/*.s37 ../manifest"
 
                             }
 
@@ -691,7 +691,7 @@ def utfWiFiTestSuite(nomadNode,devicegroup, testbed_name, app_name, matter_type,
                                     "STUDIO_URL=N/A",     // ?
                                     "BRANCH_NAME=${JOB_BASE_NAME}", // ?
                                     "SDK_BUILD_NUM=$BUILD_NUMBER",
-                                    "TESTBED_NAME=${testbed_name}",
+                                    "TESTBED_NAME=${testBedName}",
                                     "BUILD_URL=$BUILD_URL",
                                     "JENKIN_RUN_NUM=$BUILD_NUMBER",
                                     "JENKINS_JOB_NAME=$JOB_NAME",
@@ -699,9 +699,9 @@ def utfWiFiTestSuite(nomadNode,devicegroup, testbed_name, app_name, matter_type,
                                     "JENKINS_TEST_RESULTS_URL=$JOB_URL$BUILD_NUMBER/testReport",
                                     // vars required for matter test execution (?)
                                     "BOARD_ID=${board}",
-                                    "MATTER_APP_EXAMPLE=${app_name}",
+                                    "MATTER_APP_EXAMPLE=${appName}",
                                     'RUN_SUITE=true',
-                                    "MATTER_TYPE=${matter_type}",
+                                    "MATTER_TYPE=${matterType}",
                                     'PUBLISH_RESULTS=true', // unneeded?
                                     'RUN_TCM_SETUP=false',  // unneeded?
                                     "MATTER_CHIP_TOOL_PATH=${chiptoolPath}" ,
@@ -717,7 +717,7 @@ def utfWiFiTestSuite(nomadNode,devicegroup, testbed_name, app_name, matter_type,
                                         sh """
                                             echo ${TESTBED_NAME}
                                             ./workspace_setup.sh
-                                            executor/launch_utf_tests.sh --publish_test_results true --harness  ${TESTBED_NAME}.yaml --executor_type local --pytest_command "pytest --tb=native tests${test_suite} --manifest manifest${manifestyaml}.yaml ${testsequenceyaml}"
+                                            executor/launch_utf_tests.sh --publish_test_results true --harness  ${TESTBED_NAME}.yaml --executor_type local --pytest_command "pytest --tb=native tests${testSuite} --manifest manifest${manifestYaml}.yaml ${testSequenceYaml}"
                                         """
                                     }
                                 }
@@ -742,30 +742,44 @@ def pushToNexusAndUbai()
 
             dir(dirPath) {
                 try{
-                    withCredentials([usernamePassword(credentialsId: 'svc_gsdk', passwordVariable: 'SL_PASSWORD', usernameVariable: 'SL_USERNAME')])
+                    def image = "nexus.silabs.net/gsdk_nomad_containers/gsdk_ubai:latest"
+                    sh "docker pull ${image}"
+                    withDockerContainer(image: image) 
                     {
-                   
-                        sh '''#!/usr/bin/env bash
-                            set -o pipefail
-                            set -x
-                            pwd
-                            file="build-binaries.zip"
+                        withCredentials([usernamePassword(credentialsId: 'svc_gsdk', passwordVariable: 'SL_PASSWORD', usernameVariable: 'SL_USERNAME')])
+                        {
+                            
+                                sh '''
+                                    set -o pipefail
+                                    set -x
+                                    pwd
+                                    file="build-binaries.zip"
 
-                            zip -r "${file}" out
-                            ls -al
+                                    zip -r "${file}" out
+                                    ls -al
 
-                            status_code=$(curl -s  -w "%{http_code}" --upload-file "$file" \
-                                            -X PUT "https://nexus.silabs.net/repository/matter/${JOB_BASE_NAME}/${BUILD_NUMBER}/$file"\
-                                            -u $SL_USERNAME:$SL_PASSWORD -H 'Content-Type: application/octet-stream'
-                                            )
-                                    if [[ "$status_code" -ne 201 ]] ; then
-                                            echo "$file File upload was not successful.\nStatus Code: $status_code"
-                                            exit 1
+                                    status_code=$(curl -s  -w "%{http_code}" --upload-file "$file" \
+                                                    -X PUT "https://nexus.silabs.net/repository/matter/${JOB_BASE_NAME}/${BUILD_NUMBER}/$file"\
+                                                    -u $SL_USERNAME:$SL_PASSWORD -H 'Content-Type: application/octet-stream'
+                                                    )
+                                            if [[ "$status_code" -ne 201 ]] ; then
+                                                    echo "$file File upload was not successful.\nStatus Code: $status_code"
+                                                    exit 1
+                                            else
+                                                    echo "$file File upload was successful."
+                                            fi
+
+                                    echo 'UBAI uploading ......'
+                                    ubai_upload_cli --client-id jenkins-gsdk-pipelines-Matter --file-path build-binaries.zip  --metadata app_name matter \
+                                            --metadata branch ${JOB_BASE_NAME} --metadata build_number ${BUILD_NUMBER} --metadata stack matter --metadata target matter  --username ${SL_USERNAME} --password ${SL_PASSWORD}
+                                    
+                                    if [ $? -eq 0 ]; then
+                                        echo 'uploaded to UBAI successfully....... '
                                     else
-                                            echo "$file File upload was successful."
+                                        echo FAIL
                                     fi
-                
-                       '''
+                            '''
+                            }
                     }
                 } catch (e)
                 {
@@ -906,7 +920,7 @@ def pipeline()
                         args = "${args} chip_build_libshell=false"
                     }
 
-                   parallelNodesBuild["WiFi " + appName + " " + board + " " + rcp]      = { this.buildWiFiExample(appName, board, rcp, args, radioName)   }
+                    parallelNodesBuild["WiFi " + appName + " " + board + " " + rcp]      = { this.buildWiFiExample(appName, board, rcp, args, radioName)   }
                 }
             }
         }
