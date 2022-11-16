@@ -207,7 +207,7 @@ def buildSilabsCustomOpenThreadExamples(app, board)
     }
 }
 
-def buildWiFiExample(name, board, wifi_radio, args, radioName)
+def buildWiFiExample(name, board, wifi_radio, args, radioName, buildCustom)
 {
     actionWithRetry {
         node(buildFarmLargeLabel)
@@ -216,6 +216,16 @@ def buildWiFiExample(name, board, wifi_radio, args, radioName)
                                                             buildOverlayDir)
             def dirPath = workspaceTmpDir + createWorkspaceOverlay.overlayMatterPath
             def saveDir = 'matter/'
+            def exampleType =''
+
+            if (buildCustom == true)
+            {
+                exampleType = "silabs_examples"
+            }
+            else
+            {
+                exampleType = "examples"
+            }
             dir(dirPath) {                            
                 withDockerContainer(image: "connectedhomeip/chip-build-efr32:0.5.64", args: "-u root")
                 {
@@ -223,7 +233,7 @@ def buildWiFiExample(name, board, wifi_radio, args, radioName)
                     withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
                     {
                         try {
-                            sh "./scripts/examples/gn_efr32_example.sh examples/${name}/efr32/ out/${name}_wifi_${radioName} ${board} ${args} --wifi ${wifi_radio}"
+                            sh "./scripts/examples/gn_efr32_example.sh ${exampleType}/${name}/efr32/ out/${name}_wifi_${radioName} ${board} ${args} --wifi ${wifi_radio}"
                         } catch (e) {
                             deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
                                                        workspaceTmpDir,
@@ -948,7 +958,7 @@ def pipeline()
                         args = "${args} chip_build_libshell=false"
                     }
 
-                    parallelNodesBuild["WiFi " + appName + " " + board + " " + rcp]      = { this.buildWiFiExample(appName, board, rcp, args, radioName)   }
+                     parallelNodesBuild["WiFi " + appName + " " + board + " " + rcp]      = { this.buildWiFiExample(appName, board, rcp, args, radioName, false)   }
                 }
             }
         }
@@ -956,18 +966,53 @@ def pipeline()
         //---------------------------------------------------------------------
         // Build Custom examples
         //---------------------------------------------------------------------
-        def boardsForCustom = [:]
-        def silabsExamples = ["onoff-plug-app", "sl-newLight", "template", "lighting-lite-app"]
+        def boardsForCustomOpenThread = [:]
+        def boardsForCustomWifi = [:]
+        def silabsCustomExamplesOpenThread = ["onoff-plug-app", "sl-newLight", "template", "lighting-lite-app"]
+        def silabsCustomExamplesWifi = ["onoff-plug-app"]
+
+        def customWifiRCP = ["rs911x", "wf200"]
 
         if (env.BRANCH_NAME.startsWith('RC_')) {
-            boardsForCustom = ["BRD4161A", "BRD4186C", "BRD4187C", "BRD4166A"]
+            boardsForCustomOpenThread = ["BRD4161A", "BRD4186C", "BRD4187C", "BRD4166A"]
+            boardsForCustomWifi       = ["BRD4161A", "BRD4186C", "BRD4187C"]
+
         } else {
-             boardsForCustom = ["BRD4161A", "BRD4186C", "BRD4166A"]
+             boardsForCustomOpenThread = ["BRD4161A", "BRD4186C", "BRD4166A"]
+             boardsForCustomWifi       = ["BRD4161A", "BRD4186C"]
         }
 
-        silabsExamples.each { example ->
-            boardsForCustom.each { board ->
-                parallelNodesBuild["Custom " + example + " " + board]      = { this.buildSilabsCustomOpenThreadExamples(example, board)   }
+        // Openthread custom examples
+        silabsCustomExamplesOpenThread.each { example ->
+            boardsForCustomOpenThread.each    { board ->
+                parallelNodesBuild["Custom OpenThread " + example + " " + board] = { this.buildSilabsCustomOpenThreadExamples(example, board)   }
+            }
+        }
+
+        // Wifi custom examples
+        silabsCustomExamplesWifi.each { example ->
+            boardsForCustomWifi.each    { board ->
+                customWifiRCP.each        { rcp ->
+
+                    def radioName = "${rcp}"  // MGxx + WF200
+                    if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "rs911x") { // MG24 + 9116
+                        radioName = "91x"
+                    } else if (board == "BRD4161A" && rcp == "rs911x") { // MG12 + 9116
+                        radioName = "rs9116"
+                    }
+
+                    def args = ""
+                    if (board == "BRD4161A" && rcp == "wf200") {  // MG12 + WF200
+                        args = "is_debug=false chip_logging=false"
+                    } else if (board == "BRD4186C" || board == "BRD4187C") {  // All MG24 combos
+                        args = "disable_lcd=true use_external_flash=false"
+                    }
+
+                    if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "wf200") {
+                        args = "${args} chip_build_libshell=false"
+                    }
+                    parallelNodesBuild["Custom Wifi " + example + " " + board + " " + rcp]       = { this.buildWiFiExample(example, board, rcp, args, radioName, true)   }
+                }
             }
         }
 
