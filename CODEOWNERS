@@ -1,3 +1,6 @@
+# Avoid codeowners only for cherry-pick pull requests
+CODEOWNERS.source_branch_exclusion_pattern cherry-pick/**
+
 @@@MatterCSA @jumartin @jepenven @ricasall @makardou @selissia
 @@@MatterWatt @jumartin @jepenven @ricasall @makardou @selissia @rerasool
 @@@MatterWifi @mamehta
