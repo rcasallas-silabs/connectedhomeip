@@ -456,15 +456,15 @@ def exportIoTReports()
                             """
                         }
 
-                        // Generate report for WiFi implementation MG24 BRD4186C + RS9116
+                        // Generate report for WiFi implementation MG24 BRD4187C + RS9116
                         wifiSizeTrackingApp.each { app ->
                             sh """unset OTEL_EXPORTER_OTLP_ENDPOINT
                                 code_size_analyzer_cli \
-                                --map_file out/${app}_wifi_rs911x/BRD4186C/*.map \
+                                --map_file out/${app}_wifi_91x/BRD4187C/*.map \
                                 --stack_name matter \
                                 --target_part efr32mg24b210f1536im48 \
                                 --compiler gcc \
-                                --target_board BRD4186C \
+                                --target_board BRD4187C \
                                 --app_name ${app}-WiFi-MG24 \
                                 --service_url https://code-size-analyzer.silabs.net \
                                 --branch_name ${env.BRANCH_NAME} \
@@ -1026,7 +1026,7 @@ def pipeline()
 
     }
 
-    if (env.BRANCH_NAME == "silabs" ) {
+    if (env.BRANCH_NAME.startsWith('silabs') || env.BRANCH_NAME.startsWith('RC_')) {
         stage("Code Size analysis")
         {
             advanceStageMarker()
