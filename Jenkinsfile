@@ -646,6 +646,7 @@ def utfThreadTestSuite(nomadNode,deviceGroup,testBedName,appName,matterType,boar
                                     "MATTER_APP_EXAMPLE=${appName}",
                                     'RUN_SUITE=true',
                                     "MATTER_TYPE=${matterType}",
+                                    "TEST_TYPE=ci",
                                     'PUBLISH_RESULTS=true', // unneeded?
                                     'RUN_TCM_SETUP=false',  // unneeded?
                                     "MATTER_CHIP_TOOL_PATH=${chiptoolPath}" ,
@@ -740,6 +741,8 @@ def utfWiFiTestSuite(nomadNode,deviceGroup,testBedName,appName,matterType,board,
                                     "MATTER_APP_EXAMPLE=${appName}",
                                     'RUN_SUITE=true',
                                     "MATTER_TYPE=${matterType}",
+                                    "WIFI_MODULE=${wifi_module}",
+                                    "TEST_TYPE=ci",
                                     'PUBLISH_RESULTS=true', // unneeded?
                                     'RUN_TCM_SETUP=false',  // unneeded?
                                     "MATTER_CHIP_TOOL_PATH=${chiptoolPath}" ,
