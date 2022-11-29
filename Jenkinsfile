@@ -132,7 +132,7 @@ def buildOpenThreadExample(app, board, args)
             def releaseString = "\"chip_detail_logging=false chip_automation_logging=false chip_progress_logging=false is_debug=false disable_lcd=true chip_build_libshell=false enable_openthread_cli=false chip_openthread_ftd=true\""
 
             dir(dirPath) {
-                withDockerContainer(image: "connectedhomeip/chip-build-efr32:0.5.64", args: "-u root")
+                withDockerContainer(image: "nexus.silabs.net/connectedhomeip/chip-build-efr32:0.5.64", args: "-u root")
                 {
                     // CSA Examples build
                     withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
@@ -179,7 +179,7 @@ def buildSilabsCustomOpenThreadExamples(app, board)
             def dirPath = workspaceTmpDir + createWorkspaceOverlay.overlayMatterPath
             def saveDir = 'matter/'
             dir(dirPath) {
-                withDockerContainer(image: "connectedhomeip/chip-build-efr32:0.5.64", args: "-u root")
+                withDockerContainer(image: "nexus.silabs.net/connectedhomeip/chip-build-efr32:0.5.64", args: "-u root")
                 {
                     // Custom Silabs build
                     withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
@@ -227,7 +227,7 @@ def buildWiFiExample(name, board, wifi_radio, args, radioName, buildCustom)
                 exampleType = "examples"
             }
             dir(dirPath) {                            
-                withDockerContainer(image: "connectedhomeip/chip-build-efr32:0.5.64", args: "-u root")
+                withDockerContainer(image: "nexus.silabs.net/connectedhomeip/chip-build-efr32:0.5.64", args: "-u root")
                 {
                     // CSA Examples build
                     withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
@@ -393,7 +393,7 @@ def exportIoTReports()
             def dirPath = workspaceTmpDir + createWorkspaceOverlay.overlayMatterPath
             def saveDir = 'matter/'
             dir(dirPath) {
-                withDockerContainer(image: "connectedhomeip/chip-build-efr32:0.5.64", args: "-u root")
+                withDockerContainer(image: "nexus.silabs.net/connectedhomeip/chip-build-efr32:0.5.64", args: "-u root")
                 {
                     try {
                         // sh 'apt-get install python3-venv'
