@@ -255,7 +255,7 @@ def buildWiFiExample(name, board, wifi_radio, args, radioName, buildCustom)
     }
 }
 
-def buildChipTool()
+def buildChipToolAndOTAProvider()
 {
         actionWithRetry {
         node(buildFarmLabel)
@@ -276,6 +276,7 @@ def buildChipTool()
                             sh 'git config --global --add safe.directory $(pwd)/third_party/pigweed/repo'
                             sh './scripts/build/gn_bootstrap.sh'
                             sh './scripts/run_in_build_env.sh  "./scripts/build/build_examples.py --target linux-arm64-chip-tool-ipv6only-clang build"'
+                            sh './scripts/run_in_build_env.sh  "./scripts/build/build_examples.py --target linux-arm64-ota-provider-ipv6only-clang build"'
                         } catch (e) {
                             deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
                                                        workspaceTmpDir,
@@ -286,7 +287,8 @@ def buildChipTool()
                     }
                 }
 
-                stash name: 'ChipTool', includes: 'out/**/chip-tool'
+                stash name: 'ChipTool', includes: 'out/linux-arm64-chip-tool-ipv6only-clang/chip-tool'
+                stash name: 'OTAProvider', includes: 'out/linux-arm64-ota-provider-ipv6only-clang/chip-ota-provider-app'
 
             }
             deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
@@ -1022,7 +1024,7 @@ def pipeline()
         //---------------------------------------------------------------------
         // Build Tooling
         //---------------------------------------------------------------------
-        parallelNodesBuild['Build Chip-tool ']           = { this.buildChipTool()   }
+        parallelNodesBuild['Build Chip-tool and OTA-Provider '] = { this.buildChipToolAndOTAProvider()   }
 
         parallelNodesBuild.failFast = false
         parallel parallelNodesBuild
