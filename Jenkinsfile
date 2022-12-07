@@ -840,7 +840,7 @@ def pushToNexusAndUbai()
     }
 }
 
-def triggerSqaSmokeTest()
+def triggerSqaSmokeAndRegressionTest(buildTool)
 {
     node(buildFarmLabel)
         {
@@ -860,7 +860,8 @@ def triggerSqaSmokeTest()
                             if(sqaFunctions.isProductionJenkinsServer())
                             {
                                 echo 'in product jenkin.... '
-                                sqaFunctions.commitToMatterSqaPipelines()
+                                sqaFunctions.commitToMatterSqaPipelines(buildTool, 'smoke')
+                                sqaFunctions.commitToMatterSqaPipelines(buildTool, 'regression')
                             }
                 }
             }
@@ -1062,10 +1063,10 @@ def pipeline()
         parallel parallelNodes
 
     }
-    stage("Trigger SQA Smoke")
+    stage("Trigger SQA Smoke and Regression")
     {
         advanceStageMarker()
-        triggerSqaSmokeTest()
+        triggerSqaSmokeAndRegressionTest('NINJA')
     }
 
     currentBuild.result = 'SUCCESS'
