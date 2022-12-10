@@ -952,7 +952,7 @@ def pipeline()
         }
 
         def wifiNCPApps = [ "lighting-app", "lock-app", "thermostat", "light-switch-app", "window-app" ]
-        def wifiSOCApps = [ "lighting-app", "lock-app", "light-switch-app", "window-app" ]
+        def wifiSOCApps = [ "lighting-app" ]
 
         def wifiNCPRadios = [ "rs911x", "wf200" ]
         def wifiSOCRadios = [ "rs911x" ]
@@ -998,23 +998,23 @@ def pipeline()
         }
 
         // SOC Builds
-        wifiSOCApps.each { appName ->
-            wifiSOCBoards.each { board ->
-                wifiSOCRadios.each { rcp ->
-                    // Platform = SiWx917 for all SOC mode combos
-                    def platform = "SiWx917"
+        // wifiSOCApps.each { appName ->
+        //     wifiSOCBoards.each { board ->
+        //         wifiSOCRadios.each { rcp ->
+        //             // Platform = SiWx917 for all SOC mode combos
+        //             def platform = "SiWx917"
 
-                    // Name the examples as "xxx_wifi_917_soc"
-                    // SiWx917 is the only radio in use right now
-                    def radioName = "917_soc"
+        //             // Name the examples as "xxx_wifi_917_soc"
+        //             // SiWx917 is the only radio in use right now
+        //             def radioName = "917_soc"
 
-                    // No additional arguments for building with BLE commissioning for SiWx917 SoC
-                    def args = ""
+        //             // No additional arguments for building with BLE commissioning for SiWx917 SoC
+        //             def args = ""
 
-                    parallelNodesBuild["WiFi " + appName + " " + board + " " + rcp]      = { this.buildWiFiExample(platform, appName, board, rcp, args, radioName, false)   }
-                }
-            }
-        }
+        //             parallelNodesBuild["WiFi " + appName + " " + board + " " + rcp]      = { this.buildWiFiExample(platform, appName, board, rcp, args, radioName, false)   }
+        //         }
+        //     }
+        // }
 
         //---------------------------------------------------------------------
         // Build Custom examples
@@ -1060,7 +1060,8 @@ def pipeline()
 					def args = ""
                     if ((board == "BRD4161A" || board == "BRD4163A" || board == "BRD4164A" || board == "BRD4170A") && rcp == "wf200")
                     {
-                        args = "is_debug=false chip_logging=false"
+                        // TODO : Disabling all logs currently makes the build fail. But flash size is close to the limit. Once fixed re-disable logs
+                        args = "is_debug=false"
                     } 
                     else if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "rs911x")
                     {    
