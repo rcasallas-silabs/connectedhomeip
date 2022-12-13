@@ -70,7 +70,7 @@ def initWorkspaceAndScm()
     }
     dir(buildOverlayDir+"/overlay/unify"){
         checkout scm: [$class: 'GitSCM',
-                 branches:   [[name: 'ver_1.2.1-103-g34db9516-unify-matter-bridge']],
+                 branches:   [[name: 'matter_stable']],
                  extensions: [[$class: 'CloneOption', depth: 1, noTags: false, reference: '', shallow: true],
                                 [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true,
                                 recursiveSubmodules: true, reference: '', shallow: true, trackingSubmodules: false]],
