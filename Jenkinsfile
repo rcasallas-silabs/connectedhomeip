@@ -70,7 +70,7 @@ def initWorkspaceAndScm()
     }
     dir(buildOverlayDir+"/overlay/unify"){
         checkout scm: [$class: 'GitSCM',
-                 branches:   [[name: 'matter_stable']],
+                 branches:   [[name: 'release/22q4']],
                  extensions: [[$class: 'CloneOption', depth: 1, noTags: false, reference: '', shallow: true],
                                 [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true,
                                 recursiveSubmodules: true, reference: '', shallow: true, trackingSubmodules: false]],
@@ -325,8 +325,8 @@ def buildUnifyBridge()
             def unifyCheckoutDir = workspaceTmpDir + "/overlay/unify"
             def saveDir = 'matter/out/'
             try {
-                def unify_bridge_docker = docker.image('nexus.silabs.net/unify-cache/unify-matter:1.0.2-armhf')
-                def unify_bridge_docker_amd64 = docker.image('nexus.silabs.net/unify-cache/unify-matter:1.0.2-amd64')
+                def unify_bridge_docker = docker.image('nexus.silabs.net/unify-cache/unify-matter:1.1.0-arm64')
+                def unify_bridge_docker_amd64 = docker.image('nexus.silabs.net/unify-cache/unify-matter:1.1.0-amd64')
                 dir(dirPath)
                 {
                     unify_bridge_docker.inside("-u root -v${unifyCheckoutDir}:/unify")
@@ -334,29 +334,29 @@ def buildUnifyBridge()
                         withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
                         {
                             echo "Build libunify"
-                            sh 'cd /unify && cmake -DCMAKE_INSTALL_PREFIX=$PWD/stage -GNinja -DCMAKE_TOOLCHAIN_FILE=../cmake/armhf_debian.cmake  -B build_unify_armhf/ -S components'
-                            sh 'cd /unify && cmake --build build_unify_armhf'
-                            sh 'cd /unify && cmake --install build_unify_armhf --prefix $PWD/stage'
+                            sh 'cd /unify && cmake -DCMAKE_INSTALL_PREFIX=$PWD/stage -GNinja -DCMAKE_TOOLCHAIN_FILE=../cmake/arm64_debian.cmake  -B build_unify_arm64/ -S components -DBUILD_TESTING=OFF'
+                            sh 'cd /unify && cmake --build build_unify_arm64'
+                            sh 'cd /unify && cmake --install build_unify_arm64 --prefix $PWD/stage'
 
                             echo "Build Unify Matter Bridge"
                             sh 'rm -rf ./.environment'
                             sh 'git config --global --add safe.directory $(pwd)'
                             sh 'git config --global --add safe.directory $(pwd)/third_party/pigweed/repo'
-                            def pkg_config_export = "export PKG_CONFIG_PATH=:/unify/stage/share/pkgconfig:/usr/lib/arm-linux-gnueabihf/pkgconfig"
+                            def pkg_config_export = "export PKG_CONFIG_PATH=:/unify/stage/share/pkgconfig:/usr/lib/aarch64-linux-gnu/pkgconfig"
 
                             // Compile the Unify Matter Bridge
                             dir ("silabs_examples/unify-matter-bridge/linux")
                             {
-                                def out_path = "../../../out/silabs_examples/unify-matter-bridge/armhf_debian_buster"
-                                sh "../../../scripts/run_in_build_env.sh \"${pkg_config_export}; gn gen ${out_path} --args='target_cpu=\\\"arm\\\"'\""
+                                def out_path = "../../../out/silabs_examples/unify-matter-bridge/arm64_debian_bullseye"
+                                sh "../../../scripts/run_in_build_env.sh \"${pkg_config_export}; gn gen ${out_path} --args='target_cpu=\\\"arm64\\\"'\""
                                 sh "../../../scripts/run_in_build_env.sh \"${pkg_config_export}; ninja -C ${out_path}\""
                             }
                             
-                            // Compile chip-tool for Debian buster
+                            // Compile chip-tool for Debian bullseye
                             dir ("examples/chip-tool")
                             {
-                                def out_path = "../../out/examples/chip-tool/armhf_debian_buster"
-                                sh "../../scripts/run_in_build_env.sh \"${pkg_config_export}; gn gen ${out_path} --args='target_cpu=\\\"arm\\\"'\""
+                                def out_path = "../../out/examples/chip-tool/arm64_debian_bullseye"
+                                sh "../../scripts/run_in_build_env.sh \"${pkg_config_export}; gn gen ${out_path} --args='target_cpu=\\\"arm64\\\"'\""
                                 sh "../../scripts/run_in_build_env.sh \"${pkg_config_export}; ninja -C ${out_path}\""
                             }
                         }
@@ -366,7 +366,7 @@ def buildUnifyBridge()
                         withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
                         {
                             echo "Build libunify"
-                            sh 'cd /unify && cmake -DCMAKE_INSTALL_PREFIX=$PWD/stage_amd64 -GNinja -B build_unify_amd64/ -S components'
+                            sh 'cd /unify && cmake -DCMAKE_INSTALL_PREFIX=$PWD/stage_amd64 -GNinja -B build_unify_amd64/ -S components -DBUILD_TESTING=OFF'
                             sh 'cd /unify && cmake --build build_unify_amd64'
                             sh 'cd /unify && cmake --install build_unify_amd64 --prefix $PWD/stage_amd64'
 
