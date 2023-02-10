@@ -221,17 +221,18 @@ def buildWiFiExample(platform, app, board, wifiRadio, args, radioName, buildCust
             def dirPath = workspaceTmpDir + createWorkspaceOverlay.overlayMatterPath
             def saveDir = 'matter/'
             def exampleType =''
+            def relPath = ''
 
             if (buildCustom == true)
             {
                 exampleType = "silabs_examples"
+                relPath = "efr32"
             }
             else
             {
                 exampleType = "examples"
+                relPath = "silabs/${platform}"
             }
-            
-            def relPath = "silabs/${platform}"
     
             dir(dirPath) {                            
                 withDockerContainer(image: "nexus.silabs.net/connectedhomeip/chip-build-efr32:0.5.64", args: "-u root")
@@ -553,7 +554,7 @@ def openThreadTestSuite(deviceGroup,name,board)
 
                             def  ci_path="${WORKSPACE}/matter/out/CSA/"+name+"/OpenThread/standard/"
                             echo "ci_path: "+ci_path
-                            def  zap_install_path="${WORKSPACE}/matter/zap-bin"
+                            def  zap_install_path="${WORKSPACE}/zap-bin"
                             echo "zap_install_path: " + zap_install_path
 
                             withEnv([ 'TEST_SCRIPT_REPO=matter-scripts',
