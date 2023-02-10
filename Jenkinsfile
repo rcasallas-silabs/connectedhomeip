@@ -76,6 +76,9 @@ def initWorkspaceAndScm()
                                 recursiveSubmodules: true, reference: '', shallow: true, trackingSubmodules: false]],
                     userRemoteConfigs: [[credentialsId: 'svc_gsdk', url: 'https://bitbucket-cph.silabs.com/scm/stash/uic/uic.git']]]
     }
+    dir(buildOverlayDir+createWorkspaceOverlay.overlayPrebuiltZapPath){
+        packageManagers.downloadLatestZapBuild('pipelineMetadata.toolchain_info.zap.zapBranch')
+    }
 }
 
 def runInWorkspace(Map args, Closure cl)
@@ -131,13 +134,7 @@ def buildOpenThreadExample(app, board, args)
             def buildRelease = true
             def releaseString = "\"chip_detail_logging=false chip_automation_logging=false chip_progress_logging=false is_debug=false disable_lcd=true chip_build_libshell=false enable_openthread_cli=false chip_openthread_ftd=true\""
 
-            // Temporary logic
-            // TODO: Remove this and hard-code /silabs/efr32 path for all apps, after CCP folder structure re-factoring is complete for all standard apps
-            def relPath = "efr32"
-            if (app == "lighting-app") {
-                relPath = "silabs/${relPath}"
-            }
-          
+            def relPath = "silabs/efr32"      
             dir(dirPath) {
                 withDockerContainer(image: "nexus.silabs.net/connectedhomeip/chip-build-efr32:0.5.64", args: "-u root")
                 {
@@ -234,13 +231,8 @@ def buildWiFiExample(platform, app, board, wifiRadio, args, radioName, buildCust
                 exampleType = "examples"
             }
             
-            // Temporary logic
-            // TODO: Remove this and hard-code /silabs/${platform} path for all apps, after CCP folder structure re-factoring is complete for all standard & custom apps
-            def relPath = "${platform}"
-            if (app == "lighting-app") {
-                relPath = "silabs/${relPath}"
-            }
-            
+            def relPath = "silabs/${platform}"
+    
             dir(dirPath) {                            
                 withDockerContainer(image: "nexus.silabs.net/connectedhomeip/chip-build-efr32:0.5.64", args: "-u root")
                 {
@@ -561,6 +553,8 @@ def openThreadTestSuite(deviceGroup,name,board)
 
                             def  ci_path="${WORKSPACE}/matter/out/CSA/"+name+"/OpenThread/standard/"
                             echo "ci_path: "+ci_path
+                            def  zap_install_path="${WORKSPACE}/matter/zap-bin"
+                            echo "zap_install_path: " + zap_install_path
 
                             withEnv([ 'TEST_SCRIPT_REPO=matter-scripts',
                                     "BOARD_ID=${board}",
@@ -574,7 +568,8 @@ def openThreadTestSuite(deviceGroup,name,board)
                                     'DEBUG=true',
                                     "TEST_BUILD_NUMBER=${BUILD_NUMBER}",
                                     "MATTER_CHIP_TOOL_PATH=${chiptoolPath}" ,
-                                    "_JAVA_OPTIONS='-Xmx3072m'"
+                                    "_JAVA_OPTIONS='-Xmx3072m'",
+                                    "ZAP_INSTALL_PATH=${zap_install_path}"
                                     ])
                                 {
                                 sh 'pwd && ls -R'
