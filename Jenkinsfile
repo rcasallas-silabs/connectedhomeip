@@ -974,10 +974,18 @@ def pipeline()
                     // MG24 + RS9116/SiWx917: disable LCD and ext flash due to common SPI pin multiplexing issue
                     // MG24 + WF200: disable libshell due to VCOM pin multiplexing issue
 					def args = ""
+                    // TODO : Disabling all logs currently makes the build fail. But flash size is close to the limit. Once fixed re-disable logs
                     if ((board == "BRD4161A" || board == "BRD4163A" || board == "BRD4164A" || board == "BRD4170A") && rcp == "wf200")  // MG12 + WF200
                     {
-                        // TODO : Disabling all logs currently makes the build fail. But flash size is close to the limit. Once fixed re-disable logs
-                        args = "is_debug=false"
+                        // TODO : MG12 + lock-app + WF200 does not currently fit within flash so disabling chip logging as well
+                        if (appName == "lock-app")
+                        {
+                            args = "is_debug=false chip_logging=false"
+                        }
+                        else
+                        {
+                            args = "is_debug=false"
+                        }
                     } 
                     else if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "rs911x")  // MG24 + RS9116/SiWx917
                     {    
