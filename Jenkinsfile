@@ -325,8 +325,8 @@ def buildUnifyBridge()
             def unifyCheckoutDir = workspaceTmpDir + "/overlay/unify"
             def saveDir = 'matter/out/'
             try {
-                def unify_bridge_docker = docker.image('nexus.silabs.net/unify-cache/unify-matter:1.1.0-arm64')
-                def unify_bridge_docker_amd64 = docker.image('nexus.silabs.net/unify-cache/unify-matter:1.1.0-amd64')
+                def unify_bridge_docker = docker.image('nexus.silabs.net/unify-cache/unify-matter:1.1.1-arm64')
+                def unify_bridge_docker_amd64 = docker.image('nexus.silabs.net/unify-cache/unify-matter:1.1.1-amd64')
                 dir(dirPath)
                 {
                     unify_bridge_docker.inside("-u root -v${unifyCheckoutDir}:/unify")
