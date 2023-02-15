@@ -1025,7 +1025,7 @@ def pipeline()
         //---------------------------------------------------------------------
         def boardsForCustomOpenThread = [:]
         def boardsForCustomWifi = [:]
-        def silabsCustomExamplesOpenThread = ["onoff-plug-app", "sl-newLight", "template", "lighting-lite-app"]
+        def silabsCustomExamplesOpenThread = ["onoff-plug-app", "occupancy-sensor", "sl-newLight", "template", "lighting-lite-app"]
         def silabsCustomExamplesWifi = ["onoff-plug-app"]
 
         def customWifiRCP = ["rs911x", "wf200"]
