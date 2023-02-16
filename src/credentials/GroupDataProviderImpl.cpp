@@ -35,6 +35,119 @@ using KeySet        = GroupDataProvider::KeySet;
 using GroupSession  = GroupDataProvider::GroupSession;
 
 
+constexpr size_t kPersistentBufferMax = 128;
+
+
+struct FabricData : chip::PersistentData<kPersistentBufferMax>
+{
+    static constexpr size_t kFabricCountMax = CHIP_CONFIG_MAX_FABRICS;
+    static constexpr TLV::Tag TagFabricCount() { return TLV::ContextTag(1); }
+    static constexpr TLV::Tag TagFabricList() { return TLV::ContextTag(2); }
+    static constexpr TLV::Tag TagFabricIndex() { return TLV::ContextTag(3); }
+
+    chip::FabricIndex fabric_list[FabricData::kFabricCountMax]; 
+    uint16_t fabric_count = 0;
+
+    FabricData() = default;
+
+    CHIP_ERROR UpdateKey(StorageKeyName & key) override
+    {
+        // TODO: key = DefaultStorageKeyAllocator::FabricKeyset(fabric_index, keyset_id);
+        key = StorageKeyName::FromConst("g/f2"); // FIXME
+        return CHIP_NO_ERROR;
+    }
+
+    void Clear() override
+    {
+        fabric_count = 0;
+        for (size_t i = 0; i < FabricData::kFabricCountMax; ++i)
+        {
+            this->fabric_list[i] = kUndefinedFabricIndex;
+        }
+    }
+
+    CHIP_ERROR Serialize(TLV::TLVWriter & writer) const override
+    {
+        TLV::TLVType container;
+        ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag(), TLV::kTLVType_Structure, container));
+
+        // fabric_count
+        ReturnErrorOnFailure(writer.Put(TagFabricCount(), static_cast<uint16_t>(fabric_count)));
+
+        // fabric_list
+        {
+            TLV::TLVType list, item;
+            ReturnErrorOnFailure(writer.StartContainer(TagFabricList(), TLV::kTLVType_List, list));
+            for (size_t i = 0; (i < this->fabric_count) && (i < FabricData::kFabricCountMax); ++i)
+            {
+                // fabric index
+                // ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag(), TLV::kTLVType_Structure, item));
+                ReturnErrorOnFailure(writer.Put(TagFabricIndex(), static_cast<uint16_t>(this->fabric_list[i])));
+                // ReturnErrorOnFailure(writer.EndContainer(item));
+            }
+            ReturnErrorOnFailure(writer.EndContainer(list));
+        }
+        return writer.EndContainer(container);
+    }
+
+    CHIP_ERROR Deserialize(TLV::TLVReader & reader) override
+    {
+        ReturnErrorOnFailure(reader.Next(TLV::AnonymousTag()));
+        VerifyOrReturnError(TLV::kTLVType_Structure == reader.GetType(), CHIP_ERROR_INTERNAL);
+
+        TLV::TLVType container;
+        ReturnErrorOnFailure(reader.EnterContainer(container));
+
+        // fabric_count
+        ReturnErrorOnFailure(reader.Next(TagFabricCount()));
+        ReturnErrorOnFailure(reader.Get(fabric_count));
+        {
+            // fabric_list
+            ReturnErrorOnFailure(reader.Next(TagFabricList()));
+            VerifyOrReturnError(TLV::kTLVType_List == reader.GetType(), CHIP_ERROR_INTERNAL);
+
+            TLV::TLVType list;
+            ReturnErrorOnFailure(reader.EnterContainer(list));
+
+            for (size_t i = 0; i < this->fabric_count && i < FabricData::kFabricCountMax; ++i)
+            {
+                // chip::FabricIndex fabric;
+                ReturnErrorOnFailure(reader.Next(TagFabricIndex()));
+                ReturnErrorOnFailure(reader.Get(this->fabric_list[i]));
+            }
+            ReturnErrorOnFailure(reader.ExitContainer(list));
+        }
+
+        return reader.ExitContainer(container);
+    }
+
+    CHIP_ERROR Register(PersistentStorageDelegate * storage, FabricIndex fabric_index)
+    {
+        CHIP_ERROR err = Load(storage);
+        if(CHIP_ERROR_NOT_FOUND == err)
+        {
+            this->fabric_count = 1;
+            this->fabric_list[0] = fabric_index;
+            return Save(storage);
+        }
+        ReturnErrorOnFailure(err);
+
+        for(size_t i = 0; i < this->fabric_count; ++i)
+        {
+            if(this->fabric_list[i] == fabric_index)
+            {
+                // Already registered
+                return CHIP_NO_ERROR;
+            }
+        }
+
+        VerifyOrReturnError(this->fabric_count < kFabricCountMax, CHIP_ERROR_INVALID_LIST_LENGTH);
+        this->fabric_list[this->fabric_count++] = fabric_index;
+        return this->Save(storage);
+    }
+
+};
+
 //------------------------------------------------------------------------------
 // Initialization
 //------------------------------------------------------------------------------
@@ -73,6 +186,10 @@ void GroupDataProviderImpl::SetStorageDelegate(PersistentStorageDelegate * stora
 CHIP_ERROR GroupDataProviderImpl::SetGroupInfo(FabricIndex fabric_index, const GroupInfo & info)
 {
     VerifyOrReturnError(IsInitialized(), CHIP_ERROR_INTERNAL);
+    
+    FabricData fabrics;
+    ReturnErrorOnFailure(fabrics.Register(mStorage, fabric_index));
+
     return CHIP_ERROR_NOT_IMPLEMENTED;
 }
 
@@ -97,6 +214,12 @@ CHIP_ERROR GroupDataProviderImpl::RemoveGroupInfo(FabricIndex fabric_index, Grou
 CHIP_ERROR GroupDataProviderImpl::SetGroupInfoAt(FabricIndex fabric_index, size_t index, const GroupInfo & info)
 {
     VerifyOrReturnError(IsInitialized(), CHIP_ERROR_INTERNAL);
+
+    FabricData fabrics;
+    ReturnErrorOnFailure(fabrics.Register(mStorage, fabric_index));
+
+    // VerifyOrReturnError(CHIP_NO_ERROR == err || CHIP_ERROR_NOT_FOUND == err, err);
+
     return CHIP_ERROR_NOT_IMPLEMENTED;
 }
 
