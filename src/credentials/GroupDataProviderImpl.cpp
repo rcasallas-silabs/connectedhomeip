@@ -38,31 +38,25 @@ using GroupSession  = GroupDataProvider::GroupSession;
 constexpr size_t kPersistentBufferMax = 128;
 
 
-struct FabricData : chip::PersistentData<kPersistentBufferMax>
+
+
+template <typename EntryType, size_t kMaxListSize, size_t kMaxSerializedSize>
+struct PersistentList : chip::PersistentData<kMaxSerializedSize>
 {
-    static constexpr size_t kFabricCountMax = CHIP_CONFIG_MAX_FABRICS;
-    static constexpr TLV::Tag TagFabricCount() { return TLV::ContextTag(1); }
-    static constexpr TLV::Tag TagFabricList() { return TLV::ContextTag(2); }
-    static constexpr TLV::Tag TagFabricIndex() { return TLV::ContextTag(3); }
+    // static constexpr size_t kMaxListSize = kMaxListSize;
+    static constexpr TLV::Tag TagItemCount() { return TLV::ContextTag(1); }
+    static constexpr TLV::Tag TagItemList() { return TLV::ContextTag(2); }
+    static constexpr TLV::Tag TagItemEntry() { return TLV::ContextTag(3); }
 
-    chip::FabricIndex fabric_list[FabricData::kFabricCountMax]; 
-    uint16_t fabric_count = 0;
-
-    FabricData() = default;
-
-    CHIP_ERROR UpdateKey(StorageKeyName & key) override
-    {
-        // TODO: key = DefaultStorageKeyAllocator::FabricKeyset(fabric_index, keyset_id);
-        key = StorageKeyName::FromConst("g/f2"); // FIXME
-        return CHIP_NO_ERROR;
-    }
+    EntryType elements[kMaxListSize]; 
+    uint16_t count = 0;
 
     void Clear() override
     {
-        fabric_count = 0;
-        for (size_t i = 0; i < FabricData::kFabricCountMax; ++i)
+        this->count = 0;
+        for (size_t i = 0; i < kMaxListSize; ++i)
         {
-            this->fabric_list[i] = kUndefinedFabricIndex;
+            this->ClearItem(this->elements[i]);
         }
     }
 
@@ -71,18 +65,18 @@ struct FabricData : chip::PersistentData<kPersistentBufferMax>
         TLV::TLVType container;
         ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag(), TLV::kTLVType_Structure, container));
 
-        // fabric_count
-        ReturnErrorOnFailure(writer.Put(TagFabricCount(), static_cast<uint16_t>(fabric_count)));
+        ReturnErrorOnFailure(writer.Put(TagItemCount(), static_cast<uint16_t>(this->count)));
 
         // fabric_list
         {
             TLV::TLVType list, item;
-            ReturnErrorOnFailure(writer.StartContainer(TagFabricList(), TLV::kTLVType_List, list));
-            for (size_t i = 0; (i < this->fabric_count) && (i < FabricData::kFabricCountMax); ++i)
+            ReturnErrorOnFailure(writer.StartContainer(TagItemList(), TLV::kTLVType_List, list));
+            for (size_t i = 0; (i < this->count) && (i < kMaxListSize); ++i)
             {
                 // fabric index
                 // ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag(), TLV::kTLVType_Structure, item));
-                ReturnErrorOnFailure(writer.Put(TagFabricIndex(), static_cast<uint16_t>(this->fabric_list[i])));
+                // ReturnErrorOnFailure(writer.Put(TagItemEntry(), static_cast<uint16_t>(this->elements[i])));
+                ReturnErrorOnFailure(this->SerializeItem(writer, this->elements[i]));
                 // ReturnErrorOnFailure(writer.EndContainer(item));
             }
             ReturnErrorOnFailure(writer.EndContainer(list));
@@ -99,21 +93,19 @@ struct FabricData : chip::PersistentData<kPersistentBufferMax>
         ReturnErrorOnFailure(reader.EnterContainer(container));
 
         // fabric_count
-        ReturnErrorOnFailure(reader.Next(TagFabricCount()));
-        ReturnErrorOnFailure(reader.Get(fabric_count));
+        ReturnErrorOnFailure(reader.Next(TagItemCount()));
+        ReturnErrorOnFailure(reader.Get(this->count));
         {
             // fabric_list
-            ReturnErrorOnFailure(reader.Next(TagFabricList()));
+            ReturnErrorOnFailure(reader.Next(TagItemList()));
             VerifyOrReturnError(TLV::kTLVType_List == reader.GetType(), CHIP_ERROR_INTERNAL);
 
             TLV::TLVType list;
             ReturnErrorOnFailure(reader.EnterContainer(list));
 
-            for (size_t i = 0; i < this->fabric_count && i < FabricData::kFabricCountMax; ++i)
+            for (size_t i = 0; i < this->count && i < kMaxListSize; ++i)
             {
-                // chip::FabricIndex fabric;
-                ReturnErrorOnFailure(reader.Next(TagFabricIndex()));
-                ReturnErrorOnFailure(reader.Get(this->fabric_list[i]));
+                ReturnErrorOnFailure(this->DeserializeItem(reader, this->elements[i]));
             }
             ReturnErrorOnFailure(reader.ExitContainer(list));
         }
@@ -121,32 +113,137 @@ struct FabricData : chip::PersistentData<kPersistentBufferMax>
         return reader.ExitContainer(container);
     }
 
-    CHIP_ERROR Register(PersistentStorageDelegate * storage, FabricIndex fabric_index)
+    CHIP_ERROR Add(PersistentStorageDelegate * storage, const EntryType item)
     {
-        CHIP_ERROR err = Load(storage);
+        CHIP_ERROR err = this->Load(storage);
         if(CHIP_ERROR_NOT_FOUND == err)
         {
-            this->fabric_count = 1;
-            this->fabric_list[0] = fabric_index;
-            return Save(storage);
+            this->count = 1;
+            this->CopyItem(item, this->elements[0]);
+            return CHIP_NO_ERROR;
         }
         ReturnErrorOnFailure(err);
-
-        for(size_t i = 0; i < this->fabric_count; ++i)
+        for(size_t i = 0; i < this->count; ++i)
         {
-            if(this->fabric_list[i] == fabric_index)
+            if(this->elements[i] == item)
             {
                 // Already registered
                 return CHIP_NO_ERROR;
             }
         }
-
-        VerifyOrReturnError(this->fabric_count < kFabricCountMax, CHIP_ERROR_INVALID_LIST_LENGTH);
-        this->fabric_list[this->fabric_count++] = fabric_index;
+        VerifyOrReturnError(this->count < kMaxListSize, CHIP_ERROR_INVALID_LIST_LENGTH);
+        this->CopyItem(item, this->elements[this->count++]);
         return this->Save(storage);
     }
 
+    CHIP_ERROR Set(PersistentStorageDelegate * storage, size_t index, const EntryType item)
+    {
+        CHIP_ERROR err = this->Load(storage);
+        if(CHIP_ERROR_NOT_FOUND == err)
+        {
+            // First group
+            VerifyOrReturnError(0 == index, CHIP_ERROR_INVALID_ARGUMENT);
+            this->count = 1;
+            this->CopyItem(item, this->elements[0]);
+            return CHIP_NO_ERROR;
+        }
+        // Second to last
+        ReturnErrorOnFailure(err);
+        VerifyOrReturnError(this->count < kMaxListSize, CHIP_ERROR_INVALID_LIST_LENGTH);
+        VerifyOrReturnError(index == this->count, CHIP_ERROR_INVALID_ARGUMENT);
+        this->CopyItem(item, this->elements[this->count++]);
+        return this->Save(storage);
+    }
+
+    virtual void ClearItem(EntryType & item) = 0;
+    virtual void CopyItem(const EntryType & from, EntryType & into) const
+    {
+        into = from;
+    }
+    virtual CHIP_ERROR SerializeItem(TLV::TLVWriter & writer, const EntryType & item) const = 0;
+    virtual CHIP_ERROR DeserializeItem(TLV::TLVReader & reader, EntryType & item) = 0;
+
 };
+
+
+struct FabricList : PersistentList<FabricIndex, CHIP_CONFIG_MAX_FABRICS, kPersistentBufferMax>
+{
+    static constexpr size_t kFabricCountMax = CHIP_CONFIG_MAX_FABRICS;
+
+    FabricList() = default;
+
+    CHIP_ERROR UpdateKey(StorageKeyName & key) override
+    {
+        // TODO: key = DefaultStorageKeyAllocator::FabricKeyset(fabric_index, keyset_id);
+        key = StorageKeyName::FromConst("g/f2"); // FIXME
+        return CHIP_NO_ERROR;
+    }
+
+    void ClearItem(FabricIndex & item) override
+    {
+        item = kUndefinedFabricIndex;
+    }
+
+    void CopyItem(const FabricIndex & from, FabricIndex & into) const override
+    {
+        into = from;
+    }
+
+    CHIP_ERROR SerializeItem(TLV::TLVWriter & writer, const FabricIndex & item) const override
+    {
+        ReturnErrorOnFailure(writer.Put(TagItemEntry(), static_cast<uint16_t>(item)));
+        return CHIP_NO_ERROR;
+    }
+
+    CHIP_ERROR DeserializeItem(TLV::TLVReader & reader, FabricIndex & item) override
+    {
+        ReturnErrorOnFailure(reader.Next(TagItemEntry()));
+        ReturnErrorOnFailure(reader.Get(item));
+        return CHIP_NO_ERROR;
+    }
+};
+
+
+struct GroupInfoList : public PersistentList<GroupInfo, CHIP_CONFIG_MAX_GROUPS_PER_FABRIC, kPersistentBufferMax>
+{
+    static constexpr size_t kFabricCountMax = CHIP_CONFIG_MAX_FABRICS;
+
+    FabricIndex fabric;
+    
+    GroupInfoList(FabricIndex fabric_index) : fabric(fabric_index) {}
+
+    CHIP_ERROR UpdateKey(StorageKeyName & key) override
+    {
+        // TODO: key = DefaultStorageKeyAllocator::FabricKeyset(fabric_index, keyset_id);
+        key = StorageKeyName::Formatted("f2/%x/gi", fabric);
+        return CHIP_NO_ERROR;
+    }
+
+    void ClearItem(GroupInfo & item) override
+    {
+        item.group_id = kUndefinedGroupId;
+    }
+
+    void CopyItem(const GroupInfo & from, GroupInfo & into) const override
+    {
+        into.group_id = from.group_id;
+    }
+
+    CHIP_ERROR SerializeItem(TLV::TLVWriter & writer, const GroupInfo & item) const override
+    {
+        ReturnErrorOnFailure(writer.Put(TagItemEntry(), static_cast<uint16_t>(item.group_id)));
+        return CHIP_NO_ERROR;
+    }
+
+    CHIP_ERROR DeserializeItem(TLV::TLVReader & reader, GroupInfo & item) override
+    {
+        ReturnErrorOnFailure(reader.Next(TagItemEntry()));
+        ReturnErrorOnFailure(reader.Get(item.group_id));
+        return CHIP_NO_ERROR;
+    }
+};
+
+
 
 //------------------------------------------------------------------------------
 // Initialization
@@ -187,8 +284,8 @@ CHIP_ERROR GroupDataProviderImpl::SetGroupInfo(FabricIndex fabric_index, const G
 {
     VerifyOrReturnError(IsInitialized(), CHIP_ERROR_INTERNAL);
     
-    FabricData fabrics;
-    ReturnErrorOnFailure(fabrics.Register(mStorage, fabric_index));
+    FabricList fabrics;
+    ReturnErrorOnFailure(fabrics.Add(mStorage, fabric_index));
 
     return CHIP_ERROR_NOT_IMPLEMENTED;
 }
@@ -215,10 +312,12 @@ CHIP_ERROR GroupDataProviderImpl::SetGroupInfoAt(FabricIndex fabric_index, size_
 {
     VerifyOrReturnError(IsInitialized(), CHIP_ERROR_INTERNAL);
 
-    FabricData fabrics;
-    ReturnErrorOnFailure(fabrics.Register(mStorage, fabric_index));
+    FabricList fabrics;
+    ReturnErrorOnFailure(fabrics.Add(mStorage, fabric_index));
 
-    // VerifyOrReturnError(CHIP_NO_ERROR == err || CHIP_ERROR_NOT_FOUND == err, err);
+    GroupInfoList groups(fabric_index);
+    ReturnErrorOnFailure(groups.Set(mStorage, index, info));
+
 
     return CHIP_ERROR_NOT_IMPLEMENTED;
 }
