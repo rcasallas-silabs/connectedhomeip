@@ -46,22 +46,22 @@ public:
     void Finish() override;
 
     //
-    // Group Table
+    // Group Info
     //
 
     // By id
-    CHIP_ERROR SetGroupInfo(FabricIndex fabric_index, const GroupInfo & info)             override;
+    CHIP_ERROR SetGroupInfo(FabricIndex fabric_index, const GroupInfo & info) override;
     CHIP_ERROR GetGroupInfo(FabricIndex fabric_index, GroupId group_id, GroupInfo & info) override;
-    CHIP_ERROR RemoveGroupInfo(FabricIndex fabric_index, GroupId group_id)                override;
+    CHIP_ERROR RemoveGroupInfo(FabricIndex fabric_index, GroupId group_id) override;
     // By index
     CHIP_ERROR SetGroupInfoAt(FabricIndex fabric_index, size_t index, const GroupInfo & info) override;
-    CHIP_ERROR GetGroupInfoAt(FabricIndex fabric_index, size_t index, GroupInfo & info)       override;
-    CHIP_ERROR RemoveGroupInfoAt(FabricIndex fabric_index, size_t index)                      override;
+    CHIP_ERROR GetGroupInfoAt(FabricIndex fabric_index, size_t index, GroupInfo & info) override;
+    CHIP_ERROR RemoveGroupInfoAt(FabricIndex fabric_index, size_t index) override;
     // Endpoints
-    bool HasEndpoint(FabricIndex fabric_index, GroupId group_id, EndpointId endpoint_id)          override;
-    CHIP_ERROR AddEndpoint(FabricIndex fabric_index, GroupId group_id, EndpointId endpoint_id)    override;
+    bool HasEndpoint(FabricIndex fabric_index, GroupId group_id, EndpointId endpoint_id) override;
+    CHIP_ERROR AddEndpoint(FabricIndex fabric_index, GroupId group_id, EndpointId endpoint_id) override;
     CHIP_ERROR RemoveEndpoint(FabricIndex fabric_index, GroupId group_id, EndpointId endpoint_id) override;
-    CHIP_ERROR RemoveEndpoint(FabricIndex fabric_index, EndpointId endpoint_id)                   override;
+    CHIP_ERROR RemoveEndpoint(FabricIndex fabric_index, EndpointId endpoint_id) override;
     // Iterators
     GroupInfoIterator * IterateGroupInfo(FabricIndex fabric_index) override;
     EndpointIterator * IterateEndpoints(FabricIndex fabric_index) override;
@@ -71,9 +71,9 @@ public:
     //
 
     CHIP_ERROR SetGroupKeyAt(FabricIndex fabric_index, size_t index, const GroupKey & info) override;
-    CHIP_ERROR GetGroupKeyAt(FabricIndex fabric_index, size_t index, GroupKey & info)       override;
-    CHIP_ERROR RemoveGroupKeyAt(FabricIndex fabric_index, size_t index)                     override;
-    CHIP_ERROR RemoveGroupKeys(FabricIndex fabric_index)                                    override;
+    CHIP_ERROR GetGroupKeyAt(FabricIndex fabric_index, size_t index, GroupKey & info) override;
+    CHIP_ERROR RemoveGroupKeyAt(FabricIndex fabric_index, size_t index) override;
+    CHIP_ERROR RemoveGroupKeys(FabricIndex fabric_index) override;
     GroupKeyIterator * IterateGroupKeys(FabricIndex fabric_index) override;
 
     //
@@ -81,8 +81,8 @@ public:
     //
 
     CHIP_ERROR SetKeySet(FabricIndex fabric_index, const ByteSpan & compressed_fabric_id, const KeySet & keys) override;
-    CHIP_ERROR GetKeySet(FabricIndex fabric_index, KeysetId keyset_id, KeySet & keys)                          override;
-    CHIP_ERROR RemoveKeySet(FabricIndex fabric_index, KeysetId keyset_id)                                      override;
+    CHIP_ERROR GetKeySet(FabricIndex fabric_index, chip::KeysetId keyset_id, KeySet & keys) override;
+    CHIP_ERROR RemoveKeySet(FabricIndex fabric_index, chip::KeysetId keyset_id) override;
     CHIP_ERROR GetIpkKeySet(FabricIndex fabric_index, KeySet & out_keyset) override;
     KeySetIterator * IterateKeySets(FabricIndex fabric_index) override;
 
@@ -90,8 +90,8 @@ public:
     CHIP_ERROR RemoveFabric(FabricIndex fabric_index) override;
 
     // Decryption
-    GroupSessionIterator * IterateGroupSessions(uint16_t session_id)                        override;
     Crypto::SymmetricKeyContext * GetKeyContext(FabricIndex fabric_index, GroupId group_id) override;
+    GroupSessionIterator * IterateGroupSessions(uint16_t session_id) override;
 
 protected:
     class GroupInfoIteratorImpl : public GroupInfoIterator
