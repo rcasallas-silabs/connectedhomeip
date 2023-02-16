@@ -950,8 +950,8 @@ def pipeline()
         def wifiNCPApps = [ "lighting-app", "lock-app", "thermostat", "light-switch-app", "window-app" ]
         def wifiSOCApps = [ "lighting-app" ]
 
-        def wifiNCPRadios = [ "rs911x", "wf200" ]
-        def wifiSOCRadios = [ "rs911x" ]
+        def wifiNCPRadios = [ "rs9116", "wf200" ]
+        def wifiSOCRadios = [ "SiWx917" ]
 
         // NCP Builds
         wifiNCPApps.each { appName ->
@@ -964,9 +964,9 @@ def pipeline()
                     // MG12 + 9116: name the example as "xxx_wifi_rs9116" so that it only applies to RS9116 (we don't support MG12 + SiWx917)
                     // MGxx + WF00: name the example as "xxx_wifi_wf200"
                     def radioName = "${rcp}"  // MGxx + WF200
-                    if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "rs911x") { // MG24 + 9116
+                    if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "rs9116") { // MG24 + 9116
                         radioName = "91x"
-                    } else if ((board == "BRD4161A" || board == "BRD4163A" || board == "BRD4164A" || board == "BRD4170A") && rcp == "rs911x") { // MG12 + 9116
+                    } else if ((board == "BRD4161A" || board == "BRD4163A" || board == "BRD4164A" || board == "BRD4170A") && rcp == "rs9116") { // MG12 + 9116
                         radioName = "rs9116"
                     }
 
@@ -987,7 +987,7 @@ def pipeline()
                             args = "is_debug=false"
                         }
                     } 
-                    else if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "rs911x")  // MG24 + RS9116/SiWx917
+                    else if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "rs9116")  // MG24 + RS9116/SiWx917
                     {    
                         args = "disable_lcd=true use_external_flash=false"
                     }
@@ -1028,7 +1028,7 @@ def pipeline()
         def silabsCustomExamplesOpenThread = ["onoff-plug-app", "occupancy-sensor", "sl-newLight", "template", "lighting-lite-app"]
         def silabsCustomExamplesWifi = ["onoff-plug-app"]
 
-        def customWifiRCP = ["rs911x", "wf200"]
+        def customWifiRCP = ["rs9116", "wf200"]
 
         if (env.BRANCH_NAME.startsWith('RC_')) {
             boardsForCustomOpenThread = ["BRD4161A", "BRD4186C", "BRD4187C", "BRD4166A"]
@@ -1055,9 +1055,9 @@ def pipeline()
                     def platform = "efr32"
 
                     def radioName = "${rcp}"  // MGxx + WF200
-                    if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "rs911x") { // MG24 + 9116
+                    if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "rs9116") { // MG24 + 9116
                         radioName = "91x"
-                    } else if ((board == "BRD4161A" || board == "BRD4163A" || board == "BRD4164A" || board == "BRD4170A") && rcp == "rs911x") { // MG12 + 9116
+                    } else if ((board == "BRD4161A" || board == "BRD4163A" || board == "BRD4164A" || board == "BRD4170A") && rcp == "rs9116") { // MG12 + 9116
                         radioName = "rs9116"
                     }
 
@@ -1067,7 +1067,7 @@ def pipeline()
                         // TODO : Disabling all logs currently makes the build fail. But flash size is close to the limit. Once fixed re-disable logs
                         args = "is_debug=false"
                     } 
-                    else if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "rs911x")
+                    else if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "rs9116")
                     {    
                         args = "disable_lcd=true use_external_flash=false"
                     }
