@@ -1,0 +1,59 @@
+!!omap
+- id: SI917
+- package: platform
+- description: CMSIS-Device part headers for SI917
+- category: Platform|si91x|core
+- quality: internal
+- define:
+  - name: SI917
+- source:
+  - path: platforms/si91x/core/chip/src/system_RS1xxxx.c
+  - path: platforms/si91x/core/chip/src/startup_RS1xxxx.c
+- provides:
+  - name: SI917
+  - name: device_arm
+  - name: cortexm4
+  - name: armv7em
+- requires:
+  - name: rsilib_board
+  - name: wiseconnect_toolchain_gcc
+- template_contribution:
+  - name: device_opn
+    value: si917-sb00
+  - name: device_arch
+    value: armv7em
+  - name: device_cpu
+    value: cortexm4
+  - name: device_family
+    value: SI917
+  - name: device_flash_addr
+    value: 136388608
+  - name: device_flash_size
+    value: 450560
+  - name: device_flash_page_size
+    value: 256
+  - name: device_ram_addr
+    value: 1024
+  - name: device_ram_size
+    value: 195584
+  - name: device_fpu
+    value: true
+  - name: device_mpu
+    value: true
+  - name: default_stack_size
+    value: 3072
+  - name: default_heap_size
+    value: 7168
+- tag:
+  - device:opn:si917-sb00
+- toolchain_settings:
+  - option: device_opn
+    value: si917-sb00
+  - option: architecture
+    value: armv7e-m
+  - option: cpu
+    value: cortex-m4
+  - option: fpu
+    value: fpv4-sp
+  - option: gcc_compiler_option
+    value: -w

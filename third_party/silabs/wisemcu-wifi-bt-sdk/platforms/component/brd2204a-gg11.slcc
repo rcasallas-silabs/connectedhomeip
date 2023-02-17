@@ -1,0 +1,125 @@
+id: brd2204a-gg11
+label: brd2204a-gg11
+package: wifi_sdk
+description: brd2204a-gg11
+category: WiFi
+quality: experimental
+requires:
+  - name: brd2204a
+  - name: status
+  - name: emlib
+root_path: platforms/efm32 
+source:
+   - path: hal/rsi_hal_mcu_interrupt.c
+   - path: hal/rsi_hal_mcu_ioports.c
+   - path: hal/rsi_hal_mcu_platform_init.c
+   - path: hal/rsi_hal_mcu_random.c
+   - path: hal/rsi_hal_mcu_sdio.c
+   - path: hal/rsi_hal_mcu_spi.c
+   - path: hal/rsi_hal_mcu_timer.c
+   - path: hal/rsi_hal_mcu_uart.c
+   - path: hal/rsi_sliconlabs_sdio_host.c
+   - path: hal/rsi_timer.c
+   - path: hal/sl_hal_mcu_logging.c
+   - path: sdio/sdio.c
+   - path: sdio/sdiodrv.c
+   - path: gecko_sdk_3.1.1/hardware/board/src/sl_board_control_gpio.c
+   - path: gecko_sdk_3.1.1/hardware/board/src/sl_board_init.c
+   - path: gecko_sdk_3.1.1/platform/service/iostream/src/sl_iostream.c
+   - path: gecko_sdk_3.1.1/platform/service/iostream/src/sl_iostream_retarget_stdio.c
+   - path: gecko_sdk_3.1.1/platform/service/iostream/src/sl_iostream_uart.c
+   - path: gecko_sdk_3.1.1/platform/service/iostream/src/sl_iostream_usart.c
+   - path: gecko_sdk_3.1.1/platform/service/device_init/src/sl_device_init_dcdc_s1.c
+   - path: gecko_sdk_3.1.1/platform/service/device_init/src/sl_device_init_emu_s1.c
+   - path: gecko_sdk_3.1.1/platform/service/device_init/src/sl_device_init_hfxo_s1.c
+   - path: gecko_sdk_3.1.1/platform/service/device_init/src/sl_device_init_nvic.c
+   - path: gecko_sdk_3.1.1/platform/service/system/src/sl_system_init.c
+   - path: gecko_sdk_3.1.1/platform/service/system/src/sl_system_kernel.c
+   - path: gecko_sdk_3.1.1/platform/service/system/src/sl_system_process_action.c
+   - path: autogen/sl_board_default_init.c
+   - path: autogen/sl_device_init_clocks.c
+   - path: autogen/sl_event_handler.c
+   - path: autogen/sl_iostream_handles.c
+   - path: autogen/sl_iostream_init_usart_instances.c
+include:
+  - path: boards/brd2204a-gg11
+    file_list:
+      - path: FreeRTOSConfig.h
+        condition: sapi_uses_rtos
+      - path: rsi_board_configuration.h
+      - path: sl_board_control_config.h
+      - path: sl_device_init_dcdc_config.h
+      - path: sl_device_init_emu_config.h
+      - path: sl_device_init_hfxo_config.h
+      - path: sl_device_init_lfxo_config.h
+      - path: sl_iostream_usart_vcom_config.h
+      - path: sl_memory_config.h
+  - path: hal
+    file_list:
+      - path: sl_rsi_host_api.h
+  - path: gecko_sdk_3.1.1/platform/service/device_init/inc/
+    file_list:
+      - path: sl_device_init_clocks.h
+      - path: sl_device_init_dcdc.h
+      - path: sl_device_init_emu.h
+      - path: sl_device_init_hfxo.h
+      - path: sl_device_init_lfxo.h
+      - path: sl_device_init_nvic.h
+  - path: gecko_sdk_3.1.1/platform/service/system/inc/
+    file_list:
+      - path: sl_system_kernel.h
+      - path: sl_system_init.h
+      - path: sl_system_process_action.h
+  - path: gecko_sdk_3.1.1/platform/service/iostream/inc
+    file_list:
+      - path: sl_iostream.h
+      - path: sl_iostream_debug.h
+      - path: sl_iostream_eusart.h
+      - path: sl_iostream_leuart.h
+      - path: sl_iostream_rtt.h
+      - path: sl_iostream_stdlib_config.h
+      - path: sl_iostream_swo.h
+      - path: sl_iostream_swo_itm_8.h
+      - path: sl_iostream_uart.h
+      - path: sl_iostream_usart.h
+      - path: sl_iostream_vuart.h
+      - path: sli_iostream_swo_itm_8.h
+      - path: sli_iostream_uart.h
+  - path: gecko_sdk_3.1.1/platform/service/iostream/config/s0
+    file_list:
+      - path: sl_iostream_leuart_inst_config.h
+      - path: sl_iostream_uart_inst_config.h
+      - path: sl_iostream_usart_inst_config.h
+  - path: gecko_sdk_3.1.1/platform/service/iostream/config/s1
+    file_list:
+      - path: sl_iostream_leuart_inst_config.h
+      - path: sl_iostream_uart_inst_config.h
+      - path: sl_iostream_usart_inst_config.h
+  - path: gecko_sdk_3.1.1/platform/service/iostream/config/s2
+    file_list:
+      - path: sl_iostream_leuart_inst_config.h
+      - path: sl_iostream_eusart_inst_config.h
+      - path: sl_iostream_usart_inst_config.h
+  - path: gecko_sdk_3.1.1/platform/service/iostream/config
+    file_list:
+      - path: sl_iostream_vuart_config.h
+  - path: gecko_sdk_3.1.1/hardware/board/inc
+    file_list:
+      - path: sl_board_control.h
+      - path: sl_board_init.h
+  - path: sdio
+    file_list:
+      - path: sdio.h
+      - path: sdiodrv.h
+      - path: sl_status.h
+  - path: autogen
+    file_list:
+      - path: RTE_Components.h
+      - path: sl_component_catalog.h
+      - path: sl_event_handler.h
+      - path: sl_iostream_handles.h
+      - path: sl_iostream_init_instances.h
+      - path: sl_iostream_init_usart_instances.h
+provides:
+  - name: brd2204a-gg11
+  - name: wiseconnect_platform_ncp_mode

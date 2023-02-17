@@ -1,0 +1,42 @@
+# Silicon Labs Project Configuration Tools: slcp, v0, Component selection file.
+project_name: i2s
+label: SI91x - SoC I2S
+description: |
+  Demonstrates how to set up I2S master
+category: example|peripheral
+package: platform
+quality: alpha
+sdk: {id: gecko_sdk, version: 4.1.0}
+sdk_extension:
+  - id: wiseconnect
+    version: 1.0.0
+source:
+  - path: i2s_master.c
+toolchain_settings: []
+component:
+  - id: rsilib_userconfig
+    from: wiseconnect
+  - id: romdriver_egpio
+    from: wiseconnect
+  - id: rsilib_clock_update
+    from: wiseconnect
+  - id: cmsis_sai
+    from: wiseconnect
+  - id: udma_linker_config
+    from: wiseconnect
+define:
+  - name: __SYSTICK
+  - name: ROM_BYPASS
+  - name: RSI_M4_INTERFACE
+  - name: I2S_LOOP_BACK
+provides:
+  - name: si91x_soc
+other_file:
+  - path: resources\readme\image504a.png
+  - path: resources\readme\image504b.png
+  - path: resources\readme\image504c.png
+readme:
+  - path: readme.md
+ui_hints:
+  highlight: readme.md
+  focus: true

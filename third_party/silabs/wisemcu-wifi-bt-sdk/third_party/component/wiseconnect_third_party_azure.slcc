@@ -1,0 +1,69 @@
+id: wiseconnect_third_party_azure
+package: wiseconnect
+description: >
+  WiSeConnect azure component
+label: third_party azure
+category: third_party|azure
+quality: alpha
+provides:
+  - name: wiseconnect_third_party_azure
+source:
+  - path: third_party/azure_sdk/src/iothub_client/src/iothub_client_core_ll.c
+  - path: third_party/azure_sdk/src/iothub_client/src/iothub_device_client_ll.c
+  - path: third_party/azure_sdk/src/iothub_client/src/iothub_message.c
+  - path: third_party/azure_sdk/src/iothub_client/src/iothub.c
+  - path: third_party/azure_sdk/src/iothub_client/src/iothub_client_authorization.c
+  - path: third_party/azure_sdk/src/iothub_client/src/iothub_client_diagnostic.c
+  - path: third_party/azure_sdk/src/iothub_client/src/iothub_client_ll_uploadtoblob.c
+  - path: third_party/azure_sdk/src/iothub_client/src/iothubtransportmqtt.c
+  - path: third_party/azure_sdk/src/iothub_client/src/blob.c
+  - path: third_party/azure_sdk/src/iothub_client/src/iothubtransport_mqtt_common.c
+  - path: third_party/azure_sdk/src/iothub_client/src/iothub_transport_ll_private.c
+  - path: third_party/azure_sdk/src/iothub_client/src/iothub_client_retry_control.c
+  - path: third_party/azure_sdk/src/c-utility/src/string_tokenizer.c
+  - path: third_party/azure_sdk/src/c-utility/src/singlylinkedlist.c
+  - path: third_party/azure_sdk/src/c-utility/src/doublylinkedlist.c
+  - path: third_party/azure_sdk/src/c-utility/src/constbuffer.c
+  - path: third_party/azure_sdk/src/c-utility/src/strings.c
+  - path: third_party/azure_sdk/src/c-utility/src/buffer.c
+  - path: third_party/azure_sdk/src/c-utility/src/map.c
+  - path: third_party/azure_sdk/src/c-utility/src/vector.c
+  - path: third_party/azure_sdk/src/c-utility/src/httpapiex.c
+  - path: third_party/azure_sdk/src/c-utility/src/httpapiexsas.c
+  - path: third_party/azure_sdk/src/c-utility/src/httpheaders.c
+  - path: third_party/azure_sdk/src/c-utility/src/urlencode.c
+  - path: third_party/azure_sdk/src/c-utility/src/crt_abstractions.c
+  - path: third_party/azure_sdk/src/c-utility/src/xlogging.c
+  - path: third_party/azure_sdk/src/c-utility/src/azure_base64.c
+  - path: third_party/azure_sdk/src/c-utility/src/sastoken.c
+  - path: third_party/azure_sdk/src/c-utility/src/xio.c
+  - path: third_party/azure_sdk/src/c-utility/src/optionhandler.c
+  - path: third_party/azure_sdk/src/c-utility/src/http_proxy_io.c
+  - path: third_party/azure_sdk/src/c-utility/src/consolelogger.c
+  - path: third_party/azure_sdk/src/c-utility/src/hmacsha256.c
+  - path: third_party/azure_sdk/src/c-utility/src/hmac.c
+  - path: third_party/azure_sdk/src/c-utility/src/usha.c
+  - path: third_party/azure_sdk/src/c-utility/src/sha1.c
+  - path: third_party/azure_sdk/src/c-utility/src/sha224.c
+  - path: third_party/azure_sdk/src/c-utility/src/sha384-512.c
+  - path: third_party/azure_sdk/src/c-utility/src/string_token.c
+  - path: third_party/azure_sdk/src/c-utility/adapters/httpapi_compact.c
+  - path: third_party/azure_sdk/src/deps/parson/parson.c
+  - path: third_party/azure_sdk/platform/silabs/src/agenttime_sapi_wrapper.c
+  - path: third_party/azure_sdk/platform/silabs/src/lock_sapi_wrapper.c
+  - path: third_party/azure_sdk/platform/silabs/src/platform_sapi_wrapper.c
+  - path: third_party/azure_sdk/platform/silabs/src/socketio_sapi_wrapper.c
+  - path: third_party/azure_sdk/platform/silabs/src/threadapi_sapi_wrapper.c
+  - path: third_party/azure_sdk/platform/silabs/src/tickcounter_sapi_wrapper.c
+  - path: third_party/azure_sdk/platform/silabs/src/tlsio_openssl_sapi_wrapper.c
+  - path: third_party/azure_sdk/src/umqtt/src/mqtt_client.c
+  - path: third_party/azure_sdk/src/umqtt/src/mqtt_message.c
+  - path: third_party/azure_sdk/src/umqtt/src/mqtt_codec.c
+include:
+  - path: third_party/azure_sdk/src/iothub_client/inc
+  - path: third_party/azure_sdk/src/deps/umock-c/inc
+  - path: third_party/azure_sdk/src/deps/parson/
+  - path: third_party/azure_sdk/src/deps/azure-macro-utils-c/inc
+  - path: third_party/azure_sdk/src/c-utility/inc
+  - path: third_party/azure_sdk/src/umqtt/inc
+  - path: third_party/azure_sdk/platform/silabs/inc

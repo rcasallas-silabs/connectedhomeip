@@ -1,0 +1,48 @@
+# Silicon Labs Project Configuration Tools: slcp, v0, Component selection file.
+project_name: dac_static
+label: SI91x - SoC DAC Static
+description: |
+  demonstrates the DAC functionality in static mode .
+category: example|peripheral
+package: platform
+quality: alpha
+sdk: {id: gecko_sdk, version: 4.1.0}
+sdk_extension:
+  - id: wiseconnect
+    version: 1.0.0
+source:
+  - path: dac_static.c
+toolchain_settings: []
+component:
+  - id: rsilib_userconfig
+    from: wiseconnect
+  - id: romdriver_egpio
+    from: wiseconnect
+  - id: rsilib_clock_update
+    from: wiseconnect
+  - id: systemlevel_processor_sensor
+    from: wiseconnect
+  - id: systemlevel_wwdt
+    from: wiseconnect
+  - id: rsilib_comparator
+    from: wiseconnect
+  - id: romdriver_efuse
+    from: wiseconnect
+  - id: rsilib_adc
+    from: wiseconnect
+  - id: cmsis_device_config_9117
+    from: wiseconnect
+other_file:
+  - path: resources\readme\image509a.png
+  - path: resources\readme\image509b.png
+  - path: resources\readme\image509c.png
+readme:
+  - path: readme.md
+ui_hints:
+  highlight: readme.md
+  focus: true
+define:
+  - name: COMMON_FLASH_EN
+  - name: RSI_M4_INTERFACE
+provides:
+  - name: si91x_soc

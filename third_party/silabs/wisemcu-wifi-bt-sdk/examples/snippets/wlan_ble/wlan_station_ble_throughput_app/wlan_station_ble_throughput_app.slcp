@@ -1,0 +1,85 @@
+project_name: wlan_station_ble_throughput_app
+package: wiseconnect
+quality: alpha
+label: WLAN Station BLE Throughput App
+category: Example|WiSeConnect
+description: >
+  Demonstrates throughput measurement of Wi-Fi while BLE is in connection
+filter:
+  - name: "Wireless Technology"
+    value: ["Wi-Fi+BLE"]
+  - name: "Device Type"
+    value: Undefined
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+xml_filter: Undefined
+sdk: {id: gecko_sdk, version: 4.1.0}
+sdk_extension:
+  - id: wiseconnect
+    version: 1.0.0
+source:
+  - path: rsi_ble_app.c
+  - path: rsi_wlan_app.c
+  - path: main.c
+include:
+  - path: 
+    file_list:
+      - path: rsi_wlan_config.h
+      - path: rsi_bt_config.h
+      - path: rsi_ble_config.h
+requires:
+  - name: wiseconnect_platform
+  - name: wiseconnect_sapi_wlan
+  - name: wiseconnect_sapi_ble
+  - name: wiseconnect_sapi_bluetooth
+  - name: wiseconnect_sapi_sockets
+  - name: wiseconnect_resources_certificates
+  - name: wiseconnect_sapi_freertos
+  - name: wiseconnect_third_party_freertos
+define:
+   - name: FLOAT_PRINT_BYPASS
+   - name: EXECUTION_FROM_RAM
+template_contribution:
+  - name: EXECUTION_FROM_RAM
+    value: 1
+toolchain_settings: []
+readme:
+  - path: readme.md
+other_file:
+  - path: resources/readme/creationfinal114.png
+  - path: resources/readme/debugmodesoc117.png
+  - path: resources/readme/image217c.png
+  - path: resources/readme/image215.png
+  - path: resources/readme/wbtncp.png
+  - path: resources/readme/buildingpjt115.png
+  - path: resources/readme/ncpboarddetection112.png
+  - path: resources/readme/ftdiprints118.png
+  - path: resources/readme/blescanner.png
+  - path: resources/readme/image216b.png
+  - path: resources/readme/image211.png
+  - path: resources/readme/image217b.png
+  - path: resources/readme/wbtsoc.png
+  - path: resources/readme/image217d.png
+  - path: resources/readme/image213.png
+  - path: resources/readme/image216d.png
+  - path: resources/readme/image216a.png
+  - path: resources/readme/image217f.png
+  - path: resources/readme/image359.png
+  - path: resources/readme/image216c.png
+  - path: resources/readme/ouputprints119.png
+  - path: resources/readme/buildsuccesssoc116.png
+  - path: resources/readme/image214.png
+  - path: resources/readme/debugmodencp120.png
+  - path: resources/readme/image212.png
+  - path: resources/readme/image217a.png
+  - path: resources/readme/socboarddetection111.png
+  - path: resources/readme/sslrx.png
+  - path: resources/readme/image216g.png
+  - path: resources/readme/image217e.png
+  - path: resources/readme/image216e.png
+  - path: resources/readme/image216f.png
+  - path: resources/readme/projctselection113.png
+ui_hints:
+  highlight:
+    - path: readme.md
+      focus: true

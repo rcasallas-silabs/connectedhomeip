@@ -1,0 +1,68 @@
+project_name: https_client
+package: wiseconnect
+quality: alpha
+label: HTTPS Client
+category: Example|WiSeConnect
+description: >
+  Demonstrates how to create HTTPs client (secure) and do PUT, GET and POST operations with the server opened on remote peer
+filter:
+  - name: "Wireless Technology"
+    value: ["Wi-Fi"]
+  - name: "Device Type"
+    value: Undefined
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+xml_filter: Undefined
+sdk: {id: gecko_sdk, version: 4.1.0}
+sdk_extension:
+  - id: wiseconnect
+    version: 1.0.0
+source:
+  - path: rsi_https_client_app.c
+  - path: index.txt
+include:
+  - path: 
+    file_list:
+      - path: rsi_wlan_config.h
+requires:
+  - name: wiseconnect_platform
+  - name: wiseconnect_sapi_wlan
+  - name: wiseconnect_sapi_sockets
+  - name: wiseconnect_sapi_http_client
+  - name: wiseconnect_resources_certificates
+  - name: wiseconnect_sapi_freertos
+  - name: wiseconnect_third_party_freertos
+define:
+   - name: FLOAT_PRINT_BYPASS
+   - name: EXECUTION_FROM_RAM
+template_contribution:
+  - name: EXECUTION_FROM_RAM
+    value: 1
+toolchain_settings: []
+readme:
+  - path: readme.md
+other_file:
+  - path: resources/readme/httpotafncp.png
+  - path: resources/readme/creationfinal114.png
+  - path: resources/readme/debugmodesoc117.png
+  - path: resources/readme/httpclienttestsuccess.png
+  - path: resources/readme/buildingpjt115.png
+  - path: resources/readme/httpserver.png
+  - path: resources/readme/ncpboarddetection112.png
+  - path: resources/readme/ftdiprints118.png
+  - path: resources/readme/httpclientncp.png
+  - path: resources/readme/image216b.png
+  - path: resources/readme/httpclientsoc.png
+  - path: resources/readme/image359.png
+  - path: resources/readme/image216c.png
+  - path: resources/readme/ouputprints119.png
+  - path: resources/readme/buildsuccesssoc116.png
+  - path: resources/readme/image210a.png
+  - path: resources/readme/debugmodencp120.png
+  - path: resources/readme/socboarddetection111.png
+  - path: resources/readme/projctselection113.png
+  - path: resources/readme/image203.png
+ui_hints:
+  highlight:
+    - path: readme.md
+      focus: true

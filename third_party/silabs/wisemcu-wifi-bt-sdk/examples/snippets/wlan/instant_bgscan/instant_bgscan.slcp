@@ -1,0 +1,43 @@
+project_name: instant_bgscan
+package: wiseconnect
+quality: alpha
+label: Instant Background Scan
+category: Example|WiSeConnect
+description: >
+  Connects as a Wi-Fi client to an Access Point and start Back ground scan to get the results of available access points
+filter:
+  - name: "Wireless Technology"
+    value: ["Wi-Fi"]
+  - name: "Device Type"
+    value: Undefined
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+xml_filter: Undefined
+sdk: {id: gecko_sdk, version: 4.1.0}
+sdk_extension:
+  - id: wiseconnect
+    version: 1.0.0
+source:
+  - path: rsi_instant_bgscan.c
+include:
+  - path: 
+    file_list:
+      - path: rsi_wlan_config.h
+requires:
+  - name: wiseconnect_platform
+  - name: wiseconnect_sapi_wlan
+  - name: wiseconnect_sapi_sockets
+  - name: wiseconnect_sapi_freertos
+  - name: wiseconnect_third_party_freertos
+toolchain_settings: []
+readme:
+  - path: readme.md
+other_file:
+  - path: resources/readme/image216b.png
+  - path: resources/readme/instantbackgroundncp.png
+  - path: resources/readme/image216c.png
+  - path: resources/readme/instantsoc.png
+ui_hints:
+  highlight:
+    - path: readme.md
+      focus: true

@@ -1,0 +1,57 @@
+project_name: gatt_long_read
+package: wiseconnect
+quality: alpha
+label: BLE Gatt Long Read
+category: Example|WiSeConnect
+description: >
+  Demonstrates how a GATT client device accesses a GATT server device for long read
+filter:
+  - name: "Wireless Technology"
+    value: ["Bluetooth"]
+  - name: "Device Type"
+    value: Undefined
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+xml_filter: Undefined
+sdk: {id: gecko_sdk, version: 4.1.0}
+sdk_extension:
+  - id: wiseconnect
+    version: 1.0.0
+source:
+  - path: rsi_ble_long_read.c
+include:
+  - path: 
+    file_list:
+      - path: rsi_ble_config.h
+requires:
+  - name: wiseconnect_platform
+  - name: wiseconnect_sapi_ble
+  - name: wiseconnect_sapi_bluetooth
+  - name: wiseconnect_sapi_freertos
+  - name: wiseconnect_third_party_freertos
+toolchain_settings: []
+readme:
+  - path: readme.md
+other_file:
+  - path: resources/readme/ncpboarddetection112.png
+  - path: resources/readme/ftdiprints118.png
+  - path: resources/readme/send_data.png
+  - path: resources/readme/keil_with_out_os.png
+  - path: resources/readme/buildsoc.png
+  - path: resources/readme/gatt_configurator.png
+  - path: resources/readme/device_advertising.png
+  - path: resources/readme/debugmodencp.png
+  - path: resources/readme/gattlongreadsoc.png
+  - path: resources/readme/device_connected.png
+  - path: resources/readme/advertiser.png
+  - path: resources/readme/debugmodesoc.png
+  - path: resources/readme/gatt_configurator1.png
+  - path: resources/readme/device_connected1.png
+  - path: resources/readme/enable_notifications.png
+  - path: resources/readme/socboarddetection111.png
+  - path: resources/readme/with_out_os.png
+  - path: resources/readme/gattlongreadncp.png
+ui_hints:
+  highlight:
+    - path: readme.md
+      focus: true

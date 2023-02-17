@@ -1,0 +1,38 @@
+# Silicon Labs Project Configuration Tools: slcp, v0, Component selection file.
+project_name: uart
+label: SI91x - SoC Peripheral UART
+description: |
+  Demonstrates how to use the UART peripheral on the SI91x SoC device.
+category: example|peripheral
+package: platform
+quality: alpha
+sdk: {id: gecko_sdk, version: 4.1.0}
+sdk_extension:
+  - id: wiseconnect
+    version: 1.0.0
+source:
+  - path: uart_exp.c
+toolchain_settings: []
+component:
+  - id: rsilib_userconfig
+    from: wiseconnect
+  - id: romdriver_egpio
+    from: wiseconnect
+  - id: rsilib_clock_update
+    from: wiseconnect
+  - id: udma_linker_config
+    from: wiseconnect
+define:
+  - name: ROM_BYPASS
+  - name: RSI_M4_INTERFACE
+provides:
+  - name: si91x_soc
+other_file:
+  - path: resources\readme\image506a.png
+  - path: resources\readme\image506b.png
+  - path: resources\readme\image506c.png
+readme:
+  - path: readme.md
+ui_hints:
+  highlight: readme.md
+  focus: true

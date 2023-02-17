@@ -1,0 +1,45 @@
+project_name: tcp_client_twt
+package: wiseconnect
+quality: alpha
+label: TCP Client TWT
+category: Example|WiSeConnect
+description: >
+  Demonstrates the procedure to setup TWT session and open a TCP client socket and sends data to TCP server socket
+filter:
+  - name: "Wireless Technology"
+    value: ["Wi-Fi"]
+  - name: "Device Type"
+    value: Undefined
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+xml_filter: Undefined
+sdk: {id: gecko_sdk, version: 4.1.0}
+sdk_extension:
+  - id: wiseconnect
+    version: 1.0.0
+source:
+  - path: rsi_twt_tcp_client.c
+include:
+  - path: 
+    file_list:
+      - path: rsi_wlan_config.h
+requires:
+  - name: wiseconnect_platform
+  - name: wiseconnect_sapi_wlan
+  - name: wiseconnect_sapi_sockets
+  - name: wiseconnect_sapi_freertos
+  - name: wiseconnect_third_party_freertos
+toolchain_settings: []
+readme:
+  - path: readme.md
+other_file:
+  - path: resources/readme/twt.png
+  - path: resources/readme/image216b.png
+  - path: resources/readme/image211.png
+  - path: resources/readme/image217d.png
+  - path: resources/readme/image218.png
+  - path: resources/readme/image216c.png
+ui_hints:
+  highlight:
+    - path: readme.md
+      focus: true

@@ -1,0 +1,63 @@
+project_name: ble_per
+package: wiseconnect
+quality: alpha
+label: BLE PER - Transmit and Receive Performance and Regulatory Testing
+category: Example|WiSeConnect
+description: >
+  configure the device with necessary parameters to start transmitting or receiving BLE PER packets.
+filter:
+  - name: "Wireless Technology"
+    value: ["Bluetooth"]
+  - name: "Device Type"
+    value: Undefined
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+xml_filter: Undefined
+sdk: {id: gecko_sdk, version: 4.1.0}
+sdk_extension:
+  - id: wiseconnect
+    version: 1.0.0
+source:
+  - path: rsi_ble_per.c
+include:
+  - path: 
+    file_list:
+      - path: rsi_ble_config.h
+requires:
+  - name: wiseconnect_platform
+  - name: wiseconnect_sapi_ble
+  - name: wiseconnect_sapi_bluetooth
+  - name: wiseconnect_sapi_freertos
+  - name: wiseconnect_third_party_freertos
+toolchain_settings: []
+readme:
+  - path: readme.md
+other_file:
+  - path: resources/readme/creationfinal114.png
+  - path: resources/readme/debugmodesoc117.png
+  - path: resources/readme/buildingpjt115.png
+  - path: resources/readme/ncpboarddetection112.png
+  - path: resources/readme/ftdiprints118.png
+  - path: resources/readme/image216b.png
+  - path: resources/readme/keil_with_out_os.png
+  - path: resources/readme/debugmodencp.png
+  - path: resources/readme/image359.png
+  - path: resources/readme/debugmodesoc.png
+  - path: resources/readme/imagesncpble.png
+  - path: resources/readme/image23a.png
+  - path: resources/readme/image216c.png
+  - path: resources/readme/image23_spectrum.png
+  - path: resources/readme/ouputprints119.png
+  - path: resources/readme/buildsuccesssoc116.png
+  - path: resources/readme/debugmodencp120.png
+  - path: resources/readme/socboarddetection111.png
+  - path: resources/readme/with_out_os.png
+  - path: resources/readme/image23spectrum.png
+  - path: resources/readme/image23txlog.png
+  - path: resources/readme/imagesocble.png
+  - path: resources/readme/images23rxlog.png
+  - path: resources/readme/projctselection113.png
+ui_hints:
+  highlight:
+    - path: readme.md
+      focus: true

@@ -1,0 +1,43 @@
+project_name: tcp_tx_with_powersave
+package: wiseconnect
+quality: alpha
+label: Wi-Fi - SoC TCP Tx with Powersave
+category: Example|WiSeConnect
+description: >
+  WiSeConnect tcp_tx_with_powersave example application
+filter:
+  - name: "Wireless Technology"
+    value: ["Wi-Fi"]
+  - name: "Device Type"
+    value: Undefined
+  - name: "Project Difficulty"
+    value: Undefined
+xml_filter: Undefined
+sdk: {id: gecko_sdk, version: 4.1.0}
+sdk_extension:
+  - id: wiseconnect
+    version: 1.0.0
+source:
+  - path: rsi_tcp_tx_with_powersave_on.c
+include:
+  - path: .
+    file_list:
+      - path: rsi_wlan_config.h
+      - path: rsi_ble_config.h
+requires:
+  - name: wiseconnect_platform
+  - name: wiseconnect_sapi_wlan
+  - name: wiseconnect_sapi_ble
+  - name: wiseconnect_sapi_bluetooth
+  - name: wiseconnect_sapi_sockets
+  - name: wiseconnect_resources_certificates
+define:
+   - name: ALARM_CONFIG
+toolchain_settings: []
+readme:
+  - path: readme.md
+other_file:
+ui_hints:
+  highlight:
+    - path: readme.md
+      focus: true
