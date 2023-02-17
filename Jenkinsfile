@@ -226,7 +226,7 @@ def buildWiFiExample(platform, app, board, wifiRadio, args, radioName, buildCust
             if (buildCustom == true)
             {
                 exampleType = "silabs_examples"
-                relPath = "efr32"
+                relPath = "${platform}"
             }
             else
             {
@@ -943,14 +943,14 @@ def pipeline()
             wifiNCPBoards = [ "BRD4161A", "BRD4163A", "BRD4164A", "BRD4170A", "BRD4186C", "BRD4187C" ]
             wifiSOCBoards = [ "BRD4325A" ]
         } else {
-            wifiNCPBoards = [ "BRD4161A", "BRD4187C" ]
-            wifiSOCBoards = [ "BRD4325A" ]
+            wifiNCPBoards = [ "BRD4186C", "BRD4187C" ]
+            wifiSOCBoards = [ "BRD4325B" ]
         }
 
-        def wifiNCPApps = [ "lighting-app", "lock-app", "thermostat", "light-switch-app", "window-app" ]
-        def wifiSOCApps = [ "lighting-app" ]
+        def wifiNCPApps = [ "lighting-app", "lock-app", "thermostat", "window-app" ]
+        def wifiSOCApps = [ "lighting-app" , "lock-app", "light-switch-app", "window-app" ]
 
-        def wifiNCPRadios = [ "rs9116", "wf200" ]
+        def wifiNCPRadios = [ "rs9116", "SiWx917", "wf200" ]
         def wifiSOCRadios = [ "SiWx917" ]
 
         // NCP Builds
@@ -960,14 +960,17 @@ def pipeline()
                     // Platform = efr32 for all NCP mode combos
                     def platform = "efr32"
 
-                    // MG24 + 9116: name the example as "xxx_wifi_91x" so that it's common to RS9116 and SiWx917
+                    // MG24 + SiWx917: name the example as "xxx_wifi_siwx917"
+                    // MG24 + 9116: name the example as "xxx_wifi_rs9116"
                     // MG12 + 9116: name the example as "xxx_wifi_rs9116" so that it only applies to RS9116 (we don't support MG12 + SiWx917)
                     // MGxx + WF00: name the example as "xxx_wifi_wf200"
                     def radioName = "${rcp}"  // MGxx + WF200
-                    if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "rs9116") { // MG24 + 9116
-                        radioName = "91x"
-                    } else if ((board == "BRD4161A" || board == "BRD4163A" || board == "BRD4164A" || board == "BRD4170A") && rcp == "rs9116") { // MG12 + 9116
-                        radioName = "rs9116"
+                    if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "SiWx917") { // MG24 + SiWx917
+                        radioName = "mg24_siwx917"
+                    } else if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "rs9116") { // MG24 + rs9116
+                        radioName = "mg24_rs9116"
+                    } else if ((board == "BRD4161A" || board == "BRD4163A" || board == "BRD4164A" || board == "BRD4170A") && rcp == "rs9116") { // MG12 + rs9116
+                        radioName = "mg12_rs9116"
                     }
 
                     // MG12 + WF200: set is_debug=false and chip_logging=false, otherwise it does not fit (not a problem for MG24 + WF200, also MG24 + WF200 init fails with is_debug=false)
@@ -987,9 +990,9 @@ def pipeline()
                             args = "is_debug=false"
                         }
                     } 
-                    else if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "rs9116")  // MG24 + RS9116/SiWx917
+                    else if ((board == "BRD4186C" || board == "BRD4187C") && (rcp == "SiWx917" || rcp == "rs9116"))  // MG24 + SiWx917/RS9116
                     {    
-                        args = "disable_lcd=true use_external_flash=false"
+                        args = "disable_lcd=true use_external_flash=false chip_enable_ble_rs911x=true"
                     }
                     else if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "wf200")   // MG24 + WF200
                     {
@@ -1002,23 +1005,23 @@ def pipeline()
         }
 
         // SOC Builds
-        // wifiSOCApps.each { appName ->
-        //     wifiSOCBoards.each { board ->
-        //         wifiSOCRadios.each { rcp ->
-        //             // Platform = SiWx917 for all SOC mode combos
-        //             def platform = "SiWx917"
+        wifiSOCApps.each { appName ->
+            wifiSOCBoards.each { board ->
+                wifiSOCRadios.each { rcp ->
+                    // Platform = SiWx917 for all SOC mode combos
+                    def platform = "SiWx917"
 
-        //             // Name the examples as "xxx_wifi_917_soc"
-        //             // SiWx917 is the only radio in use right now
-        //             def radioName = "917_soc"
+                    // Name the examples as "xxx_wifi_917_soc"
+                    // SiWx917 is the only radio in use right now
+                    def radioName = "917_soc"
 
-        //             // No additional arguments for building with BLE commissioning for SiWx917 SoC
-        //             def args = ""
+                    // No additional arguments for building with BLE commissioning for SiWx917 SoC
+                    def args = ""
 
-        //             parallelNodesBuild["WiFi " + appName + " " + board + " " + rcp]      = { this.buildWiFiExample(platform, appName, board, rcp, args, radioName, false)   }
-        //         }
-        //     }
-        // }
+                    parallelNodesBuild["WiFi " + appName + " " + board + " " + rcp]      = { this.buildWiFiExample(platform, appName, board, rcp, args, radioName, false)   }
+                }
+            }
+        }
 
         //---------------------------------------------------------------------
         // Build Custom examples
@@ -1028,7 +1031,8 @@ def pipeline()
         def silabsCustomExamplesOpenThread = ["onoff-plug-app", "occupancy-sensor", "sl-newLight", "template", "lighting-lite-app"]
         def silabsCustomExamplesWifi = ["onoff-plug-app"]
 
-        def customWifiRCP = ["rs9116", "wf200"]
+        def customWifiRCP = ["rs9116", "SiWx917" ,"wf200"]
+        def customWifiSoC = ["SiWx917"]
 
         if (env.BRANCH_NAME.startsWith('RC_')) {
             boardsForCustomOpenThread = ["BRD4161A", "BRD4186C", "BRD4187C", "BRD4166A"]
@@ -1036,7 +1040,8 @@ def pipeline()
 
         } else {
              boardsForCustomOpenThread = ["BRD4161A", "BRD4186C", "BRD4166A"]
-             boardsForCustomWifi       = ["BRD4161A", "BRD4187C"]
+             boardsForCustomWifi       = ["BRD4186C", "BRD4187C"]
+             boardsForCustomWifiSoC    = ["BRD4325B"]
         }
 
         // Openthread custom examples
@@ -1055,10 +1060,12 @@ def pipeline()
                     def platform = "efr32"
 
                     def radioName = "${rcp}"  // MGxx + WF200
-                    if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "rs9116") { // MG24 + 9116
-                        radioName = "91x"
+                    if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "SiWx917") { // MG24 + SiWx917
+                        radioName = "mg24_siwx917"
+                    } else if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "rs9116") { // MG24 + rs9116
+                        radioName = "mg24_rs9116"
                     } else if ((board == "BRD4161A" || board == "BRD4163A" || board == "BRD4164A" || board == "BRD4170A") && rcp == "rs9116") { // MG12 + 9116
-                        radioName = "rs9116"
+                        radioName = "mg12_rs9116"
                     }
 
 					def args = ""
@@ -1067,9 +1074,9 @@ def pipeline()
                         // TODO : Disabling all logs currently makes the build fail. But flash size is close to the limit. Once fixed re-disable logs
                         args = "is_debug=false"
                     } 
-                    else if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "rs9116")
+                    else if ((board == "BRD4186C" || board == "BRD4187C") && (rcp == "rs9116" || rcp == "SiWx917"))
                     {    
-                        args = "disable_lcd=true use_external_flash=false"
+                        args = "disable_lcd=true use_external_flash=false chip_enable_ble_rs911x=true"
                     }
                     else if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "wf200")
                     {
@@ -1081,6 +1088,24 @@ def pipeline()
             }
         }
 
+        // Custom SOC Builds
+        silabsCustomExamplesWifi.each { appName ->
+            boardsForCustomWifiSoC.each { board ->
+                customWifiSoC.each { rcp ->
+                    // Platform = SiWx917 for all SOC mode combos
+                    def platform = "SiWx917"
+
+                    // Name the examples as "xxx_wifi_917_soc"
+                    // SiWx917 is the only radio in use right now
+                    def radioName = "917_soc"
+
+                    // No additional arguments for building with BLE commissioning for SiWx917 SoC
+                    def args = ""
+
+                    parallelNodesBuild["WiFi " + appName + " " + board + " " + rcp]      = { this.buildWiFiExample(platform, appName, board, rcp, args, radioName, true)   }
+                }
+            }
+        }
         //---------------------------------------------------------------------
         // Build Tooling
         //---------------------------------------------------------------------
