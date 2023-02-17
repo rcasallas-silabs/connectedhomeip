@@ -1,0 +1,44 @@
+# Silicon Labs Project Configuration Tools: slcp, v0, Component selection file.
+project_name: ulp_spi
+label: SI91x SoC Peripheral - ULP_SPI
+description: |
+  Demonstrates how to use the ULP_SPI interface on the SI91x SoC device.
+category: example|peripheral
+package: platform
+quality: alpha
+sdk: {id: gecko_sdk, version: 4.1.0}
+sdk_extension:
+  - id: wiseconnect
+    version: 1.0.0
+source:
+  - path: ulp_spi.c
+  - path: hardware_setup.c
+toolchain_settings: []
+component:
+  - id: rsilib_userconfig
+    from: wiseconnect
+  - id: romdriver_egpio
+    from: wiseconnect
+  - id: rsilib_clock_update
+    from: wiseconnect
+  - id: cmsis_spi
+    from: wiseconnect
+  - id: udma_linker_config
+    from: wiseconnect
+define:
+  - name: RSI_M4_INTERFACE
+  - name: M4_PS2_STATE
+provides:
+  - name: si91x_soc
+template_contribution:
+  - name: RAM_EXECUTION
+    value: 1
+other_file:
+  - path: resources\readme\image502a.png
+  - path: resources\readme\image502b.png
+  - path: resources\readme\image502c.png
+readme:
+  - path: readme.md
+ui_hints:
+  highlight: readme.md
+  focus: true

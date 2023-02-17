@@ -1,0 +1,71 @@
+project_name: embedded_mqtt
+package: wiseconnect
+quality: alpha
+label: Embedded MQTT
+category: Example|WiSeConnect
+description: >
+  Demonstrates how to build an MQTT client and connects with an MQTT broker.
+filter:
+  - name: "Wireless Technology"
+    value: ["Wi-Fi"]
+  - name: "Device Type"
+    value: Undefined
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+xml_filter: Undefined
+sdk: {id: gecko_sdk, version: 4.1.0}
+sdk_extension:
+  - id: wiseconnect
+    version: 1.0.0
+source:
+  - path: rsi_emb_mqtt.c
+include:
+  - path: 
+    file_list:
+      - path: rsi_wlan_config.h
+requires:
+  - name: wiseconnect_platform
+  - name: wiseconnect_sapi_wlan
+  - name: wiseconnect_sapi_sockets
+  - name: wiseconnect_sapi_mqtt_client
+  - name: wiseconnect_third_party_mqtt_client
+  - name: wiseconnect_sapi_freertos
+  - name: wiseconnect_third_party_freertos
+toolchain_settings: []
+readme:
+  - path: readme.md
+other_file:
+  - path: resources/readme/creationfinal114.png
+  - path: resources/readme/debugmodesoc117.png
+  - path: resources/readme/image4.png
+  - path: resources/readme/buildingpjt115.png
+  - path: resources/readme/ncpboarddetection112.png
+  - path: resources/readme/ftdiprints118.png
+  - path: resources/readme/image149.png
+  - path: resources/readme/image216b.png
+  - path: resources/readme/image147a.png
+  - path: resources/readme/image102.png
+  - path: resources/readme/image150.png
+  - path: resources/readme/image151.png
+  - path: resources/readme/image153.png
+  - path: resources/readme/image6.png
+  - path: resources/readme/embmqttsoc.png
+  - path: resources/readme/image359.png
+  - path: resources/readme/image8.png
+  - path: resources/readme/image152.png
+  - path: resources/readme/image216c.png
+  - path: resources/readme/buildsuccesssoc116.png
+  - path: resources/readme/debugmodencp120.png
+  - path: resources/readme/image9.png
+  - path: resources/readme/socboarddetection111.png
+  - path: resources/readme/image5.png
+  - path: resources/readme/embmqttncp.png
+  - path: resources/readme/image148.png
+  - path: resources/readme/image10.png
+  - path: resources/readme/image154.png
+  - path: resources/readme/projctselection113.png
+  - path: resources/readme/outputprints119.png
+ui_hints:
+  highlight:
+    - path: readme.md
+      focus: true

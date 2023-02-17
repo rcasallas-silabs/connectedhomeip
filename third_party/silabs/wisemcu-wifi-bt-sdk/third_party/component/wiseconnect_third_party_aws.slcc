@@ -1,0 +1,32 @@
+id: wiseconnect_third_party_aws
+package: wiseconnect
+description: >
+  WiSeConnect aws component
+label: third_party aws
+category: third_party|aws
+quality: alpha
+provides:
+  - name: wiseconnect_third_party_aws
+source:
+  - path: third_party/aws_sdk/platform/silabs/src/timer.c
+  - path: third_party/aws_sdk/platform/silabs/src/network_sapi_wrapper.c
+  - path: third_party/aws_sdk/src/aws_iot_jobs_topics.c
+  - path: third_party/aws_sdk/src/aws_iot_jobs_json.c
+  - path: third_party/aws_sdk/src/aws_iot_jobs_interface.c
+  - path: third_party/aws_sdk/src/aws_iot_mqtt_client_yield.c
+  - path: third_party/aws_sdk/src/aws_iot_mqtt_client_unsubscribe.c
+  - path: third_party/aws_sdk/src/aws_iot_mqtt_client_subscribe.c
+  - path: third_party/aws_sdk/src/aws_iot_mqtt_client_publish.c
+  - path: third_party/aws_sdk/src/aws_iot_shadow.c
+  - path: third_party/aws_sdk/src/aws_iot_mqtt_client.c
+  - path: third_party/aws_sdk/src/aws_iot_mqtt_client_common_internal.c
+  - path: third_party/aws_sdk/src/aws_iot_shadow_records.c
+  - path: third_party/aws_sdk/src/aws_iot_shadow_json.c
+  - path: third_party/aws_sdk/src/aws_iot_jobs_types.c
+  - path: third_party/aws_sdk/src/jsmn.c
+  - path: third_party/aws_sdk/src/aws_iot_mqtt_client_connect.c
+  - path: third_party/aws_sdk/src/aws_iot_json_utils.c
+  - path: third_party/aws_sdk/src/aws_iot_shadow_actions.c
+include:
+  - path: third_party/aws_sdk/include
+  - path: third_party/aws_sdk/platform/silabs/inc

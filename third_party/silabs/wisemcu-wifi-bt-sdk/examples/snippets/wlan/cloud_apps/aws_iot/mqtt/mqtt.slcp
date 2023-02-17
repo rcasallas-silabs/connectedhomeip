@@ -1,0 +1,98 @@
+project_name: aws_iot_mqtt
+package: wiseconnect
+quality: alpha
+label: AWS IoT MQTT Client
+category: Example|WiSeConnect
+description: >
+  Create an AWS IoT 'thing' that interacts with AWS IoT using MQTT publish/subscribe
+filter:
+  - name: "Wireless Technology"
+    value: ["Wi-Fi"]
+  - name: "Device Type"
+    value: Undefined
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+xml_filter: Undefined
+sdk: {id: gecko_sdk, version: 4.1.0}
+sdk_extension:
+  - id: wiseconnect
+    version: 1.0.0
+source:
+  - path: rsi_subscribe_publish_sample.c
+include:
+  - path: 
+    file_list:
+      - path: rsi_wlan_config.h
+      - path: aws_iot_config.h
+requires:
+  - name: wiseconnect_platform
+  - name: wiseconnect_sapi_wlan
+  - name: wiseconnect_sapi_sockets
+  - name: wiseconnect_resources_certificates
+  - name: wiseconnect_third_party_aws
+  - name: wiseconnect_sapi_freertos
+  - name: wiseconnect_third_party_freertos
+define:
+   - name: MQTT_YIELD_EN
+   - name: EXECUTION_FROM_RAM
+template_contribution:
+  - name: EXECUTION_FROM_RAM
+    value: 1
+toolchain_settings: []
+readme:
+  - path: readme.md
+other_file:
+  - path: resources/readme/image91f.png
+  - path: resources/readme/creationfinal114.png
+  - path: resources/readme/debugmodesoc117.png
+  - path: resources/readme/buildingpjt115.png
+  - path: resources/readme/image452.png
+  - path: resources/readme/ncpboarddetection112.png
+  - path: resources/readme/aws_create_thing_step3.png
+  - path: resources/readme/ftdiprints118.png
+  - path: resources/readme/image91c.png
+  - path: resources/readme/image216b.png
+  - path: resources/readme/image91b.png
+  - path: resources/readme/aws_iot_mqtt_host_url_2.png
+  - path: resources/readme/aws_thing_certificates_download.png
+  - path: resources/readme/image91ncp.png
+  - path: resources/readme/aws_create_policy.png
+  - path: resources/readme/image91soc.png
+  - path: resources/readme/aws_create_thing_step1.png
+  - path: resources/readme/aws_create_thing_step4.png
+  - path: resources/readme/image447.png
+  - path: resources/readme/image453.png
+  - path: resources/readme/aws_iot_mqtt_host_url_1.png
+  - path: resources/readme/image451.png
+  - path: resources/readme/aws_create_thing_step2.png
+  - path: resources/readme/image359.png
+  - path: resources/readme/image91a.png
+  - path: resources/readme/image91e.png
+  - path: resources/readme/image216c.png
+  - path: resources/readme/aws_create_thing_policy_create.png
+  - path: resources/readme/image448.png
+  - path: resources/readme/aws_create_thing_step5.png
+  - path: resources/readme/ouputprints119.png
+  - path: resources/readme/buildsuccesssoc116.png
+  - path: resources/readme/debugmodencp120.png
+  - path: resources/readme/image443.png
+  - path: resources/readme/image91d.png
+  - path: resources/readme/socboarddetection111.png
+  - path: resources/readme/image444.png
+  - path: resources/readme/image446.png
+  - path: resources/readme/image96.png
+  - path: resources/readme/image91.png
+  - path: resources/readme/image92.png
+  - path: resources/readme/image450.png
+  - path: resources/readme/image431a.png
+  - path: resources/readme/image94.png
+  - path: resources/readme/aws_create_thing_attach_policy.png
+  - path: resources/readme/image449.png
+  - path: resources/readme/aws_choosing_policy.png
+  - path: resources/readme/projctselection113.png
+  - path: resources/readme/image445.png
+  - path: resources/readme/image93.png
+ui_hints:
+  highlight:
+    - path: readme.md
+      focus: true

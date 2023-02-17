@@ -1,0 +1,39 @@
+# Silicon Labs Project Configuration Tools: slcp, v0, Component selection file.
+project_name: adc_static_mode
+label: SI91x - SoC ADC Static Mode
+description: |
+  Demonstrates how to use ADC in static mode.
+category: example|peripheral
+package: platform
+quality: alpha
+sdk: {id: gecko_sdk, version: 4.1.0}
+sdk_extension:
+  - id: wiseconnect
+    version: 1.0.0
+source:
+  - path: adc_static_mode.c
+toolchain_settings: []
+component:
+  - id: rsilib_userconfig
+    from: wiseconnect
+  - id: romdriver_egpio
+    from: wiseconnect
+  - id: rsilib_adc
+    from: wiseconnect
+  - id: rsilib_clock_update
+    from: wiseconnect
+define:
+  - name: __SYSTICK
+  - name: GAIN_OFFSET_CAL_EN
+  - name: RSI_M4_INTERFACE
+provides:
+  - name: si91x_soc
+other_file:
+  - path: resources\readme\image509a.png
+  - path: resources\readme\image509b.png
+  - path: resources\readme\image509c.png
+readme:
+  - path: readme.md
+ui_hints:
+  highlight: readme.md
+  focus: true

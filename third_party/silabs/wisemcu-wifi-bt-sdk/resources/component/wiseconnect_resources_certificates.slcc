@@ -1,0 +1,12 @@
+id: wiseconnect_resources_certificates
+package: wiseconnect
+description: >
+  WiSeConnect certificates component
+label: resources certificates
+category: resources|certificates
+quality: alpha
+provides:
+  - name: wiseconnect_resources_certificates
+
+include:
+  - path: resources/certificates

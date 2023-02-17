@@ -1,0 +1,72 @@
+project_name: enterprise_client
+package: wiseconnect
+quality: alpha
+label: Client with Enterprise Security
+category: Example|WiSeConnect
+description: >
+  Connects as a Wi-Fi client to an Access Point and RADIUS server using Enterprise Security
+filter:
+  - name: "Wireless Technology"
+    value: ["Wi-Fi"]
+  - name: "Device Type"
+    value: Undefined
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+xml_filter: Undefined
+sdk: {id: gecko_sdk, version: 4.1.0}
+sdk_extension:
+  - id: wiseconnect
+    version: 1.0.0
+source:
+  - path: rsi_eap_connectivity.c
+include:
+  - path: 
+    file_list:
+      - path: rsi_wlan_config.h
+requires:
+  - name: wiseconnect_platform
+  - name: wiseconnect_sapi_wlan
+  - name: wiseconnect_sapi_sockets
+  - name: wiseconnect_sapi_freertos
+  - name: wiseconnect_third_party_freertos
+  - name: wiseconnect_resources_certificates
+define:
+   - name: EXECUTION_FROM_RAM
+template_contribution:
+  - name: EXECUTION_FROM_RAM
+    value: 1
+toolchain_settings: []
+readme:
+  - path: readme.md
+other_file:
+  - path: resources/readme/creationfinal114.png
+  - path: resources/readme/debugmodesoc117.png
+  - path: resources/readme/buildingpjt115.png
+  - path: resources/readme/ncpboarddetection112.png
+  - path: resources/readme/ftdiprints118.png
+  - path: resources/readme/image135.png
+  - path: resources/readme/image137.png
+  - path: resources/readme/image216b.png
+  - path: resources/readme/image145.png
+  - path: resources/readme/image142.png
+  - path: resources/readme/image359.png
+  - path: resources/readme/image216c.png
+  - path: resources/readme/image146.png
+  - path: resources/readme/enterprisesoc.png
+  - path: resources/readme/image144.png
+  - path: resources/readme/image143a.png
+  - path: resources/readme/ouputprints119.png
+  - path: resources/readme/buildsuccesssoc116.png
+  - path: resources/readme/image139.png
+  - path: resources/readme/debugmodencp120.png
+  - path: resources/readme/socboarddetection111.png
+  - path: resources/readme/image136.png
+  - path: resources/readme/image140.png
+  - path: resources/readme/image141.png
+  - path: resources/readme/image138.png
+  - path: resources/readme/projctselection113.png
+  - path: resources/readme/enterprisencp.png
+ui_hints:
+  highlight:
+    - path: readme.md
+      focus: true

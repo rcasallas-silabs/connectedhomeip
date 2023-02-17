@@ -1,0 +1,27 @@
+id: si917_hal
+label: si917_hal
+package: wiseconnect
+description: si917_hal
+category: Platform|si91x|HAL
+quality: alpha
+root_path: . 
+source:
+  - path: platforms/si91x/hal/src/rsi_bootup_config.c
+  - path: platforms/si91x/hal/src/rsi_hal_mcu_m4.c
+  - path: platforms/si91x/hal/src/rsi_hal_mcu_platform_init.c
+  - path: platforms/si91x/hal/src/rsi_hal_mcu_timer.c
+  - path: platforms/si91x/hal/src/rsi_hal_mcu_m4_rom.c
+  - path: platforms/si91x/hal/src/rsi_hal_mcu_interrupt.c
+include:
+  - path: platforms/si91x/hal/inc
+    file_list:
+      - path: rs9116.h
+      - path: rsi_api.h
+      - path: rsi_m4.h
+      - path: rsi_reg_spi.h
+provides:
+  - name: si917_hal
+requires:
+  - name: rsilib_egpio
+  - name: rsilib_clock_update
+  - name: SI917

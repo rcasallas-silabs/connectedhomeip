@@ -1,0 +1,21 @@
+id: wiseconnect_third_party_amazon-freertos
+package: wiseconnect
+description: >
+  WiSeConnect amazon-freertos component
+label: third_party amazon-freertos
+category: third_party|amazon-freertos
+quality: alpha
+provides:
+  - name: wiseconnect_third_party_amazon-freertos
+source:
+  - path: third_party/amazon-freertos/FreeRTOS/event_groups.c
+  - path: third_party/amazon-freertos/FreeRTOS/list.c
+  - path: third_party/amazon-freertos/FreeRTOS/queue.c
+  - path: third_party/amazon-freertos/FreeRTOS/stream_buffer.c
+  - path: third_party/amazon-freertos/FreeRTOS/tasks.c
+  - path: third_party/amazon-freertos/FreeRTOS/timers.c
+  - path: third_party/amazon-freertos/FreeRTOS/portable/heap_4.c
+  - path: third_party/amazon-freertos/FreeRTOS/portable/port.c
+include:
+  - path: third_party/amazon-freertos/include
+  - path: third_party/amazon-freertos/FreeRTOS/portable

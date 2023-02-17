@@ -1,0 +1,26 @@
+id: wiseconnect
+label: WiSeConnect
+description: >
+  WiSeConnect Wi-Fi and BLE extension for the Gecko SDK
+
+version: "1.0.0"
+sdk:
+  id: gecko_sdk
+  version: "4.1.0"
+component_path:
+  - path: sapi/component
+  - path: resources/component
+  - path: third_party/component
+  - path: platforms/component
+  - path: platforms/si91x/boards/brd4325a/component
+  - path: platforms/si91x/core/chip/component
+  - path: platforms/si91x/core/cmsis/component
+  - path: platforms/si91x/core/config/component
+  - path: platforms/si91x/drivers/cmsis_driver/CMSIS/Driver/component
+  - path: platforms/si91x/drivers/cmsis_driver/component
+  - path: platforms/si91x/drivers/cmsis_driver/config/component
+  - path: platforms/si91x/drivers/peripheral_drivers/component
+  - path: platforms/si91x/drivers/rom_driver/component
+  - path: platforms/si91x/drivers/systemlevel/component
+  - path: platforms/si91x/hal/component
+  - path: platforms/si91x/toolchain/component

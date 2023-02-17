@@ -1,0 +1,67 @@
+project_name: ble_multiconnection_gatt_test
+package: wiseconnect
+quality: alpha
+label: BLE Multiple GATT Connections
+category: Example|WiSeConnect
+description: >
+  Demonstrates how to connect a central device with multiple peripherals and vice versa.
+filter:
+  - name: "Wireless Technology"
+    value: ["Bluetooth"]
+  - name: "Device Type"
+    value: Undefined
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+xml_filter: Undefined
+sdk: {id: gecko_sdk, version: 4.1.0}
+sdk_extension:
+  - id: wiseconnect
+    version: 1.0.0
+source:
+  - path: rsi_ble_device_info.c
+  - path: rsi_ble_main_task.c
+  - path: rsi_ble_subtasks.c
+  - path: main.c
+include:
+  - path: 
+    file_list:
+      - path: rsi_ble_device_info.h
+      - path: rsi_common_config.h
+      - path: rsi_ble_config.h
+requires:
+  - name: wiseconnect_platform
+  - name: wiseconnect_sapi_ble
+  - name: wiseconnect_sapi_bluetooth
+  - name: wiseconnect_sapi_freertos
+  - name: wiseconnect_third_party_freertos
+toolchain_settings: []
+readme:
+  - path: readme.md
+other_file:
+  - path: resources/readme/ncpboarddetection112.png
+  - path: resources/readme/ftdiprints118.png
+  - path: resources/readme/multi_gatt_master1.png
+  - path: resources/readme/image79b.png
+  - path: resources/readme/buildncp.png
+  - path: resources/readme/multigattslave2.png
+  - path: resources/readme/keil_with_out_os.png
+  - path: resources/readme/gatt_server.png
+  - path: resources/readme/device_advertising.png
+  - path: resources/readme/multigattslave1.png
+  - path: resources/readme/debugmodencp.png
+  - path: resources/readme/multi_gatt_slave1.png
+  - path: resources/readme/advertiser.png
+  - path: resources/readme/debugmodesoc.png
+  - path: resources/readme/image79blemulticonngatt.png
+  - path: resources/readme/socboarddetection111.png
+  - path: resources/readme/multi_gatt_master2.png
+  - path: resources/readme/multigattmaster2.png
+  - path: resources/readme/multi_gatt_slave2.png
+  - path: resources/readme/multigattmaster1.png
+  - path: resources/readme/image79blemulticonngattncp.png
+  - path: resources/readme/with_out_os1.png
+  - path: resources/readme/image1.png
+ui_hints:
+  highlight:
+    - path: readme.md
+      focus: true
