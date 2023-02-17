@@ -134,7 +134,7 @@ def buildOpenThreadExample(app, board, args)
             def buildRelease = true
             def releaseString = "\"chip_detail_logging=false chip_automation_logging=false chip_progress_logging=false is_debug=false disable_lcd=true chip_build_libshell=false enable_openthread_cli=false chip_openthread_ftd=true\""
 
-            def relPath = "silabs/efr32"      
+            def relPath = "silabs/efr32"
             dir(dirPath) {
                 withDockerContainer(image: "nexus.silabs.net/connectedhomeip/chip-build-efr32:0.5.64", args: "-u root")
                 {
@@ -211,6 +211,49 @@ def buildSilabsCustomOpenThreadExamples(app, board)
     }
 }
 
+def buildSilabsSensorApp(board)
+{
+    actionWithRetry {
+        node(buildFarmLargeLabel)
+        {
+            def workspaceTmpDir = createWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
+                                                            buildOverlayDir)
+            def dirPath = workspaceTmpDir + createWorkspaceOverlay.overlayMatterPath
+            def saveDir = 'matter/'
+            dir(dirPath) {
+                withDockerContainer(image: "nexus.silabs.net/connectedhomeip/chip-build-efr32:0.5.64", args: "-u root")
+                {
+                    // Custom Silabs build
+                    withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
+                    {
+                        try {
+                            sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/occupancy/OpenThread/ ${board} \"is_occupancy_sensor=true\""
+                            sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/temperature/OpenThread/ ${board} \"is_temperature_sensor=true\""
+                            sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/contact/OpenThread/ ${board} \"is_contact_sensor=true\""
+                            sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/occupancy-sed/OpenThread/ ${board} \"is_occupancy_sensor=true\" --sed"
+                            sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/temperature-sed/OpenThread/ ${board} \"is_temperature_sensor=true\" --sed"
+                            sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/contact-sed/OpenThread/ ${board} \"is_contact_sensor=true\" --sed"
+                        } catch (e) {
+                            deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
+                                                       workspaceTmpDir,
+                                                       saveDir,
+                                                       '-name no-files')
+                            throw e
+                        }
+                    }
+                }
+                stash name: 'CustomOpenThreadExamples', includes:  'out/**/*.s37 '
+
+
+            }
+            deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
+                                       workspaceTmpDir,
+                                       'matter/out/',
+                                       '-name "*.s37" -o -name "*.map"')
+        }
+    }
+}
+
 def buildWiFiExample(platform, app, board, wifiRadio, args, radioName, buildCustom)
 {
     actionWithRetry {
@@ -233,8 +276,8 @@ def buildWiFiExample(platform, app, board, wifiRadio, args, radioName, buildCust
                 exampleType = "examples"
                 relPath = "silabs/${platform}"
             }
-    
-            dir(dirPath) {                            
+
+            dir(dirPath) {
                 withDockerContainer(image: "nexus.silabs.net/connectedhomeip/chip-build-efr32:0.5.64", args: "-u root")
                 {
                     // CSA Examples build
@@ -344,7 +387,7 @@ def buildUnifyBridge()
                                 sh "../../../scripts/run_in_build_env.sh \"${pkg_config_export}; gn gen ${out_path} --args='target_cpu=\\\"arm64\\\"'\""
                                 sh "../../../scripts/run_in_build_env.sh \"${pkg_config_export}; ninja -C ${out_path}\""
                             }
-                            
+
                             // Compile chip-tool for Debian bullseye
                             dir ("examples/chip-tool")
                             {
@@ -354,7 +397,7 @@ def buildUnifyBridge()
                             }
                         }
                     }
-                    unify_bridge_docker_amd64.inside("-u root -v${unifyCheckoutDir}:/unify") 
+                    unify_bridge_docker_amd64.inside("-u root -v${unifyCheckoutDir}:/unify")
                     {
                         withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
                         {
@@ -545,10 +588,10 @@ def openThreadTestSuite(deviceGroup,name,board)
                                 echo "unstash folder: "+stashFolder
                                 unstash stashFolder
                                 unstash 'ChipTool'
-                    
+
                                 chiptoolPath = sh(script: "find " + pwd() + " -name 'chip-tool' -print",returnStdout: true).trim()
                                 echo chiptoolPath
-  
+
                             }
 
 
@@ -621,7 +664,7 @@ def utfThreadTestSuite(nomadNode,deviceGroup,testBedName,appName,matterType,boar
                             sh ''' git clean -ffdx
                                 git submodule foreach --recursive -q git reset --hard -q
                                 git submodule foreach --recursive -q git clean -ffdx -q '''
- 
+
                             dir('matter')
                             {
                                     sh 'pwd '
@@ -629,7 +672,7 @@ def utfThreadTestSuite(nomadNode,deviceGroup,testBedName,appName,matterType,boar
                                     echo "unstash folder: "+stashFolder
                                     unstash stashFolder
                                     unstash 'ChipTool'
-                                   
+
                                     chiptoolPath = sh(script: "find " + pwd() + " -name 'chip-tool' -print",returnStdout: true).trim()
                                     echo chiptoolPath
                                     sh "cp out/CSA/${appName}/OpenThread/standard/${board}/*.s37 ../manifest"
@@ -715,14 +758,14 @@ def utfWiFiTestSuite(nomadNode,deviceGroup,testBedName,appName,matterType,board,
                                 git submodule foreach --recursive -q git reset --hard -q
                                 git submodule foreach --recursive -q git clean -ffdx -q '''
 
-                        
+
 
                             dir('matter')
                             {
                                 stashFolder = 'WiFiExamples-'+appName+'-'+board+'-'+wifi_module
                                 unstash stashFolder
                                 unstash 'ChipTool'
-                           
+
                                 chiptoolPath = sh(script: "find " + pwd() + " -name 'chip-tool' -print",returnStdout: true).trim()
                                 echo chiptoolPath
 
@@ -767,7 +810,7 @@ def utfWiFiTestSuite(nomadNode,deviceGroup,testBedName,appName,matterType,board,
                                                message: "[ERROR] One or more tests have failed",
                                                stageResult: 'UNSTABLE')
                                     {
-                                
+
                                         sh """
                                             echo ${TESTBED_NAME}
                                             ./workspace_setup.sh
@@ -798,11 +841,11 @@ def pushToNexusAndUbai()
                 try{
                     def image = "nexus.silabs.net/gsdk_nomad_containers/gsdk_ubai:latest"
                     sh "docker pull ${image}"
-                    withDockerContainer(image: image) 
+                    withDockerContainer(image: image)
                     {
                         withCredentials([usernamePassword(credentialsId: 'svc_gsdk', passwordVariable: 'SL_PASSWORD', usernameVariable: 'SL_USERNAME')])
                         {
-                            
+
                                 sh '''
                                     set -o pipefail
                                     set -x
@@ -826,7 +869,7 @@ def pushToNexusAndUbai()
                                     echo 'UBAI uploading ......'
                                     ubai_upload_cli --client-id jenkins-gsdk-pipelines-Matter --file-path build-binaries.zip  --metadata app_name matter \
                                             --metadata branch ${JOB_BASE_NAME} --metadata build_number ${BUILD_NUMBER} --metadata stack matter --metadata target matter  --username ${SL_USERNAME} --password ${SL_PASSWORD}
-                                    
+
                                     if [ $? -eq 0 ]; then
                                         echo 'uploaded to UBAI successfully....... '
                                     else
@@ -864,10 +907,10 @@ def triggerSqaSmokeAndRegressionTest(buildTool)
                         message: "[ERROR] SQA smoke trigger branch doesn't exist",
                         stageResult: 'SUCCESS')
             {
-               
-                ws(workspaceTmpDir+createWorkspaceOverlay.overlaySqaPipelinesPath) 
-                { 
-                        sh 'pwd && ls -al'  
+
+                ws(workspaceTmpDir+createWorkspaceOverlay.overlaySqaPipelinesPath)
+                {
+                        sh 'pwd && ls -al'
                             if(sqaFunctions.isProductionJenkinsServer())
                             {
                                 echo 'in product jenkin.... '
@@ -902,7 +945,7 @@ def pipeline()
         // Build Unify Matter Bridge
         //---------------------------------------------------------------------
         parallelNodesBuild["Unify Matter Bridge"] = {this.buildUnifyBridge()}
-        
+
         //---------------------------------------------------------------------
         // Build OpenThread Examples
         //---------------------------------------------------------------------
@@ -914,7 +957,7 @@ def pipeline()
             openThreadBoards = ["BRD4161A", "BRD4162A", "BRD4163A", "BRD4164A", "BRD4166A", "BRD4186C", "BRD4187C", "BRD2703A", "BRD2601B", "BRD4316A", "BRD4317A", "BRD4319A"]
         } else {
             openThreadBoards = ["BRD4161A", "BRD4166A", "BRD4187C", "BRD2703A","BRD4316A", "BRD4319A" ]
-          
+
         }
         def openThreadApps = ["lighting-app", "lock-app", "thermostat", "light-switch-app", "window-app"]
 
@@ -956,7 +999,7 @@ def pipeline()
         // NCP Builds
         wifiNCPApps.each { appName ->
             wifiNCPBoards.each { board ->
-                wifiNCPRadios.each { rcp ->                  
+                wifiNCPRadios.each { rcp ->
                     // Platform = efr32 for all NCP mode combos
                     def platform = "efr32"
 
@@ -1028,7 +1071,7 @@ def pipeline()
         //---------------------------------------------------------------------
         def boardsForCustomOpenThread = [:]
         def boardsForCustomWifi = [:]
-        def silabsCustomExamplesOpenThread = ["onoff-plug-app", "occupancy-sensor", "sl-newLight", "template", "lighting-lite-app"]
+        def silabsCustomExamplesOpenThread = ["onoff-plug-app", "sl-newLight", "template", "lighting-lite-app"]
         def silabsCustomExamplesWifi = ["onoff-plug-app"]
 
         def customWifiRCP = ["rs9116", "SiWx917" ,"wf200"]
@@ -1050,6 +1093,12 @@ def pipeline()
                 parallelNodesBuild["Custom OpenThread " + example + " " + board] = { this.buildSilabsCustomOpenThreadExamples(example, board)   }
             }
         }
+
+        // Build OpenThread Silabs Sensor App
+        boardsForCustomOpenThread.each    { board ->
+                parallelNodesBuild["Silabs Sensor " + board] = { this.buildSilabsSensorApp(board)   }
+        }
+
 
         // Wifi custom examples
         silabsCustomExamplesWifi.each { example ->
