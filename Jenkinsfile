@@ -984,9 +984,9 @@ def pipeline()
         // Build only for release candidate branch
         if (env.BRANCH_NAME.startsWith('RC_')) {
             wifiNCPBoards = [ "BRD4161A", "BRD4163A", "BRD4164A", "BRD4170A", "BRD4186C", "BRD4187C" ]
-            wifiSOCBoards = [ "BRD4325A" ]
+            wifiSOCBoards = [ "BRD4325B" ]
         } else {
-            wifiNCPBoards = [ "BRD4186C", "BRD4187C" ]
+            wifiNCPBoards = [ "BRD4161A", "BRD4187C" ]
             wifiSOCBoards = [ "BRD4325B" ]
         }
 
@@ -1003,19 +1003,20 @@ def pipeline()
                     // Platform = efr32 for all NCP mode combos
                     def platform = "efr32"
 
-                    // MG24 + SiWx917: name the example as "xxx_wifi_siwx917"
+                    // MG24 + SiWx917: name the example as "xxx_wifi_91x"
                     // MG24 + 9116: name the example as "xxx_wifi_rs9116"
                     // MG12 + 9116: name the example as "xxx_wifi_rs9116" so that it only applies to RS9116 (we don't support MG12 + SiWx917)
                     // MGxx + WF00: name the example as "xxx_wifi_wf200"
                     def radioName = "${rcp}"  // MGxx + WF200
                     if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "SiWx917") { // MG24 + SiWx917
-                        radioName = "mg24_siwx917"
+                        radioName = "91x"
                     } else if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "rs9116") { // MG24 + rs9116
-                        radioName = "mg24_rs9116"
+                        radioName = "rs9116"
                     } else if ((board == "BRD4161A" || board == "BRD4163A" || board == "BRD4164A" || board == "BRD4170A") && rcp == "rs9116") { // MG12 + rs9116
-                        radioName = "mg12_rs9116"
+                        radioName = "rs9116"
+                    } else if ((board == "BRD4161A" || board == "BRD4163A" || board == "BRD4164A" || board == "BRD4170A") && rcp == "SiWx917") { // MG12 + SiWx917 is not supported
+                        return
                     }
-
                     // MG12 + WF200: set is_debug=false and chip_logging=false, otherwise it does not fit (not a problem for MG24 + WF200, also MG24 + WF200 init fails with is_debug=false)
                     // MG24 + RS9116/SiWx917: disable LCD and ext flash due to common SPI pin multiplexing issue
                     // MG24 + WF200: disable libshell due to VCOM pin multiplexing issue
@@ -1080,10 +1081,10 @@ def pipeline()
         if (env.BRANCH_NAME.startsWith('RC_')) {
             boardsForCustomOpenThread = ["BRD4161A", "BRD4186C", "BRD4187C", "BRD4166A"]
             boardsForCustomWifi       = ["BRD4161A", "BRD4163A", "BRD4164A", "BRD4170A", "BRD4186C", "BRD4187C"]
-
+            boardsForCustomWifiSoC    = ["BRD4325B"]
         } else {
              boardsForCustomOpenThread = ["BRD4161A", "BRD4186C", "BRD4166A"]
-             boardsForCustomWifi       = ["BRD4186C", "BRD4187C"]
+             boardsForCustomWifi       = ["BRD4161A", "BRD4187C"]
              boardsForCustomWifiSoC    = ["BRD4325B"]
         }
 
@@ -1110,11 +1111,13 @@ def pipeline()
 
                     def radioName = "${rcp}"  // MGxx + WF200
                     if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "SiWx917") { // MG24 + SiWx917
-                        radioName = "mg24_siwx917"
+                        radioName = "91x"
                     } else if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "rs9116") { // MG24 + rs9116
-                        radioName = "mg24_rs9116"
+                        radioName = "rs9116"
                     } else if ((board == "BRD4161A" || board == "BRD4163A" || board == "BRD4164A" || board == "BRD4170A") && rcp == "rs9116") { // MG12 + 9116
-                        radioName = "mg12_rs9116"
+                        radioName = "rs9116"
+                    } else if ((board == "BRD4161A" || board == "BRD4163A" || board == "BRD4164A" || board == "BRD4170A") && rcp == "SiWx917") { // MG12 + SiWx917 is not supported
+                        return
                     }
 
 					def args = ""
