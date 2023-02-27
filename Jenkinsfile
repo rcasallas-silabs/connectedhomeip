@@ -11,6 +11,7 @@ chiptoolPath = ''
 bootloaderPath = ''
 buildFarmLabel = 'Build-Farm'
 buildFarmLargeLabel = 'Build-Farm-Large'
+chipBuildEfr32Image = "artifactory.silabs.net/gsdk-dockerhub-proxy/connectedhomeip/chip-build-efr32:0.5.64"
 
 secrets = [[path: 'teams/gecko-sdk/app/svc_gsdk', engineVersion: 2,
             secretValues: [[envVar: 'SL_PASSWORD', vaultKey: 'password'],
@@ -135,8 +136,12 @@ def buildOpenThreadExample(app, board, args)
             def releaseString = "\"chip_detail_logging=false chip_automation_logging=false chip_progress_logging=false is_debug=false disable_lcd=true chip_build_libshell=false enable_openthread_cli=false chip_openthread_ftd=true\""
 
             def relPath = "silabs/efr32"
+
+            withDockerRegistry([url: "https://artifactory.silabs.net ", credentialsId: 'svc_gsdk']){
+                sh "docker pull $chipBuildEfr32Image"
+            }
             dir(dirPath) {
-                withDockerContainer(image: "nexus.silabs.net/connectedhomeip/chip-build-efr32:0.5.64", args: "-u root")
+                withDockerContainer(image: chipBuildEfr32Image, args: "-u root")
                 {
                     // CSA Examples build
                     withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
@@ -182,8 +187,13 @@ def buildSilabsCustomOpenThreadExamples(app, board)
                                                             buildOverlayDir)
             def dirPath = workspaceTmpDir + createWorkspaceOverlay.overlayMatterPath
             def saveDir = 'matter/'
+
+            withDockerRegistry([url: "https://artifactory.silabs.net ", credentialsId: 'svc_gsdk']){
+                sh "docker pull $chipBuildEfr32Image"
+            }
+
             dir(dirPath) {
-                withDockerContainer(image: "nexus.silabs.net/connectedhomeip/chip-build-efr32:0.5.64", args: "-u root")
+                withDockerContainer(image: chipBuildEfr32Image, args: "-u root")
                 {
                     // Custom Silabs build
                     withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
@@ -220,8 +230,13 @@ def buildSilabsSensorApp(board)
                                                             buildOverlayDir)
             def dirPath = workspaceTmpDir + createWorkspaceOverlay.overlayMatterPath
             def saveDir = 'matter/'
+
+            withDockerRegistry([url: "https://artifactory.silabs.net ", credentialsId: 'svc_gsdk']){
+                    sh "docker pull $chipBuildEfr32Image"
+                }
+
             dir(dirPath) {
-                withDockerContainer(image: "nexus.silabs.net/connectedhomeip/chip-build-efr32:0.5.64", args: "-u root")
+                withDockerContainer(image: chipBuildEfr32Image, args: "-u root")
                 {
                     // Custom Silabs build
                     withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
@@ -277,8 +292,12 @@ def buildWiFiExample(platform, app, board, wifiRadio, args, radioName, buildCust
                 relPath = "silabs/${platform}"
             }
 
+            withDockerRegistry([url: "https://artifactory.silabs.net ", credentialsId: 'svc_gsdk']){
+                    sh "docker pull $chipBuildEfr32Image"
+            }
+
             dir(dirPath) {
-                withDockerContainer(image: "nexus.silabs.net/connectedhomeip/chip-build-efr32:0.5.64", args: "-u root")
+                withDockerContainer(image: chipBuildEfr32Image, args: "-u root")
                 {
                     // CSA Examples build
                     withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
@@ -315,8 +334,14 @@ def buildChipToolAndOTAProvider()
                                                             buildOverlayDir)
             def dirPath = workspaceTmpDir + createWorkspaceOverlay.overlayMatterPath
             def saveDir = 'matter/'
+            def chipToolImage = "artifactory.silabs.net/gsdk-docker-production/connectedhomeip/chip-build-crosscompile:22"
+
+            withDockerRegistry([url: "https://artifactory.silabs.net ", credentialsId: 'svc_gsdk']){
+                sh "docker pull $chipToolImage"
+            }
+
             dir(dirPath) {
-                withDockerContainer(image: "nexus.silabs.net/connectedhomeip/chip-build-crosscompile:22",args: "-u root")
+                withDockerContainer(image: chipToolImage, args: "-u root")
                 {
                   	withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
                     {
@@ -361,8 +386,9 @@ def buildUnifyBridge()
             def unifyCheckoutDir = workspaceTmpDir + "/overlay/unify"
             def saveDir = 'matter/out/'
             try {
-                def unify_bridge_docker = docker.image('nexus.silabs.net/unify-cache/unify-matter:1.1.1-arm64')
-                def unify_bridge_docker_amd64 = docker.image('nexus.silabs.net/unify-cache/unify-matter:1.1.1-amd64')
+             
+                def unify_bridge_docker = docker.image('artifactory.silabs.net/gsdk-docker-production/unify-cache/unify-matter:1.1.1-arm64')
+                def unify_bridge_docker_amd64 = docker.image('artifactory.silabs.net/gsdk-docker-production/unify-cache/unify-matter:1.1.1-amd64')
                 dir(dirPath)
                 {
                     unify_bridge_docker.inside("-u root -v${unifyCheckoutDir}:/unify")
@@ -445,8 +471,12 @@ def exportIoTReports()
                                                             buildOverlayDir)
             def dirPath = workspaceTmpDir + createWorkspaceOverlay.overlayMatterPath
             def saveDir = 'matter/'
+            withDockerRegistry([url: "https://artifactory.silabs.net ", credentialsId: 'svc_gsdk']){
+                sh "docker pull $chipBuildEfr32Image"
+            }
+
             dir(dirPath) {
-                withDockerContainer(image: "nexus.silabs.net/connectedhomeip/chip-build-efr32:0.5.64", args: "-u root")
+                withDockerContainer(image: chipBuildEfr32Image, args: "-u root")
                 {
                     try {
                         // sh 'apt-get install python3-venv'
@@ -827,7 +857,7 @@ def utfWiFiTestSuite(nomadNode,deviceGroup,testBedName,appName,matterType,board,
     }
 }
 
-def pushToNexusAndUbai()
+def pushToArtifactoryAndUbai()
 {
     actionWithRetry {
         node(buildFarmLabel)
@@ -837,10 +867,20 @@ def pushToNexusAndUbai()
             def dirPath = workspaceTmpDir + createWorkspaceOverlay.overlayMatterPath
             def saveDir = 'matter/'
 
+            def image = "artifactory.silabs.net/gsdk-docker-production/gsdk_nomad_containers/gsdk_ubai:latest"
+            withDockerRegistry([url: "https://artifactory.silabs.net ", credentialsId: 'svc_gsdk']){
+                sh "docker pull $image"
+            }
+
             dir(dirPath) {
                 try{
-                    def image = "nexus.silabs.net/gsdk_nomad_containers/gsdk_ubai:latest"
-                    sh "docker pull ${image}"
+                    //for RC_ branch, artifacts need push staging repos, otherwise push to development repos
+                    def reposName = 'gsdk-generic-development'
+                    if (env.BRANCH_NAME.startsWith('RC_')){
+                        reposName = 'gsdk-generic-staging'
+                    }      
+                    echo reposName
+
                     withDockerContainer(image: image)
                     {
                         withCredentials([usernamePassword(credentialsId: 'svc_gsdk', passwordVariable: 'SL_PASSWORD', usernameVariable: 'SL_USERNAME')])
@@ -856,7 +896,7 @@ def pushToNexusAndUbai()
                                     ls -al
 
                                     status_code=$(curl -s  -w "%{http_code}" --upload-file "$file" \
-                                                    -X PUT "https://nexus.silabs.net/repository/matter/${JOB_BASE_NAME}/${BUILD_NUMBER}/$file"\
+                                                    -X PUT "https://artifactory.silabs.net/artifactory/'''+reposName+'''/matter/${JOB_BASE_NAME}/${BUILD_NUMBER}/$file"\
                                                     -u $SL_USERNAME:$SL_PASSWORD -H 'Content-Type: application/octet-stream'
                                                     )
                                             if [[ "$status_code" -ne 201 ]] ; then
@@ -1042,7 +1082,6 @@ def pipeline()
                     {
                         args = "chip_build_libshell=false"
                     }
-
                     parallelNodesBuild["WiFi " + appName + " " + board + " " + rcp]      = { this.buildWiFiExample(platform, appName, board, rcp, args, radioName, false)   }
                 }
             }
@@ -1061,7 +1100,6 @@ def pipeline()
 
                     // No additional arguments for building with BLE commissioning for SiWx917 SoC
                     def args = ""
-
                     parallelNodesBuild["WiFi " + appName + " " + board + " " + rcp]      = { this.buildWiFiExample(platform, appName, board, rcp, args, radioName, false)   }
                 }
             }
@@ -1134,7 +1172,6 @@ def pipeline()
                     {
                         args = "chip_build_libshell=false"
                     }
-
                     parallelNodesBuild["Custom Wifi " + example + " " + board + " " + rcp]       = { this.buildWiFiExample(platform, example, board, rcp, args, radioName, true)   }
                 }
             }
@@ -1153,7 +1190,6 @@ def pipeline()
 
                     // No additional arguments for building with BLE commissioning for SiWx917 SoC
                     def args = ""
-
                     parallelNodesBuild["WiFi " + appName + " " + board + " " + rcp]      = { this.buildWiFiExample(platform, appName, board, rcp, args, radioName, true)   }
                 }
             }
@@ -1176,11 +1212,12 @@ def pipeline()
         }
     }
 
-    stage("Push to Nexus and UBAI")
+    stage("Push to Artifactory and UBAI")
     {
         advanceStageMarker()
-        pushToNexusAndUbai()
+        pushToArtifactoryAndUbai()
     }
+
      stage('SQA')
     {
       // advanceStageMarker()
@@ -1192,7 +1229,6 @@ def pipeline()
         //                                                                         "/manifest-2703-thread",
         //                                                                         "--tmconfig tests/.sequence_manager/test_execution_definitions/matter_thread_ci_sequence.yaml") }
         parallelNodes['lighting Thread BRD4161A']   = { this.utfThreadTestSuite('gsdkMontrealNode','utf_matter_thread_4','matter_thread_4','lighting-app','thread','BRD4161A','',"/manifest-4161-thread","--tmconfig tests/.sequence_manager/test_execution_definitions/matter_thread_ci_sequence.yaml") }
-
         parallelNodes['lighting rs9116 BRD4161A']   = { this.utfWiFiTestSuite('gsdkMontrealNode','utf_matter_ci','INT0014944','lighting-app','wifi','BRD4161A','rs9116','',"/manifest","--tmconfig tests/.sequence_manager/test_execution_definitions/matter_wifi_ci_sequence.yaml") }
         parallelNodes['lighting 917-exp BRD4187C']   = { this.utfWiFiTestSuite('gsdkMontrealNode','utf_matter_wifi','matter_wifi','lighting-app','wifi','BRD4187C','91x','',"/manifest-4187-917","--tmconfig tests/.sequence_manager/test_execution_definitions/matter_wifi_ci_sequence.yaml") }
         parallelNodes.failFast = false
