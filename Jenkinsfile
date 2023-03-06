@@ -123,7 +123,7 @@ def runInWorkspace(Map args, Closure cl)
     }
 }
 
-def buildOpenThreadExample(app, board, args)
+def buildOpenThreadExample(app)
 {
     actionWithRetry {
         node(buildFarmLargeLabel)
@@ -133,27 +133,44 @@ def buildOpenThreadExample(app, board, args)
             def dirPath = workspaceTmpDir + createWorkspaceOverlay.overlayMatterPath
             def saveDir = 'matter/'
             def buildRelease = true
-            def releaseString = "\"chip_detail_logging=false chip_automation_logging=false chip_progress_logging=false is_debug=false disable_lcd=true chip_build_libshell=false enable_openthread_cli=false chip_openthread_ftd=true\""
+            def openThreadBoards = [:]
+            def sleepyBoard = ["BRD4161A", "BRD4186C"]
 
             def relPath = "silabs/efr32"
 
             withDockerRegistry([url: "https://artifactory.silabs.net ", credentialsId: 'svc_gsdk']){
                 sh "docker pull $chipBuildEfr32Image"
             }
+            // Build only for release candidate branch
+            if (env.BRANCH_NAME.startsWith('RC_')) {
+                openThreadBoards = ["BRD4161A", "BRD4162A", "BRD4163A", "BRD4164A", "BRD4166A", "BRD4186C", "BRD4187C", "BRD2703A", "BRD2601B", "BRD4316A", "BRD4317A", "BRD4319A"]
+            } else {
+                openThreadBoards = ["BRD4161A", "BRD4166A", "BRD4187C", "BRD2703A","BRD4316A", "BRD4319A" ]
+
+            }
+
             dir(dirPath) {
                 withDockerContainer(image: chipBuildEfr32Image, args: "-u root")
                 {
                     // CSA Examples build
                     withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
                     {
-                        try {
-                            sh "./scripts/examples/gn_efr32_example.sh ./examples/${app}/${relPath} ./out/CSA/${app}/OpenThread/standard ${board}"
 
-                            if(buildRelease) {
-                                sh "./scripts/examples/gn_efr32_example.sh ./examples/${app}/${relPath} ./out/CSA/${app}/OpenThread/release ${board} ${releaseString}"
-                            }
-                            if(args) {
-                                sh "./scripts/examples/gn_efr32_example.sh ./examples/${app}/${relPath} ./out/CSA/${app}/OpenThread/sleepy ${board} ${args}"
+
+                        try {
+                            openThreadBoards.each { board ->
+                                def arguments = ""
+                                    if (sleepyBoard.contains(board)) {
+                                        arguments = "--sed"
+                                    }
+                                sh "./scripts/examples/gn_efr32_example.sh ./examples/${app}/${relPath} ./out/CSA/${app}/OpenThread/standard ${board}"
+
+                                if(buildRelease) {
+                                    sh "./scripts/examples/gn_efr32_example.sh ./examples/${app}/${relPath} ./out/CSA/${app}/OpenThread/release ${board} --release"
+                                }
+                                if(args) {
+                                    sh "./scripts/examples/gn_efr32_example.sh ./examples/${app}/${relPath} ./out/CSA/${app}/OpenThread/sleepy ${board} ${arguments}"
+                                }
                             }
                         } catch (e) {
                             deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
@@ -165,7 +182,9 @@ def buildOpenThreadExample(app, board, args)
                     }
                 }
 
-                stash name: 'OpenThreadExamples-'+app+'-'+board, includes: 'out/CSA/*/OpenThread/**/*.s37 '
+                openThreadBoards.each { board ->
+                    stash name: 'OpenThreadExamples-'+app+'-'+board, includes: 'out/CSA/*/OpenThread/**/*.s37 '
+                }
 
             }
             deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
@@ -178,7 +197,7 @@ def buildOpenThreadExample(app, board, args)
 
 
 
-def buildSilabsCustomOpenThreadExamples(app, board)
+def buildSilabsCustomOpenThreadExamples(app)
 {
     actionWithRetry {
         node(buildFarmLargeLabel)
@@ -191,6 +210,16 @@ def buildSilabsCustomOpenThreadExamples(app, board)
             withDockerRegistry([url: "https://artifactory.silabs.net ", credentialsId: 'svc_gsdk']){
                 sh "docker pull $chipBuildEfr32Image"
             }
+
+            def boardsForCustomOpenThread = [:]
+
+            if (env.BRANCH_NAME.startsWith('RC_')) {
+                boardsForCustomOpenThread = ["BRD4161A", "BRD4186C", "BRD4187C", "BRD4166A"]
+            } else {
+                boardsForCustomOpenThread = ["BRD4161A", "BRD4186C", "BRD4166A"]
+            }
+
+
 
             dir(dirPath) {
                 withDockerContainer(image: chipBuildEfr32Image, args: "-u root")
@@ -199,7 +228,9 @@ def buildSilabsCustomOpenThreadExamples(app, board)
                     withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
                     {
                         try {
-                            sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/${app}/efr32 ./out/silabs/${app}/OpenThread/ ${board}"
+                            boardsForCustomOpenThread.each { board ->
+                                sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/${app}/efr32 ./out/silabs/${app}/OpenThread/ ${board}"
+                            }
                         } catch (e) {
                             deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
                                                        workspaceTmpDir,
@@ -209,7 +240,9 @@ def buildSilabsCustomOpenThreadExamples(app, board)
                         }
                     }
                 }
+
                 stash name: 'CustomOpenThreadExamples', includes:  'out/**/*.s37 '
+
 
 
             }
@@ -221,7 +254,7 @@ def buildSilabsCustomOpenThreadExamples(app, board)
     }
 }
 
-def buildSilabsSensorApp(board)
+def buildSilabsSensorApp()
 {
     actionWithRetry {
         node(buildFarmLargeLabel)
@@ -230,6 +263,14 @@ def buildSilabsSensorApp(board)
                                                             buildOverlayDir)
             def dirPath = workspaceTmpDir + createWorkspaceOverlay.overlayMatterPath
             def saveDir = 'matter/'
+
+            def boardsForCustomOpenThread = [:]
+
+            if (env.BRANCH_NAME.startsWith('RC_')) {
+                boardsForCustomOpenThread = ["BRD4161A", "BRD4186C", "BRD4187C", "BRD4166A"]
+            } else {
+                boardsForCustomOpenThread = ["BRD4161A", "BRD4186C", "BRD4166A"]
+            }
 
             withDockerRegistry([url: "https://artifactory.silabs.net ", credentialsId: 'svc_gsdk']){
                     sh "docker pull $chipBuildEfr32Image"
@@ -242,12 +283,14 @@ def buildSilabsSensorApp(board)
                     withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
                     {
                         try {
-                            sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/occupancy/OpenThread/ ${board} \"is_occupancy_sensor=true\""
-                            sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/temperature/OpenThread/ ${board} \"is_temperature_sensor=true\""
-                            sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/contact/OpenThread/ ${board} \"is_contact_sensor=true\""
-                            sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/occupancy-sed/OpenThread/ ${board} \"is_occupancy_sensor=true\" --sed"
-                            sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/temperature-sed/OpenThread/ ${board} \"is_temperature_sensor=true\" --sed"
-                            sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/contact-sed/OpenThread/ ${board} \"is_contact_sensor=true\" --sed"
+                            boardsForCustomOpenThread.each { board ->
+                                sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/occupancy/OpenThread/ ${board} \"is_occupancy_sensor=true\""
+                                sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/temperature/OpenThread/ ${board} \"is_temperature_sensor=true\""
+                                sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/contact/OpenThread/ ${board} \"is_contact_sensor=true\""
+                                sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/occupancy-sed/OpenThread/ ${board} \"is_occupancy_sensor=true\" --sed"
+                                sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/temperature-sed/OpenThread/ ${board} \"is_temperature_sensor=true\" --sed"
+                                sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/contact-sed/OpenThread/ ${board} \"is_contact_sensor=true\" --sed"
+                            }
                         } catch (e) {
                             deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
                                                        workspaceTmpDir,
@@ -304,6 +347,7 @@ def buildWiFiExample(platform, app, board, wifiRadio, args, radioName, buildCust
                     {
                         try {
                           sh "./scripts/examples/gn_efr32_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName} ${board} ${args} --wifi ${wifiRadio}"
+                          sh "./scripts/examples/gn_efr32_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName}/release ${board} ${args} --release --wifi ${wifiRadio}"
                         } catch (e) {
                             deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
                                                        workspaceTmpDir,
@@ -386,7 +430,7 @@ def buildUnifyBridge()
             def unifyCheckoutDir = workspaceTmpDir + "/overlay/unify"
             def saveDir = 'matter/out/'
             try {
-             
+
                 def unify_bridge_docker = docker.image('artifactory.silabs.net/gsdk-docker-production/unify-cache/unify-matter:1.1.1-arm64')
                 def unify_bridge_docker_amd64 = docker.image('artifactory.silabs.net/gsdk-docker-production/unify-cache/unify-matter:1.1.1-amd64')
                 dir(dirPath)
@@ -878,7 +922,7 @@ def pushToArtifactoryAndUbai()
                     def reposName = 'gsdk-generic-development'
                     if (env.BRANCH_NAME.startsWith('RC_')){
                         reposName = 'gsdk-generic-staging'
-                    }      
+                    }
                     echo reposName
 
                     withDockerContainer(image: image)
@@ -990,29 +1034,10 @@ def pipeline()
         // Build OpenThread Examples
         //---------------------------------------------------------------------
         // build library dependencies
-        def openThreadBoards = [:]
-
-        // Build only for release candidate branch
-        if (env.BRANCH_NAME.startsWith('RC_')) {
-            openThreadBoards = ["BRD4161A", "BRD4162A", "BRD4163A", "BRD4164A", "BRD4166A", "BRD4186C", "BRD4187C", "BRD2703A", "BRD2601B", "BRD4316A", "BRD4317A", "BRD4319A"]
-        } else {
-            openThreadBoards = ["BRD4161A", "BRD4166A", "BRD4187C", "BRD2703A","BRD4316A", "BRD4319A" ]
-
-        }
         def openThreadApps = ["lighting-app", "lock-app", "thermostat", "light-switch-app", "window-app"]
 
-        def sleepyBoard = ["BRD4161A", "BRD4186C"]
-
         openThreadApps.each { appName ->
-            openThreadBoards.each { board ->
-                def arguments = ""
-                if (sleepyBoard.contains(board)) {
-                    arguments = "--sed"
-                }
-
-                parallelNodesBuild["OpenThread " + appName + " " + board + " " + arguments]      = { this.buildOpenThreadExample(appName, board, arguments)   }
-
-            }
+            parallelNodesBuild["OpenThread " + appName]      = { this.buildOpenThreadExample(appName)   }
         }
 
         //---------------------------------------------------------------------
@@ -1073,9 +1098,9 @@ def pipeline()
                         {
                             args = "is_debug=false"
                         }
-                    } 
+                    }
                     else if ((board == "BRD4186C" || board == "BRD4187C") && (rcp == "SiWx917" || rcp == "rs9116"))  // MG24 + SiWx917/RS9116
-                    {    
+                    {
                         args = "disable_lcd=true use_external_flash=false chip_enable_ble_rs911x=true"
                     }
                     else if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "wf200")   // MG24 + WF200
@@ -1108,8 +1133,6 @@ def pipeline()
         //---------------------------------------------------------------------
         // Build Custom examples
         //---------------------------------------------------------------------
-        def boardsForCustomOpenThread = [:]
-        def boardsForCustomWifi = [:]
         def silabsCustomExamplesOpenThread = ["onoff-plug-app", "sl-newLight", "template", "lighting-lite-app"]
         def silabsCustomExamplesWifi = ["onoff-plug-app"]
 
@@ -1117,26 +1140,21 @@ def pipeline()
         def customWifiSoC = ["SiWx917"]
 
         if (env.BRANCH_NAME.startsWith('RC_')) {
-            boardsForCustomOpenThread = ["BRD4161A", "BRD4186C", "BRD4187C", "BRD4166A"]
             boardsForCustomWifi       = ["BRD4161A", "BRD4163A", "BRD4164A", "BRD4170A", "BRD4186C", "BRD4187C"]
             boardsForCustomWifiSoC    = ["BRD4325B"]
         } else {
-             boardsForCustomOpenThread = ["BRD4161A", "BRD4186C", "BRD4166A"]
              boardsForCustomWifi       = ["BRD4161A", "BRD4187C"]
              boardsForCustomWifiSoC    = ["BRD4325B"]
         }
 
         // Openthread custom examples
         silabsCustomExamplesOpenThread.each { example ->
-            boardsForCustomOpenThread.each    { board ->
-                parallelNodesBuild["Custom OpenThread " + example + " " + board] = { this.buildSilabsCustomOpenThreadExamples(example, board)   }
-            }
+            parallelNodesBuild["Custom OpenThread " + example] = { this.buildSilabsCustomOpenThreadExamples(example)   }
         }
 
         // Build OpenThread Silabs Sensor App
-        boardsForCustomOpenThread.each    { board ->
-                parallelNodesBuild["Silabs Sensor " + board] = { this.buildSilabsSensorApp(board)   }
-        }
+        parallelNodesBuild["Silabs Sensor "] = { this.buildSilabsSensorApp()   }
+
 
 
         // Wifi custom examples
@@ -1163,9 +1181,9 @@ def pipeline()
                     {
                         // TODO : Disabling all logs currently makes the build fail. But flash size is close to the limit. Once fixed re-disable logs
                         args = "is_debug=false"
-                    } 
+                    }
                     else if ((board == "BRD4186C" || board == "BRD4187C") && (rcp == "rs9116" || rcp == "SiWx917"))
-                    {    
+                    {
                         args = "disable_lcd=true use_external_flash=false chip_enable_ble_rs911x=true"
                     }
                     else if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "wf200")
