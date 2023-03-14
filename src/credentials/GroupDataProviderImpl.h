@@ -19,10 +19,16 @@
 #include <credentials/GroupDataProvider.h>
 #include <crypto/SessionKeystore.h>
 #include <lib/core/CHIPPersistentStorageDelegate.h>
+#include <lib/support/CommonPersistentData.h>
 #include <lib/support/Pool.h>
 
 namespace chip {
 namespace Credentials {
+
+
+constexpr size_t kPersistentBufferMax = 1024;
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 class GroupDataProviderImpl : public GroupDataProvider
 {
@@ -85,8 +91,8 @@ public:
     //
 
     CHIP_ERROR SetKeySet(FabricIndex fabric_index, const ByteSpan & compressed_fabric_id, const KeySet & keys) override;
-    CHIP_ERROR GetKeySet(FabricIndex fabric_index, chip::KeysetId keyset_id, KeySet & keys) override;
-    CHIP_ERROR RemoveKeySet(FabricIndex fabric_index, chip::KeysetId keyset_id) override;
+    CHIP_ERROR GetKeySet(FabricIndex fabric_index, KeysetId keyset_id, KeySet & keys)                          override;
+    CHIP_ERROR RemoveKeySet(FabricIndex fabric_index, KeysetId keyset_id)                                      override;
     CHIP_ERROR GetIpkKeySet(FabricIndex fabric_index, KeySet & out_keyset) override;
     KeySetIterator * IterateKeySets(FabricIndex fabric_index) override;
 
@@ -109,9 +115,8 @@ protected:
     protected:
         GroupDataProviderImpl & mProvider;
         FabricIndex mFabric = kUndefinedFabricIndex;
-        uint16_t mNextId    = 0;
-        size_t mCount       = 0;
-        size_t mTotal       = 0;
+        // GroupInfoList mList;
+        size_t mIndex       = 0;
     };
 
     class GroupKeyIteratorImpl : public GroupKeyIterator
@@ -125,9 +130,8 @@ protected:
     protected:
         GroupDataProviderImpl & mProvider;
         FabricIndex mFabric = kUndefinedFabricIndex;
-        uint16_t mNextId    = 0;
-        size_t mCount       = 0;
-        size_t mTotal       = 0;
+        // KeySetMap mMap;
+        uint16_t mIndex    = 0;
     };
 
     class EndpointIteratorImpl : public EndpointIterator
@@ -141,14 +145,10 @@ protected:
     protected:
         GroupDataProviderImpl & mProvider;
         FabricIndex mFabric   = kUndefinedFabricIndex;
-        GroupId mFirstGroup   = kUndefinedGroupId;
-        uint16_t mGroup       = 0;
-        size_t mGroupIndex    = 0;
-        size_t mGroupCount    = 0;
-        uint16_t mEndpoint    = 0;
-        size_t mEndpointIndex = 0;
-        size_t mEndpointCount = 0;
-        bool mFirstEndpoint   = true;
+        // GroupInfoList mGroups;
+        // EndpointList mEndpoints;
+        size_t mGroupIndex       = 0;
+        size_t mEndpointIndex       = 0;
     };
 
     class GroupKeyContext : public Crypto::SymmetricKeyContext
@@ -216,9 +216,8 @@ protected:
     protected:
         GroupDataProviderImpl & mProvider;
         FabricIndex mFabric = kUndefinedFabricIndex;
-        uint16_t mNextId    = 0;
-        size_t mCount       = 0;
-        size_t mTotal       = 0;
+        // KeySetList mList;
+        uint16_t mIndex    = 0;
     };
 
     class GroupSessionIteratorImpl : public GroupSessionIterator
@@ -231,17 +230,18 @@ protected:
 
     protected:
         GroupDataProviderImpl & mProvider;
-        uint16_t mSessionId      = 0;
-        FabricIndex mFirstFabric = kUndefinedFabricIndex;
-        FabricIndex mFabric      = kUndefinedFabricIndex;
-        uint16_t mFabricCount    = 0;
-        uint16_t mFabricTotal    = 0;
-        uint16_t mMapping        = 0;
-        uint16_t mMapCount       = 0;
-        uint16_t mKeyIndex       = 0;
-        uint16_t mKeyCount       = 0;
-        bool mFirstMap           = true;
         GroupKeyContext mGroupKeyContext;
+        uint16_t mSessionId      = 0;
+        // CommonPersistentData::FabricList mFabrics;
+        // KeySetMap mMap;
+        // KeySetList mList;
+        bool mMapCache = true;
+        bool mListCache = true;
+        bool mCacheKeys = true;
+        uint16_t mFabricIndex    = 0;
+        uint16_t mMapIndex    = 0;
+        uint16_t mListIndex    = 0;
+        uint16_t mKeyIndex    = 0;
     };
     bool IsInitialized() { return (mStorage != nullptr); }
     CHIP_ERROR RemoveEndpoints(FabricIndex fabric_index, GroupId group_id);
