@@ -73,17 +73,5 @@ struct StoredDataList : public PersistentData<kMaxSerializedSize>
     }
 };
 
-constexpr size_t kPersistentFabricBufferMax = 32;
-struct FabricList : StoredDataList<FabricIndex, kPersistentFabricBufferMax>
-{
-    // Subclasses need to define UpdateKey to be whatever fabric list key they
-    // care about.
-
-    void Clear() override
-    {
-        first_entry = kUndefinedFabricIndex;
-        entry_count = 0;
-    }
-};
 } // namespace CommonPersistentData
 } // namespace chip

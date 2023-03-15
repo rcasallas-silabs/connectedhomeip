@@ -17,21 +17,75 @@
 #include <credentials/GroupDataProviderImpl.h>
 #include <crypto/CHIPCryptoPAL.h>
 #include <lib/core/TLV.h>
-#include <lib/support/DefaultStorageKeyAllocator.h>
-#include <lib/support/PersistentData.h>
 #include <lib/support/Pool.h>
+#include <lib/support/DefaultStorageKeyAllocator.h>
+#include "PersistentData.h"
 #include <stdlib.h>
 
 namespace chip {
 namespace Credentials {
 
-using FabricList    = CommonPersistentData::FabricList;
+// using FabricList    = CommonPersistentData::FabricList;
 using GroupInfo     = GroupDataProvider::GroupInfo;
 using GroupKey      = GroupDataProvider::GroupKey;
 using GroupEndpoint = GroupDataProvider::GroupEndpoint;
 using EpochKey      = GroupDataProvider::EpochKey;
 using KeySet        = GroupDataProvider::KeySet;
 using GroupSession  = GroupDataProvider::GroupSession;
+
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+
+enum class GroupTags : uint8_t
+{
+    kFabric = static_cast<uint8_t>(PersistentTags::kEntryData) + 1,
+};
+
+struct FabricEntry: public PersistentEntry {
+
+    FabricEntry(): mIndex(kUndefinedFabricIndex) {}
+    FabricEntry(FabricIndex index): mIndex(index) {}
+
+    void Clear() override
+    {
+        mIndex = kUndefinedFabricIndex;
+    }
+
+    bool Compare(const PersistentEntry & other) const override
+    {
+        const FabricEntry &f = dynamic_cast<const FabricEntry &>(other);
+        return f.mIndex == mIndex;
+    }
+    
+    CHIP_ERROR Serialize(TLV::TLVWriter & writer) const override
+    {
+        // Fabric
+        ReturnErrorOnFailure(writer.Put(TLV::ContextTag(GroupTags::kFabric), static_cast<uint16_t>(mIndex)));
+        return CHIP_NO_ERROR;
+    }
+    
+    CHIP_ERROR Deserialize(TLV::TLVReader & reader) override
+    {
+        // Fabric
+        ReturnErrorOnFailure(reader.Next(TLV::ContextTag(GroupTags::kFabric)));
+        ReturnErrorOnFailure(reader.Get(mIndex));
+        return CHIP_NO_ERROR;
+    }
+
+    FabricIndex mIndex = kUndefinedFabricIndex;
+};
+
+constexpr size_t kPersistentFabricBufferMax = 1024;
+struct FabricList: public PersistentArray<kPersistentFabricBufferMax, 32, FabricEntry> {
+
+    FabricList(PersistentStorageDelegate * storage): PersistentArray<kPersistentFabricBufferMax, 32, FabricEntry>(storage) {}
+
+    CHIP_ERROR UpdateKey(StorageKeyName & key) override
+    {
+        key = DefaultStorageKeyAllocator::GroupFabricList();
+        return CHIP_NO_ERROR;
+    }
+};
 
 
 //------------------------------------------------------------------------------
@@ -45,6 +99,25 @@ CHIP_ERROR GroupDataProviderImpl::Init()
     {
         return CHIP_ERROR_INCORRECT_STATE;
     }
+
+
+    FabricList list(mStorage);
+    for(size_t i = 0; i < 25; i++)
+    {
+        FabricEntry f(static_cast<FabricIndex>(100 + i));
+        list.Set(i, f);
+    }
+    FabricEntry g;
+    list.Remove(15, g);
+    list.Remove(20, g);
+    list.Remove(24, g);
+
+    for(size_t i = 23; i < 32; i++)
+    {
+        FabricEntry f(static_cast<FabricIndex>(200 + i));
+        list.Set(i, f);
+    }
+
     return CHIP_NO_ERROR;
 }
 

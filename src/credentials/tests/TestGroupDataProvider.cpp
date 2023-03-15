@@ -1131,63 +1131,65 @@ void TestGroupDecryption(nlTestSuite * apSuite, void * apContext)
     MutableByteSpan plaintext(plaintext_buffer, sizeof(plaintext_buffer));
     MutableByteSpan tag(mic, sizeof(mic));
 
-    //
-    // Encrypt
-    //
-
     // Load the plaintext to encrypt
     memcpy(plaintext_buffer, kMessage, sizeof(kMessage));
 
     // Get the key context
     Crypto::SymmetricKeyContext * key_context = provider->GetKeyContext(kFabric2, kGroup2);
     NL_TEST_ASSERT(apSuite, nullptr != key_context);
-    uint16_t session_id = key_context->GetKeyHash();
-
-    // Encrypt the message
-    NL_TEST_ASSERT(
-        apSuite,
-        CHIP_NO_ERROR ==
-            key_context->MessageEncrypt(plaintext, ByteSpan(aad, sizeof(aad)), ByteSpan(nonce, sizeof(nonce)), tag, ciphertext));
-
-    // The ciphertext must be different to the original message
-    NL_TEST_ASSERT(apSuite, memcmp(ciphertext.data(), kMessage, sizeof(kMessage)));
-    key_context->Release();
-
-    //
-    // Decrypt
-    //
-
-    const std::set<std::pair<FabricIndex, GroupId>> expected = { { kFabric2, kGroup2 } };
-
-    // Iterate all keys that matches the incoming session
-    GroupSession session;
-    auto it      = provider->IterateGroupSessions(session_id);
-    size_t count = 0, total = 0;
-
-    NL_TEST_ASSERT(apSuite, it);
-    if (it)
+    if(key_context)
     {
-        total = it->Count();
-        NL_TEST_ASSERT(apSuite, expected.size() == total);
-        while (it->Next(session))
+        //
+        // Encrypt
+        //
+        uint16_t session_id = key_context->GetKeyHash();
+
+        NL_TEST_ASSERT(
+            apSuite,
+            CHIP_NO_ERROR ==
+                key_context->MessageEncrypt(plaintext, ByteSpan(aad, sizeof(aad)), ByteSpan(nonce, sizeof(nonce)), tag, ciphertext));
+
+        // The ciphertext must be different to the original message
+        NL_TEST_ASSERT(apSuite, memcmp(ciphertext.data(), kMessage, sizeof(kMessage)));
+        key_context->Release();
+
+        //
+        // Decrypt
+        //
+
+        const std::set<std::pair<FabricIndex, GroupId>> expected = { { kFabric2, kGroup2 } };
+
+        // Iterate all keys that matches the incoming session
+        GroupSession session;
+        auto it      = provider->IterateGroupSessions(session_id);
+        size_t count = 0, total = 0;
+
+        NL_TEST_ASSERT(apSuite, it);
+        if (it)
         {
-            std::pair<FabricIndex, GroupId> found(session.fabric_index, session.group_id);
-            NL_TEST_ASSERT(apSuite, expected.count(found) > 0);
-            NL_TEST_ASSERT(apSuite, session.keyContext != nullptr);
+            total = it->Count();
+            NL_TEST_ASSERT(apSuite, expected.size() == total);
+            while (it->Next(session))
+            {
+                std::pair<FabricIndex, GroupId> found(session.fabric_index, session.group_id);
+                NL_TEST_ASSERT(apSuite, expected.count(found) > 0);
+                NL_TEST_ASSERT(apSuite, session.keyContext != nullptr);
 
-            // Decrypt the ciphertext
-            NL_TEST_ASSERT(apSuite,
-                           CHIP_NO_ERROR ==
-                               session.keyContext->MessageDecrypt(ciphertext, ByteSpan(aad, sizeof(aad)),
-                                                                  ByteSpan(nonce, sizeof(nonce)), tag, plaintext));
+                // Decrypt the ciphertext
+                NL_TEST_ASSERT(apSuite,
+                            CHIP_NO_ERROR ==
+                                session.keyContext->MessageDecrypt(ciphertext, ByteSpan(aad, sizeof(aad)),
+                                                                    ByteSpan(nonce, sizeof(nonce)), tag, plaintext));
 
-            // The new plaintext must match the original message
-            NL_TEST_ASSERT(apSuite, 0 == memcmp(plaintext.data(), kMessage, sizeof(kMessage)));
-            count++;
+                // The new plaintext must match the original message
+                NL_TEST_ASSERT(apSuite, 0 == memcmp(plaintext.data(), kMessage, sizeof(kMessage)));
+                count++;
+            }
+            NL_TEST_ASSERT(apSuite, count == total);
+            it->Release();
         }
-        NL_TEST_ASSERT(apSuite, count == total);
-        it->Release();
     }
+
 }
 
 } // namespace TestGroups

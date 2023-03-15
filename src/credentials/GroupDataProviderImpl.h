@@ -19,7 +19,7 @@
 #include <credentials/GroupDataProvider.h>
 #include <crypto/SessionKeystore.h>
 #include <lib/core/CHIPPersistentStorageDelegate.h>
-#include <lib/support/CommonPersistentData.h>
+// #include <lib/support/CommonPersistentData.h>
 #include <lib/support/Pool.h>
 
 namespace chip {
