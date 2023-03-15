@@ -5,7 +5,7 @@ CODEOWNERS.source_branch_exclusion_pattern cherry-pick/**
 @@@MatterWatt @jumartin @jepenven @ricasall @makardou @selissia @rerasool
 @@@MatterWifi @mamehta
 @@@Documentation @wehale @caowens @rerasool
-@@@Unify @anesbens @dejensen @thbowley @dewassie @svradema @jsolesen @midumbar
+@@@Unify @anesbens @dejensen @thbowley @dewassie @jsolesen @midumbar
 @@@CICD @gbash @yushu @shmakdis @jepenven
 
 # Pipeline rule
