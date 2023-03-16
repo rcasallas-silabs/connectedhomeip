@@ -20,6 +20,7 @@
 #include <crypto/SessionKeystore.h>
 #include <lib/core/CHIPPersistentStorageDelegate.h>
 // #include <lib/support/CommonPersistentData.h>
+#include "PersistentData.h"
 #include <lib/support/Pool.h>
 
 namespace chip {
@@ -27,6 +28,78 @@ namespace Credentials {
 
 
 constexpr size_t kPersistentBufferMax = 1024;
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+struct FabricEntry: public PersistentEntry {
+
+    FabricEntry() = default;
+    FabricEntry(FabricIndex index): index(index) {}
+    void Clear() override;
+    CHIP_ERROR Serialize(TLV::TLVWriter & writer) const override;
+    CHIP_ERROR Deserialize(TLV::TLVReader & reader) override;
+
+    FabricIndex index = kUndefinedFabricIndex;
+};
+
+struct FabricList: public PersistentArray<kPersistentBufferMax, CHIP_CONFIG_MAX_FABRICS, FabricEntry> {
+
+    FabricList(PersistentStorageDelegate * storage): PersistentArray<kPersistentBufferMax, CHIP_CONFIG_MAX_FABRICS, FabricEntry>(storage) {}
+    void UpdateKey(StorageKeyName & key) override;
+    bool Compare(const FabricEntry & a, const FabricEntry & b) const override;
+};
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+struct GroupEntry: public PersistentEntry, GroupDataProvider::GroupInfo {
+
+    GroupEntry() = default;
+    GroupEntry(GroupId gid): GroupDataProvider::GroupInfo(gid, nullptr) {}
+    GroupEntry(GroupId gid, const char * name): GroupDataProvider::GroupInfo(gid, name) {}
+    GroupEntry(const GroupEntry & info): GroupEntry(info.group_id, info.name) {}
+    // GroupEntry(const GroupDataProvider::GroupInfo & info): GroupDataProvider::GroupInfo(info.group_id, info.name) {}
+
+    // GroupEntry() = default;
+    // GroupEntry(GroupId id): GroupDataProvider::GroupInfo(id, nullptr) {}
+    // GroupEntry(const GroupEntry & entry): PersistentEntry(entry.id), GroupDataProvider::GroupInfo(entry.group_id, entry.name) {}
+    
+    void Clear() override;
+    CHIP_ERROR Serialize(TLV::TLVWriter & writer) const override;
+    CHIP_ERROR Deserialize(TLV::TLVReader & reader) override;
+
+    // GroupEntry& operator=(const GroupEntry & other)
+    // {
+    //     if (this != &other) // not a self-assignment
+    //     {
+    //         id = other.id;
+    //         group_id = other.group_id;
+    //         SetName(other.name);
+    //     }
+    //     return *this;
+    // }
+};
+
+struct GroupList: public PersistentArray<kPersistentBufferMax, CHIP_CONFIG_MAX_FABRICS, GroupEntry> {
+
+    GroupList(PersistentStorageDelegate * storage,
+              GroupDataProvider::GroupListener * listener,
+              FabricEntry & fabric):
+        PersistentArray<kPersistentBufferMax, CHIP_CONFIG_MAX_FABRICS, GroupEntry>(storage),
+        fabric(fabric), _listener(listener) {}
+    void UpdateKey(StorageKeyName & key) override;
+    bool Compare(const GroupEntry & a, const GroupEntry & b) const override;
+    void OnEntryAdded(const GroupEntry & entry) override;
+    void OnEntryRemoved(const GroupEntry & entry) override;
+
+    // bool operator==(const GroupInfo & other)
+    // {
+    //     return (this->group_id == other.group_id) && !strncmp(this->name, other.name, kGroupNameMax);
+    // }
+
+    FabricEntry & fabric;
+private:
+    GroupDataProvider::GroupListener *_listener = nullptr;
+};
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

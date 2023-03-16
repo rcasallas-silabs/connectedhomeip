@@ -30,7 +30,7 @@ struct PersistentData
 {
     virtual ~PersistentData() = default;
 
-    virtual CHIP_ERROR UpdateKey(StorageKeyName & key)          = 0;
+    virtual void UpdateKey(StorageKeyName & key)          = 0;
     virtual CHIP_ERROR Serialize(TLV::TLVWriter & writer) const = 0;
     virtual CHIP_ERROR Deserialize(TLV::TLVReader & reader)     = 0;
     virtual void Clear()                                        = 0;
@@ -40,8 +40,10 @@ struct PersistentData
         VerifyOrReturnError(nullptr != storage, CHIP_ERROR_INVALID_ARGUMENT);
 
         uint8_t buffer[kMaxSerializedSize] = { 0 };
+
+        // Update storage key
         StorageKeyName key                 = StorageKeyName::Uninitialized();
-        ReturnErrorOnFailure(UpdateKey(key));
+        UpdateKey(key);
 
         // Serialize the data
         TLV::TLVWriter writer;
@@ -57,13 +59,13 @@ struct PersistentData
         VerifyOrReturnError(nullptr != storage, CHIP_ERROR_INVALID_ARGUMENT);
 
         uint8_t buffer[kMaxSerializedSize] = { 0 };
+
+        // Update storage key
         StorageKeyName key                 = StorageKeyName::Uninitialized();
+        UpdateKey(key);
 
         // Set data to defaults
         Clear();
-
-        // Update storage key
-        ReturnErrorOnFailure(UpdateKey(key));
 
         // Load the serialized data
         uint16_t size  = static_cast<uint16_t>(sizeof(buffer));
@@ -81,8 +83,8 @@ struct PersistentData
     {
         VerifyOrReturnError(nullptr != storage, CHIP_ERROR_INVALID_ARGUMENT);
 
-        StorageKeyName key = StorageKeyName::Uninitialized();
-        ReturnErrorOnFailure(UpdateKey(key));
+        StorageKeyName key                 = StorageKeyName::Uninitialized();
+        UpdateKey(key);
 
         return storage->SyncDeleteKeyValue(key.KeyName());
     }

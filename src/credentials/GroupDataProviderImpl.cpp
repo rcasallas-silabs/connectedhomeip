@@ -25,7 +25,6 @@
 namespace chip {
 namespace Credentials {
 
-// using FabricList    = CommonPersistentData::FabricList;
 using GroupInfo     = GroupDataProvider::GroupInfo;
 using GroupKey      = GroupDataProvider::GroupKey;
 using GroupEndpoint = GroupDataProvider::GroupEndpoint;
@@ -34,59 +33,103 @@ using KeySet        = GroupDataProvider::KeySet;
 using GroupSession  = GroupDataProvider::GroupSession;
 
 //------------------------------------------------------------------------------
+// Persistent Data
 //------------------------------------------------------------------------------
 
 enum class GroupTags : uint8_t
 {
     kFabric = static_cast<uint8_t>(PersistentTags::kEntryData) + 1,
+    kGroup,
+    kName,
 };
 
-struct FabricEntry: public PersistentEntry {
+void FabricEntry::Clear()
+{
+    index = kUndefinedFabricIndex;
+}
 
-    FabricEntry(): mIndex(kUndefinedFabricIndex) {}
-    FabricEntry(FabricIndex index): mIndex(index) {}
+CHIP_ERROR FabricEntry::Serialize(TLV::TLVWriter & writer) const
+{
+    // Fabric
+    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(GroupTags::kFabric), static_cast<uint16_t>(index)));
+    return CHIP_NO_ERROR;
+}
 
-    void Clear() override
+CHIP_ERROR FabricEntry::Deserialize(TLV::TLVReader & reader)
+{
+    // Fabric
+    ReturnErrorOnFailure(reader.Next(TLV::ContextTag(GroupTags::kFabric)));
+    ReturnErrorOnFailure(reader.Get(index));
+    return CHIP_NO_ERROR;
+}
+
+void FabricList::UpdateKey(StorageKeyName & key)
+{
+    key = DefaultStorageKeyAllocator::GroupFabricList();
+}
+
+bool FabricList::Compare(const FabricEntry & a, const FabricEntry & b) const
+{
+    return a.index == b.index;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+void GroupEntry::Clear()
+{
+    group_id = kUndefinedGroupId;
+}
+
+CHIP_ERROR GroupEntry::Serialize(TLV::TLVWriter & writer) const
+{
+    // group_id
+    ReturnErrorOnFailure(writer.Put(TLV::ContextTag(GroupTags::kGroup), static_cast<uint16_t>(this->group_id)));
+    // name
+    size_t name_size = strnlen(this->name, GroupDataProvider::GroupInfo::kGroupNameMax);
+    ReturnErrorOnFailure(writer.PutString(TLV::ContextTag(GroupTags::kName), this->name, static_cast<uint32_t>(name_size)));
+    return CHIP_NO_ERROR;
+}
+
+CHIP_ERROR GroupEntry::Deserialize(TLV::TLVReader & reader)
+{
+    // group_id
+    ReturnErrorOnFailure(reader.Next(TLV::ContextTag(GroupTags::kGroup)));
+    ReturnErrorOnFailure(reader.Get(this->group_id));
+    // name
+    ReturnErrorOnFailure(reader.Next(TLV::ContextTag(GroupTags::kName)));
+    ReturnErrorOnFailure(reader.GetString(this->name, sizeof(this->name)));
+    size_t size = strnlen(this->name, GroupDataProvider::GroupInfo::kGroupNameMax);
+    this->name[size]  = 0;
+    return CHIP_NO_ERROR;
+}
+
+void GroupList::UpdateKey(StorageKeyName & key)
+{
+    key = DefaultStorageKeyAllocator::FabricGroups(this->fabric.id);
+}
+
+bool GroupList::Compare(const GroupEntry & a, const GroupEntry & b) const
+{
+    return a.group_id == b.group_id;
+}
+
+void GroupList::OnEntryAdded(const GroupEntry & entry)
+{
+    if (_listener)
     {
-        mIndex = kUndefinedFabricIndex;
+        _listener->OnGroupAdded(fabric.index, entry);
     }
+}
 
-    bool Compare(const PersistentEntry & other) const override
+void GroupList::OnEntryRemoved(const GroupEntry & entry)
+{
+    if (_listener)
     {
-        const FabricEntry &f = dynamic_cast<const FabricEntry &>(other);
-        return f.mIndex == mIndex;
+        _listener->OnGroupRemoved(fabric.index, entry);
     }
-    
-    CHIP_ERROR Serialize(TLV::TLVWriter & writer) const override
-    {
-        // Fabric
-        ReturnErrorOnFailure(writer.Put(TLV::ContextTag(GroupTags::kFabric), static_cast<uint16_t>(mIndex)));
-        return CHIP_NO_ERROR;
-    }
-    
-    CHIP_ERROR Deserialize(TLV::TLVReader & reader) override
-    {
-        // Fabric
-        ReturnErrorOnFailure(reader.Next(TLV::ContextTag(GroupTags::kFabric)));
-        ReturnErrorOnFailure(reader.Get(mIndex));
-        return CHIP_NO_ERROR;
-    }
+}
 
-    FabricIndex mIndex = kUndefinedFabricIndex;
-};
-
-constexpr size_t kPersistentFabricBufferMax = 1024;
-struct FabricList: public PersistentArray<kPersistentFabricBufferMax, 32, FabricEntry> {
-
-    FabricList(PersistentStorageDelegate * storage): PersistentArray<kPersistentFabricBufferMax, 32, FabricEntry>(storage) {}
-
-    CHIP_ERROR UpdateKey(StorageKeyName & key) override
-    {
-        key = DefaultStorageKeyAllocator::GroupFabricList();
-        return CHIP_NO_ERROR;
-    }
-};
-
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 //------------------------------------------------------------------------------
 // Initialization
@@ -101,22 +144,22 @@ CHIP_ERROR GroupDataProviderImpl::Init()
     }
 
 
-    FabricList list(mStorage);
-    for(size_t i = 0; i < 25; i++)
-    {
-        FabricEntry f(static_cast<FabricIndex>(100 + i));
-        list.Set(i, f);
-    }
-    FabricEntry g;
-    list.Remove(15, g);
-    list.Remove(20, g);
-    list.Remove(24, g);
+    // FabricList list(mStorage);
+    // for(size_t i = 0; i < 25; i++)
+    // {
+    //     FabricEntry f(static_cast<FabricIndex>(100 + i));
+    //     list.Set(i, f);
+    // }
+    // FabricEntry g;
+    // list.Remove(15);
+    // list.Remove(20);
+    // list.Remove(24);
 
-    for(size_t i = 23; i < 32; i++)
-    {
-        FabricEntry f(static_cast<FabricIndex>(200 + i));
-        list.Set(i, f);
-    }
+    // for(size_t i = 23; i < 32; i++)
+    // {
+    //     FabricEntry f(static_cast<FabricIndex>(200 + i));
+    //     list.Set(i, f);
+    // }
 
     return CHIP_NO_ERROR;
 }
@@ -146,7 +189,13 @@ CHIP_ERROR GroupDataProviderImpl::SetGroupInfo(FabricIndex fabric_index, const G
     VerifyOrReturnError(IsInitialized(), CHIP_ERROR_INTERNAL);
     VerifyOrReturnError(kUndefinedFabricIndex != fabric_index, CHIP_ERROR_INVALID_FABRIC_INDEX);
     
-    return CHIP_ERROR_NOT_IMPLEMENTED;
+    FabricList fabrics(mStorage);
+    FabricEntry fabric(fabric_index);
+    ReturnErrorOnFailure(fabrics.Get(fabric, true));
+
+    GroupList groups(mStorage, mListener, fabric);
+    GroupEntry group(info.group_id, info.name);
+    return groups.Set(group);
 }
 
 CHIP_ERROR GroupDataProviderImpl::GetGroupInfo(FabricIndex fabric_index, GroupId group_id, GroupInfo & info)
@@ -154,7 +203,17 @@ CHIP_ERROR GroupDataProviderImpl::GetGroupInfo(FabricIndex fabric_index, GroupId
     VerifyOrReturnError(IsInitialized(), CHIP_ERROR_INTERNAL);
     VerifyOrReturnError(kUndefinedFabricIndex != fabric_index, CHIP_ERROR_INVALID_FABRIC_INDEX);
 
-    return CHIP_ERROR_NOT_IMPLEMENTED;
+    FabricList fabrics(mStorage);
+    FabricEntry fabric(fabric_index);
+    ReturnErrorOnFailure(fabrics.Get(fabric));
+
+    GroupList groups(mStorage, mListener, fabric);
+    GroupEntry group(info.group_id);
+    ReturnErrorOnFailure(groups.Get(group));
+
+    info.group_id = group.group_id;
+    info.SetName(group.name);
+    return CHIP_NO_ERROR;
 }
 
 CHIP_ERROR GroupDataProviderImpl::RemoveGroupInfo(FabricIndex fabric_index, GroupId group_id)
@@ -162,7 +221,13 @@ CHIP_ERROR GroupDataProviderImpl::RemoveGroupInfo(FabricIndex fabric_index, Grou
     VerifyOrReturnError(IsInitialized(), CHIP_ERROR_INTERNAL);
     VerifyOrReturnError(kUndefinedFabricIndex != fabric_index, CHIP_ERROR_INVALID_FABRIC_INDEX);
 
-    return CHIP_ERROR_NOT_IMPLEMENTED;
+    FabricList fabrics(mStorage);
+    FabricEntry fabric(fabric_index);
+    ReturnErrorOnFailure(fabrics.Get(fabric));
+
+    GroupList groups(mStorage, mListener, fabric);
+    GroupEntry group(group_id);
+    return groups.Remove(group);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -173,7 +238,13 @@ CHIP_ERROR GroupDataProviderImpl::SetGroupInfoAt(FabricIndex fabric_index, size_
     VerifyOrReturnError(IsInitialized(), CHIP_ERROR_INTERNAL);
     VerifyOrReturnError(kUndefinedFabricIndex != fabric_index, CHIP_ERROR_INVALID_FABRIC_INDEX);
 
-    return CHIP_ERROR_NOT_IMPLEMENTED;
+    FabricList fabrics(mStorage);
+    FabricEntry fabric(fabric_index);
+    ReturnErrorOnFailure(fabrics.Get(fabric, true));
+
+    GroupList groups(mStorage, mListener, fabric);
+    GroupEntry group(info.group_id, info.name);
+    return groups.Set(index, group);
 }
 
 CHIP_ERROR GroupDataProviderImpl::GetGroupInfoAt(FabricIndex fabric_index, size_t index, GroupInfo & info)
@@ -181,7 +252,17 @@ CHIP_ERROR GroupDataProviderImpl::GetGroupInfoAt(FabricIndex fabric_index, size_
     VerifyOrReturnError(IsInitialized(), CHIP_ERROR_INTERNAL);
     VerifyOrReturnError(kUndefinedFabricIndex != fabric_index, CHIP_ERROR_INVALID_FABRIC_INDEX);
 
-    return CHIP_ERROR_NOT_IMPLEMENTED;
+    FabricList fabrics(mStorage);
+    FabricEntry fabric(fabric_index);
+    ReturnErrorOnFailure(fabrics.Get(fabric));
+
+    GroupList groups(mStorage, mListener, fabric);
+    GroupEntry group;
+    ReturnErrorOnFailure(groups.Get(index, group));
+
+    info.group_id = group.group_id;
+    info.SetName(group.name);
+    return CHIP_NO_ERROR;
 }
 
 CHIP_ERROR GroupDataProviderImpl::RemoveGroupInfoAt(FabricIndex fabric_index, size_t index)
@@ -189,7 +270,12 @@ CHIP_ERROR GroupDataProviderImpl::RemoveGroupInfoAt(FabricIndex fabric_index, si
     VerifyOrReturnError(IsInitialized(), CHIP_ERROR_INTERNAL);
     VerifyOrReturnError(kUndefinedFabricIndex != fabric_index, CHIP_ERROR_INVALID_FABRIC_INDEX);
 
-    return CHIP_ERROR_NOT_IMPLEMENTED;
+    FabricList fabrics(mStorage);
+    FabricEntry fabric(fabric_index);
+    ReturnErrorOnFailure(fabrics.Get(fabric));
+
+    GroupList groups(mStorage, mListener, fabric);
+    return groups.Remove(index);
 }
 
 

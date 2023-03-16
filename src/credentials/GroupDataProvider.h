@@ -46,6 +46,7 @@ public:
         char name[kGroupNameMax + 1] = { 0 };
 
         GroupInfo() { SetName(nullptr); }
+        // GroupInfo(const GroupInfo & other) : group_id(other.group_id) { SetName(other.name); }
         GroupInfo(const char * groupName) { SetName(groupName); }
         GroupInfo(const CharSpan & groupName) { SetName(groupName); }
         GroupInfo(GroupId id, const char * groupName) : group_id(id) { SetName(groupName); }
@@ -72,6 +73,17 @@ public:
                 Platform::CopyString(name, groupName);
             }
         }
+
+        // GroupInfo& operator=(const GroupInfo & other)
+        // {
+        //     if (this != &other) // not a self-assignment
+        //     {
+        //         group_id = other.group_id;
+        //         SetName(other.name);
+        //     }
+        //     return *this;
+        // }
+
         bool operator==(const GroupInfo & other)
         {
             return (this->group_id == other.group_id) && !strncmp(this->name, other.name, kGroupNameMax);

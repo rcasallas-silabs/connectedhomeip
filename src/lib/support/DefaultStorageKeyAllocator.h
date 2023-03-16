@@ -144,23 +144,23 @@ public:
     // Group Data Provider
 
     // List of fabric indices that have endpoint-to-group associations defined.
-    static StorageKeyName GroupFabricList() { return StorageKeyName::FromConst("g/gfl"); }
-    static StorageKeyName FabricGroups(chip::FabricIndex fabric) { return StorageKeyName::Formatted("f/%x/g", fabric); }
-    static StorageKeyName FabricGroup(chip::FabricIndex fabric, chip::GroupId group)
+    static StorageKeyName GroupFabricList() { return StorageKeyName::FromConst("+f"); }
+    static StorageKeyName FabricGroups(uint16_t fabric) { return StorageKeyName::Formatted("+f/%x/g", fabric); }
+    static StorageKeyName FabricGroup(uint16_t fabric, chip::GroupId group)
     {
-        return StorageKeyName::Formatted("f/%x/g/%x", fabric, group);
+        return StorageKeyName::Formatted("+f/%x/g/%x", fabric, group);
     }
-    static StorageKeyName FabricGroupKey(chip::FabricIndex fabric, uint16_t index)
+    static StorageKeyName FabricGroupKey(uint16_t fabric, uint16_t index)
     {
-        return StorageKeyName::Formatted("f/%x/gk/%x", fabric, index);
+        return StorageKeyName::Formatted("+f/%x/gk/%x", fabric, index);
     }
-    static StorageKeyName FabricGroupEndpoint(chip::FabricIndex fabric, chip::GroupId group, chip::EndpointId endpoint)
+    static StorageKeyName FabricGroupEndpoint(uint16_t fabric, chip::GroupId group, chip::EndpointId endpoint)
     {
-        return StorageKeyName::Formatted("f/%x/g/%x/e/%x", fabric, group, endpoint);
+        return StorageKeyName::Formatted("+f/%x/g/%x/e/%x", fabric, group, endpoint);
     }
-    static StorageKeyName FabricKeyset(chip::FabricIndex fabric, uint16_t keyset)
+    static StorageKeyName FabricKeyset(uint16_t fabric, uint16_t keyset)
     {
-        return StorageKeyName::Formatted("f/%x/k/%x", fabric, keyset);
+        return StorageKeyName::Formatted("+f/%x/k/%x", fabric, keyset);
     }
 
     static StorageKeyName AttributeValue(EndpointId endpointId, ClusterId clusterId, AttributeId attributeId)

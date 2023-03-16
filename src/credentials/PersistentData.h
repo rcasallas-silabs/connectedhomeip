@@ -31,7 +31,7 @@ struct PersistentData
     PersistentData(PersistentStorageDelegate * storage): mStorage(storage) {}
     virtual ~PersistentData() = default;
     
-    virtual CHIP_ERROR UpdateKey(StorageKeyName & key)          = 0;
+    virtual void UpdateKey(StorageKeyName & key)          = 0;
     virtual CHIP_ERROR Serialize(TLV::TLVWriter & writer) const = 0;
     virtual CHIP_ERROR Deserialize(TLV::TLVReader & reader)     = 0;
     virtual void Clear()                                        = 0;
@@ -41,7 +41,7 @@ struct PersistentData
         VerifyOrReturnError(nullptr != mStorage, CHIP_ERROR_INVALID_ARGUMENT);
 
         StorageKeyName key                 = StorageKeyName::Uninitialized();
-        ReturnErrorOnFailure(UpdateKey(key));
+        UpdateKey(key);
 
         // Serialize the data
         TLV::TLVWriter writer;
@@ -58,12 +58,10 @@ struct PersistentData
         VerifyOrReturnError(nullptr != mStorage, CHIP_ERROR_INVALID_ARGUMENT);
 
         StorageKeyName key                 = StorageKeyName::Uninitialized();
+        UpdateKey(key);
 
         // Set data to defaults
         Clear();
-
-        // Update mStorage key
-        ReturnErrorOnFailure(UpdateKey(key));
 
         // Load the serialized data
         uint16_t size  = static_cast<uint16_t>(sizeof(mBuffer));
@@ -84,9 +82,8 @@ struct PersistentData
     {
         VerifyOrReturnError(nullptr != mStorage, CHIP_ERROR_INVALID_ARGUMENT);
 
-        StorageKeyName key = StorageKeyName::Uninitialized();
-        ReturnErrorOnFailure(UpdateKey(key));
-
+        StorageKeyName key                 = StorageKeyName::Uninitialized();
+        UpdateKey(key);
         return mStorage->SyncDeleteKeyValue(key.KeyName());
     }
 
@@ -107,61 +104,110 @@ enum class PersistentTags : uint8_t
 };
 
 
+using PersistentId = uint16_t;
+
 struct PersistentEntry {
 
-    PersistentEntry(): mId(0) {}
+    PersistentEntry(): id(0) {}
+    PersistentEntry(PersistentId id): id(id) {}
     virtual ~PersistentEntry() = default;
     virtual void Clear() = 0;
-    virtual bool Compare(const PersistentEntry & other) const = 0;
     virtual CHIP_ERROR Serialize(TLV::TLVWriter & writer) const = 0;
     virtual CHIP_ERROR Deserialize(TLV::TLVReader & reader) = 0;
 
-    uint16_t mId = 0;
+    PersistentId id = 0;
 };
 
 
 template <size_t kMaxSerializedSize, size_t kMaxListSize, typename EntryType>
-struct PersistentArray: public PersistentData<kMaxSerializedSize> {
+struct PersistentList: public PersistentData<kMaxSerializedSize> {
 
-    PersistentArray(PersistentStorageDelegate * storage): PersistentData<kMaxSerializedSize>(storage) {}
-    // ~PersistentArray() = default;
+    PersistentList(PersistentStorageDelegate * storage): PersistentData<kMaxSerializedSize>(storage) {}
+
+    virtual bool Compare(const EntryType & a, const EntryType & b) const = 0;
 
     void Clear() override
     {
-        for (size_t i = 0; i < mLimit; ++i)
-        {
-            At(i).mId = 0;
-            At(i).Clear();
-        }
         for (size_t i = 0; i < sizeof(mBitmap); ++i)
         {
             mBitmap[i] = 0;
+        }
+    }
+
+    void SetId(PersistentId id, bool active)
+    {
+        VerifyOrReturn(id-- > 0);
+        size_t byte = id / 8;
+        uint8_t bit = id % 8;
+        uint8_t mask = static_cast<uint8_t>(1 << bit);
+        if(active) {
+            mBitmap[byte] |= mask; 
+        }
+        else {
+            mBitmap[byte] &= ~mask; 
+        }
+    }
+
+    CHIP_ERROR GetId(PersistentId & id)
+    {
+        size_t i = 0, j = 0;
+        while( (i < sizeof(mBitmap)) && (0xff == mBitmap[i]))
+        {
+            i++;
+        }
+        VerifyOrReturnError(i < sizeof(mBitmap), CHIP_ERROR_NOT_FOUND);
+        while( (j < 8) && (mBitmap[i] & (1 << j) ))
+        {
+            j++;
+        }
+        id = static_cast<PersistentId>(8 * i + j + 1);
+        SetId(id, true);
+        return CHIP_NO_ERROR;
+    }
+
+private:
+    uint8_t mBitmap[kMaxListSize / 8 + 1] = { 0 };
+};
+
+
+template <size_t kMaxSerializedSize, size_t kMaxListSize, typename EntryType>
+struct PersistentArray: public PersistentList<kMaxSerializedSize, kMaxListSize, EntryType> {
+
+    PersistentArray(PersistentStorageDelegate * storage): PersistentList<kMaxSerializedSize, kMaxListSize, EntryType>(storage) {}
+
+    void Clear() override
+    {
+        PersistentList<kMaxSerializedSize, kMaxListSize, EntryType>::Clear();
+        for (size_t i = 0; i < mLimit; ++i)
+        {
+            At(i).id = 0;
+            At(i).Clear();
         }
         mCount = 0;
     }
 
     CHIP_ERROR Serialize(TLV::TLVWriter & writer) const override
     {
-        TLV::TLVType container;
+        TLV::TLVType container, list, entry;
         ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag(), TLV::kTLVType_Structure, container));
 
         // Count
         ReturnErrorOnFailure(writer.Put(TLV::ContextTag(PersistentTags::kCount), static_cast<uint16_t>(mCount)));
 
         // Entries
+        ReturnErrorOnFailure(writer.StartContainer(TLV::ContextTag(PersistentTags::kList), TLV::kTLVType_List, list));
+        for (size_t i = 0; (i < mCount) && (i < mLimit); ++i)
         {
-            TLV::TLVType list;
-            ReturnErrorOnFailure(writer.StartContainer(TLV::ContextTag(PersistentTags::kList), TLV::kTLVType_List, list));
-            for (size_t i = 0; (i < mCount) && (i < mLimit); ++i)
-            {
-                const EntryType & entry = mEntries[i];
-                // Entry Id
-                ReturnErrorOnFailure(writer.Put(TLV::ContextTag(PersistentTags::kEntryId), static_cast<uint16_t>(entry.mId)));
-                // Entry data
-                ReturnErrorOnFailure(entry.Serialize(writer));
-            }
-            ReturnErrorOnFailure(writer.EndContainer(list));
+            ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag(), TLV::kTLVType_Structure, entry));
+            const EntryType & e = mEntries[i];
+            // Entry Id
+            ReturnErrorOnFailure(writer.Put(TLV::ContextTag(PersistentTags::kEntryId), e.id));
+            // Entry data
+            ReturnErrorOnFailure(e.Serialize(writer));
+            ReturnErrorOnFailure(writer.EndContainer(entry));
         }
+        ReturnErrorOnFailure(writer.EndContainer(list));
+
         return writer.EndContainer(container);
     }
 
@@ -170,32 +216,33 @@ struct PersistentArray: public PersistentData<kMaxSerializedSize> {
         ReturnErrorOnFailure(reader.Next(TLV::AnonymousTag()));
         VerifyOrReturnError(TLV::kTLVType_Structure == reader.GetType(), CHIP_ERROR_INTERNAL);
 
-        TLV::TLVType container;
+        TLV::TLVType container, list, entry;
         ReturnErrorOnFailure(reader.EnterContainer(container));
 
         // Count
         ReturnErrorOnFailure(reader.Next(TLV::ContextTag(PersistentTags::kCount)));
         ReturnErrorOnFailure(reader.Get(mCount));
+
+        // Entries
+        ReturnErrorOnFailure(reader.Next(TLV::ContextTag(PersistentTags::kList)));
+        VerifyOrReturnError(TLV::kTLVType_List == reader.GetType(), CHIP_ERROR_INTERNAL);
+
+        ReturnErrorOnFailure(reader.EnterContainer(list));
+        for (size_t i = 0; i < mCount && i < mLimit; ++i)
         {
-            // Entries
-            ReturnErrorOnFailure(reader.Next(TLV::ContextTag(PersistentTags::kList)));
-            VerifyOrReturnError(TLV::kTLVType_List == reader.GetType(), CHIP_ERROR_INTERNAL);
-
-            TLV::TLVType list;
-            ReturnErrorOnFailure(reader.EnterContainer(list));
-
-            for (size_t i = 0; i < mCount && i < mLimit; ++i)
-            {
-                EntryType & entry = At(i);
-                // Entry Id
-                ReturnErrorOnFailure(reader.Next(TLV::ContextTag(PersistentTags::kEntryId)));
-                ReturnErrorOnFailure(reader.Get(entry.mId));
-                // Entry data
-                ReturnErrorOnFailure(entry.Deserialize(reader));
-                Mark(entry.mId);
-            }
-            ReturnErrorOnFailure(reader.ExitContainer(list));
+            ReturnErrorOnFailure(reader.Next(TLV::AnonymousTag()));
+            VerifyOrReturnError(TLV::kTLVType_Structure == reader.GetType(), CHIP_ERROR_INTERNAL);
+            ReturnErrorOnFailure(reader.EnterContainer(entry));
+            EntryType & e = At(i);
+            // Entry Id
+            ReturnErrorOnFailure(reader.Next(TLV::ContextTag(PersistentTags::kEntryId)));
+            ReturnErrorOnFailure(reader.Get(e.id));
+            // Entry data
+            ReturnErrorOnFailure(e.Deserialize(reader));
+            ReturnErrorOnFailure(reader.ExitContainer(entry));
+            this->SetId(e.id, true);
         }
+        ReturnErrorOnFailure(reader.ExitContainer(list));
 
         return reader.ExitContainer(container);
     }
@@ -208,11 +255,12 @@ struct PersistentArray: public PersistentData<kMaxSerializedSize> {
         // Check existing
         for(size_t i = 0; i < mCount; ++i)
         {
-            if(At(i).Compare(entry))
+            EntryType & e = At(i);
+            if(this->Compare(e, entry))
             {
                 // Existing entry, index must match
                 VerifyOrReturnError(i == index, CHIP_ERROR_DUPLICATE_KEY_ID);
-                At(index) = entry;
+                e = entry;
                 return this->Save();
             }
         }
@@ -223,14 +271,14 @@ struct PersistentArray: public PersistentData<kMaxSerializedSize> {
         if(index < mCount) {
             // Override (implicit remove)
             EntryType old = At(index);
-            entry.mId = old.mId;
+            entry.id = old.id;
             At(index) = entry;
             ReturnErrorOnFailure(this->Save());
             OnEntryRemoved(old);
         }
         else {
             // Insert last
-            ReturnErrorOnFailure(NextId(entry.mId));
+            ReturnErrorOnFailure(this->GetId(entry.id));
             At(mCount++) = entry;
             ReturnErrorOnFailure(this->Save());
         }
@@ -246,18 +294,19 @@ struct PersistentArray: public PersistentData<kMaxSerializedSize> {
         // Check existing
         for(size_t i = 0; i < mCount; ++i)
         {
-            if(At(i).Compare(entry))
+            EntryType & e = At(i);
+            if(this->Compare(e, entry))
             {
                 // Already registered
                 VerifyOrReturnError(do_override, CHIP_ERROR_DUPLICATE_KEY_ID);
-                At(i) = entry;
+                e = entry;
                 return this->Save();
             }
         }
         // Insert last
         size_t next_id = 0;
         VerifyOrReturnError(mCount < mLimit, CHIP_ERROR_INVALID_LIST_LENGTH);
-        ReturnErrorOnFailure(NextId(entry.mId));
+        ReturnErrorOnFailure(this->GetId(entry.id));
         At(mCount++) = entry;
         ReturnErrorOnFailure(this->Save());
         OnEntryAdded(entry);
@@ -281,9 +330,10 @@ struct PersistentArray: public PersistentData<kMaxSerializedSize> {
         // Check existing
         for(size_t i = 0; i < mCount; ++i)
         {
-            if(At(i).Compare(entry))
+            EntryType & e = At(i);
+            if(this->Compare(e, entry))
             {
-                entry = At(i);
+                entry = e;
                 return CHIP_NO_ERROR;
             }
         }
@@ -294,89 +344,48 @@ struct PersistentArray: public PersistentData<kMaxSerializedSize> {
         return this->Save();
     }
 
-    CHIP_ERROR Remove(size_t index, EntryType & old)
+    CHIP_ERROR Remove(size_t index)
     {
         ReturnErrorOnFailure(this->Load());
         VerifyOrReturnError(index < mLimit, CHIP_ERROR_NOT_FOUND);
         VerifyOrReturnError(index < mCount, CHIP_ERROR_NOT_FOUND);
-        old = At(index);
+        EntryType old = At(index);
         mCount--;
         for(size_t i = index; i < mCount; ++i)
         {
             At(i) = At(i + 1);
         }
-        At(mCount).mId = 0;
+        At(mCount).id = 0;
         At(mCount).Clear();
         ReturnErrorOnFailure(this->Save());
-        Mark(old.mId, false);
+        this->SetId(old.id, false);
         OnEntryRemoved(old);
         return CHIP_NO_ERROR;
     }
 
-    CHIP_ERROR Remove(EntryType & old)
+    CHIP_ERROR Remove(EntryType & entry)
     {
         ReturnErrorOnFailure(this->Load());
         for(size_t i = 0; i < mCount; ++i)
         {
-            if(At(i).Compare(old))
+            if(this->Compare(At(i), entry))
             {
-                return Remove(i, old);
+                return Remove(i);
             }
         }
         return CHIP_NO_ERROR;
     }
     
 protected:
-
-    EntryType & At(size_t index) { return (index < mLimit) ? mEntries[index] : mEntries[0]; }
-
-    void Mark(uint16_t id, bool active = true)
-    {
-        VerifyOrReturn(id-- > 0);
-        size_t byte = id / 8;
-        uint8_t bit = id % 8;
-        uint8_t mask = static_cast<uint8_t>(1 << bit);
-        if(active) {
-            mBitmap[byte] |= mask; 
-        }
-        else {
-            mBitmap[byte] &= ~mask; 
-        }
-    }
-
-    CHIP_ERROR NextId(uint16_t & id)
-    {
-        size_t i = 0, j = 0;
-        while( (i < sizeof(mBitmap)) && (0xff == mBitmap[i]))
-        {
-            i++;
-        }
-        VerifyOrReturnError(i < sizeof(mBitmap), CHIP_ERROR_NOT_FOUND);
-        while( (j < 8) && (mBitmap[i] & (1 << j) ))
-        {
-            j++;
-        }
-        // VerifyOrReturnError( < mLimit, CHIP_ERROR_NOT_FOUND);
-        id = static_cast<uint16_t>(8 * i + j + 1);
-        Mark(id);
-        return CHIP_NO_ERROR;
-    }
-
-    // bool Used(size_t index)
-    // {
-    //     size_t byte = index / 8;
-    //     uint8_t bit = index % 8;
-    //     return mBitmap[byte] & static_cast<uint8_t>(1 << bit);
-    // }
-
     virtual void OnEntryAdded(const EntryType & entry) {}
     virtual void OnEntryRemoved(const EntryType & entry) {}
 
-    uint8_t mBitmap[kMaxListSize / 8 + 1] = { 0 };
+private:
+    EntryType & At(size_t index) { return (index < mLimit) ? mEntries[index] : mEntries[0]; }
+    
     EntryType mEntries[kMaxListSize];
     uint16_t mLimit = kMaxListSize;
     uint16_t mCount = 0;
-    bool mLoaded = false;
 };
 
 
