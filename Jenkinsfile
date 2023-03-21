@@ -150,14 +150,12 @@ def buildOpenThreadExample(app)
             }
 
             dir(dirPath) {
-                withDockerContainer(image: chipBuildEfr32Image, args: "-u root")
-                {
-                    // CSA Examples build
-                    withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
+                try {
+                    withDockerContainer(image: chipBuildEfr32Image, args: "-u root")
                     {
-
-
-                        try {
+                        // CSA Examples build
+                        withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
+                        {
                             openThreadBoards.each { board ->
                                 def arguments = ""
                                     if (sleepyBoard.contains(board)) {
@@ -168,18 +166,18 @@ def buildOpenThreadExample(app)
                                 if(buildRelease) {
                                     sh "./scripts/examples/gn_efr32_example.sh ./examples/${app}/${relPath} ./out/CSA/${app}/OpenThread/release ${board} --release"
                                 }
-                                if(args) {
+                                if(arguments) {
                                     sh "./scripts/examples/gn_efr32_example.sh ./examples/${app}/${relPath} ./out/CSA/${app}/OpenThread/sleepy ${board} ${arguments}"
                                 }
                             }
-                        } catch (e) {
-                            deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
-                                                       workspaceTmpDir,
-                                                       saveDir,
-                                                       '-name no-files')
-                            throw e
                         }
                     }
+                } catch (e) {
+                    deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
+                                                workspaceTmpDir,
+                                                saveDir,
+                                                '-name no-files')
+                    throw e
                 }
 
                 openThreadBoards.each { board ->
@@ -222,28 +220,26 @@ def buildSilabsCustomOpenThreadExamples(app)
 
 
             dir(dirPath) {
-                withDockerContainer(image: chipBuildEfr32Image, args: "-u root")
-                {
-                    // Custom Silabs build
-                    withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
+                try {
+                    withDockerContainer(image: chipBuildEfr32Image, args: "-u root")
                     {
-                        try {
+                        // Custom Silabs build
+                        withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
+                        {
                             boardsForCustomOpenThread.each { board ->
                                 sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/${app}/efr32 ./out/silabs/${app}/OpenThread/ ${board}"
                             }
-                        } catch (e) {
-                            deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
-                                                       workspaceTmpDir,
-                                                       saveDir,
-                                                       '-name no-files')
-                            throw e
                         }
                     }
+                } catch (e) {
+                    deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
+                                                workspaceTmpDir,
+                                                saveDir,
+                                                '-name no-files')
+                    throw e
                 }
 
                 stash name: 'CustomOpenThreadExamples', includes:  'out/**/*.s37 '
-
-
 
             }
             deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
@@ -277,12 +273,13 @@ def buildSilabsSensorApp()
                 }
 
             dir(dirPath) {
-                withDockerContainer(image: chipBuildEfr32Image, args: "-u root")
-                {
-                    // Custom Silabs build
-                    withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
+                try {
+                    withDockerContainer(image: chipBuildEfr32Image, args: "-u root")
                     {
-                        try {
+                        // Custom Silabs build
+                        withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
+                        {
+
                             boardsForCustomOpenThread.each { board ->
                                 sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/occupancy/OpenThread/ ${board} \"is_occupancy_sensor=true\""
                                 sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/temperature/OpenThread/ ${board} \"is_temperature_sensor=true\""
@@ -291,14 +288,15 @@ def buildSilabsSensorApp()
                                 sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/temperature-sed/OpenThread/ ${board} \"is_temperature_sensor=true\" --sed"
                                 sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/contact-sed/OpenThread/ ${board} \"is_contact_sensor=true\" --sed"
                             }
-                        } catch (e) {
-                            deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
-                                                       workspaceTmpDir,
-                                                       saveDir,
-                                                       '-name no-files')
-                            throw e
+
                         }
                     }
+                } catch (e) {
+                        deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
+                                                    workspaceTmpDir,
+                                                    saveDir,
+                                                    '-name no-files')
+                        throw e
                 }
                 stash name: 'CustomOpenThreadExamples', includes:  'out/**/*.s37 '
 
@@ -340,22 +338,23 @@ def buildWiFiExample(platform, app, board, wifiRadio, args, radioName, buildCust
             }
 
             dir(dirPath) {
-                withDockerContainer(image: chipBuildEfr32Image, args: "-u root")
-                {
-                    // CSA Examples build
-                    withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
+                try {
+                    withDockerContainer(image: chipBuildEfr32Image, args: "-u root")
                     {
-                        try {
-                          sh "./scripts/examples/gn_efr32_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName} ${board} ${args} --wifi ${wifiRadio}"
-                          sh "./scripts/examples/gn_efr32_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName}/release ${board} ${args} --release --wifi ${wifiRadio}"
-                        } catch (e) {
-                            deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
-                                                       workspaceTmpDir,
-                                                       saveDir,
-                                                       '-name no-files')
-                            throw e
+                        // CSA Examples build
+                        withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
+                        {
+
+                            sh "./scripts/examples/gn_efr32_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName} ${board} ${args} --wifi ${wifiRadio}"
+                            sh "./scripts/examples/gn_efr32_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName}/release ${board} ${args} --release --wifi ${wifiRadio}"
                         }
                     }
+                } catch (e) {
+                    deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
+                                                workspaceTmpDir,
+                                                saveDir,
+                                                '-name no-files')
+                    throw e
                 }
 
                 stash name: 'WiFiExamples-' + app + '-' + board + '-' + radioName, includes: 'out/**/*.s37 '
@@ -385,11 +384,12 @@ def buildChipToolAndOTAProvider()
             }
 
             dir(dirPath) {
-                withDockerContainer(image: chipToolImage, args: "-u root")
-                {
-                  	withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
+                try {
+                    withDockerContainer(image: chipToolImage, args: "-u root")
                     {
-                        try {
+                        withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
+                        {
+
                             sh 'rm -rf ./.environment'
                             sh 'pwd'
                             sh 'git config --global --add safe.directory $(pwd)'
@@ -397,14 +397,14 @@ def buildChipToolAndOTAProvider()
                             sh './scripts/build/gn_bootstrap.sh'
                             sh './scripts/run_in_build_env.sh  "./scripts/build/build_examples.py --target linux-arm64-chip-tool-ipv6only-clang build"'
                             sh './scripts/run_in_build_env.sh  "./scripts/build/build_examples.py --target linux-arm64-ota-provider-ipv6only-clang build"'
-                        } catch (e) {
-                            deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
-                                                       workspaceTmpDir,
-                                                       saveDir,
-                                                       '-name no-files')
-                            throw e
                         }
                     }
+                } catch (e) {
+                        deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
+                                                    workspaceTmpDir,
+                                                    saveDir,
+                                                    '-name no-files')
+                        throw e
                 }
 
                 stash name: 'ChipTool', includes: 'out/linux-arm64-chip-tool-ipv6only-clang/chip-tool'
@@ -520,9 +520,9 @@ def exportIoTReports()
             }
 
             dir(dirPath) {
-                withDockerContainer(image: chipBuildEfr32Image, args: "-u root")
-                {
-                    try {
+                try {
+                    withDockerContainer(image: chipBuildEfr32Image, args: "-u root")
+                    {
                         // sh 'apt-get install python3-venv'
                         sh 'python3 -m venv code_size_analysis_venv'
                         sh '. code_size_analysis_venv/bin/activate'
@@ -602,18 +602,15 @@ def exportIoTReports()
                             """
                         }
 
-
-                    } catch (e) {
-                        deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
-                                                    workspaceTmpDir,
-                                                    saveDir,
-                                                    '-name no-files')
-                        throw e
+                        // Create dummy files to forward workspace to next stage
+                        sh 'touch ./bugfix.txt'
                     }
-
-                    // Create dummy files to forward workspace to next stage
-                    sh 'touch ./bugfix.txt'
-
+                } catch (e) {
+                    deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
+                                                workspaceTmpDir,
+                                                saveDir,
+                                                '-name no-files')
+                    throw e
                 }
             }
             deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
