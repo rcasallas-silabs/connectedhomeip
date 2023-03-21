@@ -30,22 +30,33 @@
 #include <zap-generated/cluster/Commands.h>
 #include <zap-generated/test/Commands.h>
 
+#include <sys/ioctl.h>
+#include <stdio.h>
+
 // ================================================================================
 // Main Code
 // ================================================================================
 int main(int argc, char * argv[])
 {
-    ExampleCredentialIssuerCommands credIssuerCommands;
-    Commands commands;
-    registerCommandsDelay(commands, &credIssuerCommands);
-    registerCommandsDiscover(commands, &credIssuerCommands);
-    registerCommandsInteractive(commands, &credIssuerCommands);
-    registerCommandsPayload(commands);
-    registerCommandsPairing(commands, &credIssuerCommands);
-    registerCommandsTests(commands, &credIssuerCommands);
-    registerCommandsGroup(commands, &credIssuerCommands);
-    registerClusters(commands, &credIssuerCommands);
-    registerCommandsStorage(commands);
+    struct winsize w;
+    ioctl(0, TIOCGWINSZ, &w);
 
-    return commands.Run(argc, argv);
+    printf ("lines %d\n", w.ws_row);
+    printf ("columns %d\n", w.ws_col);
+    
+    // ExampleCredentialIssuerCommands credIssuerCommands;
+    // Commands commands;
+    // registerCommandsDelay(commands, &credIssuerCommands);
+    // registerCommandsDiscover(commands, &credIssuerCommands);
+    // registerCommandsInteractive(commands, &credIssuerCommands);
+    // registerCommandsPayload(commands);
+    // registerCommandsPairing(commands, &credIssuerCommands);
+    // registerCommandsTests(commands, &credIssuerCommands);
+    // registerCommandsGroup(commands, &credIssuerCommands);
+    // registerClusters(commands, &credIssuerCommands);
+    // registerCommandsStorage(commands);
+
+    // return commands.Run(argc, argv);
+
+    return 0;
 }
