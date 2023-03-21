@@ -141,7 +141,7 @@ private:
         // messages.  Just include 30 chars before the error.
         constexpr ptrdiff_t kMaxContext = 30;
         std::string errorMarker;
-        if (error_start > kMaxContext)
+        if (sourceText && error_start > kMaxContext)
         {
             sourceText += (error_start - kMaxContext);
             error_start = kMaxContext;

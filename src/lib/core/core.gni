@@ -14,7 +14,7 @@
 
 declare_args() {
   # Enable logging. Shorthand for chip_error_logging, etc.
-  chip_logging = true
+  chip_logging = false
 }
 
 declare_args() {
