@@ -430,63 +430,98 @@ def buildUnifyBridge()
             def unifyCheckoutDir = workspaceTmpDir + "/overlay/unify"
             def saveDir = 'matter/out/'
             try {
-
-                def unify_bridge_docker = docker.image('artifactory.silabs.net/gsdk-docker-production/unify-cache/unify-matter:1.1.1-arm64')
-                def unify_bridge_docker_amd64 = docker.image('artifactory.silabs.net/gsdk-docker-production/unify-cache/unify-matter:1.1.1-amd64')
-                dir(dirPath)
-                {
-                    unify_bridge_docker.inside("-u root -v${unifyCheckoutDir}:/unify")
+                
+                withDockerRegistry([url: "https://artifactory.silabs.net ", credentialsId: 'svc_gsdk']) {
+                    def unify_bridge_docker_arm64 = docker.image('artifactory.silabs.net/unify-docker-dev/unify-matter-bridge/unify-matter:1.1.1-arm64')
+                    def unify_bridge_docker_armhf = docker.image('artifactory.silabs.net/unify-docker-dev/unify-matter-bridge/unify-matter:1.1.1-armhf')
+                    def unify_bridge_docker_amd64 = docker.image('artifactory.silabs.net/unify-docker-dev/unify-matter-bridge/unify-matter:1.1.1-amd64')
+                    dir(dirPath)
                     {
-                        withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
+                        // Currently official supported platform
+                        unify_bridge_docker_arm64.inside("-u root -v${unifyCheckoutDir}:/unify")
                         {
-                            echo "Build libunify"
-                            sh 'cd /unify && cmake -DCMAKE_INSTALL_PREFIX=$PWD/stage -GNinja -DCMAKE_TOOLCHAIN_FILE=../cmake/arm64_debian.cmake  -B build_unify_arm64/ -S components -DBUILD_TESTING=OFF'
-                            sh 'cd /unify && cmake --build build_unify_arm64'
-                            sh 'cd /unify && cmake --install build_unify_arm64 --prefix $PWD/stage'
-
-                            echo "Build Unify Matter Bridge"
-                            sh 'rm -rf ./.environment'
-                            sh 'git config --global --add safe.directory $(pwd)'
-                            sh 'git config --global --add safe.directory $(pwd)/third_party/pigweed/repo'
-                            def pkg_config_export = "export PKG_CONFIG_PATH=:/unify/stage/share/pkgconfig:/usr/lib/aarch64-linux-gnu/pkgconfig"
-
-                            // Compile the Unify Matter Bridge
-                            dir ("silabs_examples/unify-matter-bridge/linux")
+                            withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
                             {
-                                def out_path = "../../../out/silabs_examples/unify-matter-bridge/arm64_debian_bullseye"
-                                sh "../../../scripts/run_in_build_env.sh \"${pkg_config_export}; gn gen ${out_path} --args='target_cpu=\\\"arm64\\\"'\""
-                                sh "../../../scripts/run_in_build_env.sh \"${pkg_config_export}; ninja -C ${out_path}\""
-                            }
+                                // Build libunify for arm64
+                                echo "Build libunify for arm64"
+                                sh 'cd /unify && cmake -DCMAKE_INSTALL_PREFIX=$PWD/stage_arm64 -GNinja -DCMAKE_TOOLCHAIN_FILE=../cmake/arm64_debian.cmake  -B build_unify_arm64/ -S components -DBUILD_TESTING=OFF'
+                                sh 'cd /unify && cmake --build build_unify_arm64'
+                                sh 'cd /unify && cmake --install build_unify_arm64 --prefix $PWD/stage_arm64'
 
-                            // Compile chip-tool for Debian bullseye
-                            dir ("examples/chip-tool")
-                            {
-                                def out_path = "../../out/examples/chip-tool/arm64_debian_bullseye"
-                                sh "../../scripts/run_in_build_env.sh \"${pkg_config_export}; gn gen ${out_path} --args='target_cpu=\\\"arm64\\\"'\""
-                                sh "../../scripts/run_in_build_env.sh \"${pkg_config_export}; ninja -C ${out_path}\""
+                                echo "Build Unify Matter Bridge"
+                                sh 'rm -rf ./.environment'
+                                sh 'git config --global --add safe.directory $(pwd)'
+                                sh 'git config --global --add safe.directory $(pwd)/third_party/pigweed/repo'
+                                def pkg_config_export = "export PKG_CONFIG_PATH=:/unify/stage_arm64/share/pkgconfig:/usr/lib/aarch64-linux-gnu/pkgconfig"
+
+                                // Compile the Unify Matter Bridge for arm64
+                                dir ("silabs_examples/unify-matter-bridge/linux")
+                                {
+                                    def out_path = "../../../out/silabs_examples/unify-matter-bridge/arm64_debian_bullseye"
+                                    sh "../../../scripts/run_in_build_env.sh \"${pkg_config_export}; gn gen ${out_path} --args='target_cpu=\\\"arm64\\\"'\""
+                                    sh "../../../scripts/run_in_build_env.sh \"${pkg_config_export}; ninja -C ${out_path}\""
+                                }
+
+                                // Compile chip-tool for arm64
+                                dir ("examples/chip-tool")
+                                {
+                                    def out_path = "../../out/examples/chip-tool/arm64_debian_bullseye"
+                                    sh "../../scripts/run_in_build_env.sh \"${pkg_config_export}; gn gen ${out_path} --args='target_cpu=\\\"arm64\\\"'\""
+                                    sh "../../scripts/run_in_build_env.sh \"${pkg_config_export}; ninja -C ${out_path}\""
+                                }
                             }
                         }
-                    }
-                    unify_bridge_docker_amd64.inside("-u root -v${unifyCheckoutDir}:/unify")
-                    {
-                        withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
-                        {
-                            echo "Build libunify"
-                            sh 'cd /unify && cmake -DCMAKE_INSTALL_PREFIX=$PWD/stage_amd64 -GNinja -B build_unify_amd64/ -S components -DBUILD_TESTING=OFF'
-                            sh 'cd /unify && cmake --build build_unify_amd64'
-                            sh 'cd /unify && cmake --install build_unify_amd64 --prefix $PWD/stage_amd64'
-
-                            echo "Build Unify Matter Bridge"
-                            sh 'rm -rf ./.environment'
-                            sh 'git config --global --add safe.directory $(pwd)'
-                            sh 'git config --global --add safe.directory $(pwd)/third_party/pigweed/repo'
-                            def pkg_config_export = "export PKG_CONFIG_PATH=:/unify/stage_amd64/share/pkgconfig"
-
-                            // Execute Unit Tests
-                            dir ("silabs_examples/unify-matter-bridge/linux")
+                        // Delete this when SQA no longer needs an ARMHF build. 
+                        unify_bridge_docker_armhf.inside("-u root -v${unifyCheckoutDir}:/unify") {
+                            withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
                             {
-                                sh "../../../scripts/run_in_build_env.sh \"${pkg_config_export}; ../scripts/compile_tests.sh -t amd64\""
-                                sh "../scripts/run_tests.sh -b out/amd64_test"
+                                echo "Build libunify for armhf"
+                                sh 'cd /unify && cmake -DCMAKE_INSTALL_PREFIX=$PWD/stage_armhf -GNinja -DCMAKE_TOOLCHAIN_FILE=../cmake/armhf_debian.cmake  -B build_unify_armhf/ -S components -DBUILD_TESTING=OFF'
+                                sh 'cd /unify && cmake --build build_unify_armhf'
+                                sh 'cd /unify && cmake --install build_unify_armhf --prefix $PWD/stage_armhf'
+
+                                echo "Build Unify Matter Bridge armhf"
+                                sh 'rm -rf ./.environment'
+                                sh 'git config --global --add safe.directory $(pwd)'
+                                sh 'git config --global --add safe.directory $(pwd)/third_party/pigweed/repo'
+                                def pkg_config_export = "export PKG_CONFIG_PATH=:/unify/stage_armhf/share/pkgconfig:/usr/lib/arm-linux-gnueabihf/pkgconfig"
+
+                                dir ("silabs_examples/unify-matter-bridge/linux")
+                                {
+                                    def out_path = "../../../out/silabs_examples/unify-matter-bridge/armhf_debian_bullseye"
+                                    sh "../../../scripts/run_in_build_env.sh \"${pkg_config_export}; gn gen ${out_path} --args='target_cpu=\\\"arm\\\"'\""
+                                    sh "../../../scripts/run_in_build_env.sh \"${pkg_config_export}; ninja -C ${out_path}\""
+                                }
+
+                                dir ("examples/chip-tool")
+                                {
+                                    def out_path = "../../out/examples/chip-tool/armhf_debian_bullseye"
+                                    sh "../../scripts/run_in_build_env.sh \"${pkg_config_export}; gn gen ${out_path} --args='target_cpu=\\\"arm\\\"'\""
+                                    sh "../../scripts/run_in_build_env.sh \"${pkg_config_export}; ninja -C ${out_path}\""
+                                }
+                            }
+                        }
+                        unify_bridge_docker_amd64.inside("-u root -v${unifyCheckoutDir}:/unify")
+                        {
+                            withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
+                            {
+                                echo "Build libunify"
+                                sh 'cd /unify && cmake -DCMAKE_INSTALL_PREFIX=$PWD/stage_amd64 -GNinja -B build_unify_amd64/ -S components -DBUILD_TESTING=OFF'
+                                sh 'cd /unify && cmake --build build_unify_amd64'
+                                sh 'cd /unify && cmake --install build_unify_amd64 --prefix $PWD/stage_amd64'
+
+                                echo "Build Unify Matter Bridge"
+                                sh 'rm -rf ./.environment'
+                                sh 'git config --global --add safe.directory $(pwd)'
+                                sh 'git config --global --add safe.directory $(pwd)/third_party/pigweed/repo'
+                                def pkg_config_export = "export PKG_CONFIG_PATH=:/unify/stage_amd64/share/pkgconfig"
+
+                                // Execute Unit Tests
+                                dir ("silabs_examples/unify-matter-bridge/linux")
+                                {
+                                    sh "../../../scripts/run_in_build_env.sh \"${pkg_config_export}; ../scripts/compile_tests.sh -t amd64\""
+                                    sh "../scripts/run_tests.sh -b out/amd64_test"
+                                }
                             }
                         }
                     }
