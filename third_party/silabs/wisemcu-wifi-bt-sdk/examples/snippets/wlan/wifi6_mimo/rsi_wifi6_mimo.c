@@ -160,14 +160,22 @@ void switch_m4_frequency(void);
      0 - measure once for throughout interval configured */
 
 // Throughput parameters
+#ifdef FLOAT_PRINT_BYPASS
 uint64_t num_bits = 0;
+#else
+uint32_t num_bits           = 0;
+#endif
 uint32_t xfer_time;
 uint32_t t_start = 0;
 uint32_t t_end;
 float throughput;
 
 volatile uint8_t data_recvd = 0;
+#ifdef FLOAT_PRINT_BYPASS
 volatile uint64_t num_bytes = 0;
+#else
+volatile uint32_t num_bytes = 0;
+#endif
 
 // Memory to initialize driv
 uint8_t global_buf[GLOBAL_BUFF_LEN];
@@ -230,12 +238,21 @@ void socket_async_recive(uint32_t sock_no, uint8_t *buffer, uint32_t length)
  *====================================================*/
 void compute_throughput(void)
 {
-  num_bits   = num_bytes * 8;                               // number of bits
-  xfer_time  = ((t_end - t_start) / 1000);                  // data transfer time
+  num_bits  = num_bytes * 8;              // number of bits
+  xfer_time = ((t_end - t_start) / 1000); // data transfer time
+#ifdef FLOAT_PRINT_BYPASS
+  uint32_t throughput;
+  throughput = (((float)(num_bits) / xfer_time) / 1000000); //Throughput calculation
+#ifdef RSI_DEBUG_PRINTS
+  LOG_PRINT("throughput in mbps=%d \r\n", (throughput));
+  LOG_PRINT("Time taken in sec: %lu \r\n", xfer_time);
+#endif
+#else
   throughput = (((float)(num_bits) / xfer_time) / 1000000); //Throughput calculation
 #ifdef RSI_DEBUG_PRINTS
   LOG_PRINT("throughput in mbps=%f \r\n", (throughput));
   LOG_PRINT("Time taken in sec: %lu \r\n", xfer_time);
+#endif
 #endif
 }
 
@@ -310,11 +327,19 @@ void measure_throughput(uint32_t pkt_length, uint32_t tx_rx)
  *====================================================*/
 void measure_throughput(uint32_t total_bytes, uint32_t start_time, uint32_t end_time)
 {
+#ifdef FLOAT_PRINT_BYPASS
+  uint32_t through_put;
+  through_put = ((float)(total_bytes * 8) / ((end_time - start_time)));
+  through_put /= 1000;
+  LOG_PRINT("\r\nThroughput in mbps is : %d\r\n", through_put);
+  LOG_PRINT("Time taken in sec: %lu \r\n", (uint32_t)((end_time - start_time) / 1000));
+#else
   float through_put;
   through_put = ((float)(total_bytes * 8) / ((end_time - start_time)));
   through_put /= 1000;
   LOG_PRINT("\r\nThroughput in mbps is : %3.2f\r\n", through_put);
   LOG_PRINT("Time taken in sec: %lu \r\n", (uint32_t)((end_time - start_time) / 1000));
+#endif
 }
 #endif
 
@@ -428,7 +453,7 @@ int32_t application()
 #if DHCP_MODE
   status = rsi_config_ipaddress(RSI_IP_VERSION_4, dhcp_mode, 0, 0, 0, ip_buff, sizeof(ip_buff), 0);
 #else
-  status = rsi_config_ipaddress(RSI_IP_VERSION_4,
+  status            = rsi_config_ipaddress(RSI_IP_VERSION_4,
                                 RSI_STATIC,
                                 (uint8_t *)&ip_addr,
                                 (uint8_t *)&network_mask,
@@ -494,7 +519,7 @@ int32_t application()
         // Measure throughput if avg time is reached
         if ((rsi_hal_gettickcount() - tt_start) >= THROUGHPUT_AVG_TIME) {
           // store the time after sending data
-          tt_end = rsi_hal_gettickcount();
+          tt_end         = rsi_hal_gettickcount();
           total_bytes_tx = pkt_cnt * BUF_SIZE;
           // Measure throughput for every interval of THROUGHPUT_AVG_TIME
 #if CONTINUOUS_THROUGHPUT
@@ -502,8 +527,8 @@ int32_t application()
           measure_throughput(total_bytes_tx, tt_start, tt_end);
           // reset to initial value
           total_bytes_tx = 0;
-          pkt_cnt = 0;
-          tt_start = rsi_hal_gettickcount();
+          pkt_cnt        = 0;
+          tt_start       = rsi_hal_gettickcount();
 #else
           LOG_PRINT("\r\nUDP TX completed\r\n");
           // Measure throughput
@@ -789,19 +814,19 @@ int main(void)
 
 #ifdef RSI_M4_INTERFACE
   //! Driver initialization
-   status = rsi_driver_init(global_buf, GLOBAL_BUFF_LEN);
-   if ((status < 0) || (status > GLOBAL_BUFF_LEN)) {
-     return status;
-   }
+  status = rsi_driver_init(global_buf, GLOBAL_BUFF_LEN);
+  if ((status < 0) || (status > GLOBAL_BUFF_LEN)) {
+    return status;
+  }
 
-   //! SiLabs module initialization
-   status = rsi_device_init(LOAD_NWP_FW);
-   if (status != RSI_SUCCESS) {
-     LOG_PRINT("\r\nDevice Initialization Failed\r\n");
-     return status;
-   } else {
-     LOG_PRINT("\r\nDevice Initialization Success\r\n");
-   }
+  //! SiLabs module initialization
+  status = rsi_device_init(LOAD_NWP_FW);
+  if (status != RSI_SUCCESS) {
+    LOG_PRINT("\r\nDevice Initialization Failed\r\n");
+    return status;
+  } else {
+    LOG_PRINT("\r\nDevice Initialization Success\r\n");
+  }
 #endif
 #ifdef RSI_WITH_OS
   rsi_task_handle_t application_handle = NULL;

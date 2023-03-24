@@ -29,7 +29,6 @@
  * Include files
  **/
 
-
 #include "i2c2_app.h"
 
 /* Private typedef -----------------------------------------------------------*/
@@ -65,7 +64,7 @@ static ARM_DRIVER_I2C *I2Cdrv = &Driver_I2C2;
 extern ARM_DRIVER_I2C Driver_I2C2;
 
 /* General return codes */
-#define ARM_DRIVER_OK                 0 ///< Operation succeeded
+#define ARM_DRIVER_OK                0  ///< Operation succeeded
 #define ARM_DRIVER_ERROR             -1 ///< Unspecified error
 #define ARM_DRIVER_ERROR_BUSY        -2 ///< Driver is busy
 #define ARM_DRIVER_ERROR_TIMEOUT     -3 ///< Timeout occurred
@@ -132,11 +131,10 @@ int32_t EEPROM_WriteBuf2(uint8_t sub_addr, const uint8_t *buf, uint32_t len)
 
   start = rsi_hal_gettickcount();
 
-  while ((I2Cdrv->GetStatus().busy))
-     {
-       if(!(rsi_hal_gettickcount() - start < 100))
-           return ARM_DRIVER_ERROR_TIMEOUT;
-     }
+  while ((I2Cdrv->GetStatus().busy)) {
+    if (!(rsi_hal_gettickcount() - start < 100))
+      return ARM_DRIVER_ERROR_TIMEOUT;
+  }
   cnt_num2 = I2Cdrv->GetDataCount();
   if (cnt_num2 != (len + 1)) {
     return -1;
@@ -227,7 +225,7 @@ void setup_i2c2(void)
   ARM_DRIVER_VERSION version;
 
   drv_info2 = &Driver_I2C2;
-  version  = drv_info2->GetVersion();
+  version   = drv_info2->GetVersion();
   if (version.api < 0x10A) {
     // error handling
     ErrorHandler2();
@@ -278,7 +276,7 @@ void ARM_I2C_SignalEvent2(uint32_t event)
 }
 
 int I2C2_Init(void)
-{ 
+{
 
   int32_t status = ARM_DRIVER_OK;
 
@@ -317,47 +315,47 @@ int I2c2_Transfer(void)
 	 * To reconfigure the default setting of SystemInit() function, refer to
 	 * startup_RS1xxxx.c file
 	 */
- 	uint32_t forever = 1, comp = 0;
+  uint32_t forever = 1, comp = 0;
   int32_t status = ARM_DRIVER_OK;
 
-    /* Writes data to EEPROM slave */
-    status = EEPROM_WriteBuf2(OFFSET_ADDR, buf2, TX_LEN);
-    if (status != ARM_DRIVER_OK) {
-     DEBUGOUT("\r\nFailed to Write Data into EEPROM(I2C2 Slave), Error Code : %d\r\n", status);
-      return status;
+  /* Writes data to EEPROM slave */
+  status = EEPROM_WriteBuf2(OFFSET_ADDR, buf2, TX_LEN);
+  if (status != ARM_DRIVER_OK) {
+    DEBUGOUT("\r\nFailed to Write Data into EEPROM(I2C2 Slave), Error Code : %d\r\n", status);
+    return status;
+  } else {
+    DEBUGOUT("\r\nWrite Data into EEPROM(I2C2 Slave)\r\n");
+  }
+
+  //5ms delay after stop to start
+  rsi_delay_ms(5);
+
+  /* Reads data from EEPROM slave */
+  status = EEPROM_ReadBuf2(OFFSET_ADDR, rd_buf2, RX_LEN);
+  if (status != ARM_DRIVER_OK) {
+    DEBUGOUT("\r\nFailed to Read Data From EEPROM(I2C2 Slave), Error Code : %d\r\n", status);
+    return status;
+  } else {
+    DEBUGOUT("\r\nStart Reading Data From EEPROM(I2C2 Slave)\r\n");
+  }
+
+  /*waits until rx_done=0  */
+  while (!rx_done2)
+    ;
+  rx_done2 = 0;
+  DEBUGOUT("\r\nCompleted Reading Data From EEPROM\r\n");
+  for (comp = 0; comp < sizeof(rd_buf2); comp++) {
+    if (buf2[comp] == rd_buf2[comp]) {
+      continue;
     } else {
-        DEBUGOUT("\r\nWrite Data into EEPROM(I2C2 Slave)\r\n");
-      }
-
-    //5ms delay after stop to start
-    rsi_delay_ms(5);
-
-    /* Reads data from EEPROM slave */
-    status = EEPROM_ReadBuf2(OFFSET_ADDR, rd_buf2, RX_LEN);
-    if (status != ARM_DRIVER_OK) {
-      DEBUGOUT("\r\nFailed to Read Data From EEPROM(I2C2 Slave), Error Code : %d\r\n", status);
-      return status;
-    } else {
-        DEBUGOUT("\r\nStart Reading Data From EEPROM(I2C2 Slave)\r\n");
-      }
-
-    /*waits until rx_done=0  */
-    while (!rx_done2)
-      ;
-    rx_done2 = 0;
-    DEBUGOUT("\r\nCompleted Reading Data From EEPROM\r\n");
-    for (comp = 0; comp < sizeof(rd_buf2); comp++) {
-      if (buf2[comp] == rd_buf2[comp]) {
-        continue;
-      } else {
-        break;
-      }
+      break;
     }
+  }
 
-    if (comp == sizeof(rd_buf2)) {
-      DEBUGOUT("\r\nI2C2 Data Comparison Success\r\n");
-      I2C2_TRANSFER = 0 ;
-    } else {
-      DEBUGOUT("\r\nI2C2 Data Comparison Fail\r\n");
-    }
+  if (comp == sizeof(rd_buf2)) {
+    DEBUGOUT("\r\nI2C2 Data Comparison Success\r\n");
+    I2C2_TRANSFER = 0;
+  } else {
+    DEBUGOUT("\r\nI2C2 Data Comparison Fail\r\n");
+  }
 }

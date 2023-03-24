@@ -25,10 +25,10 @@
 #include "rsi_chip.h"
 #include "rsi_board.h"
 
-#define RESERVED_IRQ_COUNT    16
-#define EXT_IRQ_COUNT         98
-#define VECTOR_TABLE_ENTRIES (RESERVED_IRQ_COUNT + EXT_IRQ_COUNT) 
-uint32_t ramVector[VECTOR_TABLE_ENTRIES] __attribute__ ((aligned(256)));
+#define RESERVED_IRQ_COUNT   16
+#define EXT_IRQ_COUNT        98
+#define VECTOR_TABLE_ENTRIES (RESERVED_IRQ_COUNT + EXT_IRQ_COUNT)
+uint32_t ramVector[VECTOR_TABLE_ENTRIES] __attribute__((aligned(256)));
 
 void hardware_setup(void);
 #define ULP_GPIO_PIN
@@ -53,29 +53,28 @@ int main(void)
   int forever = 1, analog_pin = 0, pad_sel;
 
   //copying the vector table from flash to ram
-  memcpy(ramVector, (uint32_t*)SCB->VTOR, sizeof(uint32_t) * VECTOR_TABLE_ENTRIES);
+  memcpy(ramVector, (uint32_t *)SCB->VTOR, sizeof(uint32_t) * VECTOR_TABLE_ENTRIES);
 
   //assing the ram vector adress to VTOR register
-  SCB->VTOR = (uint32_t)ramVector; 
+  SCB->VTOR = (uint32_t)ramVector;
 
-  // Configures the system default clock and power configurations 
+  // Configures the system default clock and power configurations
   SystemCoreClockUpdate();
 
   /* Switching MCU from PS4 to PS2 state */
   hardware_setup();
- 
+
 #ifdef ULP_GPIO_PIN
-  // Set pin in GPIO mode  
+  // Set pin in GPIO mode
   RSI_EGPIO_SetPinMux(EGPIO1, PORT, PIN, EGPIO_PIN_MUX_MODE0);
-  // Set output direction  
+  // Set output direction
   RSI_EGPIO_SetDir(EGPIO1, PORT, PIN, EGPIO_CONFIG_DIR_OUTPUT);
-  while (1) {
-    // Toggle gpio pin in loop 
-    RSI_EGPIO_SetPin(EGPIO1, PORT, PIN, 1);
-    RSI_EGPIO_SetPin(EGPIO1, PORT, PIN, 0);
-  }
+
+  // Toggle gpio pin from High to Low
+  RSI_EGPIO_SetPin(EGPIO1, PORT, PIN, 1);
+  RSI_EGPIO_SetPin(EGPIO1, PORT, PIN, 0);
+
 #endif
-  //Statement will never reach here , just to satisfy the standard main 
+  //Statement will never reach here , just to satisfy the standard main
   return 0;
 }
-

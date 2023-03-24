@@ -9,7 +9,7 @@ quality: alpha
 sdk: {id: gecko_sdk, version: 4.1.0}
 sdk_extension:
   - id: wiseconnect
-    version: 1.0.0
+    version: 1.0.1
 source:
   - path: cts.c
 toolchain_settings: []
@@ -35,13 +35,11 @@ component:
 define:
   - name: __GNUC__
   - name: RSI_M4_INTERFACE
-  - name: COMMON_FLASH_EN
 provides:
   - name: si91x_soc
 other_file:
-  - path: resources\readme\image502a.png
-  - path: resources\readme\image502b.png
-  - path: resources\readme\image502c.png
+  - path: resources/readme/image502a.png
+  - path: resources/readme/image502c.png
 readme:
   - path: readme.md
 ui_hints:

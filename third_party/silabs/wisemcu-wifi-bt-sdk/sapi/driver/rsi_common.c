@@ -135,6 +135,9 @@ int32_t rsi_driver_common_send_cmd(rsi_common_cmd_request_t cmd, rsi_pkt_t *pkt)
     case RSI_COMMON_REQ_FW_VERSION: {
 
     } break;
+    case RSI_COMMON_REQ_MODULE_TYPE: {
+
+    } break;
     case RSI_COMMON_REQ_OPERMODE: {
       // opermode Parameters
       rsi_opermode_t *rsi_opermode = (rsi_opermode_t *)pkt->data;
@@ -206,7 +209,8 @@ int32_t rsi_driver_common_send_cmd(rsi_common_cmd_request_t cmd, rsi_pkt_t *pkt)
         rsi_opermode->ble_ext_feature_bit_map[2] |=
           (RSI_BLE_SET_SCAN_RESP_DATA_FROM_HOST); //Set SCAN Resp Data from app
         rsi_opermode->ble_ext_feature_bit_map[2] |=
-          (RSI_BLE_DISABLE_CODED_PHY_FROM_HOST << 1); //Disable Coded PHY from app
+          (RSI_BLE_DISABLE_CODED_PHY_FROM_HOST << 1);                            //Disable Coded PHY from app
+        rsi_opermode->ble_ext_feature_bit_map[2] |= (BLE_CP_BUFF_SIZE_512 << 2); // BIT 18 for BLE 512 Buff
 #if BLE_SIMPLE_GATT
         rsi_opermode->ble_ext_feature_bit_map[1] |= (1 << 5);
 #endif
@@ -738,6 +742,21 @@ int32_t rsi_driver_process_common_recv_cmd(rsi_pkt_t *pkt)
       }
 
     } break;
+
+    case RSI_COMMON_RSP_MODULE_TYPE: {
+
+      if (status == RSI_SUCCESS) {
+        // check the length of application buffer and copy the module type
+        if ((rsi_common_cb->app_buffer != NULL) && (rsi_common_cb->app_buffer_length != 0)) {
+          copy_length = (payload_length < rsi_common_cb->app_buffer_length) ? (payload_length)
+                                                                            : (rsi_common_cb->app_buffer_length);
+          memcpy(rsi_common_cb->app_buffer, payload, copy_length);
+          rsi_common_cb->app_buffer = NULL;
+        }
+      }
+
+    } break;
+
     case RSI_COMMON_RSP_GET_RTC_TIMER: {
 
       if (status == RSI_SUCCESS) {
@@ -1105,10 +1124,8 @@ void rsi_powersave_gpio_init(void)
 void rsi_common_packet_transfer_done(rsi_pkt_t *pkt)
 {
   UNUSED_PARAMETER(pkt); //This statement is added only to resolve compilation warning, value is unchanged
-#ifdef RSI_WLAN_ENABLE
   // Set wlan status as success
-  rsi_wlan_set_status(RSI_SUCCESS);
-#endif
+  rsi_common_set_status(RSI_SUCCESS);
 }
 
 /*====================================================*/

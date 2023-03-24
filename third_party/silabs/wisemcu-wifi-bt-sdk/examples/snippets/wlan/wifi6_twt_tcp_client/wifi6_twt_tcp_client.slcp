@@ -16,7 +16,7 @@ xml_filter: Undefined
 sdk: {id: gecko_sdk, version: 4.1.0}
 sdk_extension:
   - id: wiseconnect
-    version: 1.0.0
+    version: 1.0.1
 source:
   - path: rsi_twt_tcp_client.c
 include:
@@ -33,12 +33,48 @@ toolchain_settings: []
 readme:
   - path: readme.md
 other_file:
+  - path: resources/readme/energy_profiler_step_1.png
+  - path: resources/readme/energy_profiler_step_5.png
+  - path: resources/readme/sdk_edit_warning.png
   - path: resources/readme/twt.png
   - path: resources/readme/image216b.png
   - path: resources/readme/image211.png
+  - path: resources/readme/usb_to_uart_2.png
+  - path: resources/readme/outputs_2.png
+  - path: resources/readme/post_build_script.png
+  - path: resources/readme/energy_profiler_step_4.png
   - path: resources/readme/image217d.png
+  - path: resources/readme/serial_port.png
   - path: resources/readme/image218.png
+  - path: resources/readme/build_project_ncp.png
+  - path: resources/readme/usb_to_uart_1.png
+  - path: resources/readme/efm32.png
+  - path: resources/readme/tcp_twt_example_ncp.png
+  - path: resources/readme/tcp_twt_example_soc.png
+  - path: resources/readme/create_project.png
+  - path: resources/readme/run.png
+  - path: resources/readme/efr32.png
+  - path: resources/readme/studio_path_rsi_wlan_common_config_2.png
+  - path: resources/readme/energy_profiler_step_7.png
   - path: resources/readme/image216c.png
+  - path: resources/readme/ncp_macros.png
+  - path: resources/readme/studio_path_rsi_wlan_common_config_1.png
+  - path: resources/readme/soc_board_detection.png
+  - path: resources/readme/energy_profiler_step_3.png
+  - path: resources/readme/outputs_1.png
+  - path: resources/readme/application_prints_1.png
+  - path: resources/readme/setup_soc.png
+  - path: resources/readme/energy_profiler_step_2.png
+  - path: resources/readme/soc_macros.png
+  - path: resources/readme/build_project_soc.png
+  - path: resources/readme/setup_ncp.png
+  - path: resources/readme/port_selection.png
+  - path: resources/readme/port_selection_soc.png
+  - path: resources/readme/energy_profiler_step_6.png
+  - path: resources/readme/serial_port_setup.png
+  - path: resources/readme/program_device.png
+  - path: resources/readme/energy_profiler_step_8.png
+  - path: resources/readme/examples_demos.png
 ui_hints:
   highlight:
     - path: readme.md

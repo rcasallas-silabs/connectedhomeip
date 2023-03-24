@@ -35,7 +35,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+/** @addtogroup SOC12
+* @{
+*/
 /**
  * @fn          STATIC INLINE error_t RSI_MCPWM_Start(RSI_MCPWM_T *pMCPWM , uint8_t chnlNum)
  * @brief		    This API is used to start the MCPWM operation for required channel
@@ -434,5 +436,5 @@ uint16_t RSI_MCPWM_GetTimePeriod(RSI_MCPWM_T *pMCPWM, uint8_t chnlNum, uint16_t 
 }
 #endif
 #endif
-
+/** @} */
 /* @}end of  RSI_PWM_DRIVERS */

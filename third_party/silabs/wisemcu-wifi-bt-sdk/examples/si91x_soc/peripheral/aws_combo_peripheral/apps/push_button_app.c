@@ -23,7 +23,7 @@
 #include "rsi_os.h"
 #include <FreeRTOS.h>
 #include "task.h"
-extern  rsi_semaphore_handle_t pwm_thread_sem ;
+extern rsi_semaphore_handle_t pwm_thread_sem;
 #endif
 
 /* Private typedef ------------------------------------------------------------------------------------------------*/
@@ -57,12 +57,11 @@ void NPSS_GPIO_IRQHandler(void)
   if (intrStatus & NPSS_GPIO_2_INTR) {
     RSI_NPSSGPIO_ClrIntr(NPSS_GPIO_2_INTR);
   }
-	#ifdef RSI_WITH_OS
-	rsi_semaphore_post_from_isr(&pwm_thread_sem);
-	#else
+#ifdef RSI_WITH_OS
+  rsi_semaphore_post_from_isr(&pwm_thread_sem);
+#else
   peripheral = PWM;
-	#endif
-	
+#endif
 }
 
 /**
@@ -108,10 +107,8 @@ int Push_Button_Intr(void)
 
   /*  NVIC Enable */
   NVIC_EnableIRQ(NPSS_TO_MCU_GPIO_INTR_IRQn);
-	
-	  
-  NVIC_SetPriority(NPSS_TO_MCU_GPIO_INTR_IRQn, 7);
 
+  NVIC_SetPriority(NPSS_TO_MCU_GPIO_INTR_IRQn, 7);
 
   return 0;
 }

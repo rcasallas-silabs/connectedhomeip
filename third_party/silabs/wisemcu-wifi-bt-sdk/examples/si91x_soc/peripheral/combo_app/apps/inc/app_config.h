@@ -20,11 +20,9 @@
  */
 #include "rsi_chip.h"
 
-#define EMPTY 0
-#define PWM 2
-#define I2C 3
-#define SPI 4
-#define PUSH_BUTTON 5
+#define EMPTY         0
+#define PWM           2
+#define I2C           3
+#define SPI           4
+#define PUSH_BUTTON   5
 #define PIN_INTERRUPT 6
-
-

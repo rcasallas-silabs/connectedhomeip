@@ -28,7 +28,7 @@
 
 #define RSI_BLE_MAX_RESP_LIST   0x05
 #define RSI_MAX_ADV_REPORT_SIZE 31
-#define BLE_PASSKEY_SIZE 6
+#define BLE_PASSKEY_SIZE        6
 
 #ifndef BLE_OUTPUT_POWER_FRONT_END_LOSS
 #define BLE_OUTPUT_POWER_FRONT_END_LOSS 0 /* db */
@@ -1037,6 +1037,9 @@ typedef struct chip_ble_buffers_stats_s {
  * *              GAP API's Declarations
  * ******************************************************/
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 //*==============================================*/
 /**
  * @fn         rsi_convert_db_to_powindex
@@ -1070,10 +1073,6 @@ void rsi_ble_update_directed_address(uint8_t *remote_dev_addr);
  * @fn         rsi_ble_encrypt
  * */
 int32_t rsi_ble_encrypt(uint8_t *, uint8_t *, uint8_t *);
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /*==============================================*/
 /**
@@ -1129,6 +1128,12 @@ int32_t rsi_ble_connect_with_params(uint8_t remote_dev_addr_type,
                                     uint16_t conn_interval_min,
                                     uint16_t conn_latency,
                                     uint16_t supervision_tout);
+
+/*==============================================*/
+/**
+ * @fn         rsi_ble_enhance_connect_with_params
+ * */
+int32_t rsi_ble_enhance_connect_with_params(void *ble_enhance_conn_params);
 
 /*==============================================*/
 /**
@@ -1439,6 +1444,11 @@ int32_t rsi_ble_gatt_read_response(uint8_t *dev_addr,
 int32_t rsi_ble_smp_pair_request(uint8_t *remote_dev_address, uint8_t io_capability, uint8_t mitm_req);
 
 /**
+ * @fn         rsi_ble_smp_pair_failed
+ */
+int32_t rsi_ble_smp_pair_failed(uint8_t *remote_dev_address, uint8_t reason);
+
+/**
  * @fn         rsi_ble_smp_pair_response
  */
 int32_t rsi_ble_smp_pair_response(uint8_t *remote_dev_address, uint8_t io_capability, uint8_t mitm_req);
@@ -1495,7 +1505,7 @@ typedef void (*rsi_ble_on_adv_report_event_t)(rsi_ble_event_adv_report_t *rsi_bl
  * @param[out]  rsi_ble_event_conn contains the BLE connection status. Please refer rsi_ble_event_conn_status_s for more info.
  * @return      void
  * @section description
- * This callback function will be called if the BLE connection status is received from the module. For BLE 4.0 version this callback will be triggered \n
+ * This callback function will be called if the BLE connection status is received from the module. For BLE 4.1 and lower version this callback will be triggered \n
  * This callback has to be registered using rsi_ble_gap_register_callbacks API
  */
 typedef void (*rsi_ble_on_connect_t)(rsi_ble_event_conn_status_t *rsi_ble_event_conn);

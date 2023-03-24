@@ -43,7 +43,7 @@
 #define RSI_CUSTOM_FEATURE_BIT_MAP FEAT_CUSTOM_FEAT_EXTENTION_VALID
 
 // To set Extended custom feature select bit map
-#define RSI_EXT_CUSTOM_FEATURE_BIT_MAP EXT_FEAT_256K_MODE
+#define RSI_EXT_CUSTOM_FEATURE_BIT_MAP RAM_LEVEL_NWP_MEDIUM_MCU_MEDIUM
 
 #define RSI_EXT_TCPIP_FEATURE_BITMAP 0
 
@@ -301,7 +301,6 @@
 #define RSI_HAND_SHAKE_TYPE MSG_BASED
 #endif
 
-
 // 0 - LP, 1- ULP mode with RAM retention and 2 - ULP with Non RAM retention
 #define RSI_SELECT_LP_OR_ULP_MODE RSI_ULP_WITH_RAM_RET
 
@@ -365,10 +364,10 @@
 //RSI_ENABLE or RSI_DISABLE Timeout support
 #define RSI_TIMEOUT_SUPPORT RSI_DISABLE
 
-// roaming threshold value
-#define RSI_TIMEOUT_BIT_MAP 1
+// timeout bitmap
+#define RSI_TIMEOUT_BIT_MAP RSI_ASSOCIATION_AND_AUTHENTICATION_TIMEOUT_MSEC
 
-// roaming hysteresis value
+// timeout value
 #define RSI_TIMEOUT_VALUE 1500
 
 // Timeout for ping request

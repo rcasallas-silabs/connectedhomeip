@@ -32,14 +32,19 @@
 #include "sl_device_init_lfxo_config.h"
 #include "sl_device_init_emu_config.h"
 #include "rsi_board_configuration.h"
+#ifdef RSI_UART_INTERFACE
+#include "rsi_uart.h"
+#endif						 
 
 #ifndef WEAK
 #define WEAK  __attribute__((weak))
 #endif
 
+#ifdef RSI_SPI_INTERFACE						
 #ifndef RSI_HAL_NO_COM_PORT
 static void rsi_hal_com_port_init(void);
 #endif
+#endif	  
 
 #ifdef RSI_CALIB_MODE_EN
 void rsi_calib_uart_recv_isr(uint8_t cmd_char);
@@ -50,6 +55,89 @@ void rsi_calib_uart_recv_isr(uint8_t cmd_char);
 
 //! packet pending interrupt priority
 #define	PACKET_PENDING_INT_PRI	3
+#ifdef RSI_UART_INTERFACE
+
+#define ITM_Port32(n) (*((volatile unsigned int *)(0xE0000000+4*n)))
+
+//! Two Retarget IO functions with the read/write functions
+int RETARGET_WriteChar(char c){
+  return ITM_SendChar (c);
+}
+int RETARGET_ReadChar(void){
+  return 0;
+}
+
+
+int _read(int file, char *ptr, int len);
+int _write(int file, const char *ptr, int len);
+
+/**************************************************************************//**
+ * @brief
+ *  Read from a file.
+ *
+ * @param[in] file
+ *  Descriptor for the file you want to read from.
+ *
+ * @param[in] ptr
+ *  Pointer to the chacaters that are beeing read.
+ *
+ * @param[in] len
+ *  Number of characters to be read.
+ *
+ * @return
+ *  Number of characters that have been read.
+ *****************************************************************************/
+int _read(int file, char *ptr, int len)
+{
+  int c, rxCount = 0;
+
+  (void) file;
+
+  while (len--) {
+    if ((c = RETARGET_ReadChar()) != -1) {
+      *ptr++ = c;
+      rxCount++;
+    } else {
+      break;
+    }
+  }
+
+  if (rxCount <= 0) {
+    return -1;                        /* Error exit */
+  }
+
+  return rxCount;
+}
+
+/**************************************************************************//**
+ * @brief
+ *  Write to a file.
+ *
+ * @param[in] file
+ *  Descriptor for the file you want to write to.
+ *
+ * @param[in] ptr
+ *  Pointer to the text you want to write
+ *
+ * @param[in] len
+ *  Number of characters to be written.
+ *
+ * @return
+ *  Number of characters that have been written.
+ *****************************************************************************/
+int _write(int file, const char *ptr, int len)
+{
+  int txCount;
+
+  (void) file;
+
+  for (txCount = 0; txCount < len; txCount++) {
+    RETARGET_WriteChar(*ptr++);
+  }
+
+  return len;
+}
+#endif
 
 /**************************************************************************//**
  * @brief
@@ -119,7 +207,7 @@ void initLdma(void)
   LDMA_Init(&ldmaInit);
 }
 
-#if 0
+#ifdef RSI_UART_INTERFACE
 /***************************************************************************//**
  * Configure SWO - serial wire output
  ******************************************************************************/
@@ -230,6 +318,7 @@ void rsi_hal_board_init(void)
 #ifndef RSI_HAL_NO_CLOCK_INIT
   // Initializes the platform
   CHIP_Init();
+#ifdef RSI_SPI_INTERFACE						
 
   // Initialize and enable the HFXO for the crystal on the radio board
   CMU_HFXOInit_TypeDef hfxoInit = CMU_HFXOINIT_DEFAULT;
@@ -266,7 +355,7 @@ void rsi_hal_board_init(void)
   // Set Systick Intr priority
   NVIC_SetPriority(SysTick_IRQn, SYSTICK_INTR_PRI);
 #endif
-#endif
+
 
 //  swo_setup();
   // Initialize GPIO and USART0
@@ -283,11 +372,24 @@ void rsi_hal_board_init(void)
 
   //! configure packet pending interrupt priority
   NVIC_SetPriority(GPIO_ODD_IRQn, PACKET_PENDING_INT_PRI);
+#ifdef EXP_BOARD
+  NVIC_SetPriority(GPIO_EVEN_IRQn, PACKET_PENDING_INT_PRI);
+  NVIC_EnableIRQ(GPIO_EVEN_IRQn);
+#endif
   
   // Configure interrupt pin
   GPIO_PinModeSet(INTERRUPT_PIN.port, INTERRUPT_PIN.pin, gpioModeInput, 0);
+#ifdef RSI_ACTIVE_LOW  
+  GPIO_ExtIntConfig(INTERRUPT_PIN.port, INTERRUPT_PIN.pin, INTERRUPT_PIN.pin,false, true, true);
+#else
   GPIO_ExtIntConfig(INTERRUPT_PIN.port, INTERRUPT_PIN.pin, INTERRUPT_PIN.pin, true, false, true);
-
+#endif
+#endif
+#endif
+#ifdef RSI_UART_INTERFACE
+  SysTick_Config(CMU_ClockFreqGet(cmuClock_CORE) / 1000);
+  swo_setup();
+#endif	  
 #ifdef LOGGING_STATS
   // Configure logging stats gpio pin
   GPIO_PinModeSet(LOGGING_WAKE_INDICATOR_PIN.port, LOGGING_WAKE_INDICATOR_PIN.pin, gpioModeInput, 1);
@@ -310,6 +412,7 @@ void rsi_hal_board_init(void)
  */
 
 
+#ifdef RSI_SPI_INTERFACE										   
 void rsi_switch_to_high_clk_freq()
 {
   // Initializes the high speed clock
@@ -475,3 +578,4 @@ void USART0_RX_IRQHandler(void)
 }
 
 #endif
+#endif																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																			   

@@ -16,7 +16,7 @@ xml_filter: Undefined
 sdk: {id: gecko_sdk, version: 4.1.0}
 sdk_extension:
   - id: wiseconnect
-    version: 1.0.0
+    version: 1.0.1
 source:
   - path: rsi_ble_app.c
   - path: rsi_wlan_app.c
@@ -35,7 +35,7 @@ requires:
   - name: wiseconnect_sapi_sockets
   - name: wiseconnect_resources_certificates
 define:
-   - name: EXECUTION_FROM_RAM
+  - name: EXECUTION_FROM_RAM
 template_contribution:
   - name: EXECUTION_FROM_RAM
     value: 1
@@ -46,17 +46,30 @@ other_file:
   - path: resources/readme/ncpboarddetection112.png
   - path: resources/readme/device_connection.png
   - path: resources/readme/image254.png
+  - path: resources/readme/buildncp1.png
+  - path: resources/readme/buildsoc1.png
+  - path: resources/readme/buildsuccesssoc1.png
   - path: resources/readme/image263wsbbncp.png
+  - path: resources/readme/buildsoc2.png
   - path: resources/readme/device_advertising.png
-  - path: resources/readme/BLE_send_data.png
   - path: resources/readme/device_connected.png
+  - path: resources/readme/ble_send_data.png
+  - path: resources/readme/creationfinal.png
   - path: resources/readme/image255.png
+  - path: resources/readme/server_certificates.png
+  - path: resources/readme/open_ssl_server_prints.png
   - path: resources/readme/image263wsbb.png
+  - path: resources/readme/buildsucessncp1.png
+  - path: resources/readme/ssl_server_connection_established.png
   - path: resources/readme/enable_notifications.png
   - path: resources/readme/socboarddetection111.png
+  - path: resources/readme/ssl_server_data.png
+  - path: resources/readme/ssl_server_socket.png
+  - path: resources/readme/ble_received_data.png
   - path: resources/readme/efr_connect_mobile_app.png
-  - path: resources/readme/BLE_received_data.png
+  - path: resources/readme/serial_teriminal_ncp_prints.png
   - path: resources/readme/projctselection113.png
+  - path: resources/readme/ssl_server_data_transfer.png
 ui_hints:
   highlight:
     - path: readme.md

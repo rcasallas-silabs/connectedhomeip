@@ -50,7 +50,9 @@ rsi_driver_cb_non_rom_t *rsi_driver_cb_non_rom = NULL;
 #endif
 #define ZB_PKT   5
 #define WLAN_PKT 6
+#ifndef RSI_UART_INTERFACE
 uint8_t rsi_get_intr_status(void);
+#endif
 /** @addtogroup DRIVER8
 * @{
 */
@@ -204,10 +206,13 @@ void rsi_tx_event_handler(void)
     // Read packet from BT/BLE Common Queue
     pkt = (rsi_pkt_t *)(rsi_driver_cb->bt_single_tx_q.head);
 
-    buf_ptr = (uint8_t *)pkt->desc;
+    /* GAR-8247: Check for the Null Pointer and proceed with Buffer full checks */
+    if (pkt != NULL) {
+      buf_ptr = (uint8_t *)pkt->desc;
 
-    // Get Frame type
-    frame_type = buf_ptr[2];
+      // Get Frame type
+      frame_type = buf_ptr[2];
+    }
 #endif
     // Read interrupt status register to check buffer full condition
     ret_status = rsi_device_interrupt_status(&int_status);
@@ -618,10 +623,12 @@ void rsi_rx_event_handler(void)
 {
   uint8_t queue_no;
   uint8_t frame_type;
-  uint16_t status    = 0;
-  uint8_t *buf_ptr   = NULL;
-  rsi_pkt_t *rx_pkt  = NULL;
+  uint16_t status   = 0;
+  uint8_t *buf_ptr  = NULL;
+  rsi_pkt_t *rx_pkt = NULL;
+#ifndef RSI_UART_INTERFACE
   uint8_t int_status = 0;
+#endif
 
 #if RSI_ASSERT_ENABLE
 #if ((defined RSI_SPI_INTERFACE) || ((defined RSI_SDIO_INTERFACE) && (!defined LINUX_PLATFORM)))
@@ -633,7 +640,9 @@ void rsi_rx_event_handler(void)
   uint32_t actual_offset = 0;
 #endif
 #ifndef RSI_M4_INTERFACE
+#ifndef RSI_UART_INTERFACE
   uint16_t ret_status = 0;
+#endif
 #endif
 
   //Get commmon cb pointer
@@ -916,6 +925,7 @@ void rsi_rx_event_handler(void)
              || (frame_type == RSI_COMMON_RSP_DEBUG_LOG) || (frame_type == RSI_COMMON_RSP_SWITCH_PROTO)
              || (frame_type == RSI_COMMON_RSP_GET_RAM_DUMP) || (frame_type == RSI_COMMON_RSP_SET_RTC_TIMER)
              || (frame_type == RSI_COMMON_RSP_GET_RTC_TIMER) || (frame_type == RSI_COMMON_REQ_SET_CONFIG)
+             || (frame_type == RSI_COMMON_RSP_MODULE_TYPE)
 #ifdef FW_LOGGING_ENABLE
              || (frame_type == RSI_COMMON_RSP_DEVICE_LOGGING_INIT)
 #endif
@@ -983,6 +993,14 @@ void rsi_rx_event_handler(void)
 #if (RSI_TCP_IP_BYPASS || TCP_IP_ETHERNET_BRIDGE)
     // Process Raw DATA packet
     rsi_wlan_process_raw_data(rx_pkt);
+#elif RSI_ENABLE_DUAL_HOST
+    if (frame_type == DUAL_HOST_RAW_DATA_PACKET) {
+      // Process Raw DATA packet - dual host enabled
+      rsi_wlan_process_raw_data(rx_pkt);
+    } else {
+      // Process DATA packet
+      rsi_driver_process_recv_data(rx_pkt);
+    }
 #else
     // Process DATA packet
     rsi_driver_process_recv_data(rx_pkt);

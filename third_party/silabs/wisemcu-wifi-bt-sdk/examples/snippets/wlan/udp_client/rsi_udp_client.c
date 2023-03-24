@@ -31,10 +31,10 @@
 //! include file to refer data types
 #include "rsi_data_types.h"
 
-//! COMMON include file to refer wlan APIs
+//! COMMON include file to refer WLAN APIs
 #include "rsi_common_apis.h"
 
-//! WLAN include file to refer wlan APIs
+//! WLAN include file to refer WLAN APIs
 #include "rsi_wlan_apis.h"
 #include "rsi_wlan_non_rom.h"
 
@@ -42,6 +42,7 @@
 #include "rsi_socket.h"
 
 #include "rsi_bootup_config.h"
+
 //! Error include files
 #include "rsi_error.h"
 
@@ -50,6 +51,7 @@
 #ifdef RSI_M4_INTERFACE
 #include "rsi_board.h"
 #endif
+
 #include "rsi_wlan_config.h"
 
 #include <string.h>
@@ -63,10 +65,10 @@
 #define CHANNEL_NO 0
 
 //! Security type
-#define SECURITY_TYPE RSI_OPEN
+#define SECURITY_TYPE RSI_WPA2
 
 //! Password
-#define PSK NULL
+#define PSK "12345678"
 
 //! DHCP mode 1- Enable 0- Disable
 #define DHCP_MODE 1
@@ -75,15 +77,12 @@
 #if !(DHCP_MODE)
 
 //! IP address of the module
-//! E.g: 0x650AA8C0 == 192.168.10.101
 #define DEVICE_IP "192.168.10.101"
 
 //! IP address of Gateway
-//! E.g: 0x010AA8C0 == 192.168.10.1
 #define GATEWAY "192.168.10.1"
 
 //! IP address of netmask
-//! E.g: 0x00FFFFFF == 255.255.255.0
 #define NETMASK "255.255.255.0"
 
 #endif
@@ -96,7 +95,7 @@
 #define SERVER_IP_ADDRESS "192.168.10.100"
 
 //! Number of packet to send or receive
-#define NUMBER_OF_PACKETS 1000
+#define NUMBER_OF_PACKETS 10000
 
 //! Memory length for driver
 #define GLOBAL_BUFF_LEN 15000
@@ -124,14 +123,16 @@ int32_t rsi_udp_client()
   struct rsi_sockaddr_in server_addr;
   int32_t status       = RSI_SUCCESS;
   int32_t packet_count = 0;
+
 #if !(DHCP_MODE)
   uint32_t ip_addr      = ip_to_reverse_hex(DEVICE_IP);
   uint32_t network_mask = ip_to_reverse_hex(NETMASK);
   uint32_t gateway      = ip_to_reverse_hex(GATEWAY);
 #else
   uint8_t dhcp_mode = (RSI_DHCP | RSI_DHCP_UNICAST_OFFER);
+
 #ifdef RSI_WITH_OS
-  //! Silabs module intialisation
+  //! Silabs module initialization
   status = rsi_device_init(LOAD_NWP_FW);
   if (status != RSI_SUCCESS) {
     LOG_PRINT("\r\nDevice Initialization Failed, Error Code : 0x%X\r\n", status);
@@ -142,7 +143,7 @@ int32_t rsi_udp_client()
 #endif
 #endif
 
-  //! WC initialization
+  //! Wireless initialization
   status = rsi_wireless_init(0, 0);
   if (status != RSI_SUCCESS) {
     LOG_PRINT("\r\nWireless Initialization Failed, Error Code : 0x%lX\r\n", status);
@@ -211,10 +212,11 @@ int32_t rsi_udp_client()
     //! Set server port number, using htons function to use proper byte order
     server_addr.sin_port = htons(SERVER_PORT);
 
-   //! Set IP address to localhost
+    //! Set IP address to localhost
     server_addr.sin_addr.s_addr = ip_to_reverse_hex(SERVER_IP_ADDRESS);
 
     LOG_PRINT("\r\nUDP TX start\r\n");
+
     while (packet_count < NUMBER_OF_PACKETS) {
       //! Send data on socket
       status = rsi_sendto(client_socket,
@@ -236,15 +238,15 @@ int32_t rsi_udp_client()
       packet_count++;
     }
 
-  LOG_PRINT("\r\nUDP TX complete\r\n");
+    LOG_PRINT("\r\nUDP TX complete\r\n");
 
-  //! closing socket after completing data transfer
-  status = rsi_shutdown(client_socket, 0);
-  if(status != RSI_SUCCESS){
-      LOG_PRINT("\r\nSocket Close Failed, Error Code : 0x%lX\r\n",status);
-  }else{
+    //! closing socket after completing data transfer
+    status = rsi_shutdown(client_socket, 0);
+    if (status != RSI_SUCCESS) {
+      LOG_PRINT("\r\nSocket Close Failed, Error Code : 0x%lX\r\n", status);
+    } else {
       LOG_PRINT("\r\nSocket Close Success\r\n");
-  }
+    }
 
 #ifdef RSI_WITH_OS
     rsi_task_suspend(NULL);
@@ -283,7 +285,7 @@ int main()
   }
 
 #ifndef RSI_WITH_OS
-  //! SiLabs module intialization
+  //!  Silabs module initialization
   status = rsi_device_init(LOAD_NWP_FW);
   if (status != RSI_SUCCESS) {
     LOG_PRINT("\r\nDevice Initialization Failed, Error Code : 0x%lX\r\n", status);

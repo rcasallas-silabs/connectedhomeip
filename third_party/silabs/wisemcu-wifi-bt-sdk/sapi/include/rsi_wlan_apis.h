@@ -43,6 +43,22 @@
 // eap password length
 #define RSI_EAP_PASSWORD_LENGTH 128
 
+// Macro to mandate CA_CERT requirement in PEAP connection
+#define CA_CERT_REQUIRED BIT(1)
+
+//EAP cipher suites list
+#define DHE_RSA_AES256_SHA256 BIT(2)
+#define DHE_RSA_AES128_SHA256 BIT(3)
+#define DHE_RSA_AES256_SHA    BIT(4)
+#define DHE_RSA_AES128_SHA    BIT(5)
+#define AES256_SHA256         BIT(6)
+#define AES128_SHA256         BIT(7)
+#define AES256_SHA            BIT(8)
+#define AES128_SHA            BIT(9)
+#define RC4_SHA               BIT(10)
+#define DES_CBC3_SHA          BIT(11)
+#define RC4_MD5               BIT(12)
+
 // total no of sockets
 #define RSI_MN_NUM_SOCKETS 10
 
@@ -98,6 +114,9 @@
 
 // To enable EAP-LEAP mode
 #define FEAT_EAP_LEAP_IN_COEX BIT(8)
+
+// To hide sensitive information (PSK, PMK, EAP credentials)
+#define FEAT_HIDE_PSK_CREDENTIALS BIT(9)
 /*=========================================================================*/
 
 // BT feature bit map
@@ -402,24 +421,57 @@
 // To enable http otaf support
 #define EXT_FEAT_HTTP_OTAF_SUPPORT BIT(18)
 
-#ifdef CHIP_9117
+#ifdef CHIP_9117B0
+
+#define EXT_FEAT_352K_M4SS_320K     0
+#define RAM_LEVEL_NWP_BASIC_MCU_ADV EXT_FEAT_352K_M4SS_320K
+
+// To enable 416K memory for TA
+#define EXT_FEAT_416K_M4SS_256K         BIT(21)
+#define RAM_LEVEL_NWP_MEDIUM_MCU_MEDIUM EXT_FEAT_416K_M4SS_256K
+
+// To enable 480K memory for TA
+#define EXT_FEAT_480K_M4SS_192K     BIT(20)
+#define RAM_LEVEL_NWP_ADV_MCU_BASIC EXT_FEAT_480K_M4SS_192K
+
+#ifndef RSI_M4_INTERFACE
+// To enable 672K memory for TA; only supported in WiSeConnect
+#define EXT_FEAT_672K_M4SS_0K      (BIT(20) | BIT(21))
+#define RAM_LEVEL_NWP_ALL_MCU_ZERO EXT_FEAT_672K_M4SS_0K
+#endif
+
+#elif (defined CHIP_9117)
+
+#define EXT_FEAT_256K_MODE              0
+#define RAM_LEVEL_NWP_BASIC_MCU_ADV     EXT_FEAT_256K_MODE
 
 // To enable 448K memory for TA
-#define EXT_FEAT_448K_M4SS_256K BIT(21)
-// To enable 512K memory for TA
-#define EXT_FEAT_512K_M4SS_192K BIT(20)
-// To enable 704K memory for TA
-#define EXT_FEAT_704K_M4SS_0K (BIT(20) | BIT(21))
+#define EXT_FEAT_448K_M4SS_256K         BIT(21)
+#define RAM_LEVEL_NWP_MEDIUM_MCU_MEDIUM EXT_FEAT_448K_M4SS_256K
 
-#define EXT_FEAT_256K_MODE 0
+// To enable 512K memory for TA
+#define EXT_FEAT_512K_M4SS_192K         BIT(20)
+#define RAM_LEVEL_NWP_ADV_MCU_BASIC     EXT_FEAT_512K_M4SS_192K
+
+#ifndef RSI_M4_INTERFACE
+// To enable 704K memory for TA; only supported in WiSeConnect
+#define EXT_FEAT_704K_M4SS_0K      (BIT(20) | BIT(21))
+#define RAM_LEVEL_NWP_ALL_MCU_ZERO EXT_FEAT_704K_M4SS_0K
+#endif
+
 #else //defaults
 
-// To enable 320K memory for TA
-#define EXT_FEAT_320K_MODE BIT(20)
 // To enable 256K memory for TA
-#define EXT_FEAT_256K_MODE BIT(21)
+#define EXT_FEAT_256K_MODE              BIT(21)
+#define RAM_LEVEL_NWP_MEDIUM_MCU_MEDIUM EXT_FEAT_256K_MODE
+
+// To enable 320K memory for TA
+#define EXT_FEAT_320K_MODE              BIT(20)
+#define RAM_LEVEL_NWP_ADV_MCU_BASIC     EXT_FEAT_320K_MODE
+
 // To enable 384K memory for TA
-#define EXT_FEAT_384K_MODE (BIT(20) | BIT(21))
+#define EXT_FEAT_384K_MODE              (BIT(20) | BIT(21))
+#define RAM_LEVEL_NWP_ALL_MCU_ZERO      EXT_FEAT_384K_MODE
 
 #endif
 
@@ -501,9 +553,11 @@
 
 /*=========================================================================*/
 // Feature enable paramters
-#define RSI_FEAT_FRAME_PREAMBLE_DUTY_CYCLE  BIT(0)
-#define RSI_FEAT_FRAME_LP_CHAIN             BIT(4)
-#define RSI_FEAT_FRAME_IN_PACKET_DUTY_CYCLE BIT(5)
+#define RSI_FEAT_FRAME_PREAMBLE_DUTY_CYCLE       BIT(0)
+#define RSI_FEAT_FRAME_PERMIT_UNDESTINED_PACKETS BIT(1)
+#define RSI_FEAT_FRAME_DISABLE_DPD               BIT(3)
+#define RSI_FEAT_FRAME_LP_CHAIN                  BIT(4)
+#define RSI_FEAT_FRAME_IN_PACKET_DUTY_CYCLE      BIT(5)
 /*=========================================================================*/
 
 // BAND COMMAND PARAMETERS OPTIONS
@@ -528,13 +582,24 @@
 // SCAN COMMAND PARAMETERS OPTIONS
 /*=========================================================================*/
 
-// Scan feature bitmap paramters !//
+// Scan feature bitmap parameters !//
 
 // If this bit is set,module scans for the AP given in scan API
 // and posts the scan results immediately to the host after finding
 // one Accesspoint.This bit is valid only if specific channel and
 // ssid to scan is given.
 #define RSI_ENABLE_QUICK_SCAN BIT(0)
+
+// Timeout bitmap parameters !//
+
+//Set timeout for association and authentication request in msec
+#define RSI_ASSOCIATION_AND_AUTHENTICATION_TIMEOUT_MSEC BIT(0)
+
+//Set each channel active scan time in msec
+#define RSI_CHANNEL_SCAN_TIME_MSEC BIT(1)
+
+//Used for WLAN keep alive timeout in sec
+#define RSI_WLAN_KEEP_ALIBE_TIMEOUT_SEC BIT(2)
 
 /*=========================================================================*/
 
@@ -653,8 +718,6 @@
 
 // Multicast filter cmds
 /*=========================================================================*/
-#define RSI_MULTICAST_MAC_ADD_BIT   0
-#define RSI_MULTICAST_MAC_CLEAR_BIT 1
 #define RSI_MULTICAST_MAC_CLEAR_ALL 2
 #define RSI_MULTICAST_MAC_SET_ALL   3
 
@@ -897,7 +960,8 @@ typedef enum rsi_wlan_query_cmd_e {
   RSI_STATIONS_INFO     = 6,
   RSI_SOCKETS_INFO      = 7,
   RSI_CFG_GET           = 8,
-  RSI_GET_WLAN_STATS    = 9
+  RSI_GET_WLAN_STATS    = 9,
+  RSI_WLAN_EXT_STATS    = 10
 } rsi_wlan_query_cmd_t;
 
 /******************************************************
@@ -1392,6 +1456,16 @@ typedef struct rsi_rsp_wlan_stats_s {
   uint8_t busy_beacon_info[2];
   uint8_t beacon_interval[2];
 } rsi_rsp_wlan_stats_t;
+/*Structure for module stats notification*/
+typedef struct rsi_wlan_ext_stats_s {
+  uint32_t beacon_lost_count;
+  uint32_t beacon_rx_count;
+  uint32_t mcast_rx_count;
+  uint32_t mcast_tx_count;
+  uint32_t ucast_rx_count;
+  uint32_t ucast_tx_count;
+  uint32_t overrun_count;
+} rsi_wlan_ext_stats_t;
 
 #define RSI_PARSE_1_BYTES 1
 #define RSI_PARSE_2_BYTES 2
@@ -1620,6 +1694,35 @@ typedef struct rsi_twt_rsp_s {
   uint8_t twt_flow_id;
 } rsi_twt_rsp_t;
 
+// Structure for incoming CSI record
+typedef struct rsi_rsp_csi_record_s {
+  /** Channel estimation information i value*/
+  uint16_t csi_matrix_p;
+  /** Channel estimation information q value*/
+  uint16_t csi_matrix_i;
+} rsi_rsp_csi_record_t;
+
+// Structure for incoming CSI data payload
+typedef struct rsi_rsp_csi_data_s {
+  /** Incoming MAC address in payload*/
+  uint8_t mac_address[6];
+  uint8_t reserved[2];
+  /** Incoming TSF of frame in payload*/
+  uint32_t tsf;
+#define CSI_MAX_NUM_RECORDS 56
+  /** Incoming CSI data in payload. Refer to \ref rsi_rsp_csi_record_s*/
+  rsi_rsp_csi_record_t rsi_rsp_csi_record[CSI_MAX_NUM_RECORDS];
+} rsi_rsp_csi_data_t;
+
+typedef struct rsi_calib_read_s {
+#define READ_FROM_EFUSE 0
+#define READ_FROM_FLASH 1
+  uint8_t target;
+  uint8_t reserved0[3];
+  int8_t gain_offset[3];
+  int8_t xo_ctune;
+} rsi_calib_read_t;
+
 /******************************************************
  * *                    Structures
  * ******************************************************/
@@ -1718,9 +1821,22 @@ int32_t rsi_wlan_ping_async(uint8_t flags,
                                                                const uint8_t *buffer,
                                                                const uint16_t length));
 int32_t rsi_send_freq_offset(int32_t freq_offset_in_khz);
-int32_t rsi_calib_write(uint8_t target, uint32_t flags, int8_t gain_offset, int32_t freq_offset);
+int32_t rsi_calib_read(uint8_t target, rsi_calib_read_t *calib_data);
+int32_t rsi_calib_write(uint8_t target,
+                        uint32_t flags,
+                        int8_t gain_offset_low,
+                        int8_t gain_offset_mid,
+                        int8_t gain_offset_high,
+                        int8_t xo_ctune);
 int16_t rsi_parse(void *address, uint16_t length, uint8_t *value);
-int32_t rsi_wlan_11ax_config(void);
+int32_t rsi_wlan_11ax_config(uint8_t gi_ltf);
+int32_t rsi_wlan_csi_config_async(uint8_t enable,
+                                  uint32_t periodicity,
+                                  uint8_t num_of_mac_addr,
+                                  uint8_t (*mac_addr)[6],
+                                  void (*wlan_csi_data_response_handler)(uint16_t status,
+                                                                         uint8_t *buffer,
+                                                                         const uint32_t length));
 
 void rsi_register_auto_config_rsp_handler(void (*rsi_auto_config_rsp_handler)(uint16_t status, uint8_t state));
 STATIC INLINE void set_option(uint32_t *parameter, uint32_t flag)

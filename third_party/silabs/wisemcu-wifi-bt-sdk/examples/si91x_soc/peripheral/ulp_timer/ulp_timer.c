@@ -35,14 +35,14 @@
 #include "rsi_board.h"
 
 /* Private typedef -----------------------------------------------------------*/
-#define RESERVED_IRQ_COUNT    16
-#define EXT_IRQ_COUNT         98
+#define RESERVED_IRQ_COUNT   16
+#define EXT_IRQ_COUNT        98
 #define VECTOR_TABLE_ENTRIES (RESERVED_IRQ_COUNT + EXT_IRQ_COUNT)
-uint32_t ramVector[VECTOR_TABLE_ENTRIES] __attribute__ ((aligned(256)));
+uint32_t ramVector[VECTOR_TABLE_ENTRIES] __attribute__((aligned(256)));
 /* Private macro -------------------------------------------------------------*/
 #define TIMER0_IRQHandler IRQ002_Handler
 #define TIMER_MATCH_VALUE 500000
-#define GPIO_TOGGLE 1
+#define GPIO_TOGGLE       1
 /* Private define ------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
@@ -64,13 +64,13 @@ void TIMER0_IRQHandler()
   /* Clears interrupt */
   RSI_TIMERS_InterruptClear(TIMERS, TIMER_0);
 #if GPIO_TOGGLE
-   //Set pin 0 in GPIO mode
-   RSI_EGPIO_SetPinMux(EGPIO1, 0, 5, EGPIO_PIN_MUX_MODE0);
-   //Set output direction
-   RSI_EGPIO_SetDir(EGPIO1, 0, 5, EGPIO_CONFIG_DIR_OUTPUT);
+  //Set pin 0 in GPIO mode
+  RSI_EGPIO_SetPinMux(EGPIO1, 0, 5, EGPIO_PIN_MUX_MODE0);
+  //Set output direction
+  RSI_EGPIO_SetDir(EGPIO1, 0, 5, EGPIO_CONFIG_DIR_OUTPUT);
 
-   RSI_EGPIO_SetPin(EGPIO1, 0, 5, 1);
-   RSI_EGPIO_SetPin(EGPIO1, 0, 5, 0);
+  RSI_EGPIO_SetPin(EGPIO1, 0, 5, 1);
+  RSI_EGPIO_SetPin(EGPIO1, 0, 5, 0);
 #endif
 
   DEBUGOUT("\r\nToggle the ULP_GPIO\r\n");
@@ -148,13 +148,13 @@ int main()
   /*Configures the system default clock and power configurations*/
   SystemCoreClockUpdate();
 
-//copying the vector table from flash to ram
-  memcpy(ramVector, (uint32_t*)SCB->VTOR, sizeof(uint32_t) * VECTOR_TABLE_ENTRIES);
-  
-  //assing the ram vector adress to VTOR register 
+  //copying the vector table from flash to ram
+  memcpy(ramVector, (uint32_t *)SCB->VTOR, sizeof(uint32_t) * VECTOR_TABLE_ENTRIES);
+
+  //assing the ram vector adress to VTOR register
   SCB->VTOR = (uint32_t)ramVector;
 
-//Switching MCU from PS4 to PS2 state
+  //Switching MCU from PS4 to PS2 state
   hardware_setup();
 
   /* Configured TRI_LED and Board UART */

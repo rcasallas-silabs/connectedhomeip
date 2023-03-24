@@ -38,15 +38,10 @@ Before running the application, the user will need the following things to setup
 ### 2.3 Setup Diagram:
    
 **SoC Mode :**   
-<br>
-<img src="resources/readme/image79blemulticonngatt.png" width=500 height=250 alt=""><br>
-
+![](resources/readme/image79blemulticonngatt.png)
   
 **NCP Mode :**  
-<br>
-<img src="resources/readme/image79blemulticonngattncp.png" width=500 height=250 alt=""><br>
-
-
+![](resources/readme/image79blemulticonngattncp.png)
 ## 3. Application Build environment
 
 ### 3.1 Project Configuration
@@ -58,7 +53,7 @@ Before running the application, the user will need the following things to setup
   
 ### 3.2 NCP Mode - Host Interface 
 
-- By default, the application is configured to use the SPI bus for interfacing between Host platforms(EFR32MG21) and the SiWx91x EVK.
+By default, the application is configured to use the SPI bus for interfacing between Host platforms(EFR32MG21) and the SiWx91x EVK.
 
 ### 3.3 Bare Metal/RTOS Support
 
@@ -122,7 +117,6 @@ The application can be configured to suit your requirements and development envi
    **Master1 configurations: (where XX=M1)**
 
    Set below macro to enable secure connection between Silicon Labs device(peripheral) and remote ble device(central)
-
 	 #define SMP_ENABLE_XX         0
 
 
@@ -213,67 +207,61 @@ The application can be configured to suit your requirements and development envi
 
 ## 5. Testing the Application
 
-Follow the below steps for the successful execution of the application.
+- Follow the below steps for the successful execution of the application.
 
 ### 5.1 Loading the SiWx91x Firmware
 
-Refer [Getting started with a PC](https://docs.silabs.com/rs9116/latest/wiseconnect-getting-started) to load the firmware into SiWx91x EVK. The firmware file is located in `<SDK>/firmware/`
+- Refer [Getting started with a PC](https://docs.silabs.com/rs9116/latest/wiseconnect-getting-started) to load the firmware into SiWx91x EVK. The firmware file is located in `<SDK>/connectivity_firmware/`
 
 ### 5.2 Creating the Project and builing the Application
   
-Refer [Getting started with EFX32](https://docs.silabs.com/rs9116-wiseconnect/latest/wifibt-wc-getting-started-with-efx32/), for settin-up EFR & EFM host platforms
+- Refer [Getting started with EFX32](https://docs.silabs.com/rs9116-wiseconnect/latest/wifibt-wc-getting-started-with-efx32/), for settin-up EFR & EFM host platforms
 
 #### 5.2.1 Project Creation - SoC Mode : 
 
 - Connect your board. The Si917 compatible SoC board is **BRD4325A**.
 - Studio should detect your board. Your board will be shown here.
 ![soc_board_detection](resources/readme/socboarddetection111.png)
-
 #### 5.2.2 Project Creation - NCP Mode : 
 
 - Connect your board. The supported NCP boards are: **BRD4180A,BRD4280B**
 - Studio should detect your board. Your board will be shown here.
 ![ncp_board_detection](resources/readme/ncpboarddetection112.png)
-
 #### 5.2.3 Selecting an example application and generate project
 
 - Go to the 'EXAMPLE PROJECT & DEMOS' tab and select your desired example application
-![projct_selection](resources/readme/projctselection.PNG)
+![projct_selection](resources/readme/projctselection1.png)
 - Click 'Create'. The "New Project Wizard" window appears. Click 'Finish'
-![creation_final](resources/readme/creationfinal.PNG)
-
+![creation_final](resources/readme/creationfinal1.png)
 #### 5.2.4 Build Project - SoC Mode
 
 - Once the project is created, right click on project and go to properties → C/C++ Build → Settings → Build Steps
 - Add post_build_script_SimplicityStudio.bat file path (SI917_COMBO_SDK.X.X.X.XX\utilities\isp_scripts_common_flash) in build steps settings as shown in below image.
-![postbuild_script](resources/readme/buildsoc.PNG)
+![postbuild_script](resources/readme/buildsoc3.png)
 - Check for M4 projects macros in preprocessor settings(RSI_M4_INTERFACE=1)
 - Check for 9117 macro in preprocessor settings(CHIP_9117=1).
 - Click on the build icon (hammer) to build the project
-![building_pjt](resources/readme/buildsoc1.PNG)
+![building_pjt](resources/readme/buildsoc5.png)
 - Successful build output will show as below.
-![build_success_soc](resources/readme/buildsoc2.PNG)
-
+![build_success_soc](resources/readme/buildsoc4.png)
 #### 5.2.5 Build Project - NCP Mode :
 
 - Check for 9117 macro in preprocessor settings(CHIP_9117=1).
 - Click on the build icon (hammer) to build the project
 ![building_pjt](resources/readme/buildncp.png)
 - Successful build output will show as below.
-![build_success_soc](resources/readme/buildsuccessncp.PNG)
-
+![build_success_soc](resources/readme/buildsuccessncp1.png)
 ## 6. Program the device
 
-Once the build was successfull, right click on project and click on Debug As->Silicon Labs ARM Program as shown in below image.
+- Once the build was successfull, right click on project and click on Debug As->Silicon Labs ARM Program as shown in below image.
 ### SoC Mode :
 ![debug_mode_soc](resources/readme/debugmodesoc.png)
 ### NCP Mode : 
 ![debug_mode_NCP](resources/readme/debugmodencp.png)
-
 ### 6.1 Running the SiWx91x Application
  
 1. Configure the remote ble devices in peripheral and put it in advertising mode and/or in central and put in scanning mode.
-<br><img src="resources/readme/advertiser.png" width=250 alt=""><br>
+![](resources/readme/advertiser.png)
    **Note:** Refer the [Creating New Advertisement Sets](https://docs.silabs.com/bluetooth/5.0/miscellaneous/mobile/efr-connect-mobile-app) for configuring the EFR connect mobile APP as advertiser.
 2. Connect any serial console for prints.
 
@@ -309,7 +297,6 @@ Once the build was successfull, right click on project and click on Debug As->Si
 10. After successful program execution, if the Silicon Labs device connects to a **remote BLE peripheral device**, prints in teraterm looks as shown below.
    ![Prints in Teraterm for Central Configuration-1](resources/readme/multigattmaster1.png)
    ![Prints in Teraterm for Central Configuration-2](resources/readme/multigattmaster2.png)
-
 11. After successful program execution, if the Silicon Labs device connects to **remote BLE central device**, prints in teraterm looks as shown below.   
 
    ![Prints in Teraterm for Peripheral Configuration-1](resources/readme/multigattslave1.png)
@@ -318,7 +305,6 @@ Once the build was successfull, right click on project and click on Debug As->Si
 
 13. If enabled, module continuously transmits notifications which can be seen on remote device
 ![Prints in Teraterm for Peripheral Configuration-2](resources/readme/multigattslave2.png)
-
 ## 7. Observing the output prints on serial terminal
 
 ### 7.1 SoC Mode:
@@ -330,13 +316,11 @@ Once the build was successfull, right click on project and click on Debug As->Si
       ![FTDI_prints](resources/readme/ftdiprints118.png)
 - Prints can see as below in any Console terminal
       ![ouput_prints](resources/readme/multigattslave2.png)
-
 ### 7.2 NCP Mode:
 - Prints can see as below in any Console terminal
    ![ouput_prints](resources/readme/multigattslave2.png)
-
 ## 8. Selecting Bare Metal
-The application has been designed to work with FreeRTOS and Bare Metal configurations. By default, the application project files (Simplicity studio) are configured with FreeRTOS enabled. The following steps demonstrate how to configure Simplicity Studio to test the application in a Bare Metal environment.
+- The application has been designed to work with FreeRTOS and Bare Metal configurations. By default, the application project files (Simplicity studio) are configured with FreeRTOS enabled. The following steps demonstrate how to configure Simplicity Studio to test the application in a Bare Metal environment.
 
 ### 8.1 Bare Metal with Simplicity Studio
 - Open the project in Simplicity Studio
@@ -345,8 +329,7 @@ The application has been designed to work with FreeRTOS and Bare Metal configura
 - Select 'Apply' and 'OK' to save the settings
    ![Figure: project settings in Simplicity Studio](resources/readme/with_out_os1.png) 
 
-   ![Figure: project settings in Simplicity Studio](resources/readme/with_out_os2.PNG)
-
+   ![Figure: project settings in Simplicity Studio](resources/readme/with_out_os.png)
 ### 8.2 Bare Metal with Keil
 - Open project in Keil IDE and click on 'Options for Target'
 - Go to 'C/C++' tab and remove 'RSI_WITH_OS' macro present under Preprocessor Symbols

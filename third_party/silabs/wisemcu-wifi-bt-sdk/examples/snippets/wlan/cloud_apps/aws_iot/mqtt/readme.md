@@ -1,12 +1,12 @@
 # AWS MQTT Subscribe-Publish Example
 
-## 1. Purpose / Scope
+## 1 Purpose / Scope
 
 This application demonstrates how to configure SiWx91x as an IoT devices and securely connect to AWS IoT Core to subscribe and publish on a topic.
 
 This application uses AWS MQTT library.
  
-In this application, SiWx91x EVK is configured as Wi-Fi station and connects to an Access Point which has an internet access. After successful Wi-Fi connection, application connects to AWS Core and subscribes to a topic. Publishes a message on subscribed topic and application waits to receive the data published on subscribed topic from the cloud.
+In this application, SiWx91x EVK is configured as Wi-Fi station and connects to an Access Point which has internet access. After successful Wi-Fi connection, application connects to AWS Core and subscribes to a topic. Publishes a message on subscribed topic and application waits to receive the data published on subscribed topic from the cloud.
 
 ## Overview of AWS SDK
 
@@ -16,7 +16,7 @@ The AWS IoT Device SDK allow applications to securely connect to the AWS IoT pla
 
    ![Setup Diagram for Device Shadow Example](resources/readme/image431a.png)
 
-## 2. Prerequisites / Setup Requirements
+## 2 Prerequisites / Setup Requirements
 
 Before running the application, set up the following:
 
@@ -28,19 +28,19 @@ Before running the application, set up the following:
   - **SoC Mode**: 
       - Silicon Labs [BRD4325A](https://www.silabs.com/)
   - **NCP Mode**:
-      - Silicon Labs [(BRD4180A, BRD4280B)](https://www.silabs.com/); **AND**
+      - Silicon Labs [(BRD4180A, BRD4280B)](https://www.silabs.com/)
       - Host MCU Eval Kit. This example has been tested with:
         - Silicon Labs [WSTK + EFR32MG21](https://www.silabs.com/development-tools/wireless/efr32xg21-bluetooth-starter-kit)
 
 #### SoC Mode : 
 
-![Figure: Setup Diagram SoC Mode for AWS MQTT Subscribe-Publish Example](resources/readme/image91soc.png)
+![Figure: Setup Diagram SoC Mode for AWS MQTT Subscribe-Publish Example](resources/readme/setup_soc.png)
   
 #### NCP Mode :  
 
-![Figure: Setup Diagram NCP Mode for AWS MQTT Subscribe-Publish Example](resources/readme/image91ncp.png)
+![Figure: Setup Diagram NCP Mode for AWS MQTT Subscribe-Publish Example](resources/readme/setup_ncp.png)
 
-## 3. Application Build Environment
+## 3 Application Build Environment
 
 ### 3.1 Project Setup
 
@@ -55,14 +55,65 @@ Read through the following sections and make any changes needed.
   
 ### 3.2 NCP Mode - Host Interface 
 
-* By default, the application is configured to use the SPI bus for interfacing between Host platforms(EFR32MG21) and the SiWx91x EVK.
+* By default, the application is configured to use the SPI bus for interfacing between Host platforms (EFR32MG21) and the SiWx91x EVK.
 
 ### 3.3 Bare Metal/RTOS Support
-To select a bare metal configuration, see [Selecting bare metal](#selecting-bare-metal).
+To select a bare metal configuration, see [Selecting bare metal](#7-selecting-bare-metal).
 
-## 4. Application Configuration Parameters
+## 4 Creating the project
+
+1. Ensure the SiWx91x loaded with the latest firmware following the [Getting started with a PC](https://docs.silabs.com/rs9116/latest/wiseconnect-getting-started). The firmware file is located at `<Si917 COMBO SDK>/connectivity_firmware/`.
+
+2. Ensure the EFx32 and SiWx91x set up is connected to your PC.
+
+### 4.1 Board detection
+
+### 4.1.1 SoC mode
+1. In the Simplicity Studio IDE, 
+    - The 917 SoC board will be detected under **Debug Adapters** pane as shown below.
+
+      **![Soc Board detection](resources/readme/soc_board_detection.png)**
+
+### 4.1.2 NCP mode
+
+1. In the Simplicity Studio IDE, 
+    - The EFR32 board will be detected under **Debug Adapters** pane as shown below.
+
+      **![EFR32 Board detection](resources/readme/efr32.png)**
+
+    - The EFM32 board will be detected under **Debug Adapters** pane as shown below.
+
+      **![EFM32 Board detection](resources/readme/efm32.png)**
+
+### 4.2 Creation of project
+
+Ensure the latest Gecko SDK along with the extension Si917 COMBO SDK is added to Simplicity Studio.
+
+1. Click on the board detected and go to **EXAMPLE PROJECTS & DEMOS** section.
+
+   **![Examples and Demos](resources/readme/examples_demos.png)**
+
+2. Filter for Wi-Fi examples from the Gecko SDK added. For this, check the *Wi-Fi* checkbox under **Wireless Technology** and *Gecko SDK Suite* checkbox under **Provider**. 
+
+3. Under provider, for SoC based example, check the *SoC* checkbox and for NCP based example, check the *NCP* checkbox.
+
+4. Now choose Wi-Fi- NCP AWS IoT MQTT example for NCP mode or choose Wi-Fi- SoC AWS IoT MQTT example for SoC mode and click on **Create**.
+  For NCP mode:
+
+   **![AWS MQTT project](resources/readme/aws_mqtt_example.png)**
+
+    For SoC mode:
+      
+   **![AWS MQTT project](resources/readme/aws_mqtt_example_soc.png)**
+
+5. Give the desired name to your project and cick on **Finish**.
+
+   **![Create AWS MQTT project](resources/readme/create_project.png)**
+
+
+## 5 Application Configuration Parameters
 The application can be configured to suit your requirements and development environment. Read through the following sections and make any changes needed.
-**4.1** Configure the following parameters in **rsi_subscribe_publish_sample.c** to enable your Silicon Labs Wi-Fi device to connect to your Wi-Fi network.
+**5.1** Configure the following parameters in **rsi_subscribe_publish_sample.c** to enable your Silicon Labs Wi-Fi device to connect to your Wi-Fi network.
   
 ```c                                      
 #define SSID           "SILABS_AP"      // Wi-Fi Network Name
@@ -77,7 +128,7 @@ DHCP_MODE refers whether IP address configured through DHCP or STATIC
 #define DHCP_MODE                        1
 ```
 
-RSI_MQTT_TOPIC refres to the topic to which the device subscribes and publishes
+RSI_MQTT_TOPIC refers to the topic to which the device subscribes and publishes
 
 ```c
 #define RSI_MQTT_TOPIC          "$aws/things/Test_IoT/shadow/update"
@@ -125,7 +176,17 @@ IP address of the network mask should also be in long format and in little endia
 #define ENABLE_POWER_SAVE              1
 ```
 
-**4.2** Configure below parameters in aws_iot_config.h file
+For SoC mode use handshake type as shown below:
+```c
+#define RSI_HAND_SHAKE_TYPE M4_BASED
+```
+
+For NCP mode handshake type can be GPIO_BASED or MSG_BASED, as shown below
+
+```c
+#define RSI_HAND_SHAKE_TYPE GPIO_BASED
+```
+**5.2** Configure below parameters in aws_iot_config.h file
 
    ```C
    //AWS Host name 
@@ -156,7 +217,7 @@ $> python3 certificate_to_array.py <input filename> <output arrayname>
 
 For example:
 $> python3 certificate_to_array.py d8f3a44d3f.cert.pem    aws_client_certificate
-$> python3 certificate_to_array.py d8f3a44d3f.private.key aws_client_private_certificate
+$> python3 certificate_to_array.py d8f3a44d3f.private.key aws_client_private_key
 ```
 
 After running the script on the certificate and private key, two new files are created.
@@ -175,86 +236,123 @@ For reference, Amazon uses [Starfield Technologies](https://www.starfieldtech.co
 > NOTE :
 > For AWS connectivity, StarField Root CA Class 2 certificate has the highest authority being at the top of the signing hierarchy.
 > 
-> The StarField Root CA Class 2 certificate is an expected/required certificate which usually comes pre-installed in the operating systems and it plays a key part in certificate chain verification when a device is performing TLS authentication with the IoT endpoint.
+> The StarField Root CA Class 2 certificate is an expected/required certificate which usually comes pre-installed in the operating systems and plays a key part in certificate chain verification when a device is performing TLS authentication with the IoT endpoint.
 > 
-> On SiWx91x device, we do not maintain root CA trust repository due to memory constraints, so it is mandatory to load StarField Root CA Class 2 certificate for successful mutual authentication to AWS server.
+> On SiWx91x device, we do not maintain the root CA trust repository due to memory constraints, so it is mandatory to load Starfield Root CA Class 2 certificate for successful mutual authentication to the AWS server.
 > 
 > The certificate chain sent by AWS server is as below:
 > id-at-commonName=Amazon,id-at-organizationalUnitName=Server CA 1B,id-at-organizationName=Amazon,id-at-countryName=US
 > id-at-commonName=Amazon Root CA 1,id-at-organizationName=Amazon,id-at-countryName=US
 > id-at-commonName=Starfield Services Root Certificate Authority ,id-at-organizationName=Starfield Technologies, Inc.,id-at-localityName=Scottsdale,id-at-  stateOrProvinceName=Arizona,id-at-countryName=US)
 > 
-> On SiWx91x to authenticate the AWS server, firstly Root CA is validated (validate the Root CA received with the Root CA loaded on the device). Once the Root CA is validation is successful , other certificates sent from the AWS server are validated.
-> SiWx91x don't authenticate to AWS server if intermediate CA certificates are loaded instead of StarField Root CA Class 2 certificate and would result in Handshake error.
+> On SiWx91x to authenticate the AWS server, firstly Root CA is validated (validate the Root CA received with the Root CA loaded on the device). Once the Root CA validation is successful, other certificates sent from the AWS server are validated.
+> SiWx91x doesn't authenticate to AWS server if intermediate CA certificates are loaded instead of Starfield Root CA Class 2 certificate and would result in a Handshake error.
 > StarField Root CA Class 2 certificate is at https://certs.secureserver.net/repository/sf-class2-root.crt
 > 
 > Reference links :
 > https://aws.amazon.com/blogs/security/how-to-prepare-for-aws-move-to-its-own-certificate-authority/
 
-## 5. Testing the Application
+## 6 Building and Testing the Application
 
 Follow the below steps for the successful execution of the application.
 
-### 5.1 Loading the SiWx91x Firmware
+### 6.1 Loading the SiWx91x Firmware
 
 Refer [Getting started with a PC](https://docs.silabs.com/rs9116/latest/wiseconnect-getting-started) to load the firmware into SiWx91x EVK. The firmware file is located in `<SDK>/firmware/`
 
-### 5.2 Creating the Project and builing the Application
+### 6.2 Building the Project
+#### 6.2.1. Building the Project - SoC Mode
+
+- Once the project is created, right click on project and go to properties → C/C++ Build → Settings → Build Steps.
+
+- Add **post_build_script_SimplicityStudio.bat** file path present at SI917_COMBO_SDK.X.X.X.XX → utilities → isp_scripts_common_flash in build steps settings as shown in below image.
+
+  ![postbuild_script](resources/readme/post_build_script.png)
+
+- Go to properties → C/C++ Build → Settings → Tool Settings → GNU ARM C Compiler → Preprocessor → Defined symbols (-D) and check for M4 projects macro (RSI_M4_INTERFACE=1) and 9117 macro (CHIP_9117=1). If not present, add the macros and click **Apply and Close**.
   
-Refer [Getting started with EFX32](https://docs.silabs.com/rs9116-wiseconnect/latest/wifibt-wc-getting-started-with-efx32/), for settin-up EFR & EFM host platforms
+  ![Build Project for SoC mode](resources/readme/soc_macros.png)
 
-#### 5.2.1 Project Creation - SoC Mode : 
+- Click on the build icon (hammer) or right click on project name and choose **Build Project** to build the project.
 
-- Connect your board. The Si917 compatible SoC board is **BRD4325A**.
-- Studio should detect your board. Your board will be shown here.
-![soc_board_detection](resources/readme/socboarddetection111.png)
+  ![building_pjt](resources/readme/build_project_soc.png)
 
-#### 5.2.2 Project Creation - NCP Mode : 
+- Make sure the build returns 0 Errors and 0 Warnings.
+  
 
-- Connect your board. The supported NCP boards are: **BRD4180A,BRD4280B**
-- Studio should detect your board. Your board will be shown here.
-![ncp_board_detection](resources/readme/ncpboarddetection112.png)
+#### 6.2.2. Build the Project - NCP Mode
 
-#### 5.2.3 Selecting an example application and generate project
+- Check for CHIP_9117 macro in preprocessor settings as mentioned below.
+   - Right click on project name.
+   - Go to properties → C/C++ Build → Settings → Tool Settings → GNU ARM C Compiler → Preprocessor → Defined symbols (-D).
+   - If CHIP_9117 macro is not present, add it by clicking on add macro option.
+   - Click on **Apply and Close**.
 
-- Go to the 'EXAMPLE PROJECT & DEMOS' tab and select your desired example application
-![projct_selection](resources/readme/projctselection113.png)
-- Click 'Create'. The "New Project Wizard" window appears. Click 'Finish'
-![creation_final](resources/readme/creationfinal114.png)
+     ![Build Project for NCP mode](resources/readme/ncp_macros.png)
 
-#### 5.2.4 Build Project - SoC Mode
+- Click on the build icon (hammer) or right click on project name and choose **Build Project** to build the project.
 
-- Once the project is created, right click on project and go to properties → C/C++ Build → Settings → Build Steps
-- Add post_build_script_SimplicityStudio.bat file path (SI917_COMBO_SDK.X.X.X.XX\utilities\isp_scripts_common_flash) in build steps settings as shown in below image.
-![postbuild_script](resources/readme/image359.png)
-- Check for M4 projects macros in preprocessor settings(RSI_M4_INTERFACE=1)
-- Check for 9117 macro in preprocessor settings(CHIP_9117=1).
-- Click on the build icon (hammer) to build the project
-![building_pjt](resources/readme/buildingpjt115.png)
-- Successful build output will show as below.
-![build_success_soc](resources/readme/buildsuccesssoc116.png)
+  ![Build Project for NCP mode](resources/readme/build_project_ncp.png)
 
-#### 5.2.5 Build Project - NCP Mode :
+- Make sure the build returns 0 Errors and 0 Warnings.
 
-- Check for 9117 macro in preprocessor settings(CHIP_9117=1).
-- Click on the build icon (hammer) to build the project
-![building_pjt](resources/readme/buildingpjt115.png)
-- Successful build output will show as below.
-![build_success_soc](resources/readme/buildsuccesssoc116.png)
+### 6.3 Set up for application prints
 
-## 6. Program the device
+Before setting up Tera Term, do the following for SoC mode.
 
-Once the build was successfull, right click on project and click on Debug As->Silicon Labs ARM Program as shown in below image.
-### SoC Mode :
-![debug_mode_soc](resources/readme/debugmodesoc117.png)
-### NCP Mode : 
-![debug_mode_NCP](resources/readme/debugmodencp120.png)
+**SoC mode**: 
+You can use either of the below USB to UART converters for application prints.
+1. Set up using USB to UART converter board.
 
-### 6.1 Running the SiWx91x Application
+  - Connect Tx (Pin-6) to P27 on WSTK
+  - Connect GND (Pin 8 or 10) to GND on WSTK
+
+    ![FTDI_prints](resources/readme/usb_to_uart_1.png)
+
+2. Set up using USB to UART converter cable.
+
+  - Connect RX (Pin 5) of TTL convertor to P27 on WSTK
+  - Connect GND (Pin1) of TTL convertor to GND on WSTK
+
+    ![FTDI_prints](resources/readme/usb_to_uart_2.png)
+
+**Tera term set up - for NCP and SoC modes**
+
+1. Open the Tera Term tool. 
+   - For SoC mode, choose the serial port to which USB to UART converter is connected and click on **OK**. 
+
+     **![](resources/readme/port_selection_soc.png)**
+
+   - For NCP mode, choose the J-Link port and click on **OK**.
+
+     **![](resources/readme/port_selection.png)**
+
+2. Navigate to the Setup → Serial port and update the baud rate to **115200** and click on **OK**.
+
+    **![](resources/readme/serial_port_setup.png)**
+
+    **![](resources/readme/serial_port.png)**
+
+The serial port is now connected. 
+
+### 6.4 Execute the application
+
+1. Once the build was successful, right click on project and select Debug As → Silicon Labs ARM Program to program the device as shown in below image.
+
+   **![debug_mode_NCP](resources/readme/program_device.png)**
+
+2. As soon as the debug process is completed, the application control branches to the main().
+
+3. Click on the **Resume** icon in the Simplicity Studio IDE toolbar to run the application.
+
+   **![Run](resources/readme/run.png)**
+
+
+### 6.5 Running the SiWx91x Application
 
 - Configure the Access point with Internet connection in OPEN/WPA-PSK/WPA2-PSK mode to connect module in STA mode.
 
-- Configure the application with the configurations mentioned in **Section 4** for the AWS IoT Thing created.
+- Configure the application with the configurations mentioned in **Section 5** for the AWS IoT Thing created.
 [ Refer to Appendix on how to create a Thing ]
 
 - Application will Subscribe to the RSI_MQTT_TOPIC and Publishes message "{\"state\":{\"desired\":{\"toggle\":1}}}" to the same topic.
@@ -265,32 +363,17 @@ Once the build was successfull, right click on project and click on Debug As->Si
 
 - The Terminal Logs appears as shown below
 
-![Console logs](resources/readme/image443.png)
+  ![Console logs](resources/readme/image443.png)
 
-- You should be able to see the LED toggling on the board
+- You should be able to see the LED0 on WTSK board toggle
 
-## 7. Observing the output prints on serial terminal
-
-### 7.1 SoC Mode:
-> Connect USB to UART connector Tx and GND pins to WSTK radio board.
-
-   - Connect Tx(Pin-6) to P27 on WSTK
-   - Connect GND(Pin 8 or 10) to GND on WSTK
-![FTDI_prints](resources/readme/ftdiprints118.png)
-> Prints can see as below in any Console terminal
-![ouput_prints](resources/readme/ouputprints119.png)
-
-### 7.2 NCP Mode:
-Prints can see as below in any Console terminal
-![ouput_prints](resources/readme/ouputprints119.png)
-
-## 8. Selecting Bare Metal
+## 7 Selecting Bare Metal
 The application has been designed to work with FreeRTOS and Bare Metal configurations. By default, the application project files (Simplicity studio) are configured with FreeRTOS enabled. The following steps demonstrate how to configure Simplicity Studio to test the application in a Bare Metal environment.
 
-### 8.1 Bare Metal with Simplicity Studio
+### 7.1 Bare Metal with Simplicity Studio
 > - Open the project in Simplicity Studio
 > - Right click on the project and choose 'Properties'
-> - Go to 'C/C++ Build' | 'Settings' | 'GNU ARM C Compiler' | 'Symbols' and remove macro 'RSI_WITH_OS=1'
+> - Go to 'C/C++ Build' | 'Settings' | 'GNU ARM C Compiler' | 'Preprocessor' and remove macro 'RSI_WITH_OS=1'
 > - Select 'Apply' and 'OK' to save the settings
 
 ![Figure: project settings in Simplicity Studio](resources/readme/image216b.png) 
@@ -305,44 +388,43 @@ Create a thing in the AWS IoT registry to represent your IoT Device.
 
 * In the [AWS IoT console](https://console.aws.amazon.com/iot/home), in the navigation pane, under Manage, choose All devices, and then choose Things.
 
-![AWS console](resources/readme/aws_create_thing_step1.png)
+  ![AWS console](resources/readme/aws_create_thing_step1.png)
 
 * If a **You don't have any things yet** dialog box is displayed, choose **Register a thing**. Otherwise, choose **Create**.
 * Click on **Create things**.
 
-![AWS thing](resources/readme/aws_create_thing_step2.png)
+  ![AWS thing](resources/readme/aws_create_thing_step2.png)
 
 * On the **Create things** page, choose **Create a single thing** and click next.
 
-![AWS thing creation](resources/readme/aws_create_thing_step3.png)
+  ![AWS thing creation](resources/readme/aws_create_thing_step3.png)
 
 * On the **Specify thing properties** page, enter a name for your IoT thing (for example, **Test_IoT**), and choose **Unnamed shadow (classic)** in the Device Shadow section, then choose **Next**. You can't change the name of a thing after you create it. To change a thing's name, you must create a new thing, give it the new name, and then delete the old thing.
 
-![Add Device 1](resources/readme/aws_create_thing_step4.png)
+  ![Add Device 1](resources/readme/aws_create_thing_step4.png)
 
 * During **Configure device certificate** step, choose **Auto-generate a new certificate (recommended)** option and click next.
 
-![Add Device 2](resources/readme/aws_create_thing_step5.png) 
+  ![Add Device 2](resources/readme/aws_create_thing_step5.png) 
 
 * Choose the **Download** links to download the device certificate, private key, and root CA certificate. Root CA certificate is already present in SDK (aws_starfield_ca.pem.h), and can be directly used.
   > **Warning:** This is the only instance you can download your device certificate and private key. Make sure to save them safely. 
 
-![Downloading certificates](resources/readme/aws_thing_certificates_download.png)
+  ![Downloading certificates](resources/readme/aws_thing_certificates_download.png)
 
 * To attach an existing policy choose the policy and click on create thing, if policy is not yet created Choose Create policy and fill the fields as mentioned in the following images.
 
-choosing an existing policy
-<br>
-<img alt = "Attach policy" src = "resources/readme/aws_choosing_policy.png" height = "50%" width = "50%">
+* choosing an existing policy
+  
+  !["Attach policy"](resources/readme/aws_choosing_policy.png)
 
-creating a policy - step 1
-<br>
-<img alt = "Create policy" src = "resources/readme/aws_create_thing_attach_policy.png" height = "50%" width = "50%">
+* creating a policy - step 1
+  
+  !["Create policy"](resources/readme/aws_create_thing_attach_policy.png)
 
-creating a policy - step 2 (filling the fields)
+* creating a policy - step 2 (filling the fields)
 Give the **Name** to your Policy, Fill **Action** and **Resource ARN** as shown in below image, Click on **Allow** under **Effect** and click **Create**
-   
-![Filling fields for policy](resources/readme/aws_create_thing_policy_create.png)
+  ![Filling fields for policy](resources/readme/aws_create_thing_policy_create.png)
 
 
 * choose the created policy and click on **Create thing**
@@ -354,12 +436,12 @@ Give the **Name** to your Policy, Fill **Action** and **Resource ARN** as shown 
 * Navigate to **AWS IoT console**
 * Choose **Policies** under **Secure**
 
-![AWS console create policy](resources/readme/image451.png) 
+  ![AWS console create policy](resources/readme/image451.png) 
 
 * Click on **Create**
    
-![Create policy](resources/readme/aws_create_policy.png)
+  ![Create policy](resources/readme/aws_create_policy.png)
 
 * Give the **Name** to your Policy, Fill **Action** and **Resource ARN** as shown in below image, Click on **Allow** under **Effect** and click **Create**
    
-![Register Thing](resources/readme/aws_create_thing_policy_create.png)
+  ![Register Thing](resources/readme/aws_create_thing_policy_create.png)

@@ -18,9 +18,9 @@
  *
  */
 
-/**
- * Includes
- */
+
+// Includes
+
 #include "rsi_ccp_user_config.h"
 #if !defined(A11_ROM) || !defined(ROMDRIVER_PRESENT)
 #include "rsi_rom_clks.h"

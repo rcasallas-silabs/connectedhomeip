@@ -172,7 +172,9 @@ int32_t rsi_emb_mqtt_client_init(int8_t *server_ip,
       mqtt_ops->encrypt = 1;
     }
 #ifdef CHIP_9117
-    mqtt_ops->tcp_max_retransmission_cap_for_emb_mqtt = ((flags >> 4) & 0xf);
+    if (flags & RSI_EMB_MQTT_TCP_MAX_RETRANSMISSION_CAP) {
+      mqtt_ops->tcp_max_retransmission_cap_for_emb_mqtt = RSI_EMB_MQTT_TCP_MAX_RETRANSMISSION_CAP >> 4;
+    }
 #endif /* CHIP_9117 */
 
 #ifndef RSI_NWK_SEM_BITMAP

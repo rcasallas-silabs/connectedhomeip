@@ -1,6 +1,6 @@
 # AWS IoT Device Shadow
 
-## Introduction
+## 1 Introduction
 
 This application demonstrates how to securely connect a Silicon Labs Si91x Wi-Fi device to AWS IoT Core to send and receive data. 
 To successfully use this application, developer should be familiar with the operation of [AWS IoT Core](https://docs.aws.amazon.com/iot/latest/developerguide/what-is-aws-iot.html) and the [AWS IoT Device Shadow Service](https://docs.aws.amazon.com/iot/latest/developerguide/iot-device-shadows.html).
@@ -29,7 +29,7 @@ The AWS IoT Device SDK allow applications to securely connect to the AWS IoT pla
 
 ![Figure: Setup Diagram for Device Shadow Example](resources/readme/image431a.png)
 
-## Setting Up
+## 2 Setting Up
 To use this application, the following hardware, software and project setup is required.
 
 ### Hardware Requirements  
@@ -51,7 +51,7 @@ To use this application, the following hardware, software and project setup is r
 
 ![Figure: Setup Diagram for Device Shadow Example](resources/readme/image91ncp.png)
 
-### Project Setup
+### 3 Project Setup
 - **SoC Mode**
   - **Silicon Labs SiWx91x SoC**. Follow the [Getting Started with SiWx91x SoC](https://docs.silabs.com/) to setup the example to work with SiWx91x SoC and Simplicity Studio.
 - **NCP Mode**
@@ -62,8 +62,36 @@ To use this application, the following hardware, software and project setup is r
 This example requires SiWx91x Wi-Fi device to be provisioned on AWS. The application needs the device certificate and the private key. 
 For brief provisioning instructions, see [AWS IoT Setup](#create-an-aws-thing) section below.
 
+## 4 Creating the project
 
-## Configuring the Application
+1. Ensure the SiWx91x loaded with the latest firmware following the [Getting started with a PC](https://docs.silabs.com/rs9116/latest/wiseconnect-getting-started). The firmware file is located at `<Si917 COMBO SDK>/connectivity_firmware/`.
+
+2. Ensure the EFx32 and SiWx91x set up is connected to your PC.
+
+### 4.1 Board detection
+
+1. In the Simplicity Studio IDE, The 917 SoC board will be detected under **Debug Adapters** pane as shown below.
+  **![Soc Board detection](resources/readme/soc_board_detection.png)**
+
+### 4.2 Creation of project
+
+Ensure the latest Gecko SDK along with the extension Si917 COMBO SDK is added to Simplicity Studio.
+
+1. Click on the board detected and go to **EXAMPLE PROJECTS & DEMOS** section.
+
+   **![Examples and Demos](resources/readme/examples_demos.png)**
+
+2. Filter for Wi-Fi examples from the Gecko SDK added. For this, check the *Wi-Fi* checkbox under **Wireless Technology** and *Gecko SDK Suite* checkbox under **Provider**. 
+
+3. Now choose AWS IoT Device Shadow and click on **Create**.
+      
+   **![AWS Device Shadow without retention deepsleep project](resources/readme/aws_without_retention_deepsleep_example_soc.png)**
+
+4. Give the desired name to your project and cick on **Finish**.
+
+   **![Create AWS Device Shadow without retention deepsleep project](resources/readme/create_project.png)**
+
+## 5 Configuring the Application
 The application can be configured to suit user requirements and development environment.
 Read through the following sections and make any changes needed. 
 
@@ -114,7 +142,7 @@ $> python3 certificate_to_array.py <input filename> <output arrayname>
 
 For example:
 $> python3 certificate_to_array.py d8f3a44d3f.cert.pem    aws_client_certificate
-$> python3 certificate_to_array.py d8f3a44d3f.private.key aws_client_private_certificate
+$> python3 certificate_to_array.py d8f3a44d3f.private.key aws_client_private_key
 ```
 
 After running the script on the certificate and private key, two new files are created.
@@ -130,97 +158,84 @@ Go ahead and overwrite any existing files with the same name in that directory, 
 The Root CA certificate used by  Wi-Fi device to verify the AWS server is already included in the WiSeConnect SDK; no additional setup is required.
 For reference, Amazon uses [Starfield Technologies](https://www.starfieldtech.com/) to secure the AWS website, the WiSeConnect SDK includes the `Starfield CA Certificate`.
 
-## Testing the Application
-After making any custom configuration changes, and updating the device certificate and private key, build, download and run the application as described in the [EFx32 Getting Started](https://docs.silabs.com/rs9116-wiseconnect/latest/wifibt-wc-getting-started-with-efx32/)
+## 6 Building and Testing the Application
 
-### Loading the SiWx91x Firmware
+Follow the below steps for the successful execution of the application.
+
+### 6.1 Loading the SiWx91x Firmware
 
 Refer [Getting started with a PC](https://docs.silabs.com/rs9116/latest/wiseconnect-getting-started) to load the firmware into SiWx91x EVK. The firmware file is located in `<SDK>/firmware/`
 
-## Creating the Project and building the Application
+### 6.2 Building the Project
+
+- Once the project is created, right click on project and go to properties → C/C++ Build → Settings → Build Steps.
+
+- Add **post_build_script_SimplicityStudio.bat** file path present at SI917_COMBO_SDK.X.X.X.XX → utilities → isp_scripts_common_flash in build steps settings as shown in below image.
+
+  ![postbuild_script](resources/readme/post_build_script.png)
+
+- Go to properties → C/C++ Build → Settings → Tool Settings → GNU ARM C Compiler → Preprocessor → Defined symbols (-D) and check for M4 projects macro (RSI_M4_INTERFACE=1) and 9117 macro (CHIP_9117=1). If not present, add the macros and click **Apply and Close**.
   
-Refer [Getting started with EFX32](https://docs.silabs.com/rs9116-wiseconnect/latest/wifibt-wc-getting-started-with-efx32/), for setting up EFR & EFM host platforms
+  ![Build Project for SoC mode](resources/readme/soc_macros.png)
 
-### Project Creation - SoC Mode : 
+- Click on the build icon (hammer) or right click on project name and choose **Build Project** to build the project.
 
-- Connect your board. The Si917 compatible SoC board is **BRD4325A**.
-- Studio should detect your board. Your board will be shown here.
-![soc_board_detection](resources/readme/socboarddetection111.png)
+  ![building_pjt](resources/readme/build_project.png)
 
-### Project Creation - NCP Mode : 
+- Make sure the build returns 0 Errors and 0 Warnings.
+  
+### 6.3 Set up for application prints
 
-- Connect your board. The supported NCP boards are: **BRD4180A,BRD4280B**
-- Studio should detect your board. Your board will be shown here.
-![ncp_board_detection](resources/readme/ncpboarddetection112.png)
+Before setting up Tera Term, do the following for SoC mode.
 
-### Selecting an example application and generate project
+**SoC mode**: 
+You can use either of the below USB to UART converters for application prints.
+1. Set up using USB to UART converter board.
 
-- Go to the 'EXAMPLE PROJECT & DEMOS' tab and select your desired example application
-![projct_selection](resources/readme/projctselection113.png)
-- Click 'Create'. The "New Project Wizard" window appears. Click 'Finish'
-![creation_final](resources/readme/creationfinal114.png)
+  - Connect Tx (Pin-6) to P27 on WSTK
+  - Connect GND (Pin 8 or 10) to GND on WSTK
 
-#### Build Project - SoC Mode
+    ![FTDI_prints](resources/readme/usb_to_uart_1.png)
 
-- Once the project is created, right click on project and go to properties → C/C++ Build → Settings → Build Steps
-- Add post_build_script_SimplicityStudio.bat file path (SI917_COMBO_SDK.X.X.X.XX\utilities\isp_scripts_common_flash) in build steps settings as shown in below image.
-![postbuild_script](resources/readme/image359.png)
-- Check for M4 projects macros in preprocessor settings(RSI_M4_INTERFACE=1)
-- Check for 9117 macro in preprocessor settings(CHIP_9117=1).
-- Click on the build icon (hammer) to build the project
-![building_pjt](resources/readme/buildingpjt115.png)
-- Successful build output will show as below.
-![build_success_soc](resources/readme/buildsuccesssoc116.png)
+2. Set up using USB to UART converter cable.
 
-#### Build Project - NCP Mode :
+  - Connect RX (Pin 5) of TTL convertor to P27 on WSTK
+  - Connect GND (Pin1) of TTL convertor to GND on WSTK
 
-- Check for 9117 macro in preprocessor settings(CHIP_9117=1).
-- Click on the build icon (hammer) to build the project
-![building_pjt](resources/readme/buildingpjt115.png)
-- Successful build output will show as below.
-![build_success_soc](resources/readme/buildsuccesssoc116.png)
+    ![FTDI_prints](resources/readme/usb_to_uart_2.png)
 
-## Program the device
+**Tera term set up**
 
-Once the build was successfull, right click on project and click on Debug As->Silicon Labs ARM Program as shown in below image.
-![debug_mode_soc](resources/readme/debugmodesoc117.png)
-![debug_mode_NCP](resources/readme/debugmodencp120.png)
+1. Open the Tera Term tool. 
+   - Choose the serial port to which USB to UART converter is connected and click on **OK**. 
 
+     **![](resources/readme/port_selection_soc.png)**
 
-After successful execution, device updates written to AWS and LED0 turns ON for SHADOW_UPDATE_COUNT times(default value is 5) then the module will go to sleep without ram retention and wake up for periodic alarm interval.
-![Figure: Shadow Update Activity](resources/readme/image94.png)
+2. Navigate to the Setup → Serial port and update the baud rate to **115200** and click on **OK**.
+
+    **![](resources/readme/serial_port_setup.png)**
+
+    **![](resources/readme/serial_port.png)**
+
+The serial port is now connected. 
+
+### 6.4 Execute the application
+
+1. Once the build was successful, right click on project and select Debug As → Silicon Labs ARM Program to program the device as shown in below image.
+
+   **![debug_mode](resources/readme/program_device.png)**
+
+2. As soon as the debug process is completed, the application control branches to the main().
+
+3. Click on the **Resume** icon in the Simplicity Studio IDE toolbar to run the application.
+
+   **![Run](resources/readme/run.png)**
+
 
 
 The following debug prints are displayed when the application runs successfully.
-![Figure: Debug Prints](resources/readme/image95.png)
+![Figure: Debug Prints](resources/readme/application_prints.png)
 
-## Observing the output prints on serial terminal
-
-### SoC Mode:
-> Connect USB to UART connector Tx and GND pins to WSTK radio board.
-
-   - Connect Tx(Pin-6) to P27 on WSTK
-   - Connect GND(Pin 8 or 10) to GND on WSTK
-![FTDI_prints](resources/readme/ftdiprints118.png)
-> Prints can see as below in any Console terminal
-![ouput_prints](resources/readme/ouputprints119.png)
-
-### NCP Mode:
-Prints can see as below in any Console terminal
-![ouput_prints](resources/readme/ouputprints119.png)
-
-# Selecting Bare Metal
-The application has been designed to work with FreeRTOS and Bare Metal configurations. By default, the application project files (Simplicity studio) are configured with FreeRTOS enabled. The following steps demonstrate how to configure Simplicity Studio to test the application in a Bare Metal environment.
-
-## Bare Metal with Simplicity Studio
-> - Open the project in Simplicity Studio
-> - Right click on the project and choose 'Properties'
-> - Go to 'C/C++ Build' | 'Settings' | 'GNU ARM C Compiler' | 'Symbols' and remove macro 'RSI_WITH_OS=1'
-> - Select 'Apply' and 'OK' to save the settings
-
-![Figure: project settings in Simplicity Studio](resources/readme/image91b.png) 
-
-![Figure: project settings in Simplicity Studio](resources/readme/image91c.png)
 
 ## Appendix
 
@@ -235,19 +250,19 @@ Create a thing in the AWS IoT registry to represent your IoT Device.
 * If a **You don't have any things yet** dialog box is displayed, choose **Register a thing**. Otherwise, choose **Create**.
 * Click on **Create things**.
 
-<img alt = "AWS thing" src = "resources/readme/aws_create_thing_step2.png" height = 60% width = 60%>
+![AWS thing](resources/readme/aws_create_thing_step2.png)
 
 * On the **Create things** page, choose **Create a single thing** and click next.
 
-<img alt = "AWS thing creation" src = "resources/readme/aws_create_thing_step3.png" height = 60% width = 60%>
+![AWS thing creation](resources/readme/aws_create_thing_step3.png)
 
 * On the **Specify thing properties** page, enter a name for your IoT thing (for example, **Test_IoT**), and choose **Unnamed shadow (classic)** in the Device Shadow section, then choose **Next**. You can't change the name of a thing after you create it. To change a thing's name, you must create a new thing, give it the new name, and then delete the old thing.
 
-<img alt = "Add Device" src = "resources/readme/aws_create_thing_step4.png" height = 60% width = 60%>
+![Add Device](resources/readme/aws_create_thing_step4.png)
 
 * During **Configure device certificate** step, choose **Auto-generate a new certificate (recommended)** option and click next.
 
-<img alt = "Add Device" src = "resources/readme/aws_create_thing_step5.png" height = 60% width = 60%>
+![Add Device](resources/readme/aws_create_thing_step5.png)
 
 * Choose the **Download** links to download the device certificate, private key, and root CA certificate. Root CA certificate is already present in SDK (aws_starfield_ca.pem.h), and can be directly used.
   > **Warning:** This is the only instance you can download your device certificate and private key. Make sure to save them safely. 
@@ -257,12 +272,12 @@ Create a thing in the AWS IoT registry to represent your IoT Device.
 * To attach an existing policy choose the policy and click on create thing, if policy is not yet created Choose Create policy and fill the fields as mentioned in the following images.
 
 choosing an existing policy
-<br>
-<img alt = "Attach Policy" src = "resources/readme/aws_choosing_policy.png" height = "50%" width = "50%">
+
+![Attach Policy](resources/readme/aws_choosing_policy.png)
 
 creating a policy - step 1
-<br>
-<img alt = "Create policy Policy" src = "resources/readme/aws_create_thing_attach_policy.png" height = "50%" width = "50%">
+
+![Create policy Policy](resources/readme/aws_create_thing_attach_policy.png)
 
 creating a policy - step 2 (filling the fields)
 Give the **Name** to your Policy, Fill **Action** and **Resource ARN** as shown in below image, Click on **Allow** under **Effect** and click **Create**
@@ -283,7 +298,7 @@ Give the **Name** to your Policy, Fill **Action** and **Resource ARN** as shown 
 
 * Click on **Create**
    
-<img src = "resources/readme/aws_create_policy.png"  alt = "create policy">
+![create policy](resources/readme/aws_create_policy.png)
 
 * Give the **Name** to your Policy, Fill **Action** and **Resource ARN** as shown in below image, Click on **Allow** under **Effect** and click **Create**
    

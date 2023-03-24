@@ -36,7 +36,9 @@ extern "C" {
 #define MAX_ON_DURATION         4096
 #define MAX_FRAMEDONE_THRESHOLD 32768
 #define MAX_DETECTION_THRESHOLD 128
-
+/** @addtogroup SOC23
+* @{
+*/
 /*===================================================*/
 /**
  * @fn           error_t RSI_IR_OffDuration(IR_Type* pIr , uint32_t off_duration)
@@ -212,4 +214,4 @@ void RSI_IR_SoftwareRestart(IR_Type *pIr);
 #endif
 
 #endif //RSI_IR_H
-
+/** @} */

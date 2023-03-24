@@ -23,11 +23,9 @@ To use this application, the following hardware, software and project setup is r
 - Sniffer machine.
 
 #### SoC Mode : 
-
 ![Figure: Setup Diagram for WIFI6 MIMO Example](resources/readme/wifimimosoc.png)
 
 #### NCP Mode :
-
 ![Figure: Setup Diagram for WIFI6 MIMO Example](resources/readme/wifimimoncp.png)
 
 ### Software Requirements
@@ -184,6 +182,7 @@ The Iperf command to start the UDP client is:
 > `C:\> iperf.exe -c 192.168.0.100 -u -p 5001 -i 1 -b 50M -t 30`  
 
 ![Figure: UDP_RX](resources/readme/image217a.png)
+
 ## TCP Tx Throuhgput
 To measure TCP Tx throughput, configure the SiWx91x as a TCP client and start a TCP server on the remote PC.
 The Iperf command to start the TCP server is: 
@@ -195,6 +194,7 @@ The Iperf command to start the TCP server is:
 > `C:\> iperf.exe -s -p 5001 -i 1`
 
 ![Figure: TCP_TX](resources/readme/image217d.png)
+
 ## TCP Rx Throughput
 To measure TCP Rx throughput, configure the SiWx91x as TCP server and start a TCP client on the remote PC.
 The Iperf command to start the TCP client is: 
@@ -204,7 +204,6 @@ The Iperf command to start the TCP client is:
 > For example ...
 >
 > `C:\> iperf.exe -c 192.168.0.100 -p 5001 -i 1 -t 30`  
-
 ![Figure: TCP_RX](resources/readme/image217c.png)
 The SiWx91x, which is configured as a UDP/TCPserver/client, connects to the iperf server/client and sends/receives data for configured intervals. While module is transmitting/receiving the data, application prints the throughput numbers in serial console.
 
@@ -215,19 +214,20 @@ In this release, due to a low SPI frequency configured for the EFR32, WLAN throu
 
 ***
 
-#Settings for OFDMA+MU-MIMO
+# Settings for OFDMA+MU-MIMO
 To connect with access point, access point should be enabled with below features.
 
-###AP wireless general
+### AP wireless general
 go to wireless general setting and enable "80211ax/wifi6 mode"
 ![Figure: 80211ax](resources/readme/ap8011.png)
 
 
-###AP wireless professional
+### AP wireless professional
 go to wireless professional setting and enable "OFDMA+MU-MIMO"
-![Figure: OFDMA+MU-MIMO](resources/readme/OFDMA.png)
 
-###Sniffer Machine setup
+![Figure: OFDMA+MU-MIMO](resources/readme/ofdma.png)
+
+### Sniffer Machine setup
 to see MU data, used the below command in a terminal in sniffer machine.
 
 > echo 0 00:00:00:00:00:00 > /sys/kernel/debug/iwlwifi/*/iwlmvm/he_sniffer_params
@@ -236,15 +236,15 @@ to see MU data, used the below command in a terminal in sniffer machine.
 > 
 > The second parameter is the MAC address of a specific AP/BSS
 
-###Sniffer Machine Output
+### Sniffer Machine Output
 UL OFDMA - from sniffer we need to make sure that upon receiving trigger basic frame from AP, DUT has to transfer the data in HE_TRIG PPDU format. DUT should be able to resend the frames which are not mentioned in the Block ACK from AP.
 
-![Figure: TCP_TX](resources/readme/ULOFDMA1.png)
-
-![Figure: TCP_TX](resources/readme/ULOFDMA2.png)
+![Figure: TCP_TX](resources/readme/ulofdma1.png)
+![Figure: TCP_TX](resources/readme/ulofdma2.png)
 
 DL OFDMA - First AP will send the MU-BAR trigger basic frame, AP has to send the HE_MU data to DUT, after receiving the data from AP, DUT should respond with HE_TRIG block ACK.
-![Figure: TCP_TX](resources/readme/DLOFDMA.png)
+
+![Figure: TCP_TX](resources/readme/dlofdma.png)
 
 
 
@@ -326,8 +326,6 @@ The application has been designed to work with FreeRTOS and Bare Metal configura
 > - Right click on the project and choose 'Properties'
 > - Go to 'C/C++ Build' | 'Settings' | 'GNU ARM C Compiler' | 'Symbols' and remove macro 'RSI_WITH_OS=1'
 > - Select 'Apply' and 'OK' to save the settings
-
 ![Figure: project settings in Simplicity Studio](resources/readme/image216b.png) 
-
 ![Figure: project settings in Simplicity Studio](resources/readme/image216c.png)
 

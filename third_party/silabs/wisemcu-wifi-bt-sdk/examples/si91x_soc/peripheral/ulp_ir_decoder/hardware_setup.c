@@ -45,7 +45,7 @@ void hardware_setup(void)
   RSI_IPMU_ProgramConfigData(ipmu_bod_clks_common_config2);  /* Disable PTAT for Brown-Out Detection Clocks */
 
   /* Power-Down Analog Peripherals */
-   RSI_IPMU_PowerGateClr(AUXDAC_PG_ENB | AUXADC_PG_ENB | WURX_CORR_PG_ENB | WURX_PG_ENB | ULP_ANG_CLKS_PG_ENB
+  RSI_IPMU_PowerGateClr(AUXDAC_PG_ENB | AUXADC_PG_ENB | WURX_CORR_PG_ENB | WURX_PG_ENB | ULP_ANG_CLKS_PG_ENB
                         | CMP_NPSS_PG_ENB);
 
   /* Power-Down Domains in NPSS */
@@ -64,7 +64,7 @@ void hardware_setup(void)
   RSI_PS_FsmHfFreqConfig(20);
   system_clocks.rc_32mhz_clock = 20000000;
 
-   /* by using this API we programmed the RTC timer clock in SOC
+  /* by using this API we programmed the RTC timer clock in SOC
   MSB 8 bits for the Integer part &
   LSB 17bits for the Fractional part
   Ex: 32Khz clock = 31.25us ==> 31.25*2^17 = 4096000 = 0x3E8000*/
@@ -90,10 +90,8 @@ void hardware_setup(void)
   RSI_PS_M4ssPeriPowerDown(M4SS_PWRGATE_ULP_QSPI_ICACHE | M4SS_PWRGATE_ULP_M4_DEBUG_FPU | M4SS_PWRGATE_ULP_EFUSE_PERI
                            | M4SS_PWRGATE_ULP_SDIO_SPI | M4SS_PWRGATE_ULP_RPDMA);
   /* Power-Down Unused ULPSS Domains */
-  RSI_PS_UlpssPeriPowerDown( ULPSS_PWRGATE_ULP_AUX | ULPSS_PWRGATE_ULP_CAP
-                            | ULPSS_PWRGATE_ULP_SSI | ULPSS_PWRGATE_ULP_I2S
-                            | ULPSS_PWRGATE_ULP_I2C
-                            | ULPSS_PWRGATE_ULP_FIM);
+  RSI_PS_UlpssPeriPowerDown(ULPSS_PWRGATE_ULP_AUX | ULPSS_PWRGATE_ULP_CAP | ULPSS_PWRGATE_ULP_SSI
+                            | ULPSS_PWRGATE_ULP_I2S | ULPSS_PWRGATE_ULP_I2C | ULPSS_PWRGATE_ULP_FIM);
   /*Turn off ULPSS SRAM Core/Periphery domains*/
   RSI_PS_UlpssRamBanksPowerDown(ULPSS_2K_BANK_2 | ULPSS_2K_BANK_3);
   RSI_PS_UlpssRamBanksPeriPowerDown(ULPSS_2K_BANK_2 | ULPSS_2K_BANK_3);
@@ -101,5 +99,4 @@ void hardware_setup(void)
   RSI_PS_M4ssRamBanksPowerDown(RAM_BANK_8 | RAM_BANK_9);
   RSI_PS_M4ssRamBanksPeriPowerDown(RAM_BANK_8 | RAM_BANK_9);
 #endif
-
 }

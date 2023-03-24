@@ -9,7 +9,7 @@ quality: alpha
 sdk: {id: gecko_sdk, version: 4.1.0}
 sdk_extension:
   - id: wiseconnect
-    version: 1.0.0
+    version: 1.0.1
 source:
   - path: uart_ds_wakeup_wo_ret.c
   - path: uart_exp.c
@@ -36,9 +36,8 @@ define:
   - name: ROM_BYPASS
   - name: RSI_M4_INTERFACE
 other_file:
-  - path: resources\readme\image506a.png
-  - path: resources\readme\image506b.png
-  - path: resources\readme\image506c.png
+  - path: resources/readme/image506a.png
+  - path: resources/readme/image506c.png
 readme:
   - path: readme.md
 ui_hints:

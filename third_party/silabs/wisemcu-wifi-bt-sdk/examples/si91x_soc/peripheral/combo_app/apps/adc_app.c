@@ -30,7 +30,7 @@
 
 /* Private define ------------------------------------------------------------*/
 #define CORE_CLOCK_180MHZ \
-    1                        /* This define use for enable core clock to 180Mhz ,
+  1                        /* This define use for enable core clock to 180Mhz ,
 CORE_CLOCK_180MHZ : 1 ; Core clock is 180Mhz SOC PLL
 CORE_CLOCK_180MHZ : 0 ; Core clock is 32Mhz RC
      */
@@ -47,8 +47,8 @@ CORE_CLOCK_180MHZ : 0 ; Core clock is 32Mhz RC
 #endif
 
 #define CHANNEL0_SAMPLING_RATE 100000 /* Number of ADC sample collect for channel0 */
-#define CHANNEL1_SAMPLING_RATE 100000  /* Number of ADC sample collect for channel1*/
-#define CHANNEL2_SAMPLING_RATE 100000  /* Number of ADC sample collect for channel2 */
+#define CHANNEL1_SAMPLING_RATE 100000 /* Number of ADC sample collect for channel1*/
+#define CHANNEL2_SAMPLING_RATE 100000 /* Number of ADC sample collect for channel2 */
 
 float vref_value = 2.8; /* Reference voltage to ADC for conversion operation */
 
@@ -106,7 +106,7 @@ uint32_t ch2_incr = 0;
 #define SWITCH_QSPI_TO_SOC_PLL
 
 #ifdef RSI_WITH_OS
-extern rsi_semaphore_handle_t pwm_thread_sem ,adc_thread_sem;
+extern rsi_semaphore_handle_t pwm_thread_sem, adc_thread_sem;
 #endif
 /**
  * @brief  This function is callback function to reconfigure ping and pong address.
@@ -148,13 +148,13 @@ void soc_pll_config(void)
 void callback_handler(uint8_t channel_no, uint8_t event)
 {
   if (event == INTERNAL_DMA) {
-      if (channel_no == ADC_CHNL0_INTR) {
-          chnl0_complete_flag++;
-      } else if (channel_no == ADC_CHNL1_INTR) {
-          chnl1_complete_flag++;
-      } else if (channel_no == ADC_CHNL2_INTR) {
-          chnl2_complete_flag++;
-      }
+    if (channel_no == ADC_CHNL0_INTR) {
+      chnl0_complete_flag++;
+    } else if (channel_no == ADC_CHNL1_INTR) {
+      chnl1_complete_flag++;
+    } else if (channel_no == ADC_CHNL2_INTR) {
+      chnl2_complete_flag++;
+    }
   }
 }
 #endif
@@ -181,7 +181,7 @@ int ADC_App()
 
   /*If input to chip less than 2.4V then switch input voltage supply from SCDC to HPLDO */
   if (battery_status < max_ip_volt_scdc) {
-      RSI_IPMU_ProgramConfigData(hp_ldo_voltsel);
+    RSI_IPMU_ProgramConfigData(hp_ldo_voltsel);
   }
 
 #if CORE_CLOCK_180MHZ
@@ -190,14 +190,16 @@ int ADC_App()
 #endif
 
   /* Configure ADC module related parameter */
-  adcConfig.num_of_channel_enable = NUMBER_OF_CHA_EN; /* Number of channel enable for ADC operation,here enable two ADC channel */
+  adcConfig.num_of_channel_enable =
+    NUMBER_OF_CHA_EN; /* Number of channel enable for ADC operation,here enable two ADC channel */
   adcConfig.operation_mode = ADC_FIFOMODE_ENABLE; /* ADC operation mode */
 
   /* Configure ADC channels related parameter */
   adcChConfig.input_type[0]    = 0;                      /* Single ended input to ADC Channel0 */
   adcChConfig.sampling_rate[0] = CHANNEL0_SAMPLING_RATE; /* Sampling rate for channel0 */
-  adcChConfig.pos_inp_sel[0]   = POS6;                      /* Positive input to channel0 from ULP_GPIO4 */
-  adcChConfig.neg_inp_sel[0]   = 2; /* Negative input to ADC from ULP_GPIO5,For single ended data acquisition this parameter not used */
+  adcChConfig.pos_inp_sel[0]   = POS6;                   /* Positive input to channel0 from ULP_GPIO4 */
+  adcChConfig.neg_inp_sel[0] =
+    2; /* Negative input to ADC from ULP_GPIO5,For single ended data acquisition this parameter not used */
   adcChConfig.opamp_gain[0]     = 0;                      /* OPAMP gain value if opamp output is one of input to ADC*/
   adcChConfig.rx_buf[0]         = adc_output_ch0;         /* Channel0 output buffer */
   adcChConfig.num_of_samples[0] = CHANNEL0_SAMPLE_LENGTH; /* Number of ADC samples collect for channel0 */
@@ -208,8 +210,9 @@ int ADC_App()
 
   adcChConfig.input_type[1]    = 0;                      /* Single ended input to ADC Channel1 */
   adcChConfig.sampling_rate[1] = CHANNEL1_SAMPLING_RATE; /* Sampling rate for channel1 */
-  adcChConfig.pos_inp_sel[1]   = POS7;                     /* Positive input to channel1 from ULP_GPIO5 */
-  adcChConfig.neg_inp_sel[1] =  2; /* Negative input to ADC from ULP_GPIO5,For single ended data acquisition this parameter not used */
+  adcChConfig.pos_inp_sel[1]   = POS7;                   /* Positive input to channel1 from ULP_GPIO5 */
+  adcChConfig.neg_inp_sel[1] =
+    2; /* Negative input to ADC from ULP_GPIO5,For single ended data acquisition this parameter not used */
   adcChConfig.opamp_gain[1]     = 0;                      /* OPAMP gain value if opamp output is one of input to ADC*/
   adcChConfig.rx_buf[1]         = adc_output_ch1;         /* Channel1 output buffer */
   adcChConfig.num_of_samples[1] = CHANNEL1_SAMPLE_LENGTH; /* Number of ADC samples collect for channel1 */
@@ -220,8 +223,9 @@ int ADC_App()
 
   adcChConfig.input_type[2]    = 0;                      /* Single ended input to ADC Channel2 */
   adcChConfig.sampling_rate[2] = CHANNEL2_SAMPLING_RATE; /* Sampling rate for channel2 */
-  adcChConfig.pos_inp_sel[2]   = POS8;                      /* Positive input to channel2 from ULP_GPIO6 */
-  adcChConfig.neg_inp_sel[2] = 2; /* Negative input to ADC from ULP_GPIO5,For single ended data acquisition this parameter not used */
+  adcChConfig.pos_inp_sel[2]   = POS8;                   /* Positive input to channel2 from ULP_GPIO6 */
+  adcChConfig.neg_inp_sel[2] =
+    2; /* Negative input to ADC from ULP_GPIO5,For single ended data acquisition this parameter not used */
   adcChConfig.opamp_gain[2]     = 0;                      /* OPAMP gain value if opamp output is one of input to ADC*/
   adcChConfig.rx_buf[2]         = adc_output_ch2;         /* Channel2 output buffer */
   adcChConfig.num_of_samples[2] = CHANNEL2_SAMPLE_LENGTH; /* Number of ADC samples collect for channel2 */
@@ -233,40 +237,40 @@ int ADC_App()
   /* Configure the Verf value ADC calibration and enable ADC power gate)*/
   status = ADC_Init(adcChConfig, adcConfig, callback_handler);
   if (status != RSI_OK) {
-      DEBUGOUT("\r\nADC Initialization Failed,Error Code : %d\r\n", status);
-      return status;
+    DEBUGOUT("\r\nADC Initialization Failed,Error Code : %d\r\n", status);
+    return status;
   }
   /* Configure reference voltage for analog peripheral ,here till 2.8V generate by using
 	   AUX_LDO so more than 2.8V enable LDO bypass mode */
   status = RSI_AUX_RefVoltageConfig(vref_value, battery_status);
   if (status != RSI_OK) {
-      DEBUGOUT("\r\nFailed to Set Reference Voltage to ADC,Error Code : %d\r\n", status);
-      return status;
+    DEBUGOUT("\r\nFailed to Set Reference Voltage to ADC,Error Code : %d\r\n", status);
+    return status;
   }
 
   status = ADC_ChannelConfig(adcChConfig, adcConfig);
   if (status != RSI_OK) {
-      DEBUGOUT("\r\nFailed to Configured Parameters to ADC Channels,Error Code : %d\r\n", status);
-      return status;
+    DEBUGOUT("\r\nFailed to Configured Parameters to ADC Channels,Error Code : %d\r\n", status);
+    return status;
   }
 
   for (ch_incr = 0; ch_incr < NUMBER_OF_CHA_EN; ch_incr++) {
-      achived_sampling_rate[ch_incr] = ADC_GetSamplingRate(ch_incr);
+    achived_sampling_rate[ch_incr] = ADC_GetSamplingRate(ch_incr);
   }
 
-status = ADC_Start(adcConfig);
-      if (status != RSI_OK) {
-          DEBUGOUT("\r\nFailed to Start ADC,Error Code : %d\r\n", status);
-          return status;
-      }
+  status = ADC_Start(adcConfig);
+  if (status != RSI_OK) {
+    DEBUGOUT("\r\nFailed to Start ADC,Error Code : %d\r\n", status);
+    return status;
+  }
 
 #ifdef RSI_WITH_OS
   while (forever) {
-      rsi_semaphore_wait(&adc_thread_sem, 0);
-      DEBUGOUT("\r\ ADC Task\r\n");     
+    rsi_semaphore_wait(&adc_thread_sem, 0);
+    DEBUGOUT("\r\ ADC Task\r\n");
   }
 #else
-        DEBUGOUT("\r\ ADC Task\r\n");     
+  DEBUGOUT("\r\ ADC Task\r\n");
 #endif
   return 0;
 }

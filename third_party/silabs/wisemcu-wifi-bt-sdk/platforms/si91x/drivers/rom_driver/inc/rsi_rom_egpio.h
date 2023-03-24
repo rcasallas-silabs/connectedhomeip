@@ -39,6 +39,9 @@ extern "C" {
 #else
 #include "rsi_rom_table_RS1xxxx.h"
 #endif
+/** @addtogroup SOC11
+* @{
+*/
 
 /**
  * @fn           STATIC INLINE void  RSI_EGPIO_SetDir(EGPIO_Type *pEGPIO ,uint8_t port,uint8_t pin, boolean_t dir)
@@ -1195,5 +1198,5 @@ STATIC INLINE void RSI_EGPIO_UlpPadSlewRateControll(uint8_t u8GpioNum, uint8_t v
 #endif
 
 #endif /*__RSI_ROM_EGPIO_H__*/
-
+/** @} */
 /* @}end of  RSI_EGPIO_DRIVERS */

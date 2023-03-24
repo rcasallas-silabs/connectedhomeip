@@ -45,9 +45,7 @@ volatile uint32_t read_tx_cnt = 0;
 volatile uint32_t read_rx_cnt = 0;
 volatile uint32_t match = 0, unmatch = 0;
 
-
 void ARM_USART_SignalEvent(uint32_t event);
-
 
 // read capabilities
 
@@ -136,7 +134,7 @@ int uart_app(void)
   // Initialize UART(Enable Clock)
   status = USARTdrv->Initialize(ARM_USART_SignalEvent);
 
-  // Initialized board UART 
+  // Initialized board UART
   DEBUGINIT();
 
   if (status != ARM_DRIVER_OK) {
@@ -146,7 +144,7 @@ int uart_app(void)
     DEBUGOUT("\r\n UART Initialization Success\r\n");
   }
 
-  // Power up the UART peripheral 
+  // Power up the UART peripheral
   status = USARTdrv->PowerControl(ARM_POWER_FULL);
   if (status != ARM_DRIVER_OK) {
     DEBUGOUT("\r\n Failed to Set Power to UART, Error Code : %d\r\n", status);
@@ -154,7 +152,7 @@ int uart_app(void)
   } else {
     DEBUGOUT("\r\n Configured Power to UART \r\n");
   }
-  // Enable Receiver and Transmitter lines 
+  // Enable Receiver and Transmitter lines
   status = USARTdrv->Control(ARM_USART_CONTROL_TX, 1);
   if (status != ARM_DRIVER_OK) {
     DEBUGOUT("\r\n Failed to Set  Transmitter lines to UART, Error Code : %d\r\n", status);
@@ -171,10 +169,10 @@ int uart_app(void)
     DEBUGOUT("\r\n Set  Receiver lines to UART\r\n");
   }
 
-  // Configure the UART to 9600 Bits/sec 
+  // Configure the UART to 9600 Bits/sec
   status = USARTdrv->Control(ARM_USART_MODE_ASYNCHRONOUS | ARM_USART_DATA_BITS_8 | ARM_USART_PARITY_NONE
-                             | ARM_USART_STOP_BITS_1 | ARM_USART_FLOW_CONTROL_NONE,
-                           BAUD_VALUE);
+                               | ARM_USART_STOP_BITS_1 | ARM_USART_FLOW_CONTROL_NONE,
+                             BAUD_VALUE);
   if (status != ARM_DRIVER_OK) {
     DEBUGOUT("\r\n Failed to set  UART control Configuration , Error Code : %d \r\n", status);
     return status;
@@ -182,7 +180,7 @@ int uart_app(void)
     DEBUGOUT("\r\n Successfully Configured UART control  \r\n");
   }
 
-  // Receives data 
+  // Receives data
   status = USARTdrv->Receive(rx_buffer, sizeof(rx_buffer));
   if (status != ARM_DRIVER_OK) {
     DEBUGOUT("\r\n Failed to Receive data , Error Code : %d \r\n", status);
@@ -201,7 +199,7 @@ int uart_app(void)
     DEBUGOUT("\r\n data send success  \r\n");
   }
 
-  // wait for the receive complete event 
+  // wait for the receive complete event
   while (read_rx_cnt == 0)
     ;
 
@@ -224,4 +222,3 @@ int uart_app(void)
   }
   return 0;
 }
-

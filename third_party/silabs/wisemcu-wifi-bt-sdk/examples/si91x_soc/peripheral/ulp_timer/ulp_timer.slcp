@@ -9,7 +9,7 @@ quality: alpha
 sdk: {id: gecko_sdk, version: 4.1.0}
 sdk_extension:
   - id: wiseconnect
-    version: 1.0.0
+    version: 1.0.1
 source:
   - path: ulp_timer.c
   - path: hardware_setup.c
@@ -37,15 +37,13 @@ template_contribution:
   - name: RAM_EXECUTION
     value: 1    
 other_file:
-  - path: resources\readme\image509a.png
-  - path: resources\readme\image509b.png
-  - path: resources\readme\image509c.png
+  - path: resources/readme/image509a.png
+  - path: resources/readme/image509c.png
 readme:
   - path: readme.md
 ui_hints:
   highlight: readme.md
   focus: true	
 define:
-  - name: COMMON_FLASH_EN
   - name: RSI_M4_INTERFACE
   - name: M4_PS2_STATE

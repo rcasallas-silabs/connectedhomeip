@@ -25,7 +25,7 @@
 #include "rsi_chip.h"
 #include "rsi_board.h"
 
-#define RSI_BLINK_RATE (10) // 10 ticks per second     
+#define RSI_BLINK_RATE (10) // 10 ticks per second
 
 /*==============================================*/
 /**
@@ -35,7 +35,7 @@
  */
 void SysTick_Handler(void)
 {
-  //  Toggles the current state of a board '0' number LED. 
+  //  Toggles the current state of a board '0' number LED.
   RSI_Board_LED_Toggle(0);
 }
 
@@ -52,26 +52,26 @@ int main(void)
   SystemCoreClockUpdate();
 
   /* Enable the DEBUG UART port for debug prints and  Set up and initialize all required
-        blocks and functions  related to the board hardware. */ 
+        blocks and functions  related to the board hardware. */
   RSI_Board_Init();
 
-  // Sets the state of a board '0'number LED to off(false). 
+  // Sets the state of a board '0'number LED to off(false).
   RSI_Board_LED_Set(0, false);
 
-  // Sets the state of a board '1'number LED to on(true). 
+  // Sets the state of a board '1'number LED to on(true).
   RSI_Board_LED_Set(1, true);
 
-  // Sets the state of a board '2'number LED to on(true). 
+  // Sets the state of a board '2'number LED to on(true).
   RSI_Board_LED_Set(2, true);
 
-  // Enable SysTick Timer 
+  // Enable SysTick Timer
   SysTick_Config(SystemCoreClock / RSI_BLINK_RATE);
-  
-  // LED toggling and debug prints for ever 
+
+  // LED toggling and debug prints for ever
   while (forever) {
     //Sleep till interrupt occurs
 #ifdef DEBUG_UART
-    // Prints on hyper-terminal as "Core is Sleeping...\n" 
+    // Prints on hyper-terminal as "Core is Sleeping...\n"
     DEBUGOUT("Core is Sleeping ...\n");
 #endif
     // Sleep untill next interrupt occurres
@@ -80,4 +80,3 @@ int main(void)
   // Statement will never reach here , just to satisfy the standard main
   return 0;
 }
-

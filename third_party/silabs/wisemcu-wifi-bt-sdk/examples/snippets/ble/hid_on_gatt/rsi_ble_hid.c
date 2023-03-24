@@ -648,9 +648,9 @@ static void rsi_ble_on_smp_passkey(rsi_bt_event_smp_passkey_t *remote_dev_addres
  */
 static void rsi_ble_on_smp_passkey_display(rsi_bt_event_smp_passkey_display_t *smp_passkey_display)
 {
-  uint8_t passkey[BLE_PASSKEY_SIZE] = {0};
+  uint8_t passkey[BLE_PASSKEY_SIZE] = { 0 };
   memcpy(&smp_passkey_display_event, smp_passkey_display, sizeof(rsi_bt_event_smp_passkey_display_t));
-  memcpy (passkey, smp_passkey_display_event.passkey, BLE_PASSKEY_SIZE);
+  memcpy(passkey, smp_passkey_display_event.passkey, BLE_PASSKEY_SIZE);
   LOG_PRINT("\r\n smp passkey disp : %s \r\n", passkey);
   rsi_ble_app_set_event(RSI_BLE_EVENT_SMP_PASSKEY_DISPLAY);
 }
@@ -843,13 +843,13 @@ static int32_t rsi_ble_add_char_val_att(rsi_ble_hid_info_t *p_hid_info,
   //! add attribute to the service
   status = rsi_ble_add_attribute(&new_att);
   if (status != RSI_SUCCESS) {
-	  LOG_PRINT("\n add attribute failed = %x \n", status);
+    LOG_PRINT("\n add attribute failed = %x \n", status);
     return status;
   }
 
   if (((config_bitmap & BIT(1)) == 1) || (data_len > 20)) {
     if (!p_hid_info) {
-	  LOG_PRINT("\n HID INFO is not available \n");
+      LOG_PRINT("\n HID INFO is not available \n");
       return RSI_FAILURE;
     }
     rsi_gatt_add_att_to_list(p_hid_info, handle, data_len, data, att_type_uuid.val.val32);

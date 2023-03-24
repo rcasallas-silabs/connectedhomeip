@@ -32,17 +32,15 @@ Before running the application, the user will need the following things to setup
     
 - Embedded Development Environment
 
-   - For Silicon Labs EFx32, use the latest version of [Simplicity Studio](https://www.silabs.com/developers/simplicity-studio)
-   
-- Download and install the Silicon Labs [EFR Connect App](https://www.silabs.com/developers/efr-connect-mobile-app) in the android smart phones for testing BLE applications. Users can also use their choice of BLE apps available in Android/iOS smart phones.
+   - For Silicon Labs EFx32, use the latest version of [Simplicity Studio](https://www.silabs.com/developers/simplicity-studio)- Download and install the Silicon Labs [EFR Connect App](https://www.silabs.com/developers/efr-connect-mobile-app) in the android smart phones for testing BLE applications. Users can also use their choice of BLE apps available in Android/iOS smart phones.
 
 ### 2.3 Setup Diagram:
    
 **SoC Mode :** 
-<br><img src="resources/readme/hidsoc.png" width=500 height=200 alt=""><br>
+![](resources/readme/hidsoc.png)
   
 **NCP Mode :**   
-<br><img src="resources/readme/hidncp.png" width=500 height=200 alt=""><br>
+![](resources/readme/hidncp.png)
       
    **Note:** Use default Bluetooth application in smart phones which has BLE support.
 
@@ -57,7 +55,7 @@ Before running the application, the user will need the following things to setup
   
 ### 3.2 NCP Mode - Host Interface 
 
-* By default, the application is configured to use the SPI bus for interfacing between Host platforms(EFR32MG21) and the SiWx91x EVK.
+By default, the application is configured to use the SPI bus for interfacing between Host platforms(EFR32MG21) and the SiWx91x EVK.
 		
 ### 3.3 Bare Metal/RTOS Support
 
@@ -101,8 +99,7 @@ The application can be configured to suit your requirements and development envi
 
    - By default, The Application is configured without power save.
 ```c 
-	 #define ENABLE_POWER_SAVE 0
-```
+	 #define ENABLE_POWER_SAVE 0```
 -   If user wants to run the application in power save, modify the below configuration. 
 ```c	 
 	 #define ENABLE_POWER_SAVE 1 
@@ -131,7 +128,6 @@ The application can be configured to suit your requirements and development envi
 	 #define RSI_BLE_HID_INFO_UUID                            0x2A4A
 ```   
    - `RSI_BLE_HID_CONTROL_POINT_UUID` refers to the attribute type of the fifth attribute under this above primary service.
-
 ```c
 	 #define RSI_BLE_HID_CONTROL_POINT_UUID                   0x2A4C 
 ```
@@ -152,8 +148,7 @@ The application can be configured to suit your requirements and development envi
 
 -   `RSI_BLE_CHAR_SERV_UUID` refers to the attribute type of the characteristics to be added in a service.
 ```c
-	 #define RSI_BLE_CHAR_SERV_UUID                           0x2803
-```
+	 #define RSI_BLE_CHAR_SERV_UUID                           0x2803```
 -   `RSI_BLE_CLIENT_CHAR_UUID` refers to the attribute type of the client characteristics descriptor to be added in a service.
 ```c    
 	 #define RSI_BLE_CLIENT_CHAR_UUID                         0x2902
@@ -161,10 +156,8 @@ The application can be configured to suit your requirements and development envi
 
 -  `RSI_BLE_REPORT_REFERENCE_UUID` refers to the attribute type of the report reference descriptor to be added in a service.
 
-
 ```c    
-	 #define RSI_BLE_REPORT_REFERENCE_UUID                    0x2908 
-```
+	 #define RSI_BLE_REPORT_REFERENCE_UUID                    0x2908 ```
 -   **GLOBAL_BUFF_LEN** refers Number of bytes required by the application and the driver
 
 	 #define GLOBAL_BUFF_LEN                               15000 
@@ -189,63 +182,57 @@ The application can be configured to suit your requirements and development envi
    **Note:** rsi_ble_config.h files are already set with desired configuration in respective example folders user need not change for each example.
 ## 5. Testing the Application
 
-Follow the below steps for the successful execution of the application.
+- Follow the below steps for the successful execution of the application.
 
 ### 5.1 Loading the SiWx91x Firmware
 
-Refer [Getting started with a PC](https://docs.silabs.com/rs9116/latest/wiseconnect-getting-started) to load the firmware into SiWx91x EVK. The firmware file is located in `<SDK>/firmware/`
+- Refer [Getting started with a PC](https://docs.silabs.com/rs9116/latest/wiseconnect-getting-started) to load the firmware into SiWx91x EVK. The firmware file is located in `<SDK>/connectivity_firmware/`
 
 ### 5.2 Creating the Project and builing the Application
   
-Refer [Getting started with EFX32](https://docs.silabs.com/rs9116-wiseconnect/latest/wifibt-wc-getting-started-with-efx32/), for settin-up EFR & EFM host platforms
+- Refer [Getting started with EFX32](https://docs.silabs.com/rs9116-wiseconnect/latest/wifibt-wc-getting-started-with-efx32/), for settin-up EFR & EFM host platforms
 
 #### 5.2.1 Project Creation - SoC Mode : 
 
 - Connect your board. The Si917 compatible SoC board is **BRD4325A**.
 - Studio should detect your board. Your board will be shown here.
 ![soc_board_detection](resources/readme/socboarddetection111.png)
-
 #### 5.2.2 Project Creation - NCP Mode : 
 
 - Connect your board. The supported NCP boards are: **BRD4180A,BRD4280B**
 - Studio should detect your board. Your board will be shown here.
 ![ncp_board_detection](resources/readme/ncpboarddetection112.png)
-
 #### 5.2.3 Selecting an example application and generate project
 
 - Go to the 'EXAMPLE PROJECT & DEMOS' tab and select your desired example application
-![projct_selection](resources/readme/projctselection.PNG)
+![projct_selection](resources/readme/projctselection1.png)
 - Click 'Create'. The "New Project Wizard" window appears. Click 'Finish'
-![creation_final](resources/readme/creationfinal.PNG)
-
+![creation_final](resources/readme/creationfinal1.png)
 #### 5.2.4 Build Project - SoC Mode
 
 - Once the project is created, right click on project and go to properties → C/C++ Build → Settings → Build Steps
 - Add post_build_script_SimplicityStudio.bat file path (SI917_COMBO_SDK.X.X.X.XX\utilities\isp_scripts_common_flash) in build steps settings as shown in below image.
-![postbuild_script](resources/readme/buildsoc.PNG)
+![postbuild_script](resources/readme/buildsoc2.png)
 - Check for M4 projects macros in preprocessor settings(RSI_M4_INTERFACE=1)
 - Check for 9117 macro in preprocessor settings(CHIP_9117=1).
 - Click on the build icon (hammer) to build the project
 ![building_pjt](resources/readme/buildsoc1.png)
 - Successful build output will show as below.
-![build_success_soc](resources/readme/buildsuccesssoc.PNG)
-
+![build_success_soc](resources/readme/buildsuccesssoc1.png)
 #### 5.2.5 Build Project - NCP Mode :
 
 - Check for 9117 macro in preprocessor settings(CHIP_9117=1).
 - Click on the build icon (hammer) to build the project
-![building_pjt](resources/readme/buildncp.PNG)
+![building_pjt](resources/readme/buildncp1.png)
 - Successful build output will show as below.
-![build_success_soc](resources/readme/buildsuccessncp.PNG)
-
+![build_success_soc](resources/readme/buildsuccessncp1.png)
 ## 6. Program the device
 
-Once the build was successfull, right click on project and click on Debug As->Silicon Labs ARM Program as shown in below image.
+- Once the build was successfull, right click on project and click on Debug As->Silicon Labs ARM Program as shown in below image.
 ### SoC Mode :
 ![debug_mode_soc](resources/readme/debugmodesoc.png)
 ### NCP Mode : 
 ![debug_mode_NCP](resources/readme/debugmodencp.png)
-
 ### 6.1 Running the SiWx91x Application
    
 **Server role**
@@ -257,37 +244,23 @@ Once the build was successfull, right click on project and click on Debug As->Si
 3. Open a default Bluetooth settings and do the scan.
 
 4. In the App, Silicon Labs module will appear with the name configured in the macro **RSI\_BLE\_APP\_HIDS (Ex: "HID_OVER_GATT")** or sometimes observed as Silicon Labs device as internal name "**SimpleBLEPeripheral**".
-<br>
-<img src="resources/readme/image73.png" width=250 alt=""><br>
-
+![](resources/readme/image73.png)
 5. Initiate connection from the Bluetooth settings. It automatically redirects to the pin-code entry pop-up window.
-<br>
-<img src="resources/readme/image74.png" width=250 alt=""><br>
-
+![](resources/readme/image74.png)
 6. Enter the **Pin code** which is displayed in the serial teriminal. 
-<br>
-<img src="resources/readme/image75.png" width=250 alt=""><br>
-
+![](resources/readme/image75.png)
 7. While connection, smart phone will do service discovery and it will find the HID service with UUID **RSI\_BLE\_HID\_SERVICE\_UUID.** After that it will read report map and enables the notification.
 
 8. After successful connection, open note pad or any text editor in phone, you can see some text printing.
-<br>
-<img src="resources/readme/image76.png" width=250 alt=""><br>
-
+![](resources/readme/image76.png)
 9. By default, the application is sending some text (i.e., "hog") in regular intervals, which will come as a notification to a smart phone. Use Notepad or Chrome to observe the received data.
-<br>
-<img src="resources/readme/image77.png" width=250 alt=""><br>
-
+![](resources/readme/image77.png)
 10. Refer the below images for console prints
 
 - For SOC the console prints are shown below
-<br>
-<img src="resources/readme/serial_teriminal_soc_prints.PNG" alt=""><br>
-
+![](resources/readme/serial_teriminal_soc_prints1.png)
 - For NCP the console prints are shown below
-<br>
-<img src="resources/readme/serial_teriminal_ncp_prints.PNG" alt=""><br>
-
+![](resources/readme/serial_teriminal_ncp_prints1.png)
 **Client role**
 
 1. Advertise a LE device which supports Human Interface Device Service.
@@ -309,16 +282,13 @@ Once the build was successfull, right click on project and click on Debug As->Si
    - Connect Tx(Pin-6) to P27 on WSTK
    - Connect GND(Pin 8 or 10) to GND on WSTK
 ![FTDI_prints](resources/readme/ftdiprints118.png)
-
 - Prints can see as below in any Console terminal
-![ouput_prints](resources/readme/serial_teriminal_soc_prints.PNG)
-
+![ouput_prints](resources/readme/serial_teriminal_soc_prints1.png)
 ### 7.2 NCP Mode:
 - Prints can see as below in any Console terminal
-![ouput_prints](resources/readme/serial_teriminal_ncp_prints.PNG)
-
+![ouput_prints](resources/readme/serial_teriminal_ncp_prints1.png)
 ## 8. Selecting Bare Metal
-The application has been designed to work with FreeRTOS and Bare Metal configurations. By default, the application project files (Simplicity studio) are configured with FreeRTOS enabled. The following steps demonstrate how to configure Simplicity Studio to test the application in a Bare Metal environment.
+- The application has been designed to work with FreeRTOS and Bare Metal configurations. By default, the application project files (Simplicity studio) are configured with FreeRTOS enabled. The following steps demonstrate how to configure Simplicity Studio to test the application in a Bare Metal environment.
 
 ### 8.1 Bare Metal with Simplicity Studio
 - Open the project in Simplicity Studio
@@ -326,8 +296,7 @@ The application has been designed to work with FreeRTOS and Bare Metal configura
 ![Figure: project settings in Simplicity Studio](resources/readme/with_out_os.png) 
 - Go to 'C/C++ Build' | 'Settings' | 'GNU ARM C Compiler' | 'Symbols' and remove macro 'RSI_WITH_OS=1'
 - Select 'Apply' and 'OK' to save the settings
-![Figure: project settings in Simplicity Studio](resources/readme/with_out_os1.PNG)
-
+![Figure: project settings in Simplicity Studio](resources/readme/with_out_os2.png)
 ### 8.2 Bare Metal with Keil
 - Open project in Keil IDE and click on 'Options for Target'
 - Go to 'C/C++' tab and remove 'RSI_WITH_OS' macro present under Preprocessor Symbols

@@ -29,10 +29,10 @@
 #include "rsi_board.h"
 /* Private typedef -----------------------------------------------------------*/
 
-#define RESERVED_IRQ_COUNT    16
-#define EXT_IRQ_COUNT         98
-#define VECTOR_TABLE_ENTRIES (RESERVED_IRQ_COUNT + EXT_IRQ_COUNT) 
-uint32_t ramVector[VECTOR_TABLE_ENTRIES] __attribute__ ((aligned(256)));
+#define RESERVED_IRQ_COUNT   16
+#define EXT_IRQ_COUNT        98
+#define VECTOR_TABLE_ENTRIES (RESERVED_IRQ_COUNT + EXT_IRQ_COUNT)
+uint32_t ramVector[VECTOR_TABLE_ENTRIES] __attribute__((aligned(256)));
 
 /* Private macro -------------------------------------------------------------*/
 #ifdef CHIP_9118
@@ -48,7 +48,7 @@ uint32_t ramVector[VECTOR_TABLE_ENTRIES] __attribute__ ((aligned(256)));
 #define IR_DET_THRESHOLD        0x5
 #define SOC_OPER_FREQUENCY      32000000
 #define RSI_BLINK_RATE          1000
-#define SYSTICK_PIN             6       //ULP GPIO PIN
+#define SYSTICK_PIN             6 //ULP GPIO PIN
 #define TEST_PIN_IR_INPUT       10U
 #define TEST_PIN_IR_INPUT_MODE  4U
 #define TEST_PIN_IR_OUTPUT      5U
@@ -120,10 +120,10 @@ int main(void)
   SystemCoreClockUpdate();
 
   //copying the vector table from flash to ram
-  memcpy(ramVector, (uint32_t*)SCB->VTOR, sizeof(uint32_t) * VECTOR_TABLE_ENTRIES);
+  memcpy(ramVector, (uint32_t *)SCB->VTOR, sizeof(uint32_t) * VECTOR_TABLE_ENTRIES);
 
   //assing the ram vector adress to VTOR register
-  SCB->VTOR = (uint32_t)ramVector; 
+  SCB->VTOR = (uint32_t)ramVector;
 
   /* Switching MCU from PS4 to PS2 state */
   hardware_setup();

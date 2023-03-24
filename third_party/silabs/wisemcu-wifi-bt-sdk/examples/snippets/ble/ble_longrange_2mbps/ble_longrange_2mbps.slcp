@@ -16,7 +16,7 @@ xml_filter: Undefined
 sdk: {id: gecko_sdk, version: 4.1.0}
 sdk_extension:
   - id: wiseconnect
-    version: 1.0.0
+    version: 1.0.1
 source:
   - path: rsi_ble_lr_2mbps.c
 include:
@@ -33,20 +33,32 @@ toolchain_settings: []
 readme:
   - path: readme.md
 other_file:
+  - path: resources/readme/creationfinal1.png
   - path: resources/readme/ncpboarddetection112.png
+  - path: resources/readme/serial_teriminal_ncp_2mbps_print1.png
   - path: resources/readme/ftdiprints118.png
   - path: resources/readme/keil_with_out_os.png
+  - path: resources/readme/buildncp1.png
   - path: resources/readme/buildsoc1.png
   - path: resources/readme/blelrncp.png
+  - path: resources/readme/buildsoc2.png
   - path: resources/readme/debugmodencp.png
   - path: resources/readme/connection.png
   - path: resources/readme/debugmodesoc.png
   - path: resources/readme/image49a.png
+  - path: resources/readme/projctselection1.png
   - path: resources/readme/remote_device_advertising.png
+  - path: resources/readme/serial_teriminal_soc_long_range_print1.png
+  - path: resources/readme/long_range_datarate1.png
   - path: resources/readme/blelrsoc.png
   - path: resources/readme/socboarddetection111.png
   - path: resources/readme/with_out_os.png
+  - path: resources/readme/serial_teriminal_ncp_long_range_print1.png
+  - path: resources/readme/serial_teriminal_soc_2mbps_print1.png
+  - path: resources/readme/coded_500kbps_1.png
+  - path: resources/readme/with_out_os2.png
   - path: resources/readme/connection_established.png
+  - path: resources/readme/buildsuccessncp1.png
 ui_hints:
   highlight:
     - path: readme.md

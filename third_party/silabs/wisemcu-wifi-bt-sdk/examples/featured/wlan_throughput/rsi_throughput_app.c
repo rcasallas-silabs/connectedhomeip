@@ -1154,6 +1154,7 @@ int main(void)
 
 #ifdef RSI_WITH_OS
   rsi_task_handle_t application_handle = NULL;
+
   // Create application task
   rsi_task_create((rsi_task_function_t)(int32_t)application,
                   (uint8_t *)"application_task",

@@ -31,10 +31,10 @@
 //! include file to refer data types
 #include "rsi_data_types.h"
 
-//! COMMON include file to refer wlan APIs
+//! COMMON include file to refer WLAN APIs
 #include "rsi_common_apis.h"
 
-//! WLAN include file to refer wlan APIs
+//! WLAN include file to refer WLAN APIs
 #include "rsi_wlan_apis.h"
 #include "rsi_wlan_non_rom.h"
 
@@ -54,8 +54,8 @@
 #endif
 
 #include "string.h"
-
 #include "rsi_driver.h"
+
 //! Access point SSID to be created
 #define SSID "SILABS_AP"
 
@@ -78,16 +78,13 @@
 #define DTIM_INTERVAL 4
 
 //! IP address of the module
-//! E.g: 0x650AA8C0 == 192.168.10.101
-#define DEVICE_IP "192.168.10.1" //0x010AA8C0
+#define DEVICE_IP "192.168.10.1"
 
 //! IP address of Gateway
-//! E.g: 0x010AA8C0 == 192.168.10.1
-#define GATEWAY "192.168.10.1" //0x010AA8C0
+#define GATEWAY "192.168.10.1"
 
 //! IP address of netmask
-//! E.g: 0x00FFFFFF == 255.255.255.0
-#define NETMASK "255.255.255.0" //0x00FFFFFF
+#define NETMASK "255.255.255.0"
 
 //! Device port number
 #define DEVICE_PORT 5001
@@ -118,10 +115,17 @@
 //! Memory to initialize driver
 uint8_t global_buf[GLOBAL_BUFF_LEN];
 
+//! Receive buffer
+uint8_t recv_buffer[RECV_BUFFER_SIZE];
+
 uint8_t station_mac[6];
+uint32_t received_length = 0;
+int32_t packet_count     = 0;
 
 #ifdef RSI_WITH_OS
+#if SOCKET_ASYNC_FEATURE
 rsi_semaphore_handle_t ap_start_app;
+#endif
 #endif
 
 //! This callback function is called when Station is connected.
@@ -138,15 +142,11 @@ void stations_connect_notify_handler(uint16_t status, uint8_t *buffer, const uin
 //! Buffer has the MAC address of the station disconnected
 void stations_disconnect_notify_handler(uint16_t status, uint8_t *buffer, const uint32_t length)
 {
-  LOG_PRINT("\r\nStation Disonnected\r\n");
+  LOG_PRINT("\r\nStation Disconnected\r\n");
   UNUSED_PARAMETER(status);       //This statement is added only to resolve compilation warning, value is unchanged
   UNUSED_PARAMETER(buffer);       //This statement is added only to resolve compilation warning, value is unchanged
   UNUSED_CONST_PARAMETER(length); //This statement is added only to resolve compilation warning, value is unchanged
 }
-
-uint32_t received_length = 0;
-int32_t packet_count     = 0;
-uint8_t recv_buffer[RECV_BUFFER_SIZE];
 
 //! Call back for Socket Async
 void socket_async_recive(uint32_t sock_no, uint8_t *buffer, uint32_t length)
@@ -163,9 +163,12 @@ void rsi_remote_socket_terminate_handler(uint16_t status, uint8_t *buffer, const
   UNUSED_PARAMETER(status);
   UNUSED_PARAMETER(buffer);
   UNUSED_CONST_PARAMETER(length);
-  LOG_PRINT("\r\n remote socket terminated\r\n");
+  LOG_PRINT("\r\nRemote socket terminated\r\n");
+
 #ifdef RSI_WITH_OS
+#if SOCKET_ASYNC_FEATURE
   rsi_semaphore_post(&ap_start_app);
+#endif
 #endif
 }
 
@@ -186,7 +189,7 @@ int32_t rsi_ap_start()
     return status;
   }
 
-  //! SiLabs module initialization
+  //! Silabs module initialization
   status = rsi_device_init(LOAD_NWP_FW);
   if (status != RSI_SUCCESS) {
     LOG_PRINT("\r\nDevice Initialization Failed, Error Code : 0x%lX\r\n", status);
@@ -204,7 +207,9 @@ int32_t rsi_ap_start()
 #ifdef RSI_WITH_OS
   rsi_task_handle_t driver_task_handle = NULL;
 
+#if SOCKET_ASYNC_FEATURE
   rsi_semaphore_create(&ap_start_app, 0);
+#endif
 
   //! Task created for Driver task
   rsi_task_create((rsi_task_function_t)rsi_wireless_driver_task,
@@ -214,7 +219,8 @@ int32_t rsi_ap_start()
                   RSI_DRIVER_TASK_PRIORITY,
                   &driver_task_handle);
 #endif
-  //! WC initialization
+
+  //! Wireless initialization
   status = rsi_wireless_init(6, 0);
   if (status != RSI_SUCCESS) {
     LOG_PRINT("\r\nWireless Initialization Failed, Error Code : 0x%lX\r\n", status);
@@ -314,12 +320,19 @@ int32_t rsi_ap_start()
   }
 
 #ifdef RSI_WITH_OS
+#if SOCKET_ASYNC_FEATURE
   rsi_semaphore_wait(&ap_start_app, 0);
+#endif
 #endif
 
 #if !SOCKET_ASYNC_FEATURE
-  uint32_t recv_size = RECV_BUFFER_SIZE;
+
+  uint32_t recv_size = 0;
+  memset(recv_buffer, 0, RECV_BUFFER_SIZE);
+
   while (packet_count < NUMBER_OF_PACKETS) {
+    recv_size = RECV_BUFFER_SIZE;
+
     do {
       //! Receive data on socket
       status = rsi_recvfrom(new_socket, recv_buffer, recv_size, 0, (struct rsi_sockaddr *)&client_addr, &addr_size);
@@ -344,13 +357,14 @@ int32_t rsi_ap_start()
   //! Disconnect the station which is connected
   status = rsi_wlan_disconnect_stations(station_mac);
   if (status != RSI_SUCCESS) {
-    LOG_PRINT("\r\nStations Disconnect Failed, Error code : 0x%lX\r\n", status);
+    LOG_PRINT("\r\nStation Disconnect Failed, Error code : 0x%lX\r\n", status);
     return status;
   } else {
-    LOG_PRINT("\r\nStations Disconnect Success\r\n");
+    LOG_PRINT("\r\nStation Disconnect Success\r\n");
   }
 
 #endif
+
   return 0;
 }
 
@@ -377,7 +391,7 @@ int main()
     return status;
   }
 
-  // Silicon labs module intialisation
+  //! Silabs module initialization
   status = rsi_device_init(LOAD_NWP_FW);
   if (status != RSI_SUCCESS) {
     LOG_PRINT("\r\nDevice Initialization Failed, Error Code : 0x%lX\r\n", status);

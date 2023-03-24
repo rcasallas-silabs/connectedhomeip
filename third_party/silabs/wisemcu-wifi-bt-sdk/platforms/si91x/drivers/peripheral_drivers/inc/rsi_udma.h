@@ -251,7 +251,9 @@ typedef PRE_PACK struct POST_PACK {
   uint32_t periAck;         // dma ACK for peripheral 
   uint32_t dmaCh;
 } RSI_UDMA_CHA_CFG_T;
-
+/** @addtogroup SOC18
+* @{
+*/
 /*===================================================*/
 /**
  * @fn          uint32_t RSI_UDMA_GetMemSize(void)
@@ -516,7 +518,7 @@ STATIC INLINE uint32_t RSI_UDMA_GetControlState(RSI_UDMA_HANDLE_T pHandle)
 }
 
 // FUNCTION PROTOTYPES
-RSI_DRIVER_VERSION RSI_UDMA_GetVersion(void);
+RSI_DRIVER_VERSION_M4 RSI_UDMA_GetVersion(void);
 
 RSI_UDMA_CAPABILITIES_T RSI_UDMA_GetCapabilities(void);
 
@@ -553,4 +555,4 @@ error_t udma_interrupt_enable(RSI_UDMA_HANDLE_T pHandle, uint8_t dmaCh);
 #endif
 
 #endif // RSI_UDMA_H
-
+/** @} */

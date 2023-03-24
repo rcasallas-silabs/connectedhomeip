@@ -1,5 +1,5 @@
 /*******************************************************************************
-* @file  rsi_tcp_tx_with_powersave.c
+* @file  rsi_tcp_periodic_data_powersave.c
 * @brief
 *******************************************************************************
 * # License
@@ -58,15 +58,15 @@
 #if !(DHCP_MODE)
 //! IP address of the module
 //! E.g: 0x650AA8C0 == 192.168.10.101
-#define DEVICE_IP 0x6500A8C0
+#define DEVICE_IP "192.168.10.101"
 
 //! IP address of Gateway
 //! E.g: 0x010AA8C0 == 192.168.10.1
-#define GATEWAY 0x0100A8C0
+#define GATEWAY "192.168.10.1"
 
 //! IP address of netmask
 //! E.g: 0x00FFFFFF == 255.255.255.0
-#define NETMASK 0x00FFFFFF
+#define NETMASK "255.255.255.0"
 
 #endif
 //! Server IP address.
@@ -162,6 +162,8 @@ typedef struct rsi_wlan_app_cb_s {
 
 rsi_wlan_app_cb_t rsi_wlan_app_cb; //! application control block
 
+extern uint64_t ip_to_reverse_hex(char *ip);
+
 void rsi_remote_socket_terminate_handler(uint16_t status, const char *buffer, const uint16_t length)
 {
   //! Remote socket has been terminated
@@ -246,9 +248,9 @@ int32_t rsi_powersave_profile_app()
   uint8_t xtal_enable = 0;
 #endif
 #if !(DHCP_MODE)
-  uint32_t ip_addr      = DEVICE_IP;
-  uint32_t network_mask = NETMASK;
-  uint32_t gateway      = GATEWAY;
+  uint32_t ip_addr      = ip_to_reverse_hex((char *)DEVICE_IP);
+  uint32_t network_mask = ip_to_reverse_hex((char *)NETMASK);
+  uint32_t gateway      = ip_to_reverse_hex((char *)GATEWAY);
 #endif
   uint8_t ip_rsp[18] = { 0 };
   uint16_t i         = 0;
@@ -332,6 +334,9 @@ int32_t rsi_powersave_profile_app()
           rsi_wlan_app_cb.state = RSI_WLAN_CONNECTED_STATE;
         } else {
           LOG_PRINT("\r\nIP Config Success\r\n");
+#if DHCP_MODE
+          LOG_PRINT("\r\nIP address: %d.%d.%d.%d \r\n", ip_rsp[6], ip_rsp[7], ip_rsp[8], ip_rsp[9]);
+#endif
           rsi_wlan_app_cb.state = RSI_WLAN_IPCONFIG_DONE_STATE;
         }
       } break;

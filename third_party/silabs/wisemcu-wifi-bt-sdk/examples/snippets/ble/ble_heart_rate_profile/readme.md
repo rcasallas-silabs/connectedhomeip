@@ -33,13 +33,11 @@ Before running the application, the user will need the following things to setup
 
 ### 2.3 Setup Diagram:
 **SoC Mode :**
-   <br><img src="resources/readme/bleheartratesoc.png" width=500 height=250 alt=""><br>
+   ![](resources/readme/bleheartratesoc.png)
  
 **NCP Mode :** 
-   <br>
-<img src="resources/readme/bleheartratencp.png" width=500 height=250 alt=""><br>
-
-
+   
+![](resources/readme/bleheartratencp.png)
 ## 3. Application Build Environment
 
 ### 3.1 Project Setup
@@ -51,7 +49,7 @@ Before running the application, the user will need the following things to setup
 
 ### 3.2 NCP Mode - Host Interface 
 
-* By default, the application is configured to use the SPI bus for interfacing between Host platforms(EFR32MG21) and the SiWx91x EVK.
+By default, the application is configured to use the SPI bus for interfacing between Host platforms(EFR32MG21) and the SiWx91x EVK.
 
 ### 3.3 Bare Metal/RTOS Support
 
@@ -71,11 +69,14 @@ The application can be configured to suit your requirements and development envi
 
    - If user configures, **CLIENT**, Silicon Labs module will act as GATT CLIENT, means will connect to remote GATT server and get services and enable notify.
 ```c
-	 #define GATT_ROLE                                     SERVER
-```
+	 #define GATT_ROLE                                     SERVER```
 - `RSI_BLE_DEV_ADDR_TYPE` refers address type of the remote device to connect.
-- Based on the address of the advertising device, Valid configurations are
+  - Based on the address of the advertising device, Valid configurations are
+
     - LE_RANDOM_ADDRESS
+    - LE_PUBLIC_ADDRESS
+    
+    **Note:** Depends 
     - LE_PUBLIC_ADDRESS
 ```c
 	 #define RSI_BLE_DEV_ADDR_TYPE                         LE_PUBLIC_ADDRESS
@@ -98,8 +99,7 @@ The application can be configured to suit your requirements and development envi
 
 -  By default, The Application is configured without power save.
 ```c	 
-	 #define ENABLE_POWER_SAVE 0
-```
+	 #define ENABLE_POWER_SAVE 0```
 -  If user wants to run the application in power save, modify the below configuration. 
 ```c	 
 	 #define ENABLE_POWER_SAVE 1 
@@ -109,24 +109,19 @@ The application can be configured to suit your requirements and development envi
    
 - `RSI_BLE_HEART_RATE_UUID` refers to the attribute value of the newly created service.
 ```c
-	 #define RSI_BLE_HEART_RATE_SERVICE_UUID                0x180D
-```
+	 #define RSI_BLE_HEART_RATE_SERVICE_UUID                0x180D```
 - `RSI_BLE_HEART_RATE_MEASUREMENT_UUID` refers to the attribute type of the first attribute under this service (RSI_BLE_HEART_RATE_SERVICE_UUID`).
 ```c
-	 #define RSI_BLE_HEART_RATE_MEASUREMENT_UUID            0x2A37
-```
+	 #define RSI_BLE_HEART_RATE_MEASUREMENT_UUID            0x2A37```
 - `RSI_BLE_SENSOR_LOCATION_UUID` refers to the attribute type of the second attribute under this service (RSI_BLE_HEART_RATE_SERVICE_UUID`).
 ```c
-	 #define RSI_BLE_SENSOR_LOCATION_UUID                   0x2A38
-```
+	 #define RSI_BLE_SENSOR_LOCATION_UUID                   0x2A38```
 - `RSI_BLE_HEART_RATE_CONTROL_POINT_UUID` refers to the attribute type of the second attribute under this service (`RSI_BLE_HEART_RATE_SERVICE_UUID`).
 ```c
-	 #define RSI_BLE_HEART_RATE_CONTROL_POINT_UUID          0x2A39
-```
+	 #define RSI_BLE_HEART_RATE_CONTROL_POINT_UUID          0x2A39```
 - `RSI_BLE_MAX_DATA_LEN` refers to the Maximum length of the attribute data.
 ```c
-	 #define RSI_BLE_MAX_DATA_LEN                           20
-```
+	 #define RSI_BLE_MAX_DATA_LEN                           20```
 - `BLE_HEART_RATE_PROFILE` refers name of the Repine device to appear during scanning by remote devices.
 ```c
 	 #define RSI_BLE_HEART_RATE_PROFILE                     "BLE_HEART_RATE_PROFILE"
@@ -135,24 +130,19 @@ Following are the **non-configurable** macros in the application.
 
 -  `RSI_BLE_CHAR_SERV_UUID` refers to the attribute type of the characteristics to be added in a service.
 ```c
-	 #define RSI_BLE_CHAR_SERV_UUID                         0x2803
-```
+	 #define RSI_BLE_CHAR_SERV_UUID                         0x2803```
 - `RSI_BLE_CLIENT_CHAR_UUID` refers to the attribute type of the client characteristics descriptor to be added in a service.
 ```c
-	 #define RSI_BLE_CLIENT_CHAR_UUID                       0x2902
-```
+	 #define RSI_BLE_CLIENT_CHAR_UUID                       0x2902```
 - `RSI_BLE_ATT_PROPERTY_READ` is used to set the read property to an attribute value.
 ```c
-	 #define RSI_BLE_ATT_PROPERTY_READ                      0x02
-```
+	 #define RSI_BLE_ATT_PROPERTY_READ                      0x02```
 - `RSI_BLE_ATT_PROPERTY_WRITE` is used to set the WRITE property to an attribute value.
 ```c
-	 #define RSI_BLE_ATT_PROPERTY_WRITE                     0x08
-```
+	 #define RSI_BLE_ATT_PROPERTY_WRITE                     0x08```
 - `RSI_BLE_ATT_PROPERTY_NOTIFY` is used to set the NOTIFY property to an attribute value.
 ```c
-	 #define RSI_BLE_ATT_PROPERTY_NOTIFY                    0x10
-```
+	 #define RSI_BLE_ATT_PROPERTY_NOTIFY                    0x10```
 - `BT_GLOBAL_BUFF_LEN` refers Number of bytes required by the application and the driver.
 ```c
 	 #define BT_GLOBAL_BUFF_LEN                             15000
@@ -181,79 +171,67 @@ Following are the **non-configurable** macros in the application.
 
 ## 5. Testing the Application
 
-Follow the below steps for the successful execution of the application.
+- Follow the below steps for the successful execution of the application.
 
 ### 5.1 Loading the SiWx91x Firmware
-Refer [Getting started with a PC](https://docs.silabs.com/rs9116/latest/wiseconnect-getting-started) to load the firmware into SiWx91x EVK. The firmware file is located in `<SDK>/firmware/`
+Refer [Getting started with a PC](https://docs.silabs.com/rs9116/latest/wiseconnect-getting-started) to load the firmware into SiWx91x EVK. The firmware file is located in `<SDK>/connectivity_firmware/`
 
 ### 5.2 Creating the Project and builing the Application
   
-Refer [Getting started with EFX32](https://docs.silabs.com/rs9116-wiseconnect/latest/wifibt-wc-getting-started-with-efx32/), for settin-up EFR & EFM host platforms
+- Refer [Getting started with EFX32](https://docs.silabs.com/rs9116-wiseconnect/latest/wifibt-wc-getting-started-with-efx32/), for settin-up EFR & EFM host platforms
 
 #### 5.2.1 Project Creation - SoC Mode : 
 
 - Connect your board. The Si917 compatible SoC board is **BRD4325A**.
 - Studio should detect your board. Your board will be shown here.
-   <br>
-<img src="resources/readme/socboarddetection111.png" alt=""><br>
-
-
+   
+![](resources/readme/socboarddetection111.png)
 #### 5.2.2 Project Creation - NCP Mode : 
 
 - Connect your board. The supported NCP boards are: **BRD4180A,BRD4280B**
 - Studio should detect your board. Your board will be shown here.
-   <br>
-<img src="resources/readme/ncpboarddetection112.png" alt=""><br>
-
+   
+![](resources/readme/ncpboarddetection112.png)
 #### 5.2.3 Selecting an example application and generate project
 
 - Go to the 'EXAMPLE PROJECT & DEMOS' tab and select your desired example application
-   <br>
-<img src="resources/readme/projctselectionncp.png" alt=""><br>
-
+   
+![](resources/readme/projctselectionncp.png)
 - Click 'Create'. The "New Project Wizard" window appears. Click 'Finish'.
-   <br>
-<img src="resources/readme/creationfinalncp.PNG" alt=""><br>
-
-
+   
+![](resources/readme/creationfinalncp1.png)
 #### 5.2.4 Build Project - SoC Mode
 
 - Once the project is created, right click on project and go to properties → C/C++ Build → Settings → Build Steps
 - Add post_build_script_SimplicityStudio.bat file path (SI917_COMBO_SDK.X.X.X.XX\utilities\isp_scripts_common_flash) in build steps settings as shown in below image.
-   <br>
-<img src="resources/readme/image359.png" alt=""><br>
+   
+![](resources/readme/image359.png)
 - Check for M4 projects macros in preprocessor settings(RSI_M4_INTERFACE=1)
 - Check for 9117 macro in preprocessor settings(CHIP_9117=1).
 - Click on the build icon (hammer) to build the project
-   <br>
-<img src="resources/readme/buildsoc.png" alt=""><br>
-
+   
+![](resources/readme/buildsoc.png)
 - Successful build output will show as below.
-   <br>
-<img src="resources/readme/buildsuccesssoc.PNG" alt=""><br>
-
+   
+![](resources/readme/buildsuccesssoc1.png)
 #### 5.2.5 Build Project - NCP Mode :
 
 - Check for 9117 macro in preprocessor settings(CHIP_9117=1).
 - Click on the build icon (hammer) to build the project
-   <br>
-<img src="resources/readme/buildncp.png" alt=""><br>
-
+   
+![](resources/readme/buildncp.png)
 - Successful build output will show as below.
-   <br>
-<img src="resources/readme/buildsuccessncp.PNG" alt=""><br>
-
+   
+![](resources/readme/buildsuccessncp1.png)
 ## 6. Program the device
 
-Once the build was successfull, right click on project and click on Debug As->Silicon Labs ARM Program as shown in below image.
+- Once the build was successfull, right click on project and click on Debug As->Silicon Labs ARM Program as shown in below image.
 ### SoC Mode :
-   <br>
-<img src="resources/readme/debugmodesoc.png" alt=""><br>
-
+   
+![](resources/readme/debugmodesoc.png)
 ### NCP Mode : 
-   <br>
-<img src="resources/readme/debugmodencp.png" alt=""><br>
-
+   
+![](resources/readme/debugmodencp.png)
 **Note:** Simillarly, Choose the **Run As** option fo one shot execution.
 
 ## 6.1 Running the SiWx91x Application
@@ -266,38 +244,30 @@ Once the build was successfull, right click on project and click on Debug As->Si
 3. Open a EFR Connect App in the Smartphone and do the scan.
 
 4. In the App, Silicon Labs module device will appear with the name configured in the macro `RSI_BLE_HEART_RATE_PROFILE (Ex: "BLE_HEART_RATE")` or sometimes observed as Silicon Labs device as internal name "**SimpleBLEPeripheral**".
-   <br>
-<img src="resources/readme/device_advertising.png" width=250 alt=""><br>
-
+   
+![](resources/readme/device_advertising.png)
 5. Initiate connection from the App.
 
 6. After successful connection, EFR Connect APP displays the supported services of Silicon Labs module.
-   <br>
-<img src="resources/readme/device_connection.png" width=250 alt=""><br>
-
+   
+![](resources/readme/device_connection.png)
 7. Select the attribute service which is added `RSI_BLE_HEART_RATE_SERVICE_UUID`
 
 8. Enable notify for the characteristic `RSI_BLE_HEART_RATE_MEASUREMENT_UUID`
 
    So that GATT server indicates when value updated in that particular attribute.
-   <br>
-<img src="resources/readme/enable_notifications.png" width=250 alt=""><br>
-
+   
+![](resources/readme/enable_notifications.png)
 9. Whenever the value is updated at server it will be notified to the client which can be read at Heart_Rate_Measurement attribute.
-   <br>
-<img src="resources/readme/received_data.png" width=250 alt=""><br>
-
+   
+![](resources/readme/received_data.png)
 10. Refer the below images for console prints
 - For SOC the console prints are shown below
-   <br>
-<img src="resources/readme/serial_teriminal_prints_soc.PNG" width=250 alt=""><br>
-
-
+   
+![](resources/readme/serial_teriminal_prints_soc1.png)
 - For NCP the console prints are shown below
-   <br>
-<img src="resources/readme/serial_teriminal_prints_ncp.PNG" width=250 alt=""><br>
-
-
+   
+![](resources/readme/serial_teriminal_prints_ncp1.png)
 ### 6.1.2 Steps to be followed to verify BLE Hear rate profile application as a CLIENT
 
 1. Configure the **GATT_ROLE** macro as **CLIENT**
@@ -309,9 +279,8 @@ Once the build was successfull, right click on project and click on Debug As->Si
    - UUID: 0x180D
 
    **Note:** Refer the [Adding Services](https://docs.silabs.com/bluetooth/5.0/miscellaneous/mobile/efr-connect-mobile-app) for creating the GATT server the EFR connect mobile APP as advertiser.
-   <br>
-<img src="resources/readme/gatt_configurator5.png" width=250 alt=""><br>
-
+   
+![](resources/readme/gatt_configurator5.png)
 4. Add the characteristic services and their coresponding properties as shown below
    | S.No | Name | UUID | Property |
    |------|------|------|----------|
@@ -320,14 +289,12 @@ Once the build was successfull, right click on project and click on Debug As->Si
    |3|Heart Rate Control Point | 0x2A39 | Write|
    
    **Note:** Refer the [Adding Characteristics and Descriptors](https://docs.silabs.com/bluetooth/5.0/miscellaneous/mobile/efr-connect-mobile-app) for creating the GATT server in the EFR connect mobile APP.
-   <br><img src="resources/readme/gatt_configurator6.png" width=250 alt=""><br>
-
+   ![](resources/readme/gatt_configurator6.png)
 5. Enable the **Heart rate** service.
-   <br><img src="resources/readme/gatt_configurator9.png" width=250 alt=""><br>
-
+   ![](resources/readme/gatt_configurator9.png)
 6. Configure the advertiser.
-   <br>
-<img src="resources/readme/advertiser.png" width=250 alt=""><br>
+   
+![](resources/readme/advertiser.png)
 **Note:** Refer the [Creating New Advertisement Sets](https://docs.silabs.com/bluetooth/5.0/miscellaneous/mobile/efr-connect-mobile-app) for configuring the EFR connect mobile APP as advertiser.
 
 7. When Silicon Labs device is configured as **CLIENT** specified in the macro **GATT_ROLE**, scans for remote device and tries to connect with the remote device specified in `RSI_BLE_DEV_ADDR or RSI_REMOTE_DEVICE_NAME` macro.
@@ -335,16 +302,12 @@ Once the build was successfull, right click on project and click on Debug As->Si
 8. Get all GATT profiles of remote device and Search for profile specified in the macro `RSI_BLE_HEART_RATE_SERVICE_UUID`. And get all characteristics of the heartrate service and verify the characteristic `RSI_BLE_HEART_RATE_MEASUREMENT_UUID` which has notify property.
 
 9. Observe notify property is enabled in the GATT server and indicates to the GATT client whenever the value is updated at server .
-   <br><img src="resources/readme/gatt_configurator10.png" width=250 alt=""><br>
-
+   ![](resources/readme/gatt_configurator10.png)
 10. Observe the updated heart rate measurement value on the teraterm. Refer the below images for console prints
 - For SOC the console prints are shown below
-   <br><img src="resources/readme/serial_teriminal_client_prints_soc.PNG" alt=""><br>
-
+   ![](resources/readme/serial_teriminal_client_prints_soc1.png)
 - For NCP the console prints are shown below
-   <br><img src="resources/readme/serial_teriminal_client_prints_ncp.PNG" alt=""><br>
-
-
+   ![](resources/readme/serial_teriminal_client_prints_ncp1.png)
 
 ## 7. Observing the output prints on serial terminal
 
@@ -353,31 +316,24 @@ Once the build was successfull, right click on project and click on Debug As->Si
 
    - Connect Tx(Pin-6) to P27 on WSTK
    - Connect GND(Pin 8 or 10) to GND on WSTK
-   <br><img src="resources/readme/ftdiprints118.png" alt=""><br>
-
+   ![](resources/readme/ftdiprints118.png)
 - Prints can see as below in any Console terminal
-   <br><img src="resources/readme/serial_teriminal_client_prints_soc.PNG" alt=""><br>
-
-
+   ![](resources/readme/serial_teriminal_client_prints_soc1.png)
 ### 7.2 NCP Mode:
 - Prints can see as below in any Console terminal
-   <br><img src="resources/readme/serial_teriminal_client_prints_ncp.PNG" alt=""><br>
-
-
+   ![](resources/readme/serial_teriminal_client_prints_ncp1.png)
 ## 8. Selecting Bare Metal
-The application has been designed to work with FreeRTOS and Bare Metal configurations. By default, the application project files (Simplicity studio) are configured with FreeRTOS enabled. The following steps demonstrate how to configure Simplicity Studio to test the application in a Bare Metal environment.
+- The application has been designed to work with FreeRTOS and Bare Metal configurations. By default, the application project files (Simplicity studio) are configured with FreeRTOS enabled. The following steps demonstrate how to configure Simplicity Studio to test the application in a Bare Metal environment.
 
 ### 8.1 Bare Metal with Simplicity Studio
 - Open project in Simplicity Studio
 - Right click on the project and choose 'Properties'
 - GO to 'C/C++ Build' | 'Settings' | 'GNU ARM C Compiler' | 'Preprocessor' and remove macro 'RSI_WITH_OS=1'
 - Click on 'Apply' and 'OK' to save the settings
-   <br><img src="resources/readme/with_out_os1.png" alt=""><br>
-   <br><img src="resources/readme/with_out_os2.PNG" alt=""><br>
-
-
+   ![](resources/readme/with_out_os1.png)
+   ![](resources/readme/with_out_os1.png)
 ### 8.2 Bare Metal with Keil
 - Open project in Keil IDE and click on 'Options for Target'
 - Go to 'C/C++' tab and remove 'RSI_WITH_OS' macro present under Preprocessor Symbols
 - Click on 'OK' button to save the settings
-   <br><img src="resources/readme/keil_with_out_os.png"  alt=""><br>
+   ![](resources/readme/keil_with_out_os.png)

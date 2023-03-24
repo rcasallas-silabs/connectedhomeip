@@ -40,9 +40,12 @@
 #define RSI_TCP_IP_FEATURE_BIT_MAP \
   (TCP_IP_FEAT_DHCPV4_CLIENT | TCP_IP_FEAT_SSL | TCP_IP_TOTAL_SOCKETS_1 | TCP_IP_FEAT_EXTENSION_VALID)
 
+//! To set custom feature select bit map
+#define RSI_CUSTOM_FEATURE_BIT_MAP FEAT_CUSTOM_FEAT_EXTENTION_VALID
+
 //! To set Extended custom feature select bit map
 #ifdef CHIP_9117
-#define RSI_EXT_CUSTOM_FEATURE_BIT_MAP (EXT_FEAT_LOW_POWER_MODE | EXT_FEAT_XTAL_CLK_ENABLE | EXT_FEAT_512K_M4SS_192K)
+#define RSI_EXT_CUSTOM_FEATURE_BIT_MAP (EXT_FEAT_LOW_POWER_MODE | EXT_FEAT_XTAL_CLK_ENABLE)
 #else
 #define RSI_EXT_CUSTOM_FEATURE_BIT_MAP (EXT_FEAT_LOW_POWER_MODE | EXT_FEAT_XTAL_CLK_ENABLE | EXT_FEAT_384K_MODE)
 #endif
@@ -290,7 +293,11 @@
 //! Power save command parameters
 /*=======================================================================*/
 //! set handshake type of power mode
-#define RSI_HAND_SHAKE_TYPE MSG_BASED
+#ifdef RSI_M4_INTERFACE
+#define RSI_HAND_SHAKE_TYPE M4_BASED
+#else
+#define RSI_HAND_SHAKE_TYPE GPIO_BASED
+#endif
 
 //! 0 - LP, 1- ULP mode with RAM retention and 2 - ULP with Non RAM retention
 #define RSI_SELECT_LP_OR_ULP_MODE RSI_ULP_WITH_RAM_RET

@@ -23,21 +23,16 @@
     - For Silicon Labs Si91x, use the latest version of Simplicity Studio (refer **"Download and Install Simplicity Studio"** section in **getting-started-with-siwx917-soc** guide at **release_package/docs/index.html**)
   
 ## Project Setup
-- **Silicon Labs Si91x** refer **"Download SDK"** section in **getting-started-with-siwx917-soc** guide at **release_package/docs/index.html** to work with Si91x and Simplicity Studio
+- **Silicon Labs Si91x** refer **"Download SDKs"**, **"Add SDK to Simplicity Studio"**, **"Connect SiWx917"**, **"Open Example Project in Simplicity Studio"** section in **getting-started-with-siwx917-soc** guide at **release_package/docs/index.html** to work with Si91x and Simplicity Studio
 
 ## Configuration and Steps for Execution
-- Configure the following parameters in mcpwm_led.c file and update/modify following macros if required
+- Configure the following parameters in pwm.c file and update/modify following macros if required
    ```C
    #define MCPWM_RATE      // 10 ms Tick rate
    #define TICKS           // 1 ms Tick rate  
    #define MCPWM_IRQHandler IRQ048_Handler
    ``` 
 
-## Loading Application on Simplicity Studio
-1. With the product Si917 selected, navigate to the example projects by clicking on Example Projects & Demos 
-in simplicity studio and click on to PWM Example application as shown below.
-
-![Figure:](resources/readme/image505b.png)
 
 ## Build 
 1. Compile the application in Simplicity Studio using build icon

@@ -29,19 +29,18 @@
 #include "rsi_board.h"
 #include "rsi_rom_clks.h"
 
-#define RESERVED_IRQ_COUNT    16
-#define EXT_IRQ_COUNT         98
+#define RESERVED_IRQ_COUNT   16
+#define EXT_IRQ_COUNT        98
 #define VECTOR_TABLE_ENTRIES (RESERVED_IRQ_COUNT + EXT_IRQ_COUNT)
-uint32_t ramVector[VECTOR_TABLE_ENTRIES] __attribute__ ((aligned(256)));
+uint32_t ramVector[VECTOR_TABLE_ENTRIES] __attribute__((aligned(256)));
 
-#define ULP_BANK_OFFSET    0x800
-#define TX_BUF_MEMORY_LOC   (ULP_SRAM_START_ADDR+(1*ULP_BANK_OFFSET))
-#define RX_BUF_MEMORY_LOC   (ULP_SRAM_START_ADDR+(2*ULP_BANK_OFFSET))
+#define ULP_BANK_OFFSET   0x800
+#define TX_BUF_MEMORY_LOC (ULP_SRAM_START_ADDR + (1 * ULP_BANK_OFFSET))
+#define RX_BUF_MEMORY_LOC (ULP_SRAM_START_ADDR + (2 * ULP_BANK_OFFSET))
 
-
-#define BUFFER_SIZE             96     // Number of data to be sent through SPI
-#define SPI_BAUD                10000000 // speed at which data transmitted through SPI 
-#define SPI_BIT_WIDTH           8        // SPI bit width can be 16/8 for 16/8 bit data transfer 
+#define BUFFER_SIZE             96       // Number of data to be sent through SPI
+#define SPI_BAUD                10000000 // speed at which data transmitted through SPI
+#define SPI_BIT_WIDTH           8        // SPI bit width can be 16/8 for 16/8 bit data transfer
 #define INTF_PLL_CLK            180000000
 #define INTF_PLL_REF_CLK        40000000
 #define SOC_PLL_CLK             20000000
@@ -100,31 +99,31 @@ int main(void)
    * To reconfigure the default setting of SystemInit() function, refer to
    * system_RS1xxxx.c file
    */
-  volatile uint16_t i     = 0;
+  volatile uint16_t i            = 0;
   volatile uint16_t transfer_len = 0;
-  ARM_DRIVER_SPI *SPIdrv  = &Driver_SSI_ULP_MASTER;
+  ARM_DRIVER_SPI *SPIdrv         = &Driver_SSI_ULP_MASTER;
 
-//copying the vector table from flash to ram
-  memcpy(ramVector, (uint32_t*)SCB->VTOR, sizeof(uint32_t) * VECTOR_TABLE_ENTRIES);
+  //copying the vector table from flash to ram
+  memcpy(ramVector, (uint32_t *)SCB->VTOR, sizeof(uint32_t) * VECTOR_TABLE_ENTRIES);
 
   //assing the ram vector adress to VTOR register
   SCB->VTOR = (uint32_t)ramVector;
 
   //Configures the system default clock and power configurations
   SystemCoreClockUpdate();
-  
+
   //Switching MCU from PS4 to PS2 state
   hardware_setup();
 
-  // Initialized board UART 
+  // Initialized board UART
   DEBUGINIT();
 
-  // Filled data into input buffer 
+  // Filled data into input buffer
   for (i = 0; i < BUFFER_SIZE; i++) {
     testdata_out[i] = i + 1;
   }
   //copying the data into ulp_memory location
-  memcpy((uint8_t *)TX_BUF_MEMORY_LOC,testdata_out,BUFFER_SIZE);
+  memcpy((uint8_t *)TX_BUF_MEMORY_LOC, testdata_out, BUFFER_SIZE);
 
   // UNInitialize the SPI driver
   status = SPIdrv->Uninitialize();
@@ -135,7 +134,7 @@ int main(void)
     DEBUGOUT("\r\n SPI UNInitialization Success\r\n");
   }
 
-  // Initialize the SPI driver 
+  // Initialize the SPI driver
   status = SPIdrv->Initialize(mySPI_callback);
   if (status != ARM_DRIVER_OK) {
     DEBUGOUT("\r\n SPI Initialization Failed, Error Code : %d\r\n", status);
@@ -144,16 +143,16 @@ int main(void)
     DEBUGOUT("\r\n SPI Initialization Success\r\n");
   }
 
-  // Power up the SPI peripheral 
+  // Power up the SPI peripheral
   status = SPIdrv->PowerControl(ARM_POWER_FULL);
   if (status != ARM_DRIVER_OK) {
     DEBUGOUT("\r\n Failed to Set Power to SPI, Error Code : %d\r\n", status);
     return status;
   } else {
-   // DEBUGOUT("\r\n Configured Power to SPI \r\n");
+    // DEBUGOUT("\r\n Configured Power to SPI \r\n");
   }
 
-  // Configure the SPI to Master, 16-bit mode @10000 kBits/sec 
+  // Configure the SPI to Master, 16-bit mode @10000 kBits/sec
   status = SPIdrv->Control(
     ARM_SPI_MODE_MASTER | ARM_SPI_CPOL1_CPHA1 | ARM_SPI_SS_MASTER_HW_OUTPUT | ARM_SPI_DATA_BITS(SPI_BIT_WIDTH),
     SPI_BAUD);
@@ -169,7 +168,7 @@ int main(void)
   else
     transfer_len = sizeof(testdata_in);
 
-  // SS line = ACTIVE = LOW 
+  // SS line = ACTIVE = LOW
   status = SPIdrv->Control(ARM_SPI_CONTROL_SS, ARM_SPI_SS_ACTIVE);
   if (status != ARM_DRIVER_OK) {
     DEBUGOUT("\r\n Failed to Active Slave Select Line for SPI Transfer, Error Code : %d\r\n", status);
@@ -178,8 +177,8 @@ int main(void)
     DEBUGOUT("\r\n Activated Slave Select Line for SPI Transfer\r\n");
   }
 
-  // Trigger the SPI data transfer 
-  status=SPIdrv->Transfer((uint8_t *)TX_BUF_MEMORY_LOC, (uint8_t *)RX_BUF_MEMORY_LOC, transfer_len);
+  // Trigger the SPI data transfer
+  status = SPIdrv->Transfer((uint8_t *)TX_BUF_MEMORY_LOC, (uint8_t *)RX_BUF_MEMORY_LOC, transfer_len);
   if (status != ARM_DRIVER_OK) {
     DEBUGOUT("\r\n SPI Transfer Failed, Error Code : %d\r\n", status);
     return status;
@@ -187,16 +186,16 @@ int main(void)
     DEBUGOUT("\r\n SPI Transfer Start \r\n");
   }
 
-  // Waits until spi_done=0 
+  // Waits until spi_done=0
   while (!spi_done)
     ;
   spi_done = 0;
 
   DEBUGOUT("\r\n SPI Transfer Completed\r\n");
 
-  memcpy(testdata_in,(uint8_t *)RX_BUF_MEMORY_LOC,BUFFER_SIZE);
+  memcpy(testdata_in, (uint8_t *)RX_BUF_MEMORY_LOC, BUFFER_SIZE);
 
-  // SS line = ACTIVE = LOW 
+  // SS line = ACTIVE = LOW
   status = SPIdrv->Control(ARM_SPI_CONTROL_SS, ARM_SPI_SS_INACTIVE);
   if (status != ARM_DRIVER_OK) {
     DEBUGOUT("\r\n Failed to Inactive Slave Select Line After SPI Transfer, Error Code : %d\r\n", status);
@@ -223,4 +222,3 @@ int main(void)
   while (1)
     ;
 }
-

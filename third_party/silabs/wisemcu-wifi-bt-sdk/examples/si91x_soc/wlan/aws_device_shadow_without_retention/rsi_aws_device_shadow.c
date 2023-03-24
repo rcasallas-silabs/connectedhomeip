@@ -73,8 +73,8 @@
 
 #if ENABLE_POWER_SAVE
 //! Power Save Profile mode
-#define PSP_MODE RSI_SLEEP_MODE_10
-#define DISCONNECTION_TIME 100
+#define PSP_MODE            RSI_SLEEP_MODE_10
+#define DISCONNECTION_TIME  100
 #define SHADOW_UPDATE_COUNT 5
 
 //! Power Save Profile type
@@ -102,7 +102,7 @@ typedef enum rsi_wlan_app_state_e {
   RSI_WLAN_SHADOW_YIELD_STATE              = 9,
   RSI_WLAN_SHADOW_IDLE_STATE               = 10,
   RSI_WLAN_SHADOW_DISCONNECT               = 11,
-  RSI_WLAN_DISCONNECT  = 12
+  RSI_WLAN_DISCONNECT                      = 12
 } rsi_wlan_app_state_t;
 
 // WLAN application context
@@ -353,7 +353,7 @@ int32_t application(void)
   }
 #ifdef RSI_M4_INTERFACE
 #ifdef ALARM_CONFIG
-          InitM4AlarmConfig();
+  InitM4AlarmConfig();
 #endif
   status = rsi_cmd_m4_ta_secure_handshake(RSI_ENABLE_XTAL, 1, &xtal_enable, 0, NULL);
   if (status != RSI_SUCCESS) {
@@ -558,74 +558,74 @@ int32_t application(void)
                                                    true);
 #ifdef ENABLE_POWER_SAVE
                 //! Configure LED
-                       RSI_Board_Init();
-                       RSI_EGPIO_SetPinMux(EGPIO1, EGPIO_PORT0, 0, EGPIO_PIN_MUX_MODE0);
-                       RSI_EGPIO_SetDir(EGPIO1, EGPIO_PORT0, 0, EGPIO_CONFIG_DIR_OUTPUT);
-                       LOG_PRINT("LED set as AWS data is received \r\n");
-                       RSI_Board_LED_Set(0, true);
+                RSI_Board_Init();
+                RSI_EGPIO_SetPinMux(EGPIO1, EGPIO_PORT0, 0, EGPIO_PIN_MUX_MODE0);
+                RSI_EGPIO_SetDir(EGPIO1, EGPIO_PORT0, 0, EGPIO_CONFIG_DIR_OUTPUT);
+                LOG_PRINT("LED set as AWS data is received \r\n");
+                RSI_Board_LED_Set(0, true);
                 update_shadow++;
                 rsi_wlan_app_context.state = RSI_WLAN_SHADOW_DISCONNECT;
-                if(update_shadow == SHADOW_UPDATE_COUNT)
-                                  break;
+                if (update_shadow == SHADOW_UPDATE_COUNT)
+                  break;
 #endif
-                              }
-                            }
-                          }
-                        }
-                #ifdef RSI_WITH_OS
-                        rsi_semaphore_post(&rsi_shadow_sem);
-                #endif
-                      }
-                      break;
+              }
+            }
+          }
+        }
+#ifdef RSI_WITH_OS
+        rsi_semaphore_post(&rsi_shadow_sem);
+#endif
+      } break;
       case RSI_WLAN_SHADOW_DISCONNECT: {
-         aws_result = aws_iot_shadow_disconnect(&mqtt_client);
-         if (aws_result == SUCCESS) {
-                LOG_PRINT("\r\nShadow disconnection Done\r\n");
-                rsi_delay_ms(DISCONNECTION_TIME);
-                rsi_wlan_app_context.state = RSI_WLAN_DISCONNECT;
-                 }else{
-                    LOG_PRINT("Shadow disconnection error\n");
-                 rsi_wlan_app_context.state = RSI_WLAN_SHADOW_DISCONNECT;
-                       }
-                                     }
-                #ifdef RSI_WITH_OS
-                        rsi_semaphore_post(&rsi_shadow_sem);
-                #endif
-                        break;
-      case RSI_WLAN_DISCONNECT: {
-         status = rsi_wlan_disconnect();
-         if (status == SUCCESS) {
-                 rsi_delay_ms(DISCONNECTION_TIME);
-                 LOG_PRINT("\r\nWLAN disconnection success\n");
-#ifdef ENABLE_POWER_SAVE
-                 rsi_wlan_radio_init();
-                               }else{
-                 LOG_PRINT("WLAN disconnection error\n");
-                 rsi_wlan_app_context.state = RSI_WLAN_DISCONNECT;
-                        }
-                        //! Apply power save profile   PSP_MODE, PSP_TYPE
-                 status = rsi_wlan_power_save_profile(RSI_SLEEP_MODE_10, PSP_TYPE);
-                   if (status != RSI_SUCCESS) {
-                       return status;        }
-                       LOG_PRINT("\r\nTA powersave success and M4 in Sleep for alarm periodic time\r\n");
-                       M4_sleep_wakeup();
+        aws_result = aws_iot_shadow_disconnect(&mqtt_client);
+        if (aws_result == SUCCESS) {
+          LOG_PRINT("\r\nShadow disconnection Done\r\n");
+          rsi_delay_ms(DISCONNECTION_TIME);
+          rsi_wlan_app_context.state = RSI_WLAN_DISCONNECT;
+        } else {
+          LOG_PRINT("Shadow disconnection error\n");
+          rsi_wlan_app_context.state = RSI_WLAN_SHADOW_DISCONNECT;
+        }
+      }
+#ifdef RSI_WITH_OS
+        rsi_semaphore_post(&rsi_shadow_sem);
 #endif
-                      }
-                #ifdef RSI_WITH_OS
-                        rsi_semaphore_post(&rsi_shadow_sem);
-                #endif
-                        break;
-                      default:
-                        break;
-                    }
-                  }
-                }
+        break;
+      case RSI_WLAN_DISCONNECT: {
+        status = rsi_wlan_disconnect();
+        if (status == SUCCESS) {
+          rsi_delay_ms(DISCONNECTION_TIME);
+          LOG_PRINT("\r\nWLAN disconnection success\n");
+#ifdef ENABLE_POWER_SAVE
+          rsi_wlan_radio_init();
+        } else {
+          LOG_PRINT("WLAN disconnection error\n");
+          rsi_wlan_app_context.state = RSI_WLAN_DISCONNECT;
+        }
+        //! Apply power save profile   PSP_MODE, PSP_TYPE
+        status = rsi_wlan_power_save_profile(RSI_SLEEP_MODE_10, PSP_TYPE);
+        if (status != RSI_SUCCESS) {
+          return status;
+        }
+        LOG_PRINT("\r\nTA powersave success and M4 in Sleep for alarm periodic time\r\n");
+        M4_sleep_wakeup();
+#endif
+      }
+#ifdef RSI_WITH_OS
+        rsi_semaphore_post(&rsi_shadow_sem);
+#endif
+        break;
+      default:
+        break;
+    }
+  }
+}
 int main()
 {
 #ifdef RSI_M4_INTERFACE
   int32_t status = RSI_SUCCESS;
   /* Clear M4_Wake_Up_TA bit */
-     P2P_STATUS_REG &= ~(M4_wakeup_TA);
+  P2P_STATUS_REG &= ~(M4_wakeup_TA);
   // Driver initialization
   status = rsi_driver_init(global_buf, GLOBAL_BUFF_LEN);
   if ((status < 0) || (status > GLOBAL_BUFF_LEN)) {
@@ -654,11 +654,11 @@ int main()
   // Start the scheduler
   rsi_start_os_scheduler();
 #else
-  application();
+    application();
 
-  while (1) {
-    rsi_wireless_driver_task();
-  }
+    while (1) {
+      rsi_wireless_driver_task();
+    }
 #endif
 }
 

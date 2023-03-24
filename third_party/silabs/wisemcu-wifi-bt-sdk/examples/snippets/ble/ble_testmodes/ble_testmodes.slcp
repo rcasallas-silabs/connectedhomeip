@@ -16,7 +16,7 @@ xml_filter: Undefined
 sdk: {id: gecko_sdk, version: 4.1.0}
 sdk_extension:
   - id: wiseconnect
-    version: 1.0.0
+    version: 1.0.1
 source:
   - path: rsi_ble_testmodes.c
 include:
@@ -33,27 +33,33 @@ toolchain_settings: []
 readme:
   - path: readme.md
 other_file:
-  - path: resources/readme/creationfinal114.png
-  - path: resources/readme/debugmodesoc117.png
-  - path: resources/readme/buildingpjt115.png
+  - path: resources/readme/creationfinal1.png
+  - path: resources/readme/tx_testmode_btmon_soc1.png
   - path: resources/readme/ncpboarddetection112.png
   - path: resources/readme/ftdiprints118.png
   - path: resources/readme/serial_teriminal_soc_prints.png
-  - path: resources/readme/image216b.png
   - path: resources/readme/keil_with_out_os.png
+  - path: resources/readme/buildncp1.png
+  - path: resources/readme/buildsoc1.png
+  - path: resources/readme/rx_testmode_btmon_log1.png
+  - path: resources/readme/buildsuccesssoc1.png
+  - path: resources/readme/rx_testmode_btmon_log_soc1.png
   - path: resources/readme/debugmodencp.png
-  - path: resources/readme/image359.png
+  - path: resources/readme/rx_testmode1.png
   - path: resources/readme/debugmodesoc.png
-  - path: resources/readme/Testmodes.png
-  - path: resources/readme/image216c.png
+  - path: resources/readme/rx_testmode_btmon_log_2.png
+  - path: resources/readme/tx_testmode1.png
+  - path: resources/readme/projctselection1.png
   - path: resources/readme/testmodesncp.png
-  - path: resources/readme/buildsuccesssoc116.png
-  - path: resources/readme/debugmodencp120.png
   - path: resources/readme/socboarddetection111.png
   - path: resources/readme/with_out_os.png
+  - path: resources/readme/buildsoc4.png
+  - path: resources/readme/with_out_os2.png
   - path: resources/readme/testmodessoc.png
+  - path: resources/readme/rx_testmode2.png
   - path: resources/readme/serial_teriminal_ncp_prints.png
-  - path: resources/readme/projctselection113.png
+  - path: resources/readme/tx_testmode_btmon1.png
+  - path: resources/readme/buildsuccessncp1.png
 ui_hints:
   highlight:
     - path: readme.md

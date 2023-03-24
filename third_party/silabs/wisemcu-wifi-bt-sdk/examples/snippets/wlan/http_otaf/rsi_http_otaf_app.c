@@ -562,7 +562,7 @@ int32_t rsi_http_otaf_app()
         if (status != RSI_SUCCESS) {
           LOG_PRINT("\r\nWireless deinit failed, Error Code : 0x%1X\r\n", status);
         }
-#ifndef RSI_M4_INTERFACE	
+#ifndef RSI_M4_INTERFACE
 #ifdef RSI_WITH_OS
         // Task created for Driver task
         rsi_task_create((rsi_task_function_t)rsi_wireless_driver_task,

@@ -13,7 +13,6 @@
  * permissions and limitations under the License.
  */
 
-
 /**
  * @file subscribe_publish_sample.c
  * @brief simple MQTT publish and subscribe on the same topic
@@ -77,7 +76,7 @@
 #define PSK                "1234567890"
 #define GLOBAL_BUFF_LEN    15000
 
-#define SIZE_BUFFERS    16
+#define SIZE_BUFFERS        16
 #define SYSTIC_TIMER_CONFIG 1000
 
 extern uint8_t rd_buf[SIZE_BUFFERS];
@@ -88,10 +87,10 @@ extern uint8_t rd_buf[SIZE_BUFFERS];
 #define RSI_DRIVER_TASK_STACK_SIZE      (512 * 2) //! Driver task stack size
 #define RSI_MQTT_CLIENT_TASK_PRIORITY   2         //! Common Initializations task priority
 #define RSI_DRIVER_TASK_PRIORITY        4         //! Wireless driver task priority
-#define PWM_TASK_STACK_SIZE  1024
-#define PWM_TASK_PRIORITY    1
-#define I2C_TASK_STACK_SIZE  1024
-#define I2C_TASK_PRIORITY    3
+#define PWM_TASK_STACK_SIZE             1024
+#define PWM_TASK_PRIORITY               1
+#define I2C_TASK_STACK_SIZE             1024
+#define I2C_TASK_PRIORITY               3
 
 rsi_task_handle_t common_init_task_handle = NULL;
 rsi_task_handle_t wlan_task_handle        = NULL;
@@ -110,7 +109,6 @@ rsi_semaphore_handle_t rsi_mqtt_sem, pwm_thread_sem, i2c_thread_sem, publish_msg
 
 int32_t rsi_wlan_power_save_profile(uint8_t psp_mode, uint8_t psp_type);
 #endif
-
 
 uint8_t publish_message_mq[] = " ";
 int8_t username_mq[]         = "username";
@@ -260,7 +258,7 @@ int32_t rsi_mqtt_client_app()
   connectParams.usernameLen = strlen((char *)username_mq);
   connectParams.pPassword   = (char *)password_mq;
   connectParams.passwordLen = strlen((char *)password_mq);
-  
+
 #ifndef RSI_M4_INTERFACE
   status = rsi_driver_init(global_buf, GLOBAL_BUFF_LEN);
   if ((status < 0) || (status > GLOBAL_BUFF_LEN)) {
@@ -468,7 +466,6 @@ int32_t rsi_mqtt_client_app()
         }
         rsi_wlan_app_cb.state = RSI_WLAN_MQTT_PUBLISH_STATE;
 
-
 #ifdef RSI_WITH_OS
         rsi_semaphore_post(&rsi_mqtt_sem);
         rsi_semaphore_post(&i2c_thread_sem);
@@ -572,7 +569,7 @@ int main()
 #ifdef RSI_M4_INTERFACE
   int32_t status = RSI_SUCCESS;
   // Driver initialization
-status = rsi_driver_init(global_buf, GLOBAL_BUFF_LEN);
+  status = rsi_driver_init(global_buf, GLOBAL_BUFF_LEN);
   if ((status < 0) || (status > GLOBAL_BUFF_LEN)) {
     return status;
   }
@@ -587,11 +584,11 @@ status = rsi_driver_init(global_buf, GLOBAL_BUFF_LEN);
 #endif
 
   // Enable SysTick Timer
-    SysTick_Config(SystemCoreClock / SYSTIC_TIMER_CONFIG);
+  SysTick_Config(SystemCoreClock / SYSTIC_TIMER_CONFIG);
 
 #ifdef RSI_WITH_OS
   //! Common Init task
-    rsi_semaphore_create(&publish_msg_sem, 0);
+  rsi_semaphore_create(&publish_msg_sem, 0);
 
   rsi_task_create((void *)rsi_mqtt_client_app,
                   (uint8_t *)"mqtt_client_task",
@@ -601,38 +598,28 @@ status = rsi_driver_init(global_buf, GLOBAL_BUFF_LEN);
                   &common_init_task_handle);
 
   /*Configure Push button interrupt*/
-    status = Push_Button_Intr();
+  status = Push_Button_Intr();
 
-    /* Initialize pin interrupt */
-    status = Pin_Int0();
+  /* Initialize pin interrupt */
+  status = Pin_Int0();
 
-    rsi_semaphore_create(&pwm_thread_sem, 0);
+  rsi_semaphore_create(&pwm_thread_sem, 0);
 
-    /*Initialize PWM*/
-    status = PWM_Init();
-	
-	//Intilise I2C0
-	status = I2C_Init();
+  /*Initialize PWM*/
+  status = PWM_Init();
 
-    //! Task created for PWM task
-    rsi_task_create(PWM_App,
-                    "pwm_task",
-                    PWM_TASK_STACK_SIZE,
-                    NULL,
-                    PWM_TASK_PRIORITY,
-                    &pwm_task_handle);
+  //Intilise I2C0
+  status = I2C_Init();
 
-    /*Initialize timer interrupt*/
-    Timer_Intr_App();
+  //! Task created for PWM task
+  rsi_task_create(PWM_App, "pwm_task", PWM_TASK_STACK_SIZE, NULL, PWM_TASK_PRIORITY, &pwm_task_handle);
 
-    rsi_semaphore_create(&i2c_thread_sem, 0);
-    //! Task created for I2C task
-    rsi_task_create(I2C_Transfer,
-                    "i2c_task",
-                    I2C_TASK_STACK_SIZE,
-                    NULL,
-                    I2C_TASK_PRIORITY,
-                    &i2c_task_handle);
+  /*Initialize timer interrupt*/
+  Timer_Intr_App();
+
+  rsi_semaphore_create(&i2c_thread_sem, 0);
+  //! Task created for I2C task
+  rsi_task_create(I2C_Transfer, "i2c_task", I2C_TASK_STACK_SIZE, NULL, I2C_TASK_PRIORITY, &i2c_task_handle);
 
   //! OS Task Start the scheduler
   rsi_start_os_scheduler();

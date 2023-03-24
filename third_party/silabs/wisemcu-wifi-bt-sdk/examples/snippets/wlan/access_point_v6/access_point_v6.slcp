@@ -1,0 +1,40 @@
+project_name: access_point_v6
+package: wiseconnect
+quality: alpha
+label: Wi-Fi Access Point v6
+category: Example|WiSeConnect
+description: >
+  Start a Wi-Fi Access Point (softAP) with WPA2 security
+filter:
+  - name: "Wireless Technology"
+    value: ["Wi-Fi"]
+  - name: "Device Type"
+    value: Undefined
+  - name: "Project Difficulty"
+    value: ["Beginner"]
+xml_filter: Undefined
+sdk: {id: gecko_sdk, version: 4.1.0}
+sdk_extension:
+  - id: wiseconnect
+    version: 1.0.1
+source:
+  - path: rsi_ap_start.c
+include:
+  - path: 
+    file_list:
+      - path: rsi_wlan_config.h
+requires:
+  - name: wiseconnect_platform
+  - name: wiseconnect_sapi_wlan
+  - name: wiseconnect_sapi_sockets
+  - name: wiseconnect_sapi_freertos
+  - name: wiseconnect_third_party_freertos
+  - name: wiseconnect_sapi_ipv6_utils
+toolchain_settings: []
+readme:
+  - path: readme.md
+other_file:
+ui_hints:
+  highlight:
+    - path: readme.md
+      focus: true

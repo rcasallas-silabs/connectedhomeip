@@ -31,17 +31,17 @@
 #include "rsi_board.h"
 
 #ifndef EEPROM_I2C_PORT
-#define EEPROM_I2C_PORT     0     // I2C Port number                     
+#define EEPROM_I2C_PORT 0 // I2C Port number
 #endif
 
-#define SIZE_BUFFERS        16
-#define EEPROM_I2C_ADDR     0x50  // 24LC128 EEPROM I2C address          
+#define SIZE_BUFFERS    16
+#define EEPROM_I2C_ADDR 0x50 // 24LC128 EEPROM I2C address
 
-#define EEPROM_MAX_ADDR     16384 // Max memory locations available      
-#define EEPROM_MAX_WRITE    16    // Max bytes to write in one step      
+#define EEPROM_MAX_ADDR  16384 // Max memory locations available
+#define EEPROM_MAX_WRITE 16    // Max bytes to write in one step
 
-#define A_WR                0     // Master will write to the I2C        
-#define A_RD                1     // Master will read from the I2C       
+#define A_WR                0 // Master will write to the I2C
+#define A_RD                1 // Master will read from the I2C
 #define OFFSET_ADDR         0x0
 #define TX_LEN              16
 #define RX_LEN              16
@@ -87,7 +87,7 @@ void WriteDataGenerate(void)
 {
   uint32_t loop;
 
-  // Put some data in the source buffer for  
+  // Put some data in the source buffer for
   for (loop = 0; loop < SIZE_BUFFERS; loop++) {
     buf[loop]    = (loop + 0x1);
     rd_buf[loop] = 0;
@@ -117,7 +117,7 @@ int32_t EEPROM_WriteBuf(uint8_t sub_addr, const uint8_t *buf, uint32_t len)
   cnt_num = I2Cdrv->GetDataCount();
   if (cnt_num != (len + 1)) {
     return -1;
-    // Acknowledge polling  
+    // Acknowledge polling
   } else {
     tx_done = 1;
   }
@@ -152,7 +152,7 @@ int32_t EEPROM_ReadBuf(uint16_t addr, uint8_t *buf, uint32_t len)
 
   if (cnt_num != (len)) {
     return -1;
-    // Acknowledge polling  
+    // Acknowledge polling
   } else {
     rx_done = 1;
   }
@@ -292,25 +292,25 @@ int i2c_exp(void)
 
   int32_t status = ARM_DRIVER_OK;
 
-  //Configures the system default clock and power configurations 
+  //Configures the system default clock and power configurations
   SystemCoreClockUpdate();
 
-  //Initialized board UART 
+  //Initialized board UART
   DEBUGINIT();
 
-  // Enable SysTick Timer  
+  // Enable SysTick Timer
   SysTick_Config(SystemCoreClock / SYSTIC_TIMER_CONFIG);
 
-  // check's I2C driver version  
+  // check's I2C driver version
   setup_i2c();
 
-  // Fills transmit buffer with data 
+  // Fills transmit buffer with data
   WriteDataGenerate();
 
-  //Read capabilities of I2C driver 
+  //Read capabilities of I2C driver
   read_capabilities();
 
-  // Initialized I2C interface   
+  // Initialized I2C interface
   status = EEPROM_Initialize();
   if (status != ARM_DRIVER_OK) {
     DEBUGOUT("\r\nFailed to Configure I2C Interface, Error Code : %d\r\n", status);
@@ -319,53 +319,52 @@ int i2c_exp(void)
     DEBUGOUT("\r\nConfigured I2C Interface\r\n");
   }
 
-  // Gets EEPROM Max size  
+  // Gets EEPROM Max size
   EEPROM_GetSize();
 
-//  while (forever) {
-    // Writes data to EEPROM slave  
-    status = EEPROM_WriteBuf(OFFSET_ADDR, buf, TX_LEN);
-    if (status != ARM_DRIVER_OK) {
-      DEBUGOUT("\r\nFailed to Write Data into EEPROM(I2C Slave), Error Code : %d\r\n", status);
-      return status;
+  //  while (forever) {
+  // Writes data to EEPROM slave
+  status = EEPROM_WriteBuf(OFFSET_ADDR, buf, TX_LEN);
+  if (status != ARM_DRIVER_OK) {
+    DEBUGOUT("\r\nFailed to Write Data into EEPROM(I2C Slave), Error Code : %d\r\n", status);
+    return status;
+  } else {
+    DEBUGOUT("\r\nWrite Data into EEPROM(I2C Slave)\r\n");
+  }
+
+  //5ms delay after stop to start
+  rsi_delay_ms(5);
+
+  // Reads data from EEPROM slave
+  status = EEPROM_ReadBuf(OFFSET_ADDR, rd_buf, RX_LEN);
+  if (status != ARM_DRIVER_OK) {
+    DEBUGOUT("\r\nFailed to Read Data From EEPROM(I2C Slave), Error Code : %d\r\n", status);
+    return status;
+  } else {
+    DEBUGOUT("\r\nStart Reading Data From EEPROM(I2C Slave)\r\n");
+  }
+
+  //waits until rx_done=0
+  while (!rx_done)
+    ;
+  rx_done = 0;
+
+  DEBUGOUT("\r\nCompleted Reading Data From EEPROM\r\n");
+
+  for (comp = 0; comp < sizeof(rd_buf); comp++) {
+    if (buf[comp] == rd_buf[comp]) {
+      continue;
     } else {
-      DEBUGOUT("\r\nWrite Data into EEPROM(I2C Slave)\r\n");
+      break;
     }
+  }
 
-    //5ms delay after stop to start
-    rsi_delay_ms(5);
-
-    // Reads data from EEPROM slave  
-    status = EEPROM_ReadBuf(OFFSET_ADDR, rd_buf, RX_LEN);
-    if (status != ARM_DRIVER_OK) {
-      DEBUGOUT("\r\nFailed to Read Data From EEPROM(I2C Slave), Error Code : %d\r\n", status);
-      return status;
-    } else {
-      DEBUGOUT("\r\nStart Reading Data From EEPROM(I2C Slave)\r\n");
-    }
-
-    //waits until rx_done=0   
-    while (!rx_done)
-      ;
-    rx_done = 0;
-
-    DEBUGOUT("\r\nCompleted Reading Data From EEPROM\r\n");
-
-    for (comp = 0; comp < sizeof(rd_buf); comp++) {
-      if (buf[comp] == rd_buf[comp]) {
-        continue;
-      } else {
-        break;
-      }
-    }
-
-    if (comp == sizeof(rd_buf)) {
-      DEBUGOUT("\r\nData Comparison Success\r\n");
-      DEBUGOUT("\r\nTest Case Pass\r\n");
-    } else {
-      DEBUGOUT("\r\nData Comparison Fail\r\n");
-      DEBUGOUT("\r\nTest Case Fail\r\n");
-    }
- // }
+  if (comp == sizeof(rd_buf)) {
+    DEBUGOUT("\r\nData Comparison Success\r\n");
+    DEBUGOUT("\r\nTest Case Pass\r\n");
+  } else {
+    DEBUGOUT("\r\nData Comparison Fail\r\n");
+    DEBUGOUT("\r\nTest Case Fail\r\n");
+  }
+  // }
 }
-

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* @file  tcp_tx_on_periodic.c
+* @file  rsi_tx_on_button_wakeup.c
 * @brief 
 *******************************************************************************
 * # License
@@ -44,7 +44,7 @@
 #define SCAN_CHANNEL 0
 
 //! Security type
-#define SECURITY_TYPE RSI_OPEN
+#define SECURITY_TYPE RSI_WPA2
 
 //! Password
 #define PSK ""
@@ -56,21 +56,21 @@
 #if !(DHCP_MODE)
 //! IP address of the module
 //! E.g: 0x650AA8C0 == 192.168.10.101
-#define DEVICE_IP 0x6500A8C0
+#define DEVICE_IP "192.168.10.101"
 
 //! IP address of Gateway
 //! E.g: 0x010AA8C0 == 192.168.10.1
-#define GATEWAY 0x0100A8C0
+#define GATEWAY "192.168.10.1"
 
 //! IP address of netmask
 //! E.g: 0x00FFFFFF == 255.255.255.0
-#define NETMASK 0x00FFFFFF
+#define NETMASK "255.255.255.0"
 
 #endif
 //! Server IP address. Should be in reverse long format
 //! E.g: 0x640AA8C0 == 192.168.10.100
 //! E.g: 0x640AA8C0 == 192.168.0.63
-#define SERVER_IP_ADDRESS 0x3C01A8C0
+#define SERVER_IP_ADDRESS "192.168.10.100"
 
 //! Server port number
 #define SERVER_PORT 5004
@@ -102,6 +102,7 @@ uint8_t send_buf[BUF_SIZE] = { 0xFF };
 #define WIRELESS_WAKEUP_IRQHandler NPSS_TO_MCU_WIRELESS_INTR_IRQn
 
 uint32_t send_data_count;
+extern uint64_t ip_to_reverse_hex(char *ip);
 /**
  * @fn           void InitM4AlarmConfig(void)
  * @brief        This function is to  Trigger m4 sleep  .
@@ -165,11 +166,12 @@ int32_t rsi_powersave_profile_app()
   volatile uint32_t packet_count = 0;
   uint8_t xtal_enable            = 0;
 #if !(DHCP_MODE)
-  uint32_t ip_addr      = DEVICE_IP;
-  uint32_t network_mask = NETMASK;
-  uint32_t gateway      = GATEWAY;
+  uint32_t ip_addr      = ip_to_reverse_hex((char *)DEVICE_IP);
+  uint32_t network_mask = ip_to_reverse_hex((char *)NETMASK);
+  uint32_t gateway      = ip_to_reverse_hex((char *)GATEWAY);
 #endif
 
+  uint8_t ip_rsp[18] = { 0 };
   /* MCU Hardware Configuration for Low-Power Applications */
   RSI_WISEMCU_HardwareSetup();
 
@@ -216,7 +218,7 @@ int32_t rsi_powersave_profile_app()
   }
   //! Configure IP
 #if DHCP_MODE
-  status = rsi_config_ipaddress(RSI_IP_VERSION_4, RSI_DHCP, 0, 0, 0, NULL, 0, 0);
+  status = rsi_config_ipaddress(RSI_IP_VERSION_4, RSI_DHCP, 0, 0, 0, ip_rsp, sizeof(ip_rsp), 0);
 #else
   status = rsi_config_ipaddress(RSI_IP_VERSION_4,
                                 RSI_STATIC,
@@ -232,6 +234,9 @@ int32_t rsi_powersave_profile_app()
     return status;
   } else {
     LOG_PRINT("\r\nIP Config Success\r\n");
+#if DHCP_MODE
+    LOG_PRINT("\r\nIP address: %d.%d.%d.%d \r\n", ip_rsp[6], ip_rsp[7], ip_rsp[8], ip_rsp[9]);
+#endif
   }
 
   //! Create socket
@@ -252,7 +257,7 @@ int32_t rsi_powersave_profile_app()
   //! Set server port number, using htons function to use proper byte order
   server_addr.sin_port = htons(SERVER_PORT);
   //! Set IP address to localhost
-  server_addr.sin_addr.s_addr = SERVER_IP_ADDRESS;
+  server_addr.sin_addr.s_addr = ip_to_reverse_hex((char *)SERVER_IP_ADDRESS);
   //! Filter Broad cast enable
   status = rsi_wlan_filter_broadcast(3000, 1, 1);
   if (status != RSI_SUCCESS) {
@@ -273,7 +278,7 @@ int32_t rsi_powersave_profile_app()
   RSI_Button_wakeup_config();
 #endif
   while (1) {
-      LOG_PRINT("\r\nSending Data To UDP Server socket\r\n");
+    LOG_PRINT("\r\nSending Data To UDP Server socket\r\n");
     //! Send data on socket
     status = rsi_sendto(client_socket,
                         (int8_t *)send_buf,

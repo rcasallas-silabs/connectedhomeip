@@ -9,7 +9,7 @@ quality: alpha
 sdk: {id: gecko_sdk, version: 4.1.0}
 sdk_extension:
   - id: wiseconnect
-    version: 1.0.0
+    version: 1.0.1
 source:
   - path: apps/i2c0_app.c
   - path: apps/i2c1_app.c
@@ -19,7 +19,7 @@ source:
   - path: apps/pin_interrupt.c
   - path: apps/push_button_app.c
   - path: apps/timer_intr_app.c
-  - path: apps/main.c
+  - path: apps/combo_app.c
   - path: apps/inc/app_config.h
   - path: apps/inc/i2c_app.h
   - path: apps/inc/i2c0_app.h
@@ -63,9 +63,8 @@ define:
 provides:
   - name: si91x_soc
 other_file:
-  - path: resources\readme\image510a.png
-  - path: resources\readme\image510b.png
-  - path: resources\readme\image510c.png
+  - path: resources/readme/image510a.png
+  - path: resources/readme/image510c.png
 readme:
   - path: readme.md
 ui_hints:

@@ -16,7 +16,7 @@ xml_filter: Undefined
 sdk: {id: gecko_sdk, version: 4.1.0}
 sdk_extension:
   - id: wiseconnect
-    version: 1.0.0
+    version: 1.0.1
 source:
   - path: rsi_ble_sc.c
 include:
@@ -34,22 +34,30 @@ readme:
   - path: readme.md
 other_file:
   - path: resources/readme/smp_pairing1.png
+  - path: resources/readme/creationfinal1.png
   - path: resources/readme/ncpboarddetection112.png
   - path: resources/readme/ftdiprints118.png
   - path: resources/readme/keil_with_out_os.png
+  - path: resources/readme/buildncp1.png
   - path: resources/readme/buildsoc1.png
+  - path: resources/readme/buildsuccesssoc1.png
+  - path: resources/readme/buildsoc2.png
   - path: resources/readme/device_advertising.png
   - path: resources/readme/debugmodencp.png
   - path: resources/readme/device_connected.png
   - path: resources/readme/debugmodesoc.png
   - path: resources/readme/blescsoc.png
   - path: resources/readme/image1a.png
+  - path: resources/readme/serial_teriminal_ncp_prints1.png
+  - path: resources/readme/projctselection1.png
   - path: resources/readme/blescncp.png
   - path: resources/readme/socboarddetection111.png
   - path: resources/readme/with_out_os.png
   - path: resources/readme/smp_pairing.png
+  - path: resources/readme/serial_teriminal_soc_prints1.png
+  - path: resources/readme/with_out_os2.png
   - path: resources/readme/image_1a.png
-  - path: resources/readme/image1b.png
+  - path: resources/readme/buildsuccessncp1.png
 ui_hints:
   highlight:
     - path: readme.md

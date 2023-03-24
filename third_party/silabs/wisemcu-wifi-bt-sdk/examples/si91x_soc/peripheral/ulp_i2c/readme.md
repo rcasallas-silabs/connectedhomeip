@@ -28,7 +28,7 @@
     - For Silicon Labs Si91x, use the latest version of Simplicity Studio (refer **"Download and Install Simplicity Studio"** section in **getting-started-with-siwx917-soc** guide at **release_package/docs/index.html**)
  
 ## Project Setup
-- **Silicon Labs Si91x** refer **"Download SDK"** section in **getting-started-with-siwx917-soc** guide at **release_package/docs/index.html** to work with Si91x and Simplicity Studio
+- **Silicon Labs Si91x** refer **"Download SDKs"**, **"Add SDK to Simplicity Studio"**, **"Connect SiWx917"**, **"Open Example Project in Simplicity Studio"** section in **getting-started-with-siwx917-soc** guide at **release_package/docs/index.html** to work with Si91x and Simplicity Studio
 
 ## Configuration and Steps for Execution
 
@@ -50,12 +50,6 @@
 | SCL | ULP_GPIO_5 [EXP_HEADER-13] | Connect to EEPROM SCL pin |
 | SDA | ULP_GPIO_4 [EXP_HEADER-11] | Connect to EEPROM SDA pin |
 
-
-## Loading Application on Simplicity Studio
-1. With the product Si917 selected, navigate to the example projects by clicking on Example Projects & Demos 
-in simplicity studio and click on to ULP_I2C Example application as shown below.
-
-![Figure:](resources/readme/image503b.png)
 
 ## Build 
 1. Compile the application in Simplicity Studio using build icon 

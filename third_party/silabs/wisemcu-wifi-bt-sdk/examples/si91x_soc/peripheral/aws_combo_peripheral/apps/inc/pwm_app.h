@@ -17,7 +17,7 @@
 /**
  * Includes
  */
- #include "rsi_chip.h"
+#include "rsi_chip.h"
 #include "rsi_board.h"
 
 int PWM_Init(void);

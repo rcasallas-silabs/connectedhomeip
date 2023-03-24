@@ -18,6 +18,7 @@ I2S
 PWM
 RTC
 QEI
+SDIO
 SPI
 UART
 UDMA
@@ -55,6 +56,7 @@ Tx on Periodic Wakeup
 Wake On Wireless
 Without Retention DeepSleep
 aws_device_shadow_without_retention
+aws_device_shadow_ps
 	
 Example folder contents
 ========================

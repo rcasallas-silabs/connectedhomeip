@@ -27,7 +27,7 @@
 #define BUFFER_SIZE       1024
 #define SAMPLING_RATE     5000000
 #define CORE_CLOCK_180MHZ 1
-float vref = 2.8;                 // Reference voltage of LDO, Min is 1.8V and Max is 3.3V
+float vref = 2.8; // Reference voltage of LDO, Min is 1.8V and Max is 3.3V
 #define GPIO_DEBUG 1
 
 /* Private function prototype ---------------------------------------------------------*/

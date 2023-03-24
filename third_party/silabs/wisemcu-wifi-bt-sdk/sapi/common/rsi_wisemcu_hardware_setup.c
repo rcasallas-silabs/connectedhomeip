@@ -22,7 +22,7 @@
 #include "rsi_common.h"
 #include "rsi_m4.h"
 
-/** @addtogroup SOC2
+/** @addtogroup MISC
 * @{
 */
 /**

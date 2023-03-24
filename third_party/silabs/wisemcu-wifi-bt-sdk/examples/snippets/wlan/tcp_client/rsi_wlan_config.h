@@ -26,15 +26,15 @@
 #define RSI_DISABLE 0
 
 //! To enable NOVUS test
-#define ENABLE_NOVUS_TEST  0
+#define ENABLE_NOVUS_TEST 0
 
 //! To enable concurrent mode
 #define CONCURRENT_MODE RSI_DISABLE
 
-//! opermode command paramaters
+//! Opermode command parameters
 /*=======================================================================*/
 #if !(ENABLE_NOVUS_TEST)
-//! To set wlan feature select bit map
+//! To set WLAN feature select bit map
 #define RSI_FEATURE_BIT_MAP (FEAT_SECURITY_OPEN)
 
 //! TCP IP BYPASS feature check
@@ -52,7 +52,7 @@
 #define RSI_EXT_TCPIP_FEATURE_BITMAP 0
 
 #else
-//! To set wlan feature select bit map
+//! To set WLAN feature select bit map
 #define RSI_FEATURE_BIT_MAP            (FEAT_SECURITY_OPEN | FEAT_ULP_GPIO_BASED_HANDSHAKE)
 
 //! TCP IP BYPASS feature check
@@ -78,11 +78,11 @@
 
 //! Feature frame parameters
 /*=======================================================================*/
-#define PLL_MODE        0
-#define RF_TYPE         1 //! 0 - External RF 1- Internal RF
-#define WIRELESS_MODE   0
-#define ENABLE_PPP      0
-#define AFE_TYPE        1
+#define PLL_MODE      0
+#define RF_TYPE       1 //! 0 - External RF 1- Internal RF
+#define WIRELESS_MODE 0
+#define ENABLE_PPP    0
+#define AFE_TYPE      1
 
 #if !(ENABLE_NOVUS_TEST)
 #define FEATURE_ENABLES 0
@@ -93,7 +93,7 @@
 
 /*=======================================================================*/
 
-//! Band command paramters
+//! Band command parameters
 /*=======================================================================*/
 
 //! RSI_BAND_2P4GHZ(2.4GHz) or RSI_BAND_5GHZ(5GHz) or RSI_DUAL_BAND
@@ -101,7 +101,7 @@
 
 /*=======================================================================*/
 
-//! set region command paramters
+//! set region command parameters
 /*=======================================================================*/
 
 //! RSI_ENABLE or RSI_DISABLE Set region support
@@ -118,7 +118,7 @@
 
 /*=======================================================================*/
 
-//! set region AP command paramters
+//! set region AP command parameters
 /*=======================================================================*/
 
 //! RSI_ENABLE or RSI_DISABLE Set region AP support
@@ -207,7 +207,7 @@
 
 /*=======================================================================*/
 
-//! High Throughput Capabilies related information
+//! High Throughput capabilities related information
 /*=======================================================================*/
 
 //! RSI_ENABLE or RSI_DISABLE 11n mode in AP mode
@@ -231,7 +231,7 @@
 //! scan channel bit map in 2.4GHz band,valid if given channel to scan is 0
 #define RSI_SCAN_CHANNEL_BIT_MAP_2_4 0
 
-//! scan channle bit map in 5GHz band ,valid if given channel to scan is 0
+//! scan channel bit map in 5GHz band ,valid if given channel to scan is 0
 #define RSI_SCAN_CHANNEL_BIT_MAP_5 0
 
 //! scan_feature_bitmap ,valid only if specific channel to scan and ssid are given
@@ -242,10 +242,12 @@
 //! Enterprise configuration command parameters
 /*=======================================================================*/
 
-//! Enterprise method ,should be one of among TLS, TTLS, FAST or PEAP
+//! Enterprise method, should be one of among TLS, TTLS, FAST or PEAP
 #define RSI_EAP_METHOD "TTLS"
+
 //! This parameter is used to configure the module in Enterprise security mode
 #define RSI_EAP_INNER_METHOD "\"auth=MSCHAPV2\""
+
 //! Private Key Password is required for encrypted private key, format is like "\"12345678\""
 #define RSI_PRIVATE_KEY_PASSWORD ""
 
@@ -276,7 +278,7 @@
 //! RSI_JOIN_FEAT_STA_BG_ONLY_MODE_ENABLE or RSI_JOIN_FEAT_LISTEN_INTERVAL_VALID
 #define RSI_JOIN_FEAT_BIT_MAP 0
 
-//!
+//! Listen interval
 #define RSI_LISTEN_INTERVAL 0
 
 //! Transmission data rate. Physical rate at which data has to be transmitted.
@@ -306,12 +308,12 @@
 
 /*=======================================================================*/
 
-//! ssl parameters
+//! SSL parameters
 /*=======================================================================*/
-//! ssl version
+//! SSL version
 #define RSI_SSL_VERSION 0
 
-//! ssl ciphers
+//! SSL ciphers
 #define RSI_SSL_CIPHERS SSL_ALL_CIPHERS
 
 //! Enable TCP over SSL with TLS version depends on remote side
@@ -325,18 +327,22 @@
 
 //! Enable TCP over SSL with TLS version 1.2
 #define PROTOCOL_TLS_1_2 (BIT(0) | BIT(15))
+
 /*=======================================================================*/
 
 //! Power save command parameters
 /*=======================================================================*/
 //! set handshake type of power mode
-
+#ifdef RSI_M4_INTERFACE
+#define RSI_HAND_SHAKE_TYPE M4_BASED
+#else
 #define RSI_HAND_SHAKE_TYPE GPIO_BASED
+#endif
 
 //! 0 - LP, 1- ULP mode with RAM retention and 2 - ULP with Non RAM retention
 #define RSI_SELECT_LP_OR_ULP_MODE RSI_ULP_WITH_RAM_RET
 
-//! set DTIM aligment required
+//! set DTIM alignment required
 //! 0 - module wakes up at beacon which is just before or equal to listen_interval
 //! 1 - module wakes up at DTIM beacon which is just before or equal to listen_interval
 #define RSI_DTIM_ALIGNED_TYPE 0
@@ -349,17 +355,17 @@
 #define RSI_NUM_OF_DTIM_SKIP 0
 
 //!WMM PS parameters
-//! set wmm enable or disable
+//! set WMM enable or disable
 #define RSI_WMM_PS_ENABLE RSI_DISABLE
 
-//! set wmm enable or disable
+//! set WMM enable or disable
 //! 0- TX BASED 1 - PERIODIC
 #define RSI_WMM_PS_TYPE 0
 
-//! set wmm wake up interval
+//! set WMM wake up interval
 #define RSI_WMM_PS_WAKE_INTERVAL 20
 
-//! set wmm UAPSD bitmap
+//! set WMM UAPSD bitmap
 #define RSI_WMM_PS_UAPSD_BITMAP 15
 
 /*=======================================================================*/
@@ -427,47 +433,66 @@
 
 //! Transmission data rate. Physical rate at which data has to be transmitted.
 #define RSI_CONFIG_AP_DATA_RATE RSI_DATA_RATE_AUTO
-//! To set wlan feature select bit map
+
+//! To set WLAN feature select bit map
 #define RSI_CONFIG_AP_WLAN_FEAT_BIT_MAP (FEAT_SECURITY_PSK)
+
 //! TCP/IP feature select bitmap for selecting TCP/IP features
 #define RSI_CONFIG_AP_TCP_IP_FEAT_BIT_MAP (TCP_IP_FEAT_DHCPV4_SERVER)
+
 //! To set custom feature select bit map
 #define RSI_CONFIG_AP_CUSTOM_FEAT_BIT_MAP 0
+
 //! Tx power level
 #define RSI_CONFIG_AP_TX_POWER RSI_POWER_LEVEL_HIGH
+
 //! AP SSID
 #define RSI_CONFIG_AP_SSID "SILABS_AP"
+
 //! RSI_BAND_2P4GHZ(2.4GHz) or RSI_BAND_5GHZ(5GHz) or RSI_DUAL_BAND
 #define RSI_CONFIG_AP_BAND RSI_BAND_2P4GHZ
-//! To configure AP channle number
+
+//! To configure AP channel number
 #define RSI_CONFIG_AP_CHANNEL 6
+
 //! To configure security type
 #define RSI_CONFIG_AP_SECURITY_TYPE RSI_WPA
+
 //! To configure encryption type
 #define RSI_CONFIG_AP_ENCRYPTION_TYPE 1
+
 //! To configure PSK
 #define RSI_CONFIG_AP_PSK "1234567890"
+
 //! To configure beacon interval
 #define RSI_CONFIG_AP_BEACON_INTERVAL 100
+
 //! To configure DTIM period
 #define RSI_CONFIG_AP_DTIM 2
+
 //! This parameter is used to configure keep alive type
 #define RSI_CONFIG_AP_KEEP_ALIVE_TYPE 0 //! RSI_NULL_BASED_KEEP_ALIVE
 
 #define RSI_CONFIG_AP_KEEP_ALIVE_COUNTER 0 //! 100
+
 //! This parameter is used to configure keep alive period
 #define RSI_CONFIG_AP_KEEP_ALIVE_PERIOD 100
+
 //! This parameter is used to configure maximum stations supported
 #define RSI_CONFIG_AP_MAX_STATIONS_COUNT 4
+
 //! P2P Network parameters
 //! TCP_STACK_USED BIT(0) - IPv4, BIT(1) -IPv6, (BIT(0) | BIT(1)) - Both IPv4 and IPv6
 #define RSI_CONFIG_AP_TCP_STACK_USED BIT(0)
+
 //! IP address of the module
 //! E.g: 0x0A0AA8C0 == 192.168.10.10
 #define RSI_CONFIG_AP_IP_ADDRESS 0x0A0AA8C0
-//! IP address of netmask
+
+//! IP address of Netmask
 //! E.g: 0x00FFFFFF == 255.255.255.0
 #define RSI_CONFIG_AP_SN_MASK_ADDRESS 0x00FFFFFF
+
 //! IP address of Gateway
 //! E.g: 0x0A0AA8C0 == 192.168.10.10
 #define RSI_CONFIG_AP_GATEWAY_ADDRESS 0x0A0AA8C0
@@ -477,52 +502,73 @@
 
 //! To configure data rate
 #define RSI_CONFIG_CLIENT_DATA_RATE RSI_DATA_RATE_AUTO
-//! To configure wlan feature bitmap
+
+//! To configure WLAN feature bitmap
 #define RSI_CONFIG_CLIENT_WLAN_FEAT_BIT_MAP 0
-//! To configure tcp/ip feature bitmap
+
+//! To configure TCP/IP feature bitmap
 #define RSI_CONFIG_CLIENT_TCP_IP_FEAT_BIT_MAP BIT(2)
+
 //! To configure custom feature bit map
 #define RSI_CONFIG_CLIENT_CUSTOM_FEAT_BIT_MAP 0
+
 //! To configure TX power
 #define RSI_CONFIG_CLIENT_TX_POWER RSI_POWER_LEVEL_HIGH
+
 //! To configure listen interval
 #define RSI_CONFIG_CLIENT_LISTEN_INTERVAL 0
+
 //! To configure SSID
 #define RSI_CONFIG_CLIENT_SSID "SILABS_AP"
+
 //! RSI_BAND_2P4GHZ(2.4GHz) or RSI_BAND_5GHZ(5GHz) or RSI_DUAL_BAND
 #define RSI_CONFIG_CLIENT_BAND RSI_BAND_2P4GHZ
+
 //! To configure channel number
 #define RSI_CONFIG_CLIENT_CHANNEL 0
+
 //! To configure security type
 #define RSI_CONFIG_CLIENT_SECURITY_TYPE 0 //RSI_WPA
+
 //! To configure encryption type
 #define RSI_CONFIG_CLIENT_ENCRYPTION_TYPE 0
+
 //! To configure PSK
 #define RSI_CONFIG_CLIENT_PSK "1234567890"
+
 //! To configure PMK
 #define RSI_CONFIG_CLIENT_PMK ""
+
 //! Client Network parameters
 //! TCP_STACK_USED BIT(0) - IPv4, BIT(1) -IPv6, (BIT(0) | BIT(1)) - Both IPv4 and IPv6
 #define RSI_CONFIG_CLIENT_TCP_STACK_USED BIT(0)
+
 //! DHCP mode 1- Enable 0- Disable
 //! If DHCP mode is disabled given IP statically
 #define RSI_CONFIG_CLIENT_DHCP_MODE RSI_DHCP
+
 //! IP address of the module
 //! E.g: 0x0A0AA8C0 == 192.168.10.10
 #define RSI_CONFIG_CLIENT_IP_ADDRESS 0x0A0AA8C0
-//! IP address of netmask
+
+//! IP address of Netmask
 //! E.g: 0x00FFFFFF == 255.255.255.0
 #define RSI_CONFIG_CLIENT_SN_MASK_ADDRESS 0x00FFFFFF
+
 //! IP address of Gateway
 //! E.g: 0x010AA8C0 == 192.168.10.1
 #define RSI_CONFIG_CLIENT_GATEWAY_ADDRESS 0x010AA8C0
+
 //! scan channel bit map in 2.4GHz band,valid if given channel to scan is 0
 #define RSI_CONFIG_CLIENT_SCAN_FEAT_BITMAP 0
+
 //! Scan channel magic code
 #define RSI_CONFIG_CLIENT_MAGIC_CODE 0x4321
+
 //! scan channel bit map in 2.4GHz band,valid if given channel to scan is 0
 #define RSI_CONFIG_CLIENT_SCAN_CHAN_BITMAP_2_4_GHZ 0
-//! scan channle bit map in 5GHz band ,valid if given channel to scan is 0
+
+//! scan channel bit map in 5GHz band ,valid if given channel to scan is 0
 #define RSI_CONFIG_CLIENT_SCAN_CHAN_BITMAP_5_0_GHZ 0
 
 //! EAP Client Profile Parameters
@@ -530,52 +576,74 @@
 
 //! To configure data rate
 #define RSI_CONFIG_EAP_DATA_RATE RSI_DATA_RATE_AUTO
-//! To configure wlan feature bitmap
+
+//! To configure WLAN feature bitmap
 #define RSI_CONFIG_EAP_WLAN_FEAT_BIT_MAP 0
-//! To configure tcp/ip feature bitmap
+
+//! To configure TCP/IP feature bitmap
 #define RSI_CONFIG_EAP_TCP_IP_FEAT_BIT_MAP BIT(2)
+
 //! To configure custom feature bit map
 #define RSI_CONFIG_EAP_CUSTOM_FEAT_BIT_MAP 0
+
 //! To configure EAP TX power
 #define RSI_CONFIG_EAP_TX_POWER RSI_POWER_LEVEL_HIGH
+
 //! To Configure scan channel feature bitmap
 #define RSI_CONFIG_EAP_SCAN_FEAT_BITMAP 0
+
 //! scan channel bit map in 2.4GHz band,valid if given channel to scan is 0
 #define RSI_CONFIG_EAP_CHAN_MAGIC_CODE 0 //0x4321
+
 //! scan channel bit map in 2.4GHz band,valid if given channel to scan is 0
 #define RSI_CONFIG_EAP_SCAN_CHAN_BITMAP_2_4_GHZ 0
-//! scan channle bit map in 5GHz band ,valid if given channel to scan is 0
+
+//! scan channel bit map in 5GHz band ,valid if given channel to scan is 0
 #define RSI_CONFIG_EAP_SCAN_CHAN_BITMAP_5_0_GHZ 0
+
 //! To configure SSID
 #define RSI_CONFIG_EAP_SSID "SILABS_AP"
+
 //! RSI_BAND_2P4GHZ(2.4GHz) or RSI_BAND_5GHZ(5GHz) or RSI_DUAL_BAND
 #define RSI_CONFIG_EAP_BAND RSI_BAND_2P4GHZ
+
 //! To set security type
 #define RSI_CONFIG_EAP_SECURITY_TYPE RSI_WPA2_EAP
+
 //! To set encryption type
 #define RSI_CONFIG_EAP_ENCRYPTION_TYPE 0
+
 //! To set channel number
 #define RSI_CONFIG_EAP_CHANNEL 0
+
 //! Enterprise method ,should be one of among TLS, TTLS, FAST or PEAP
 #define RSI_CONFIG_EAP_METHOD "TLS"
+
 //! This parameter is used to configure the module in Enterprise security mode
 #define RSI_CONFIG_EAP_INNER_METHOD "\"auth=MSCHAPV2\""
+
 //! To configure EAP user identity
 #define RSI_CONFIG_EAP_USER_IDENTITY "\"user1\""
+
 //! TO configure EAP password
 #define RSI_CONFIG_EAP_PASSWORD "\"test123\""
+
 //! EAP Network parameters
 //! TCP_STACK_USED BIT(0) - IPv4, BIT(1) -IPv6, (BIT(0) | BIT(1)) - Both IPv4 and IPv6
 #define RSI_CONFIG_EAP_TCP_STACK_USED BIT(0)
+
 //! DHCP mode 1- Enable 0- Disable
 //! If DHCP mode is disabled given IP statically
 #define RSI_CONFIG_EAP_DHCP_MODE RSI_DHCP
+
 //! IP address of the module
 //! E.g: 0x0A0AA8C0 == 192.168.10.10
 #define RSI_CONFIG_EAP_IP_ADDRESS 0x0A0AA8C0
+
 //! IP address of netmask
 //! E.g: 0x00FFFFFF == 255.255.255.0
 #define RSI_CONFIG_EAP_SN_MASK_ADDRESS 0x00FFFFFF
+
 //! IP address of Gateway
 //! E.g: 0x010AA8C0 == 192.168.10.1
 #define RSI_CONFIG_EAP_GATEWAY_ADDRESS 0x010AA8C0
@@ -585,38 +653,53 @@
 
 //! To configure data rate
 #define RSI_CONFIG_P2P_DATA_RATE RSI_DATA_RATE_AUTO
-//! To configure wlan feature bitmap
+
+//! To configure WLAN feature bitmap
 #define RSI_CONFIG_P2P_WLAN_FEAT_BIT_MAP 0
-//! To configure P2P tcp/ip feature  bitmap
+
+//! To configure P2P TCP/IP feature  bitmap
 #define RSI_CONFIG_P2P_TCP_IP_FEAT_BIT_MAP BIT(2)
+
 //! To configure P2P custom feature bitmap
 #define RSI_CONFIG_P2P_CUSTOM_FEAT_BIT_MAP 0
-//! TO configure P2P tx power level
+
+//! TO configure P2P Tx power level
 #define RSI_CONFIG_P2P_TX_POWER RSI_POWER_LEVEL_HIGH
+
 //! Set P2P go intent
 #define RSI_CONFIG_P2P_GO_INTNET 16 //! Support only Autonomous GO mode
+
 //! Set device name
 #define RSI_CONFIG_P2P_DEVICE_NAME "WSC1.1"
+
 //! Set device operating channel
 #define RSI_CONFIG_P2P_OPERATING_CHANNEL 11
+
 //! Set SSID postfix
 #define RSI_CONFIG_P2P_SSID_POSTFIX "WSC_1_0_0"
+
 //! Set P2P join SSID
 #define RSI_CONFIG_P2P_JOIN_SSID "SILABS_AP"
-//! Set psk key
+
+//! Set PSK key
 #define RSI_CONFIG_P2P_PSK_KEY "12345678"
+
 //! P2P Network parameters
 //! TCP_STACK_USED BIT(0) - IPv4, BIT(1) -IPv6, (BIT(0) | BIT(1)) - Both IPv4 and IPv6
 #define RSI_CONFIG_P2P_TCP_STACK_USED BIT(0)
+
 //! DHCP mode 1- Enable 0- Disable
 //! If DHCP mode is disabled given IP statically
 #define RSI_CONFIG_P2P_DHCP_MODE 1
+
 //! IP address of the module
 //! E.g: 0x0A0AA8C0 == 192.168.10.10
 #define RSI_CONFIG_P2P_IP_ADDRESS 0x0A0AA8C0
+
 //! IP address of netmask
 //! E.g: 0x00FFFFFF == 255.255.255.0
 #define RSI_CONFIG_P2P_SN_MASK_ADDRESS 0x00FFFFFF
+
 //! IP address of Gateway
 //! E.g: 0x010AA8C0 == 192.168.10.1
 #define RSI_CONFIG_P2P_GATEWAY_ADDRESS 0x010AA8C0

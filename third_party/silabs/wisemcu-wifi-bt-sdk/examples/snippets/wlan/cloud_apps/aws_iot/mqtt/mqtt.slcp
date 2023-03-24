@@ -16,7 +16,7 @@ xml_filter: Undefined
 sdk: {id: gecko_sdk, version: 4.1.0}
 sdk_extension:
   - id: wiseconnect
-    version: 1.0.0
+    version: 1.0.1
 source:
   - path: rsi_subscribe_publish_sample.c
 include:
@@ -33,8 +33,8 @@ requires:
   - name: wiseconnect_sapi_freertos
   - name: wiseconnect_third_party_freertos
 define:
-   - name: MQTT_YIELD_EN
-   - name: EXECUTION_FROM_RAM
+  - name: MQTT_YIELD_EN
+  - name: EXECUTION_FROM_RAM
 template_contribution:
   - name: EXECUTION_FROM_RAM
     value: 1
@@ -49,48 +49,70 @@ other_file:
   - path: resources/readme/image452.png
   - path: resources/readme/ncpboarddetection112.png
   - path: resources/readme/aws_create_thing_step3.png
-  - path: resources/readme/ftdiprints118.png
   - path: resources/readme/image91c.png
+  - path: resources/readme/aws_mqtt_example_soc.png
   - path: resources/readme/image216b.png
   - path: resources/readme/image91b.png
   - path: resources/readme/aws_iot_mqtt_host_url_2.png
+  - path: resources/readme/usb_to_uart_2.png
   - path: resources/readme/aws_thing_certificates_download.png
   - path: resources/readme/image91ncp.png
+  - path: resources/readme/post_build_script.png
   - path: resources/readme/aws_create_policy.png
   - path: resources/readme/image91soc.png
   - path: resources/readme/aws_create_thing_step1.png
   - path: resources/readme/aws_create_thing_step4.png
+  - path: resources/readme/serial_port.png
+  - path: resources/readme/build.png
   - path: resources/readme/image447.png
   - path: resources/readme/image453.png
   - path: resources/readme/aws_iot_mqtt_host_url_1.png
   - path: resources/readme/image451.png
+  - path: resources/readme/build_project_ncp.png
+  - path: resources/readme/usb_to_uart_1.png
+  - path: resources/readme/efm32.png
   - path: resources/readme/aws_create_thing_step2.png
   - path: resources/readme/image359.png
   - path: resources/readme/image91a.png
+  - path: resources/readme/create_project.png
   - path: resources/readme/image91e.png
+  - path: resources/readme/run.png
+  - path: resources/readme/efr32.png
   - path: resources/readme/image216c.png
   - path: resources/readme/aws_create_thing_policy_create.png
   - path: resources/readme/image448.png
+  - path: resources/readme/ncp_macros.png
   - path: resources/readme/aws_create_thing_step5.png
   - path: resources/readme/ouputprints119.png
   - path: resources/readme/buildsuccesssoc116.png
+  - path: resources/readme/soc_board_detection.png
   - path: resources/readme/debugmodencp120.png
   - path: resources/readme/image443.png
   - path: resources/readme/image91d.png
   - path: resources/readme/socboarddetection111.png
   - path: resources/readme/image444.png
   - path: resources/readme/image446.png
+  - path: resources/readme/setup_soc.png
   - path: resources/readme/image96.png
+  - path: resources/readme/aws_mqtt_example.png
+  - path: resources/readme/soc_macros.png
   - path: resources/readme/image91.png
+  - path: resources/readme/build_project_soc.png
+  - path: resources/readme/setup_ncp.png
+  - path: resources/readme/port_selection.png
   - path: resources/readme/image92.png
   - path: resources/readme/image450.png
   - path: resources/readme/image431a.png
   - path: resources/readme/image94.png
+  - path: resources/readme/port_selection_soc.png
   - path: resources/readme/aws_create_thing_attach_policy.png
+  - path: resources/readme/serial_port_setup.png
   - path: resources/readme/image449.png
+  - path: resources/readme/program_device.png
   - path: resources/readme/aws_choosing_policy.png
   - path: resources/readme/projctselection113.png
   - path: resources/readme/image445.png
+  - path: resources/readme/examples_demos.png
   - path: resources/readme/image93.png
 ui_hints:
   highlight:

@@ -44,7 +44,7 @@
 #define SCAN_CHANNEL 0
 
 //! Security type
-#define SECURITY_TYPE RSI_OPEN
+#define SECURITY_TYPE RSI_WPA2
 
 //! Password
 #define PSK ""
@@ -56,21 +56,21 @@
 #if !(DHCP_MODE)
 //! IP address of the module
 //! E.g: 0x650AA8C0 == 192.168.10.101
-#define DEVICE_IP 0x6500A8C0
+#define DEVICE_IP "192.168.10.101"
 
 //! IP address of Gateway
 //! E.g: 0x010AA8C0 == 192.168.10.1
-#define GATEWAY 0x0100A8C0
+#define GATEWAY "192.168.10.1"
 
 //! IP address of netmask
 //! E.g: 0x00FFFFFF == 255.255.255.0
-#define NETMASK 0x00FFFFFF
+#define NETMASK "255.255.255.0"
 
 #endif
 //! Server IP address. Should be in reverse long format
 //! E.g: 0x640AA8C0 == 192.168.10.100
 //! E.g: 0x640AA8C0 == 192.168.0.63
-#define SERVER_IP_ADDRESS 0x2E2BA8C0
+#define SERVER_IP_ADDRESS "192.168.10.100"
 
 //! Server port number
 #define SERVER_PORT 5001
@@ -161,6 +161,8 @@ typedef struct rsi_wlan_app_cb_s {
 
 rsi_wlan_app_cb_t rsi_wlan_app_cb; //! application control block
 
+extern uint64_t ip_to_reverse_hex(char *ip);
+
 void rsi_remote_socket_terminate_handler(uint16_t status, const char *buffer, const uint16_t length)
 {
   //! Remote socket has been terminated
@@ -250,10 +252,11 @@ int32_t rsi_powersave_profile_app()
   uint8_t xtal_enable = 0;
 #endif
 #if !(DHCP_MODE)
-  uint32_t ip_addr      = DEVICE_IP;
-  uint32_t network_mask = NETMASK;
-  uint32_t gateway      = GATEWAY;
+  uint32_t ip_addr      = ip_to_reverse_hex((char *)DEVICE_IP);
+  uint32_t network_mask = ip_to_reverse_hex((char *)NETMASK);
+  uint32_t gateway      = ip_to_reverse_hex((char *)GATEWAY);
 #endif
+
   uint8_t ip_rsp[18] = { 0 };
 
   /* MCU Hardware Configuration for Low-Power Applications */
@@ -323,7 +326,7 @@ int32_t rsi_powersave_profile_app()
 #if DHCP_MODE
         status = rsi_config_ipaddress(RSI_IP_VERSION_4, RSI_DHCP, 0, 0, 0, ip_rsp, 18, 0);
 #else
-        status        = rsi_config_ipaddress(RSI_IP_VERSION_4,
+        status = rsi_config_ipaddress(RSI_IP_VERSION_4,
                                       RSI_STATIC,
                                       (uint8_t *)&ip_addr,
                                       (uint8_t *)&network_mask,
@@ -394,7 +397,7 @@ int32_t rsi_powersave_profile_app()
         server_addr.sin_port = htons(SERVER_PORT);
 
         //! Set IP address to localhost
-        server_addr.sin_addr.s_addr = SERVER_IP_ADDRESS;
+        server_addr.sin_addr.s_addr = ip_to_reverse_hex((char *)SERVER_IP_ADDRESS);
 
         //! Connect to server socket
         status = rsi_connect(client_socket, (struct rsi_sockaddr *)&server_addr, sizeof(server_addr));

@@ -94,7 +94,9 @@ extern "C" {
 #define QEI_ENCODING_MODE_1X 0x00 
 #define QEI_ENCODING_MODE_2X 0x01 
 #define QEI_ENCODING_MODE_4X 0x02
-
+/** @addtogroup SOC25
+* @{
+*/
 /*===================================================*/
 /**
  * @fn          STATIC INLINE void RSI_QEI_SetConfiguration(volatile QEI_Type  *pstcQei, uint32_t configParms)   
@@ -523,4 +525,4 @@ void RSI_QEI_Disable(volatile QEI_Type *pstcQei);
 #endif
 
 #endif // RSI_QEI_H
-
+/** @} */

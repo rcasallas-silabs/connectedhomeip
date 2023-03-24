@@ -58,7 +58,10 @@ typedef struct {
 #define SL_BOARD_ENABLE_VCOM_PIN    PIN(D, 4)
 
 #define RSI_SPI_INTERFACE
+
+#ifdef RSI_SPI_INTERFACE
 #define RSI_SPI_HIGH_SPEED_ENABLE
+#endif
 
 // Declaration of MCU type
 #define RSI_ARM_CM4F

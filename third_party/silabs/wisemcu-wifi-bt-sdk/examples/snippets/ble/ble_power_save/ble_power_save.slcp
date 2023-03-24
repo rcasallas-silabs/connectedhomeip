@@ -16,7 +16,7 @@ xml_filter: Undefined
 sdk: {id: gecko_sdk, version: 4.1.0}
 sdk_extension:
   - id: wiseconnect
-    version: 1.0.0
+    version: 1.0.1
 source:
   - path: rsi_ble_power_save.c
 include:
@@ -27,41 +27,36 @@ requires:
   - name: wiseconnect_platform
   - name: wiseconnect_sapi_ble
   - name: wiseconnect_sapi_bluetooth
-  - name: wiseconnect_sapi_freertos
-  - name: wiseconnect_third_party_freertos
 toolchain_settings: []
 readme:
   - path: readme.md
 other_file:
-  - path: resources/readme/creationfinal114.png
   - path: resources/readme/image32.png
-  - path: resources/readme/debugmodesoc117.png
-  - path: resources/readme/buildingpjt115.png
+  - path: resources/readme/buildsuccesssoc_1.png
+  - path: resources/readme/creationfinal1.png
   - path: resources/readme/ncpboarddetection112.png
-  - path: resources/readme/BLE_conn_200s.png
-  - path: resources/readme/projectselection.png
   - path: resources/readme/ftdiprints118.png
   - path: resources/readme/image31spps.png
   - path: resources/readme/image_pw_log.png
-  - path: resources/readme/image216b.png
   - path: resources/readme/keil_with_out_os.png
+  - path: resources/readme/buildncp1.png
   - path: resources/readme/bleconn200s.png
   - path: resources/readme/image31a.png
+  - path: resources/readme/buildsoc2.png
   - path: resources/readme/debugmodencp.png
+  - path: resources/readme/buildsuccessncp_1.png
   - path: resources/readme/image35.png
-  - path: resources/readme/Exp-board-preprocessor.png
-  - path: resources/readme/image359.png
+  - path: resources/readme/buildsoc3.png
   - path: resources/readme/debugmodesoc.png
-  - path: resources/readme/image216c.png
-  - path: resources/readme/buildsuccesssoc116.png
-  - path: resources/readme/debugmodencp120.png
+  - path: resources/readme/with_out_os3.png
+  - path: resources/readme/exp-board-preprocessor.png
+  - path: resources/readme/projctselection1.png
   - path: resources/readme/image33.png
   - path: resources/readme/image34.png
   - path: resources/readme/socboarddetection111.png
   - path: resources/readme/imagepwlog.png
   - path: resources/readme/with_out_os1.png
   - path: resources/readme/image31sppsncp.png
-  - path: resources/readme/projctselection113.png
 ui_hints:
   highlight:
     - path: readme.md

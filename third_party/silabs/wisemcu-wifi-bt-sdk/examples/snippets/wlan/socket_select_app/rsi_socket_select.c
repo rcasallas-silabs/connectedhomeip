@@ -340,6 +340,12 @@ int32_t rsi_socket_select()
         } else {
           //! update wlan application state
           rsi_wlan_app_cb.state = RSI_WLAN_DATA_RECEIVE_STATE;
+#ifndef RSI_WITH_OS
+          do {
+            //! wireless driver tasks
+            rsi_wireless_driver_task();
+          } while (!socket_select_response);
+#endif
           break;
         }
       }
@@ -386,19 +392,19 @@ int main()
 #endif
 #ifdef RSI_M4_INTERFACE
   //! Driver initialization
-   status = rsi_driver_init(global_buf, GLOBAL_BUFF_LEN);
-   if ((status < 0) || (status > GLOBAL_BUFF_LEN)) {
-     return status;
-   }
+  status = rsi_driver_init(global_buf, GLOBAL_BUFF_LEN);
+  if ((status < 0) || (status > GLOBAL_BUFF_LEN)) {
+    return status;
+  }
 
-   //! SiLabs module initialization
-   status = rsi_device_init(LOAD_NWP_FW);
-   if (status != RSI_SUCCESS) {
-     LOG_PRINT("\r\nDevice Initialization Failed\r\n");
-     return status;
-   } else {
-     LOG_PRINT("\r\nDevice Initialization Success\r\n");
-   }
+  //! SiLabs module initialization
+  status = rsi_device_init(LOAD_NWP_FW);
+  if (status != RSI_SUCCESS) {
+    LOG_PRINT("\r\nDevice Initialization Failed\r\n");
+    return status;
+  } else {
+    LOG_PRINT("\r\nDevice Initialization Success\r\n");
+  }
 #endif
 
 #ifdef RSI_WITH_OS

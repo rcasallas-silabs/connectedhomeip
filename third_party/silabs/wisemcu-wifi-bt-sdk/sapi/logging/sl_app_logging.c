@@ -94,11 +94,11 @@ uint32_t sl_log_data_into_buf(uint8_t *buf, uint32_t arg_len, uint32_t arg)
   } else {
     len = (arg_len + 1);
     if (arg_len == DWORD_LEN) {
-      *(uint32 *)buf = (uint32)arg;
+      *(uint32_t *)buf = (uint32_t)arg;
     } else if (arg_len == WORD_LEN) {
-      *(uint16 *)buf = (uint16)arg;
+      *(uint16_t *)buf = (uint16_t)arg;
     } else {
-      *(uint8 *)buf = (uint8)arg;
+      *(uint8_t *)buf = (uint8_t)arg;
     }
   }
   return len;

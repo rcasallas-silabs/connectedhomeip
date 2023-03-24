@@ -27,15 +27,15 @@ extern "C" {
 /*==============================================*/
 /**
 /**
- * @fn          RSI_DRIVER_VERSION RSI_GPDMA_GetVersion(void)
+ * @fn          RSI_DRIVER_VERSION_M4 RSI_GPDMA_GetVersion(void)
  * @brief		    This API is used to get version information of the driver implementation
- * @return 		  structure of type RSI_DRIVER_VERSION and its members are as below
+ * @return 		  structure of type RSI_DRIVER_VERSION_M4 and its members are as below
  *								- \ref RSI_GPDMA_API_VERSION   : Version of the CMSIS-Driver specification used to implement this driver.
  *								- \ref RSI_GPDMA_DRV_VERSION   : GPDMA peripheral source code version of the actual driver implementation.   
  */
-RSI_DRIVER_VERSION RSI_GPDMA_GetVersion(void)
+RSI_DRIVER_VERSION_M4 RSI_GPDMA_GetVersion(void)
 {
-  RSI_DRIVER_VERSION vsDriverVersion;
+  RSI_DRIVER_VERSION_M4 vsDriverVersion;
 
   vsDriverVersion.api = RSI_GPDMA_API_VERSION;
   vsDriverVersion.drv = RSI_GPDMA_DRV_VERSION;

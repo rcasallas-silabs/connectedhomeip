@@ -1,273 +1,335 @@
-# HTTP/HTTPS Client Sockets 
+# HTTP Client 
 
-## 1. Purpose / Scope
+## 1 Purpose/Scope
 
-This application demonstrates how to create Silicon Labs device as HTTP/HTTPs client and do HTTP PUT, GET and POST operations with the HTTP/HTTPs server opened 
-on remote peer. In this application, the device configures as Wi-Fi station and connects to Access point and do HTTP/HTTPs PUT, GET and post operation with 
-HTTP/HTTPs server opened on remote peer.
+This application demonstrates how to configure SiWx91x device as an HTTP client and do HTTP PUT, GET and POST operations with the HTTP server opened 
+on remote peer. In this application, the SiWx91x is configured as a Wi-Fi station and connects to an Access point. The application then performs HTTP PUT, GET and POST operations with 
+HTTP server opened on remote peer.
 
-## 2. Prerequisites / Setup Requirements
+## 2 Prerequisites/Set up Requirements
 
-Before running the application, the user will need the following things to setup.
+For running the application, you will need the following:
 
 ### 2.1 Hardware Requirements
 
-- Windows PC
-- Wireless Access Point
-- TCP server over SSL running in Windows PC2 (This application uses OpenSSL to create TCP server over SSL)
-- SiWx91x Wi-Fi Evaluation Kit. The SiWx91x supports multiple operating modes. See [Operating Modes]() for details.
-  - **SoC Mode**:
-      - Silicon Labs [BRD4325A](https://www.silabs.com/)
-  - **NCP Mode**:
-      - Silicon Labs [(BRD4180A, BRD4280B)](https://www.silabs.com/); **AND**
-      - Host MCU Eval Kit. This example has been tested with:
-        - Silicon Labs [WSTK + EFR32MG21](https://www.silabs.com/development-tools/wireless/efr32xg21-bluetooth-starter-kit)
-        - Silicon Labs [WSTK + EFM32GG11](https://www.silabs.com/development-tools/mcu/32-bit/efm32gg11-starter-kit)
+- **SoC Mode**: [Silicon Labs EFR32xG21 Starter Kit with Wireless Gecko](https://www.silabs.com/) (SLSWSTK6006A Base board: BRD4001A, Radio board: BRD4325A)
 
-#### SoC Mode : 
+- **NCP Mode**: 
+   - [SiWx91x Wi-Fi Expansion Board](https://www.silabs.com/)
+   - A Host MCU. This example application has been tested with the following host MCUs.
 
-![Figure: Setup Diagram SoC Mode for WLAN Throughput Example](resources/readme/httpclientsoc.png)
+     - [Silicon Labs EFR32xG21 Starter Kit with Wireless Gecko](https://www.silabs.com/development-tools/wireless/efr32xg21-bluetooth-starter-kit) (SLSWSTK6006A Base board: BRD4001A, Radio board: BRD4180a or BRD4180b)
+
+     - [Silicon Labs EFM32GG11 Starter Kit with Wireless Gecko](https://www.silabs.com/development-tools/mcu/32-bit/efm32gg11-starter-kit) (SLSTK3701A Base board: BRD2204A)
+
+- A Windows PC
+
+### 2.2 Software Requirements
+
+- Simplicity Studio IDE 
+
+   - Download the [Simplicity Studio IDE](https://www.silabs.com/developers/simplicity-studio).
+
+   - Follow the [Simplicity Studio user guide](https://docs.silabs.com/simplicity-studio-5-users-guide/1.1.0/ss-5-users-guide-getting-started/install-ss-5-and-software#install-ssv5) to install Simplicity Studio IDE.
+
+- [Silicon Labs Gecko SDK](https://github.com/SiliconLabs/gecko_sdk)
+
+- [Si91x COMBO SDK](https://github.com/SiliconLabs/)
+
+- [Python tool](https://www.python.org/downloads/)
+
+**NOTE:**
+
+- This example application supports Bare metal and FreeRTOS configurations.
+
+## 3 Set up
+
+#### 3.1 SoC Mode 
+
+Set up diagram for SoC mode:
+
+**![Figure: Setup Diagram for HTTP client Example - SoC mode](resources/readme/setup_soc.png)**
+
+Follow the [Getting Started with SiWx91x SoC](https://docs.silabs.com/) guide to set up the hardware connections and Simplicity Studio IDE.
   
-#### NCP Mode :  
+#### 3.2 NCP Mode  
 
-![Figure: Setup Diagram NCP Mode for WLAN Throughput Example](resources/readme/httpclientncp.png)
+Set up diagram for NCP mode:
 
-## 3. Application Build Environment
-### 3.1 Project Setup
+**![Figure: Setup Diagram for HTTP client Example - NCP mode](resources/readme/setup_ncp.png)**
 
-- **SoC Mode**
-  - **Silicon Labs SiWx91x SoC**. Follow the [Getting Started with SiWx91x SoC](https://docs.silabs.com/) to setup the example to work with SiWx91x SoC and Simplicity Studio.
-- **NCP Mode**
-  - **Silicon Labs EFx32 Host**. Follow the [Getting Started with EFx32](https://docs.silabs.com/rs9116-wiseconnect/latest/wifibt-wc-getting-started-with-efx32/) to setup the example to work with EFx32 and Simplicity Studio.
+Follow the [Getting Started with EFx32](https://docs.silabs.com/rs9116-wiseconnect/latest/wifibt-wc-getting-started-with-efx32/) guide to setup the hardware connections and Simplicity Studio IDE.
 
-## Configuring the Application
+**NOTE**: 
+- The Host MCU platform (EFR32MG21) and the SiWx91x interact with each other through the SPI interface. 
+- The Host MCU platform (EFM32GG11) and the SiWx91x interact with each other through the SDIO interface.
 
-The application can be configured to suit user requirements and development environment.
-Read through the following sections and make any changes needed. 
+## 4 Application Build Environment
+
+1. Ensure the SiWx91x is loaded with the latest firmware following the [Getting started with a PC](https://docs.silabs.com/rs9116/latest/wiseconnect-getting-started). The firmware file is located at **< Si91x COMBO SDK > → connectivity_firmware**.
+
+2. Ensure the EFx32 and SiWx91x set up is connected to your PC.
+
+### 4.1 Board detection
+
+### 4.1.1 SoC mode
+
+1. In the Simplicity Studio IDE, 
+    - The SiWx91x SoC board will be detected under **Debug Adapters** pane, as shown below.
+
+      **![Soc Board detection](resources/readme/soc_board_detection.png)**
+
+### 4.1.2 NCP mode
+
+1. In the Simplicity Studio IDE, 
+    - The EFR32 board will be detected under **Debug Adapters** pane, as shown below.
+
+      **![EFR32 Board detection](resources/readme/efr32.png)**
+
+    - The EFM32 board will be detected under **Debug Adapters** pane, as shown below.
+
+      **![EFM32 Board detection](resources/readme/efm32.png)**
+
+### 4.2 Creation of project
+
+Ensure the latest Gecko SDK along with the extension Si91x COMBO SDK is added to Simplicity Studio.
+
+1. Click on the board detected and go to **EXAMPLE PROJECTS & DEMOS** section.
+
+   **![Examples and Demos](resources/readme/examples_demos.png)**
+
+2. Filter for Wi-Fi examples from the Gecko SDK added. For this, check the *Wi-Fi* checkbox under **Wireless Technology** and *Gecko SDK Suite* checkbox under **Provider**. 
+
+3. Under provider, for SoC based example, check the *SoC* checkbox and for NCP based example, check the *NCP* checkbox.
+
+4. Now choose **Wi-Fi- NCP HTTP Client** example for NCP mode or choose **Wi-Fi- SoC HTTP Client example** for SoC mode and click on **Create**.
+
+   For NCP mode:
+
+   **![HTTP Client project](resources/readme/http_client_example.png)**
+
+   For SoC mode:
+      
+   **![HTTP Client project](resources/readme/http_client_example_soc.png)**
+
+5. Give the desired name to your project and cick on **Finish**.
+
+   **![Create HTTP Client project](resources/readme/create_project.png)**
+
+### 4.3 Application configurations
+
+The application can be configured to suit your requirements and development environment. 
+
+1. In the Project explorer pane, expand the **http_client** folder and open the **rsi_http_client.c** file. Configure the following parameters based on your requirements.
+
+   **![Application configuration](resources/readme/application_configuration.png)**
+
+   - SSID refers to the Wi-Fi network's name to which the SiWx91x is going to get connceted.
+
+     ```c
+     #define SSID                                  "SILABS_AP"      
+     ```
+   - SECURITY_TYPE refers to the mode of the SoftAP. Supported security types are OPEN, WPA, and WPA2.
+
+     ```c 
+     #define SECURITY_TYPE                           RSI_WPA2 
+     ```
+   - PSK refers to the secret key if the Access point is configured in WPA-PSK/WPA2-PSK security modes.
+
+     ```c 
+     #define PSK                                    "1234567890" 
+     ``` 
+   -  DHCP_MODE refers to whether the IP assignment of SiWx91x is done statically or through DHCP.
+      
+      1  - DHCP_MODE
+      0  - Static IP assignment
+   
+      ```c
+      #define DHCP_MODE                                          1
+      ```
+
+   - If you want to assign the IP address Statically, then set DHCP_MODE macro to **0** and configure DEVICE_IP, GATEWAY and NETMASK macros.
   
-### 3.2 NCP Mode - Host Interface 
+      ```c
+      #define DEVICE_IP                                    "192.168.10.101"
+      ```
 
-* By default, the application is configured to use the SPI bus for interfacing between Host platforms(EFR32MG21) and the SiWx91x EVK.
-
-### 3.3 Bare Metal/RTOS Support
-
-To select a bare metal configuration, see [Selecting bare metal](#selecting-bare-metal).
-
-## 4. Application Configuration Parameters
-
-The application can be configured to suit your requirements and development environment. Read through the following sections and make any changes needed.
-**4.1** Configure the following parameters in **rsi_http_client_app.c** to enable your Silicon Labs Wi-Fi device to connect to your Wi-Fi network.
+      ```c
+      #define GATEWAY                                      "192.168.10.1"
+      ```
   
-```c                                      
-#define SSID           "SILABS_AP"      // Wi-Fi Network Name
-#define PSK            "1234567890"     // Wi-Fi Password
-#define SECURITY_TYPE  RSI_WPA2         // Wi-Fi Security Type: RSI_OPEN / RSI_WPA / RSI_WPA2
-#define CHANNEL_NO     0                // Wi-Fi channel if the softAP is used (0 = auto select)
-```
+      ```c
+      #define NETMASK                                      "255.255.255.0"
+      ```
 
-### Client/Server IP Settings
-```c   
-#define HTTP_PORT 80     //! Server port number
-#define HTTP_SERVER_IP_ADDRESS "192.168.0.111"    //! HTTP Server IP address.  
-```
+   - HTTP_PORT refers to the port number on which the remote HTTP server is running.
 
-### The desired parameters are provided below. User can also modify the parameters as per their needs and requirements.
-```c   
-#define GLOBAL_BUFF_LEN      15000           //Application memory length which is required by the driver
-```
+      ```c 
+      #define HTTP_PORT                                         80
+      ```
+   - HTTP_SERVER_IP_ADDRESS refers to the IP address of the remote HTTP server.
+   
+      ```c 
+      #define HTTP_SERVER_IP_ADDRESS                       "192.168.0.111"                               
+      ```
+   - HTTP_HOSTNAME refers to the host name of the remote HTTP server. This is usually same as the IP address of remote HTTP server.
 
-> LOAD_CERTIFICATE refers to load certificates into flash
+      ```c 
+      #define HTTP_HOSTNAME                                "192.168.0.111"                           
+      ``` 
+   - For secured HTTP or HTTPS, enable SSL under FLAGS.
 
-  0 - Already certificates are there in flash so no need to laod.
+      ```c 
+      #define FLAGS                                              0                           
+      ``` 
+   - LOAD_CERTIFICATE value defines whether to load the certificates on to module or not.
+   
+      ```c
+      #define LOAD_CERTIFICATE                                   1
+      ```
+   - HTTP_DATA refers to the data that is to be posted to the HTTP server
 
-  1 - Certicates will load into flash.
+      ```c
+      #define HTTP_DATA "employee_name=MR.REDDY&employee_id=RSXYZ123&designation=Engineer&company=SILABS&location=Hyderabad"   
+      ```   
 
-```c   
-#define LOAD_CERTIFICATE       0 
-```
-
-**Note!**
+**Note**:
 
 If certificates are not there in flash then ssl handshake will fail.
 
-***
+### 4.4 Execution of the Application    
 
-```c   
-#define DHCP_MODE               1           //whether IP address is configured through DHCP or STATIC
-```
+#### 4.4.1 Building the Project - SoC Mode
 
-**Note!**
-> If user wants to configure STA IP address through DHCP then set DHCP_MODE to "1" and skip configuring the following DEVICE_IP, GATEWAY and NETMASK macros.
-                                         (Or)
-> If user wants to configure STA IP address through STATIC then set DHCP_MODE macro to "0" and configure following DEVICE_IP, GATEWAY and NETMASK macros.
-    
-> IP address to be configured to the device in STA mode should be in long format and in little endian byte order.
+- Once the project is created, right click on project and go to **Properties → C/C++ Build → Settings → Build Steps**.
+
+- Add **post_build_script_SimplicityStudio.bat** file path present at SI917_COMBO_SDK.X.X.X.XX → utilities → isp_scripts_common_flash in build steps settings as shown in below image.
+
+  ![postbuild_script](resources/readme/post_build_script.png)
+
+- Go to Properties → C/C++ Build → Settings → Tool Settings → GNU ARM C Compiler → Preprocessor → Defined symbols (-D) and check for M4 projects macro (RSI_M4_INTERFACE=1) and 9117 macro (CHIP_9117=1). If not present, add the macros and click **Apply and Close**.
   
-      - Example: To configure "192.168.10.10" as IP address, update the macro DEVICE_IP as 0x0A0AA8C0.
+  ![Build Project for SoC mode](resources/readme/soc_macros.png)
 
-```c   
-#define DEVICE_IP              0X0A0AA8C0
-```
-> IP address of the gateway should also be in long format and in little endian byte order.
+- Click on the build icon (hammer) or right click on project name and choose **Build Project** to build the project.
 
-     - Example: To configure "192.168.10.1" as Gateway, update the macro GATEWAY as 0x010AA8C0 
+  ![building_pjt](resources/readme/build_project_soc.png)
 
-```c   
-#define GATEWAY                0x010AA8C0
-```
-
-> IP address of the network mask should also be in long format and in little endian byte order
+- Make sure the build returns 0 Errors and 0 Warnings.
   
-        - Example: To configure "255.255.255.0" as network mask, update the macro NETMASK as 0x00FFFFFF 
 
-```c   
-#define NETMASK                 0x00FFFFFF
-```
-                 
+#### 4.4.2 Build the Project - NCP Mode
 
+1. Check for CHIP_9117 macro in preprocessor settings as mentioned below.
+   - Right click on project name.
+   - Go to **Properties → C/C++ Build → Settings → Tool Settings → GNU ARM C Compiler → Preprocessor → Defined symbols (-D)**.
+   - If CHIP_9117 macro is not present, add it by clicking on add macro option.
+   - Click on **Apply and Close**.
 
-## 5. Testing the Application
+     **![Build Project for NCP mode](resources/readme/ncp_macros.png)**
 
-Follow the below steps for the successful execution of the application.
+2. Click on the build icon (hammer) or right click on project name and choose **Build Project** to build the project.
 
-### 5.1 Loading the SiWx91x Firmware
+    **![Build Project for NCP mode](resources/readme/build_project_ncp.png)**
 
-Refer [Getting started with a PC](https://docs.silabs.com/rs9116/latest/wiseconnect-getting-started) to load the firmware into SiWx91x EVK. The firmware file is located in `<SDK>/connectivity_firmware/`
+3. Make sure the build returns 0 Errors and 0 Warnings.
 
+### 4.4.3 Set up for application prints
 
-### 5.2 Creating the Project and builing the Application
-  
-Refer [Getting started with EFX32](https://docs.silabs.com/rs9116-wiseconnect/latest/wifibt-wc-getting-started-with-efx32/), for settin-up EFR & EFM host platforms
+Before setting up Tera Term, do the following for SoC mode.
 
-#### 5.2.1 Project Creation - SoC Mode : 
+**SoC mode**: 
+You can use either of the below USB to UART converters for application prints.
+1. Set up using USB to UART converter board.
 
-- Connect your board. The Si917 compatible SoC board is **BRD4325A**.
+  - Connect Tx (Pin-6) to P27 on WSTK
+  - Connect GND (Pin 8 or 10) to GND on WSTK
 
-- Studio should detect your board. Your board will be shown here.
+    **![FTDI_prints](resources/readme/usb_to_uart_1.png)**
 
-![soc_board_detection](resources/readme/socboarddetection111.png)
+2. Set up using USB to UART converter cable.
 
-#### 5.2.2 Project Creation - NCP Mode : 
+  - Connect RX (Pin 5) of TTL convertor to P27 on WSTK
+  - Connect GND (Pin1) of TTL convertor to GND on WSTK
 
-- Connect your board. The supported NCP boards are: **BRD4180A,BRD4280B**
+    **![FTDI_prints](resources/readme/usb_to_uart_2.png)**
 
-- Studio should detect your board. Your board will be shown here.
+**Tera term set up - for NCP and SoC modes**
 
-![ncp_board_detection](resources/readme/ncpboarddetection112.png)
+1. Open the Tera Term tool. 
+   - For SoC mode, choose the serial port to which USB to UART converter is connected and click on **OK**. 
 
-#### 5.2.3 Selecting an example application and generate project
+     **![UART - SoC](resources/readme/port_selection_soc.png)**
 
-- Go to the 'EXAMPLE PROJECT & DEMOS' tab and select your desired example application
+   - For NCP mode, choose the J-Link port and click on **OK**.
 
- ![projct_selection](resources/readme/projctselection113.png)
+     **![J-link - NCP](resources/readme/port_selection.png)**
 
-- Click 'Create'. The "New Project Wizard" window appears. Click 'Finish'
+2. Navigate to the Setup → Serial port and update the baud rate to **115200** and click on **OK**.
 
- ![creation_final](resources/readme/creationfinal114.png)
+    **![Serial port](resources/readme/serial_port_setup.png)**
 
-#### 5.2.4 Build Project - SoC Mode
+    **![Baud rate](resources/readme/serial_port.png)**
 
-- Once the project is created, right click on project and go to properties → C/C++ Build → Settings → Build Steps
+The serial port is now connected. 
 
-- Add post_build_script_SimplicityStudio.bat file path (SI917_COMBO_SDK.X.X.X.XX\utilities\isp_scripts_common_flash) in build steps settings as shown in below image.
+### 4.4.4 Execute the application
 
- ![postbuild_script](resources/readme/image359.png)
+1. Once the build was successful, right click on project and select **Debug As → Silicon Labs ARM Program** to program the device as shown in below image.
 
-- Check for M4 projects macros in preprocessor settings(RSI_M4_INTERFACE=1)
+   **![debug_mode_NCP](resources/readme/program_device.png)**
 
-- Check for 9117 macro in preprocessor settings(CHIP_9117=1).
+2. As soon as the debug process is completed, the application control branches to the main().
 
-- Click on the build icon (hammer) to build the project
+3. Before running the application, set up the HTTP server on a remote PC. For details, refer to Appendix section. 
 
- ![building_pjt](resources/readme/buildingpjt115.png)
+4. Once the HTTP server is running successfully, click on the **Resume** icon in the Simplicity Studio IDE toolbar to run the application.
 
-- Successful build output will show as below.
+   **![Run](resources/readme/run.png)**
 
- ![build_success_soc](resources/readme/buildsuccesssoc116.png)
+5. After the program gets executed, the SiWx91x connects to AP and get an IP address.
 
-#### 5.2.5 Build Project - NCP Mode :
+6. Later, the application requests for HTTP PUT to PUT/Create the file on to the server, which is given in index.txt file and wait until put file completes.
 
-- Check for 9117 macro in preprocessor settings(CHIP_9117=1).
+7. The remote HTTP server accepts the PUT request and writes the received data to a file. User can find the created new file **index.html** at path **<Si917 COMBO SDK> → utilities → scripts**.
 
-- Click on the build icon (hammer) to build the project
+8. After successful creation of file using HTTP PUT, the application requests for the file **index.html** from the HTTP server using HTTP GET method and waits until complete response is received from the server.
 
- ![building_pjt](resources/readme/buildingpjt115.png)
+9. After fetching **index.html**, the application posts the given data in **HTTP_DATA** to the HTTP server using HTTP POST method.
 
-- Successful build output will show as below.
+10. User can see the log messages at HTTP server. Please find the below image for success responses for HTTP PUT, HTTP GET and HTTP POST.
 
- ![build_success_soc](resources/readme/buildsuccesssoc116.png)
+    **![ouput_prints](resources/readme/http_server_logs.png)**
 
-## 6. Program the device
+### 4.4.5 **Application Prints - SoC mode**:
 
-Once the build was successfull, right click on project and click on Debug As->Silicon Labs ARM Program as shown in below image.
-### SoC Mode :
- ![debug_mode_soc](resources/readme/debugmodesoc117.png)
-### NCP Mode : 
- ![debug_mode_NCP](resources/readme/debugmodencp120.png)
+   **![Application prints](resources/readme/application_prints_soc.png)**
 
-### 6.1 Running the SiWx91x Application
+**Application Prints - NCP mode**:
 
-After making any custom configuration changes required, build, download and run the application as below.
+   **![Application prints](resources/readme/application_prints_ncp.png)**
 
-- In Windows PC2, install python and run HTTP server.
+ 
+## 5 Selecting Bare Metal configuration
 
-- In release package python scripts are provided to open HTTP server in the path: resources/script
+1. By default, the application runs over FreeRTOS. To run the application with Bare metal configurations, follow the below steps.
+   - For Simplicity Studio IDE,
+      - Right click on project name
+      - Go to **Properties → C/C++ Build → Settings → Tool Settings → GNU ARM C Compiler → Preprocessor → Defined Symbols (-D)**.
+      - Select RSI_WITH_OS symbol and click on **Delete** symbol.
+      - Click on **Apply and Close**.
+      
+        **![Bare metal configuration](resources/readme/bare_metal.png)**
 
-- Run simple_http_server.py by port number 80 as argument to open HTTP server.
+ ## Appendix
 
-use the following command to run the script
-```
-python simple_http_server.py 80
-```
+ ### Steps to set up HTTP server
 
-  ![ouput_prints](resources/readme/httpserver.png)
+1. In a Windows PC, make sure python is installed.
 
-- After the program gets executed, the device connects to AP and get IP.
-
-- After successful connection with Access Point, the Silicon Labs device request for HTTP PUT to PUT/Create the file on to the server, which is given in index.txt file and wait until put file complete.
-
-- Remote web server accepts a PUT request and writes the received data to a file. User can find the created new file "index.html" on Windows PC2 in the following path, utilities/scripts
-
-- After successful creation of file using HTTP PUT, Silicon Labs device request for the file "index.html" using HTTP GET method and wait until complete response receive from Server.
-
-- After receiving complete response for the given HTTP GET, the device post the given data in HTTP_DATA macro to HTTP server using HTTP POST meth
-
-- User can see the log messages at HTTP server. Please find the below image for success responses for HTTP PUT, HTTP GET and HTTP POST.
-
-  ![ouput_prints](resources/readme/httpclienttestsuccess.png)
-
-## 7. Observing the output prints on serial terminal
-
-### 7.1 SoC Mode:
-
-> Connect USB to UART connector Tx and GND pins to WSTK radio board.
-
-   - Connect Tx(Pin-6) to P27 on WSTK
-   - Connect GND(Pin 8 or 10) to GND on WSTK
-
- ![FTDI_prints](resources/readme/ftdiprints118.png)
-
-> Prints can see as below in any Console terminal
-
- ![ouput_prints](resources/readme/ouputprints119.png)
-
-### 7.2 NCP Mode:
-
-Prints can see as below in any Console terminal
-
- ![ouput_prints](resources/readme/ouputprints119.png)
-
-## 8. Selecting Bare Metal
-
-The application has been designed to work with FreeRTOS and Bare Metal configurations. By default, the application project files (Simplicity studio) are configured with FreeRTOS enabled. The following steps demonstrate how to configure Simplicity Studio to test the application in a Bare Metal environment.
-
-### 8.1 Bare Metal with Simplicity Studio
-> - Open the project in Simplicity Studio
-> - Right click on the project and choose 'Properties'
-> - Go to 'C/C++ Build' | 'Settings' | 'GNU ARM C Compiler' | 'Symbols' and remove macro 'RSI_WITH_OS=1'
-> - Select 'Apply' and 'OK' to save the settings
-
- ![Figure: project settings in Simplicity Studio](resources/readme/image216b.png) 
-
- ![Figure: project settings in Simplicity Studio](resources/readme/image216c.png)
+2. Navigate to **<Si917 COMBO SDK> → utilities → scripts**. Run **simple_http_server.py** acript on port number 80 using the following command.
+   
+   `python simple_http_server.py 80`
+   
+   **![ouput_prints](resources/readme/httpserver.png)**
 

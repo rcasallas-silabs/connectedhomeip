@@ -388,14 +388,14 @@
              <FileType>1</FileType>
              <FilePath>../../../../../examples/snippets/wlan/https_client/rsi_https_client_app.c</FilePath>
            </File>
-           <File>
-             <FileName>index.txt</FileName>
-             <FileType>1</FileType>
-             <FilePath>../../../../../examples/snippets/wlan/https_client/index.txt</FilePath>
-           </File>
          </Files>
          <Files>
            
+           <File>
+             <FileName>index.txt</FileName>
+             <FileType>5</FileType>
+             <FilePath>../../../../../examples/snippets/wlan/https_client/index.txt</FilePath>
+           </File>
            <File>
              <FileName>rsi_wlan_config.h</FileName>
              <FileType>5</FileType>

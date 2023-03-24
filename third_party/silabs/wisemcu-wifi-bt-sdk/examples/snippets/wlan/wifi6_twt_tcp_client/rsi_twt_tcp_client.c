@@ -80,7 +80,7 @@
 #define PSK "12345678"
 
 //! DHCP mode 1- Enable 0- Disable
-#define DHCP_MODE 0
+#define DHCP_MODE 1
 
 //! If DHCP mode is disabled given IP statically
 #if !(DHCP_MODE)
@@ -262,6 +262,7 @@ int32_t rsi_tcp_client()
   } else {
     LOG_PRINT("\r\nWireless Initialization Success\r\n");
   }
+
   //! Send feature frame
   status = rsi_send_feature_frame();
   if (status != RSI_SUCCESS) {
@@ -312,6 +313,22 @@ int32_t rsi_tcp_client()
     return status;
   } else {
     LOG_PRINT("\r\nWLAN AP Connect Success\r\n");
+  }
+
+  // ! Display MAC address
+  uint8_t response[6];
+  status = rsi_wlan_get(RSI_MAC_ADDRESS, response, 6);
+  if (status != RSI_SUCCESS) {
+    LOG_PRINT("\r\nMAC address query command failed, Error Code: 0x%1X!\r\n", status);
+    return status;
+  } else {
+    LOG_PRINT("\r\nMAC Address - %02X:%02X:%02X:%02X:%02X:%02X\r\n",
+              response[0],
+              response[1],
+              response[2],
+              response[3],
+              response[4],
+              response[5]);
   }
 
   //! Configure IP

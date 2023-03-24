@@ -1,0 +1,43 @@
+project_name: blood_pressure
+package: wiseconnect
+quality: alpha
+label: BLE Blood Pressure
+category: Example|WiSeConnect
+description: >
+  Demonstrates how to configure Blood Pressure Service GATT server with Blood Pressure service with notification characteristic UUID.
+filter:
+  - name: "Wireless Technology"
+    value: ["Bluetooth"]
+  - name: "Device Type"
+    value: Undefined
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+xml_filter: Undefined
+sdk: {id: gecko_sdk, version: 4.1.0}
+sdk_extension:
+  - id: wiseconnect
+    version: 1.0.1
+source:
+  - path: rsi_ble_blood_pressure.c
+include:
+  - path: 
+    file_list:
+      - path: rsi_ble_config.h
+requires:
+  - name: wiseconnect_platform
+  - name: wiseconnect_sapi_ble
+  - name: wiseconnect_sapi_bluetooth
+toolchain_settings: []
+readme:
+  - path: readme.md
+other_file:
+  - path: resources/readme/image32.png
+  - path: resources/readme/bloodpressurencp.png
+  - path: resources/readme/bloodpressuresoc.png
+  - path: resources/readme/image31.png
+  - path: resources/readme/image33.png
+  - path: resources/readme/image34.png
+ui_hints:
+  highlight:
+    - path: readme.md
+      focus: true

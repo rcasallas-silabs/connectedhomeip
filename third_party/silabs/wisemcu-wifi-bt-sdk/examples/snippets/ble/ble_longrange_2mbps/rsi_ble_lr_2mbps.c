@@ -38,7 +38,7 @@
 #include "sl_fw_logging.h"
 #endif
 
-#define RSI_DEVICE_DATA_RATE   LONG_RANGE
+#define RSI_DEVICE_DATA_RATE LONG_RANGE
 
 //! Address type of the device to connect
 #define RSI_BLE_DEV_ADDR_TYPE LE_PUBLIC_ADDRESS
@@ -333,15 +333,15 @@ int32_t rsi_ble_central(void)
 #endif
 
 #if (RSI_DEVICE_DATA_RATE == LONG_RANGE)
-  uint8_t tx_phy_rate =BLE_CODED_TX_PHY;
-  uint8_t rx_phy_rate =BLE_CODED_RX_PHY;
-  uint8_t coded_phy_rate =BLE_500KBPS_CODED_PHY;
+  uint8_t tx_phy_rate    = BLE_CODED_TX_PHY;
+  uint8_t rx_phy_rate    = BLE_CODED_RX_PHY;
+  uint8_t coded_phy_rate = BLE_500KBPS_CODED_PHY;
 #endif
 
 #if (RSI_DEVICE_DATA_RATE == BLE_2MBPS)
-  uint8_t tx_phy_rate =BLE_2MBPS_TX_PHY;
-  uint8_t rx_phy_rate =BLE_2MBPS_RX_PHY;
-  uint8_t coded_phy_rate =BLE_2MBPS_CODED_PHY;
+  uint8_t tx_phy_rate    = BLE_2MBPS_TX_PHY;
+  uint8_t rx_phy_rate    = BLE_2MBPS_RX_PHY;
+  uint8_t coded_phy_rate = BLE_2MBPS_CODED_PHY;
 #endif
 
 #ifdef FW_LOGGING_ENABLE
@@ -506,8 +506,7 @@ int32_t rsi_ble_central(void)
           return status;
         }
 
-        status =
-          rsi_ble_setphy((int8_t *)rsi_app_connected_device.dev_addr, tx_phy_rate, rx_phy_rate, coded_phy_rate);
+        status = rsi_ble_setphy((int8_t *)rsi_app_connected_device.dev_addr, tx_phy_rate, rx_phy_rate, coded_phy_rate);
         if (status != RSI_SUCCESS) {
           return status;
         }
@@ -567,25 +566,18 @@ int32_t rsi_ble_central(void)
       case RSI_APP_EVENT_PHY_UPDATE_COMPLETE: {
         //! phy update complete event
         LOG_PRINT("\r\nPhy rate update complete event\r\n");
-        if((rsi_app_phy_update_complete.TxPhy != BLE_2MBPS) &&(rsi_app_phy_update_complete.RxPhy !=BLE_2MBPS))
-          {
-            if(coded_phy_rate == BLE_500_KBPS)
-              {
-                LOG_PRINT("\r\nPHY data rate is updated to 500kbps\n");
-              }
-            else if(coded_phy_rate == BLE_125_KBPS)
-              {
-                LOG_PRINT("\r\nPHY data rate is updated to 125kbps PHY data rate \n");
-              }
+        if ((rsi_app_phy_update_complete.TxPhy != BLE_2MBPS) && (rsi_app_phy_update_complete.RxPhy != BLE_2MBPS)) {
+          if (coded_phy_rate == BLE_500_KBPS) {
+            LOG_PRINT("\r\nPHY data rate is updated to 500kbps\n");
+          } else if (coded_phy_rate == BLE_125_KBPS) {
+            LOG_PRINT("\r\nPHY data rate is updated to 125kbps PHY data rate \n");
           }
-        else if((rsi_app_phy_update_complete.TxPhy == BLE_1MBPS) &&(rsi_app_phy_update_complete.RxPhy ==BLE_1MBPS))
-          {
-            LOG_PRINT("\r\nPHY data rate is updated to 1Mbps PHY data rate \n");
-          }
-        else
-          {
-            LOG_PRINT("\r\nPHY data rate is updated to 2Mbps PHY data rate \n");
-          }
+        } else if ((rsi_app_phy_update_complete.TxPhy == BLE_1MBPS)
+                   && (rsi_app_phy_update_complete.RxPhy == BLE_1MBPS)) {
+          LOG_PRINT("\r\nPHY data rate is updated to 1Mbps PHY data rate \n");
+        } else {
+          LOG_PRINT("\r\nPHY data rate is updated to 2Mbps PHY data rate \n");
+        }
 
         //! clear the phy updare complete event.
         rsi_ble_app_clear_event(RSI_APP_EVENT_PHY_UPDATE_COMPLETE);

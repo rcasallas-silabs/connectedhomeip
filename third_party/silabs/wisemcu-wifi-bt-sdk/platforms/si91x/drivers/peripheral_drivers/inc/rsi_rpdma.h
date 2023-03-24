@@ -443,7 +443,7 @@ STATIC INLINE void RSI_RPDMA_FIFOConfig(RSI_RPDMA_HANDLE_T pHandle, uint8_t dmaC
 
 // FUNCTION PROTOTYPES					                     
 
-RSI_DRIVER_VERSION RSI_RPDMA_GetVersion(void);
+RSI_DRIVER_VERSION_M4 RSI_RPDMA_GetVersion(void);
 
 RSI_RPDMA_CAPABILITIES_T RSI_RPDMA_GetCapabilities(void);
 

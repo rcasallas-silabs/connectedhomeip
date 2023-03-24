@@ -9,7 +9,7 @@ quality: alpha
 sdk: {id: gecko_sdk, version: 4.1.0}
 sdk_extension:
   - id: wiseconnect
-    version: 1.0.0
+    version: 1.0.1
 source:
   - path: i2c_ds_wakeup_wo_ret.c
   - path: I2c_exp.c
@@ -37,9 +37,8 @@ define:
   - name: RSI_M4_INTERFACE
   - name: ALARM_CONFIG
 other_file:
-  - path: resources\readme\image503a.png
-  - path: resources\readme\image503b.png
-  - path: resources\readme\image503c.png
+  - path: resources/readme/image503a.png
+  - path: resources/readme/image503c.png
 readme:
   - path: readme.md
 ui_hints:

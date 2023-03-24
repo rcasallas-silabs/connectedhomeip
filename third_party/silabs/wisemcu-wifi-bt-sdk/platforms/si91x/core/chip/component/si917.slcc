@@ -28,6 +28,12 @@
     value: SI917
   - name: device_flash_addr
     value: 136388608
+    condition:
+    - brd4325a
+  - name: device_flash_addr
+    value: 134291456
+    condition: 
+    - brd4325b
   - name: device_flash_size
     value: 450560
   - name: device_flash_page_size

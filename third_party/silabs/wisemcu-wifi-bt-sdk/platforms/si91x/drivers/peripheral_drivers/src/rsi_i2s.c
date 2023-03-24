@@ -26,7 +26,9 @@
 #include "rsi_i2s.h"
 #include "SAI.h"
 
-
+/** @addtogroup SOC17
+* @{
+*/
 /*==============================================*/
 /**
  *  @fn          void RSI_I2S_InterruptEnableDisable(I2S_RESOURCES *i2s, boolean_t chnlNum, uint32_t maskFlag, boolean_t mask)
@@ -243,9 +245,7 @@ void i2s_chnl_Init(ARM_SAI_SignalEvent_t cb_event, I2S_RESOURCES *i2s)
     }
   }
 }
-/** @addtogroup SOC17
-* @{
-*/
+
 /*==============================================*/
 /**
  *  @fn          int32_t I2S_Initialize(ARM_SAI_SignalEvent_t cb_event,

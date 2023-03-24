@@ -276,6 +276,7 @@ int32_t application(void)
     LOG_PRINT("\r\nWireless Initialization Failed, Error Code : 0x%lX\r\n", status);
     return status;
   }
+
 #ifdef RSI_M4_INTERFACE
   status = rsi_cmd_m4_ta_secure_handshake(RSI_ENABLE_XTAL, 1, &xtal_enable, 0, NULL);
   if (status != RSI_SUCCESS) {

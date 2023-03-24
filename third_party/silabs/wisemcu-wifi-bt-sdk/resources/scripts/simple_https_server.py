@@ -130,6 +130,7 @@ class MyHandler(BaseHTTPRequestHandler):
                 self.send_response(200)
                 self.send_header('Content-type',mimetype)
                 self.end_headers()
+                #msg = f.read()
                 self.wfile.write(f.read().encode(encoding='utf_8'))
                 print('--------------   GET SUCCESS  --------------\n')                
                 f.close()
@@ -140,7 +141,7 @@ class MyHandler(BaseHTTPRequestHandler):
             
 
 def run_on(port):
-    print("\nLaunching HTTPS server on port %i ..." % port)
+    print("\nLaunching HTTP server on port %i ..." % port)
     server_address = ('', port)
     httpd = HTTPServer(server_address, MyHandler)
     httpd.socket = ssl.wrap_socket(httpd.socket, certfile="server-cert.pem", keyfile="server-key.pem", server_side=True)
@@ -152,7 +153,7 @@ def run_on(port):
 
 if __name__ == "__main__":
     if(len(sys.argv) < 2):
-        print("Usage: simple_https_server.py <port #>")
+        print("Usage:python simple_https_server.py <port #>")
         sys.exit()
     ports = [int(arg) for arg in sys.argv[1:]]
     for port_number in ports:

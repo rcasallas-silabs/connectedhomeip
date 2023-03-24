@@ -1,228 +1,349 @@
 # Access Point
 
-## 1. Purpose / Scope
+## 1 Purpose/Scope
 
-This application demonstrates how to configure the SiWx91x EVK as a soft Access point and allows stations to connect to it and enables TCP data transmission from the connected Wi-Fi station to Silicon Labs Access Point.
+Software-enabled Access Point (SoftAP) allows two or more stations to communicate directly with each other securely without the need for physical access point routing their traffic.
 
-## 2. Prerequisites / Setup Requirements
+This example application demonstrates how to configure the SiWx91x as a SoftAP, connect a station to the SoftAP, and transfer TCP data from the connected station (TCP client) to the SiWx91x SoftAP (TCP server).
 
-Before running the application, set up the following:
+## 2 Prerequisites/Set up Requirements
+
+For running the application, you will need the following:
 
 ### 2.1 Hardware Requirements
 
-- A Windows PC.
-- Windows PC (Remote PC) with iperf application
-- SiWx91x Wi-Fi Evaluation Kit
-  - **SoC Mode**: 
-      - Silicon Labs [BRD4325A](https://www.silabs.com/)
-  - **NCP Mode**:
-      - Silicon Labs [(BRD4180A, BRD4280B)](https://www.silabs.com/); **AND**
-      - Host MCU Eval Kit. This example has been tested with:
-        - Silicon Labs [WSTK + EFR32MG21](https://www.silabs.com/development-tools/wireless/efr32xg21-bluetooth-starter-kit)
+- **SoC Mode**: [Silicon Labs EFR32xG21 Starter Kit with Wireless Gecko](https://www.silabs.com/) (SLSWSTK6006A Base board: BRD4001A, Radio board: BRD4325A)
 
-#### SoC Mode : 
+- **NCP Mode**: 
+   - [SiWx91x Wi-Fi Expansion Board](https://www.silabs.com/)
+   - A Host MCU. This example application has been tested with the following host MCUs.
 
-![Figure: Setup Diagram SoC Mode for Access point Example](resources/readme/accesspointsoc.png)
+     - [Silicon Labs EFR32xG21 Starter Kit with Wireless Gecko](https://www.silabs.com/development-tools/wireless/efr32xg21-bluetooth-starter-kit) (SLSWSTK6006A Base board: BRD4001A, Radio board: BRD4180a or BRD4180b)
+
+     - [Silicon Labs EFM32GG11 Starter Kit with Wireless Gecko](https://www.silabs.com/development-tools/mcu/32-bit/efm32gg11-starter-kit) (SLSTK3701A Base board: BRD2204A)
+
+- A Windows PC
+
+- Iperf application
+
+### 2.2 Software Requirements
+
+- Simplicity Studio IDE 
+
+   - Download the [Simplicity Studio IDE](https://www.silabs.com/developers/simplicity-studio).
+
+   - Follow the [Simplicity Studio user guide](https://docs.silabs.com/simplicity-studio-5-users-guide/1.1.0/ss-5-users-guide-getting-started/install-ss-5-and-software#install-ssv5) to install Simplicity Studio IDE.
+
+- [Silicon Labs Gecko SDK](https://github.com/SiliconLabs/gecko_sdk)
+
+- [Si91x COMBO SDK](https://github.com/SiliconLabs/)
+
+**NOTE:**
+
+- This example application supports Bare metal and FreeRTOS configurations.
+
+## 3 Set up
+
+#### 3.1 SoC Mode 
+
+Set up diagram for SoC mode:
+![Figure: Setup Diagram SoC Mode for Access point Example](resources/readme/ap_soc.png)
+
+Follow the [Getting Started with SiWx91x SoC](https://docs.silabs.com/) guide to set up the hardware connections and Simplicity Studio IDE.
   
-#### NCP Mode :  
+#### 3.2 NCP Mode  
 
-![Figure: Setup Diagram NCP Mode for Access point Example](resources/readme/accesspointncp.png)
+Set up diagram for NCP mode:
+![Figure: Setup Diagram NCP Mode for Access point Example](resources/readme/ap_ncp.png)
 
-## 3. Application Build Environment
+Follow the [Getting Started with EFx32](https://docs.silabs.com/rs9116-wiseconnect/latest/wifibt-wc-getting-started-with-efx32/) guide to setup the hardware connections and Simplicity Studio IDE.
 
-### 3.1 Project Setup
-
-- **SoC Mode**
-  - **Silicon Labs SiWx91x SoC**. Follow the [Getting Started with SiWx91x SoC](https://docs.silabs.com/) to setup the example to work with SiWx91x SoC and Simplicity Studio.
-- **NCP Mode**
-  - **Silicon Labs EFx32 Host**. Follow the [Getting Started with EFx32](https://docs.silabs.com/rs9116-wiseconnect/latest/wifibt-wc-getting-started-with-efx32/) to setup the example to work with EFx32 and Simplicity Studio.
-
-### 3.2 NCP Mode - Host Interface 
-
-* By default, the application is configured to use the SPI bus for interfacing between Host platforms(EFR32MG21) and the SiWx91x EVK.
-
-### 3.3 Bare Metal/RTOS Support
-To select a bare metal configuration, see [Selecting bare metal](#selecting-bare-metal).
-
-## 4. Application Configuration Parameters
-
-The application can be configured to suit your requirements and development environment. Read through the following sections and make any changes needed.
-
-**4.1** Configure the following parameters in **rsi_ap_start.c** to enable your Silicon Labs Wi-Fi device to connect to your Wi-Fi network.
-  
-```                                     
-#define SSID               "SILABS_AP"      // Wi-Fi Network Name
-#define PSK                "1234567890"     // Wi-Fi Password
-#define SECURITY_TYPE      RSI_WPA2         // Wi-Fi Security Type: RSI_OPEN / RSI_WPA / RSI_WPA2
-#define CHANNEL_NO         0                // Wi-Fi channel if the softAP is used (0 = auto select)
-```
-
-ENCRYPTION_TYPE refers to the type of Encryption method. Access point supports OPEN, TKIP, CCMP encryption methods.
-
-Valid configurations are:
-
-   - RSI_CCMP - For CCMP encryption
-
-   - RSI_TKIP - For TKIP encryption
-
-   - RSI_NONE - For open encryption
-
-```
-#define ENCRYPTION_TYPE                      RSI_CCMP
-```
-
-BEACON_INTERVAL refers to the time delay between two consecutive beacons in milliseconds. Allowed values are integers from 100 to 1000 which are multiples of 100.
-
-```
-#define BEACON_INTERVAL                      100
-```
-
-DTIM_INTERVAL refers DTIM interval of the Access Point. Allowed values are from 1 to 255.
-
-```
-#define DTIM_INTERVAL                        4
-```
-
-DEVICE_PORT port refers TCP server port number
-
-```
-#define DEVICE_PORT                          5001
-```
-
-NUMEBR_OF_PACKETS refers how many packets to receive from remote TCP client.
-
-```
-#define NUMBER_OF_PACKETS                    1000
-```
-
-GLOBAL_BUFF_LEN refers the memory length for driver
-
-```
-#define GLOBAL_BUFF_LEN                      15000
-```
-
-RECV_BUFFER_SIZE refers receive data length
-
-```
-#define RECV_BUFFER_SIZE                      1000
-```
-
-IP address to be configured to the device 
-
-```
-#define DEVICE_IP                            "192.168.10.1"
-```
-
-IP address of the gateway 
-
-```
-#define GATEWAY                              "192.168.10.1"
-```
-
-IP address of the network mask 
-
-```
-#define NETMASK                              "255.255.255.0"
-```
+**NOTE**: 
+- The Host MCU platform (EFR32MG21) and the SiWx91x interact with each other through the SPI interface. 
+- The Host MCU platform (EFM32GG11) and the SiWx91x interact with each other through the SDIO interface.
 
 
-## 5. Testing the Application
+## 4 Application Build Environment
+
+1. Ensure the SiWx91x loaded with the latest firmware following the [Getting started with a PC](https://docs.silabs.com/rs9116/latest/wiseconnect-getting-started). The firmware file is located at **<Si917 COMBO SDK> → connectivity_firmware**.
+
+2. Ensure the EFx32 and SiWx91x set up is connected to your PC.
+
+### 4.1 Board detection
+
+### 4.1.1 SoC mode
+
+1. In the Simplicity Studio IDE, 
+    - The SiWx91x SoC board will be detected under **Debug Adapters** pane as shown below.
+
+      **![Soc Board detection](resources/readme/soc_board_detection.png)**
+
+### 4.1.2 NCP mode
+
+1. In the Simplicity Studio IDE, 
+    - The EFR32 board will be detected under **Debug Adapters** pane as shown below.
+
+      **![EFR32 Board detection](resources/readme/efr32.png)**
+
+    - The EFM32 board will be detected under **Debug Adapters** pane as shown below.
+
+      **![EFM32 Board detection](resources/readme/efm32.png)**
+
+### 4.2 Creation of project
+
+Ensure the latest Gecko SDK along with the extension Si91x COMBO SDK is added to Simplicity Studio.
+
+1. Click on the board detected and go to **EXAMPLE PROJECTS & DEMOS** section.
+
+   **![Examples and Demos](resources/readme/examples_demos.png)**
+
+2. Filter for Wi-Fi examples from the Gecko SDK added. For this, check the *Wi-Fi* checkbox under **Wireless Technology** and *Gecko SDK Suite* checkbox under **Provider**. 
+
+3. Under **Device Type**, for SoC based example, check the *SoC* checkbox and for NCP based example, check the *NCP* checkbox.
+
+4. Now choose Wi-Fi- NCP Access Point example for NCP mode or choose Wi-Fi- SoC Access Point example for SoC mode and click on **Create**.
+
+   For NCP mode:
+
+   **![Access Point project](resources/readme/ap_example.png)**
+
+   For SoC mode:
+      
+   **![Access Point project](resources/readme/ap_example_soc.png)**
+
+5. Give the desired name to your project and cick on **Finish**.
+
+   **![Create Access Point project](resources/readme/create_project.png)**
+
+### 4.3 Application configurations
+
+The application can be configured to suit your requirements and development environment. 
+
+1. In the Project explorer pane, expand the **access_point** folder and open the **rsi_ap_start.c** file. Configure the following parameters based on your requirements.
+
+   **![Application configuration](resources/readme/application_configuration.png)**
+
+   - SSID refers to the name with which the SiWx91x SoftAP's Wi-Fi network shall be advertised.
+
+     ```c
+     #define SSID                                  "SILABS_AP"      
+     ```
+   - SECURITY_TYPE refers to the mode of the SoftAP. Supported security types are OPEN, WPA, and WPA2.
+
+     ```c 
+     #define SECURITY_TYPE                           RSI_WPA2 
+     ```
+   - PSK refers to the secret key if the Access point is configured in WPA-PSK/WPA2-PSK security modes.
+
+     ```c 
+     #define PSK                                    "12345678" 
+     ``` 
+   - ENCRYPTION_TYPE refers to the encryption method of the SoftAP. Supported encryption methods are OPEN, TKIP, CCMP encryption methods.
+
+     ```c 
+     #define ENCRYPTION_TYPE                         RSI_CCMP 
+     ```
+   - CHANNEL_NO refers to the channel in which the SoftAP is to be configured.
+
+     ```c 
+     #define CHANNEL_NO                                11
+     ```  
+   - BEACON_INTERVAL refers to the time interval between two beacons transmission of the SoftAP. Allowed values are integers from 100 to 1000 in multiples of 100.
+
+     ```c 
+     #define BEACON_INTERVAL                          100 
+     ``` 
+   - DTIM_INTERVAL refers to how often the SoftAP informs its connected stations about the buffered data on it. According to below value, the DTIM is sent once in every 4 beacons. Allowed values are from 1 to 255.
+
+     ```c 
+     #define DTIM_INTERVAL                             4 
+     ``` 
+   - DEVICE_IP refers to the IP address of the SoftAP.
+
+     ```c 
+     #define DEVICE_IP                           "192.168.10.1" 
+     ```
+   - GATEWAY refers to gateway address of the SoftAP.
+
+     ```c 
+     #define GATEWAY                             "192.168.10.1"
+     ```
+   - NETMASK refers to subnet mask of the SoftAP.
+
+     ```c 
+     #define NETMASK                             "255.255.255.0"
+     ```
+   - DEVICE_PORT refers to the port number on which TCP Server is opened on SiWx91x.
+
+     ```c 
+     #define DEVICE_PORT                           5001 
+     ``` 
+   - NUMBER_OF_PACKETS refers to the number of packets to be received on TCP Server socket opened on SiWx917 from the TCP client.
+
+     ```c 
+     #define NUMBER_OF_PACKETS                     1000 
+     ``` 
+   - RECV_BUFFER_SIZE is the buffer to store the incoming data on TCP Server socket.
+
+     ```c 
+     #define RECV_BUFFER_SIZE                      1000 
+     ```
+2. Open **rsi\_wlan\_config.h** file and configure the following features as per your requirements.
+
+   **![Configuration file](resources/readme/configuration_file.png)**
+
+   - Opermode parameters
+
+     ```c  
+     #define RSI_FEATURE_BIT_MAP           (FEAT_SECURITY_PSK )
+
+     #define RSI_TCP_IP_BYPASS              RSI_DISABLE
+
+     #define RSI_TCP_IP_FEATURE_BIT_MAP    (TCP_IP_FEAT_DHCPV4_SERVER)
+
+     #define RSI_CUSTOM_FEATURE_BIT_MAP            0
+     ```
+   - Band setting parameters. The Access Point mode supports only 2.4 GHz band.
+
+     ```c 
+     #define RSI_BAND                        RSI_BAND_2P4GHZ
+     ``` 
+   - AP Region configurations. In this example application, the region configurations are disabled by default.
+
+     ```c 
+     #define RSI_SET_REGION_AP_SUPPORT RSI_DISABLE
+
+     #define RSI_SET_REGION_AP_FROM_USER RSI_DISABLE
+
+     #define RSI_COUNTRY_CODE "US"
+     ```
+   - AP configuration command parameters. The SiWx91x SoftAP supports a maximum of 16 stations.
+
+     ```c
+     #define RSI_AP_KEEP_ALIVE_ENABLE RSI_ENABLE
+
+     #define RSI_AP_KEEP_ALIVE_TYPE RSI_NULL_BASED_KEEP_ALIVE
+
+     #define RSI_AP_KEEP_ALIVE_PERIOD 100
+
+     #define RSI_MAX_STATIONS_SUPPORT 4
+     ```
+ 
+### 4.4 Execution of the Application
 
 Follow the below steps for the successful execution of the application.
 
-### 5.1 Loading the SiWx91x Firmware
+#### 4.4.1 Build the Project - SoC Mode
 
-Refer [Getting started with a PC](https://docs.silabs.com/rs9116/latest/wiseconnect-getting-started) to load the firmware into SiWx91x EVK. The firmware file is located in `<SDK>/firmware/`
+1. Once the project is created, right click on project and go to **Properties → C/C++ Build → Settings → Build Steps**.
 
-### 5.2 Creating the Project and builing the Application
+2. Add **post_build_script_SimplicityStudio.bat** file path present at **SI917_COMBO_SDK.X.X.X.XX → utilities → isp_scripts_common_flash** in build steps settings as shown in below image.
+
+   **![Post build script](resources/readme/post_build_script.png)**
+
+3. Go to **Properties → C/C++ Build → Settings → Tool Settings → GNU ARM C Compiler → Preprocessor → Defined symbols (-D)** and check for M4 projects macro (RSI_M4_INTERFACE=1) and 9117 macro (CHIP_9117=1). If not present, add the macros by clicking on **ADD** symbol and click **Apply and Close**.
   
-Refer [Getting started with EFX32](https://docs.silabs.com/rs9116-wiseconnect/latest/wifibt-wc-getting-started-with-efx32/), for settin-up EFR & EFM host platforms
+   **![Enable macros](resources/readme/macros.png)**
 
-#### 5.2.1 Project Creation - SoC Mode : 
+4. Click on the build icon (hammer) or right click on project name and choose **Build Project** to build the project.
 
-- Connect your board. The Si917 compatible SoC board is **BRD4325A**.
-- Studio should detect your board. Your board will be shown here.
-![soc_board_detection](resources/readme/socboarddetection111.png)
+   **![Build Project](resources/readme/build_project_soc.png)**
 
-#### 5.2.2 Project Creation - NCP Mode : 
+- Make sure the build returns 0 Errors and 0 Warnings.
+  
 
-- Connect your board. The supported NCP boards are: **BRD4180A,BRD4280B**
-- Studio should detect your board. Your board will be shown here.
-![ncp_board_detection](resources/readme/ncpboarddetection112.png)
+#### 4.4.2 Build the Project - NCP Mode
 
-#### 5.2.3 Selecting an example application and generate project
+1. Check for CHIP_9117 macro in preprocessor settings as mentioned below.
+   - Right click on project name.
+   - Go to **Properties → C/C++ Build → Settings → Tool Settings → GNU ARM C Compiler → Preprocessor → Defined Symbols (-D)**.
+   - If CHIP_9117 macro is not present, add it by clicking on **ADD** symbol.
+   - Click on **Apply and Close**.
 
-- Go to the 'EXAMPLE PROJECT & DEMOS' tab and select your desired example application
-![projct_selection](resources/readme/projctselection113.png)
-- Click 'Create'. The "New Project Wizard" window appears. Click 'Finish'
-![creation_final](resources/readme/creationfinal114.png)
+     **![Build Project for NCP mode](resources/readme/chip_9117_macro.png)**
 
-#### 5.2.4 Build Project - SoC Mode
+2. Click on the build icon (hammer) or right click on project name and choose **Build Project** to build the project.
 
-- Once the project is created, right click on project and go to properties → C/C++ Build → Settings → Build Steps
-- Add post_build_script_SimplicityStudio.bat file path (SI917_COMBO_SDK.X.X.X.XX\utilities\isp_scripts_common_flash) in build steps settings as shown in below image.
-![postbuild_script](resources/readme/image359.png)
-- Check for M4 projects macros in preprocessor settings(RSI_M4_INTERFACE=1)
-- Check for 9117 macro in preprocessor settings(CHIP_9117=1).
-- Click on the build icon (hammer) to build the project
-![building_pjt](resources/readme/buildingpjt115.png)
-- Successful build output will show as below.
-![build_success_soc](resources/readme/buildsuccesssoc116.png)
+     **![Build Project for NCP mode](resources/readme/build_project_ncp.png)**
 
-#### 5.2.5 Build Project - NCP Mode :
+3. Make sure the build returns 0 Errors and 0 Warnings.
 
-- Check for 9117 macro in preprocessor settings(CHIP_9117=1).
-- Click on the build icon (hammer) to build the project
-![building_pjt](resources/readme/buildingpjt115.png)
-- Successful build output will show as below.
-![build_success_soc](resources/readme/buildsuccesssoc116.png)
+### 4.4.3 Set up for application prints
 
-## 6. Program the device
+Before setting up Tera Term, do the following for SoC mode.
 
-Once the build was successfull, right click on project and click on Debug As->Silicon Labs ARM Program as shown in below image.
-### SoC Mode :
-![debug_mode_soc](resources/readme/debugmodesoc117.png)
-### NCP Mode : 
-![debug_mode_NCP](resources/readme/debugmodencp120.png)
+**SoC mode**: 
+You can use either of the below USB to UART converters for application prints.
+1. Set up using USB to UART converter board.
 
-### 6.1 Running the SiWx91x Application
+  - Connect Tx (Pin-6) to P27 on WSTK
+  - Connect GND (Pin 8 or 10) to GND on WSTK
 
-- After program gets executed, SiWx91x EVK will be created as an Access Point with configured **SSID** ( Ex: "**SILABS_AP"**) and opens TCP server socket on **DEVICE_PORT** and waits for TCP connection request from TCP client. Now scan and connect to Device Access Point (Ex: "SILABS_AP" is the AP name) from Laptop.
+    **![FTDI_prints](resources/readme/usb_to_uart_1.png)**
 
-- After successful connection, open iperf application from remote PC command Prompt.
+2. Set up using USB to UART converter cable.
 
-- Connect to TCP Server running on SiWx91x EVK using below command
+  - Connect RX (Pin 5) of TTL convertor to P27 on WSTK
+  - Connect GND (Pin1) of TTL convertor to GND on WSTK
 
-    `iperf.exe -c <DEVICE_IP> -p <DEVICE_PORT> -i 1 -t 100`
+    **![FTDI_prints](resources/readme/usb_to_uart_2.png)**
 
-- The SiWx91x EVK accepts connection request and receives data on the TCP server port and exit after receiving configured NUMBER_OF_PACKETS
+**Tera Term set up - for NCP and SoC modes**
 
-![Receiving data on the TCP server port](resources/readme/image107.png)
+1. Open the Tera Term tool. 
+   - For SoC mode, choose the serial port to which USB to UART converter is connected and click on **OK**. 
 
-## 7. Observing the output prints on serial terminal
+     **![UART - SoC](resources/readme/port_selection_soc.png)**
 
-### 7.1 SoC Mode:
-> Connect USB to UART connector Tx and GND pins to WSTK radio board.
+   - For NCP mode, choose the J-Link port and click on **OK**.
 
-   - Connect Tx(Pin-6) to P27 on WSTK
-   - Connect GND(Pin 8 or 10) to GND on WSTK
-![FTDI_prints](resources/readme/ftdiprints118.png)
-> Prints can see as below in any Console terminal
-![ouput_prints](resources/readme/ouputprints119.png)
+     **![J-link - NCP](resources/readme/port_selection.png)**
 
-### 7.2 NCP Mode:
-Prints can see as below in any Console terminal
-![ouput_prints](resources/readme/ouputprints119.png)
+2. Navigate to the Setup → Serial port and update the baud rate to **115200** and click on **OK**.
 
-## 8. Selecting Bare Metal
-The application has been designed to work with FreeRTOS and Bare Metal configurations. By default, the application project files (Simplicity studio) are configured with FreeRTOS enabled. The following steps demonstrate how to configure Simplicity Studio to test the application in a Bare Metal environment.
+    **![Serial port](resources/readme/serial_port_setup.png)**
 
-### 8.1 Bare Metal with Simplicity Studio
-> - Open the project in Simplicity Studio
-> - Right click on the project and choose 'Properties'
-> - Go to 'C/C++ Build' | 'Settings' | 'GNU ARM C Compiler' | 'Symbols' and remove macro 'RSI_WITH_OS=1'
-> - Select 'Apply' and 'OK' to save the settings
+    **![Baud rate](resources/readme/baud_rate.png)**
 
-![Figure: project settings in Simplicity Studio](resources/readme/image216b.png) 
+### 4.4.4 Execute the application
 
-![Figure: project settings in Simplicity Studio](resources/readme/image216c.png)
+1. Once the build was successful, right click on project and select **Debug As → Silicon Labs ARM Program** to program the device as shown in below image.
+
+   **![debug_mode_NCP](resources/readme/program_device.png)**
+
+2. As soon as the debug process is completed, the application control branches to the main().
+
+3. Click on the **Resume** icon in the Simplicity Studio IDE toolbar to run the application.
+
+   **![Run](resources/readme/run.png)**
+
+4. After the application gets executed, SiWx91x starts advertizing its SoftAP Wi-Fi network with the specified SSID (in this example, **SILABS_AP**) and listens for TCP connections on specified DEVICE_PORT (in this example, **5001**) and DEVICE_IP (in this example, **192.168.10.1**).
+   
+5. Now scan for the SiWx91x SoftAP using a PC (you can make use of same PC on which Simplicity Studio IDE is running) and connect to it. After successful connection, run Iperf application on the PC using command prompt.
+
+6. Connect to TCP Server running on SiWx91x using below command:
+
+    `iperf.exe -c <DEVICE_IP> -p <DEVICE_PORT> -t 30 -i 1 `
+
+7. If SOCKET_ASYNC_FEATURE is disabled, the SiWx91x accepts connection request and receives data on the TCP server port and exits after receiving configured NUMBER_OF_PACKETS (in this example, **1000**). Else, the application keeps polling for data asynchronously from the connected client.
+  
+### 4.4.5 **Application Prints - SoC mode**:
+
+   **![Application prints](resources/readme/application_prints_soc.png)**
+
+**Application Prints - NCP mode**:
+
+   **![Application prints](resources/readme/application_prints_ncp.png)**
+
+## 5 Selecting Bare Metal configuration
+
+1. By default, the application runs over FreeRTOS. To run the application with Bare metal configurations, follow the below steps.
+   - For Simplicity Studio IDE,
+      - Right click on project name
+      - Go to **Properties → C/C++ Build → Settings → Tool Settings → GNU ARM C Compiler → Preprocessor → Defined Symbols (-D)**.
+      - Select RSI_WITH_OS symbol and click on **Delete** symbol.
+      - Click on **Apply and Close**.
+      
+        **![Bare metal configuration](resources/readme/bare_metal.png)**
+
+

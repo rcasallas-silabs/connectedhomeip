@@ -16,7 +16,7 @@ xml_filter: Undefined
 sdk: {id: gecko_sdk, version: 4.1.0}
 sdk_extension:
   - id: wiseconnect
-    version: 1.0.0
+    version: 1.0.1
 source:
   - path: rsi_periodic_tx_deepsleep.c
 include:
@@ -32,8 +32,8 @@ requires:
   - name: wiseconnect_sapi_sockets
   - name: wiseconnect_resources_certificates
 define:
-   - name: ALARM_CONFIG
-   - name: TA_DEEP_SLEEP_COMMON_FLASH
+  - name: ALARM_CONFIG
+  - name: TA_DEEP_SLEEP_COMMON_FLASH
 toolchain_settings: []
 readme:
   - path: readme.md

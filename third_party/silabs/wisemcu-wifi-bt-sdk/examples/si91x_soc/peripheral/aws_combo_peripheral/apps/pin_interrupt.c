@@ -37,12 +37,12 @@
 /* Private define -------------------------------------------------------------------------------------------------*/
 
 /* Private macro --------------------------------------------------------------------------------------------------*/
-#define PININT0_NVIC_NAME     EGPIO_PIN_0_IRQn
-#define PININT0_IRQ_HANDLER   IRQ052_Handler   /* GPIO interrupt IRQ function name            */
-#define PIN_INT0              0                /* Pin  interrupt number(0 to 7)               */
-#define M4_GPIO_PORT          0                /* GPIO port number                            */
-#define M4_GPIO_PIN0          11                /* GPIO pin number                             */
-#define PIN0_PAD              6                /* GPIO pin number                             */
+#define PININT0_NVIC_NAME   EGPIO_PIN_0_IRQn
+#define PININT0_IRQ_HANDLER IRQ052_Handler /* GPIO interrupt IRQ function name            */
+#define PIN_INT0            0              /* Pin  interrupt number(0 to 7)               */
+#define M4_GPIO_PORT        0              /* GPIO port number                            */
+#define M4_GPIO_PIN0        11             /* GPIO pin number                             */
+#define PIN0_PAD            6              /* GPIO pin number                             */
 
 /* Private variables ----------------------------------------------------------------------------------------------*/
 extern volatile uint32_t peripheral;
@@ -64,14 +64,14 @@ void PININT0_IRQ_HANDLER(void)
   gintStatus = RSI_EGPIO_GetIntStat(EGPIO, PIN_INT0);
 
   if ((gintStatus & EGPIO_PIN_INT_CLR_RISING) || (gintStatus & EGPIO_PIN_INT_CLR_FALLING)) {
-      /*clear interrupt*/
-      RSI_EGPIO_IntClr(EGPIO, PIN_INT0, INTERRUPT_STATUS_CLR);
+    /*clear interrupt*/
+    RSI_EGPIO_IntClr(EGPIO, PIN_INT0, INTERRUPT_STATUS_CLR);
   } else {
-      RSI_EGPIO_IntMask(EGPIO, PIN_INT0);
+    RSI_EGPIO_IntMask(EGPIO, PIN_INT0);
   }
-  #ifndef RSI_WITH_OS
+#ifndef RSI_WITH_OS
   peripheral = PIN_INTERRUPT;
-  #endif
+#endif
   return;
 }
 
@@ -86,15 +86,12 @@ int Pin_Int0(void)
   /*Enable clock for EGPIO module*/
   RSI_CLK_PeripheralClkEnable(M4CLK, EGPIO_CLK, ENABLE_STATIC_CLK);
 
-  if (M4_GPIO_PIN0 > 24 && M4_GPIO_PIN0 < 31)
-    {
-      RSI_EGPIO_HostPadsGpioModeEnable(M4_GPIO_PIN0);
-    }
-  else
-    {
-      /*PAD selection*/
-      RSI_EGPIO_PadSelectionEnable(PIN0_PAD);
-    }
+  if (M4_GPIO_PIN0 > 24 && M4_GPIO_PIN0 < 31) {
+    RSI_EGPIO_HostPadsGpioModeEnable(M4_GPIO_PIN0);
+  } else {
+    /*PAD selection*/
+    RSI_EGPIO_PadSelectionEnable(PIN0_PAD);
+  }
 
   /*REN enable */
   RSI_EGPIO_PadReceiverEnable(M4_GPIO_PIN0);

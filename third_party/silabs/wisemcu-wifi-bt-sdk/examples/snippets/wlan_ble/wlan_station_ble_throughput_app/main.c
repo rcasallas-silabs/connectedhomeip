@@ -121,6 +121,15 @@ int32_t rsi_wlan_ble_app_init(void)
   rsi_task_handle_t wlan_task_handle = NULL;
   rsi_task_handle_t ble_task_handle  = NULL;
 
+  //! SiLabs module intialization
+  status = rsi_device_init(LOAD_NWP_FW);
+  if (status != RSI_SUCCESS) {
+    LOG_PRINT("\r\nDevice Initialization Failed, Error Code : 0x%lX\r\n", status);
+    return status;
+  } else {
+    LOG_PRINT("\r\nDevice Initialization Success\r\n");
+  }
+
   //! WiSeConnect initialization
   status = rsi_wireless_init(RSI_WLAN_CLIENT_MODE, RSI_OPERMODE_WLAN_BLE);
 
@@ -215,15 +224,6 @@ int main(void)
   status = rsi_driver_init(global_buf, GLOBAL_BUFF_LEN);
   if ((status < 0) || (status > GLOBAL_BUFF_LEN)) {
     return status;
-  }
-
-  //! SiLabs module intialization
-  status = rsi_device_init(LOAD_NWP_FW);
-  if (status != RSI_SUCCESS) {
-    LOG_PRINT("\r\nDevice Initialization Failed, Error Code : 0x%lX\r\n", status);
-    return status;
-  } else {
-    LOG_PRINT("\r\nDevice Initialization Success\r\n");
   }
 
   //Start BT Stack

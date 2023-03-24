@@ -26,11 +26,20 @@ To use this application, the following hardware, software and project setup is r
 
 #### SoC Mode : 
 
-![Figure: Setup Diagram for SoC mode Power Save Standby Example](resources/readme/image184soc.png)
+![Figure: Setup Diagram for SoC mode Power Save Standby Example](resources/readme/setup_soc.png)
   
 #### NCP Mode :  
 
-![Figure: Setup Diagram for NCP mode Power Save Standby Example](resources/readme/image184ncp.png)
+![Figure: Setup Diagram for NCP mode Power Save Standby Example](resources/readme/setup_ncp.png)
+
+
+#### Current consumption measurement pins for using power-meter (NCP mode):
+
+![Figure: Setup Diagram for NCP mode Power Save Standby Example](resources/readme/power_save_current_measurement_pins.png)
+
+Negative probe of power meter is used for pin-1 and positive probe is used for pin-2
+
+For Soc Mode, Simplicity Studio Energy Profiler can be used for the current consumption measurement - [Simplicity Studio Energy Profiler](#using-simplicity-studio-energy-profiler-for-current-measurement). 
 
 ### Software Requirements
   - [Iperf Application](https://iperf.fr/iperf-download.php)
@@ -49,7 +58,7 @@ Read through the following sections and make any changes needed.
 
 * This application is configured to use the SPI bus for interfacing between Host platforms(EFR32MG21) and the SiWx91x EVK.
 * While using the expansion board, the `EXP_BOARD=1` preprocessor symbol should be added to the list of defined symbols from the preprocessor menu of project settings.
-![Figure: Adding pre-processor symbol required for Expansion board](resources/readme/Exp-board-preprocessor.png)
+![Figure: Adding pre-processor symbol required for Expansion board](resources/readme/exp-board-preprocessor.png)
 
 ### Bare Metal/RTOS Support
 To select a bare metal configuration, see [Selecting bare metal](#selecting-bare-metal).
@@ -71,7 +80,7 @@ Configure the following parameters in **rsi_wlan_connected_sleep_app.c** to enab
   #define SERVER_PORT        <remote port>
   #define SERVER_IP_ADDRESS  0x640AA8C0      // 192.168.10.100 => | 0x64 = 100 | 0x0A = 10 | 0xA8 = 168 | 0xC0 = 192 |
 ```
-> **Note!** The feature to connect to a remote UDP server is disabled by default. To enable this feature, see [Testing Application - UDP Data Transfer](#testing-application---udp-data-transfer)
+> **Note!** The feature to connect to a remote UDP server is disabled by default. To enable this feature, see [Testing Application - UDP Data Transfer](#enabling-data-transfer)
 ### Memory & Throughput
   - `NUMBER_OF_PACKETS` controls the number of packets sent to the remote UDP server.
   - `GLOBAL_BUFF_LEN` sets the application memory size (in bytes) used by the driver.
@@ -177,7 +186,7 @@ Follow the below steps for the successful execution of the application.
 
 ### Loading the SiWx91x Firmware
 
-Refer [Getting started with a PC](https://docs.silabs.com/rs9116/latest/wiseconnect-getting-started) to load the firmware into SiWx91x EVK. The firmware file is located in `<SDK>/connectivity_firmware/`
+Refer [Getting started with a PC](https:/s/docs.silabs.com/rs9116/latest/wiseconnect-getting-started) to load the firmware into SiWx91x EVK. The firmware file is located in `<SDK>/connectivity_firmware/`
 
 
 ## Creating the Project and building the Application
@@ -187,46 +196,83 @@ Refer [Getting started with EFX32](https://docs.silabs.com/rs9116-wiseconnect/la
 ### Project creation - SoC Mode : 
 - Connect your board. The Si917 compatible SoC board is **BRD4325A**.
 - Studio should detect your board. Your board will be shown here.
-![soc_board_detection](resources/readme/socboarddetection111.png)
+
+  **![Soc Board detection](resources/readme/soc_board_detection.png)**
 
 ### Project creation - NCP Mode : 
 - Connect your board. The supported NCP boards are: **BRD4180A,BRD4280B**
-- Studio should detect your board. Your board will be shown here.
-![ncp_board_detection](resources/readme/ncpboarddetection112.png)
+- The EFR32 board will be detected under **Debug Adapters** pane as shown below.
+
+  **![EFR32 Board detection](resources/readme/efr32.png)**
+
+- The EFM32 board will be detected under **Debug Adapters** pane as shown below.
+
+  **![EFM32 Board detection](resources/readme/efm32.png)**
 
 ### Selecting an example application and generate project
-- Go to the 'EXAMPLE PROJECT & DEMOS' tab and select your desired example application
-![projct_selection](resources/readme/projctselection113.png)
+SoC
+- Go to the 'EXAMPLE PROJECT & DEMOS' tab and select Wi-Fi - SoC Powersave Standby Associated application
+
+  ![projct_selection](resources/readme/projctselection113.png)
 - Click 'Create'. The "New Project Wizard" window appears. Click 'Finish'
-![creation_final](resources/readme/creationfinal114.png)
+
+  ![creation_final](resources/readme/creationfinal114.png)
+
+NCP
+- Go to the 'EXAMPLE PROJECT & DEMOS' tab and select Wi-Fi - NCP Powersave Standby Associated application
+
+  ![projct_selection](resources/readme/projctselectionncp113.png)
+- Click 'Create'. The "New Project Wizard" window appears. Click 'Finish'
+
+  ![creation_final](resources/readme/creationfinalncp114.png)
 
 #### Build Project - SoC Mode :
 
 - Once the project is created, right click on project and go to properties → C/C++ Build → Settings → Build Steps
 - Add post_build_script_SimplicityStudio.bat file path (SI917_COMBO_SDK.X.X.X.XX\utilities\isp_scripts_common_flash) in build steps settings as shown in below image.
-![postbuild_script](resources/readme/image359.png)
-- Check for M4 projects macros in preprocessor settings(RSI_M4_INTERFACE=1)
-- Check for 9117 macro in preprocessor settings(CHIP_9117=1).
-- Click on the build icon (hammer) to build the project
-![building_pjt](resources/readme/buildingpjt115.png)
+
+  ![postbuild_script](resources/readme/image359.png)
+- Go to properties → C/C++ Build → Settings → Tool Settings → GNU ARM C Compiler → Preprocessor → Defined symbols (-D) and check for M4 projects macro (RSI_M4_INTERFACE=1) and 9117 macro (CHIP_9117=1). If not present, add the macros and click **Apply and Close**.
+  
+  ![Build Project for SoC mode](resources/readme/soc_macros.png)
+- Click on the build icon (hammer) or right click on project name and choose **Build Project** to build the project.
+
+  ![building_pjt](resources/readme/build_project_soc.png)
 - Successful build output will show as below.
-![build_success_soc](resources/readme/buildsuccesssoc116.png)
+
+  ![build_success_soc](resources/readme/buildsuccesssoc116.png)
 
 #### Build Project - NCP Mode :
 
-- Check for 9117 macro in preprocessor settings(CHIP_9117=1).
-- Click on the build icon (hammer) to build the project
-![building_pjt](resources/readme/buildingpjt115.png)
+- Check for CHIP_9117 macro in preprocessor settings as mentioned below.
+   - Right click on project name.
+   - Go to properties → C/C++ Build → Settings → Tool Settings → GNU ARM C Compiler → Preprocessor → Defined symbols (-D).
+   - If CHIP_9117 macro is not present, add it by clicking on **ADD**.
+   - Click on **Apply and Close**.
+
+     ![Build Project for NCP mode](resources/readme/ncp_macros.png)
+
+- Click on the build icon (hammer) or right click on project name and choose **Build Project** to build the project.
+
+  ![Build Project for NCP mode](resources/readme/build_project_ncp.png)
+
 - Successful build output will show as below.
-![build_success_soc](resources/readme/buildsuccesssoc116.png)
+  
+  ![build_success_ncp](resources/readme/buildsuccessncp116.png)
 
 ## Program the device
 Once the build was successful, right click on project and click on Debug As->Silicon Labs ARM Program as shown in below image.
+ SoC
+
 ![debug_mode_soc](resources/readme/debugmodesoc117.png)
+
+ NCP
+
 ![debug_mode_NCP](resources/readme/debugmodencp120.png)
 
 # Running the SiWx91x Application - UDP Data Transfer
 
+### Enabling Data Transfer
 To enable the feature for data transfer with remote UDP server, follow the steps given below.
 > - Open the project in Simplicity Studio
 > - Right click on the project and choose 'Properties'
@@ -248,17 +294,106 @@ When the powersave application runs, SiWx91x scans and connect to the Wi-Fi acce
 
 ## Observing the output prints on serial terminal
 
-### SoC Mode:
-> Connect USB to UART connector Tx and GND pins to WSTK radio board.
+You can use either of the below USB to UART converters for application prints.
+1. Set up using USB to UART converter board.
 
-   - Connect Tx(Pin-6) to P27 on WSTK
-   - Connect GND(Pin 8 or 10) to GND on WSTK
-![FTDI_prints](resources/readme/ftdiprints118.png)
-> Prints can see as below in any Console terminal
-![ouput_prints](resources/readme/ouputprints119.png)
+  - Connect Tx (Pin-6) to P27 on WSTK
+  - Connect GND (Pin 8 or 10) to GND on WSTK
+
+    ![FTDI_prints](resources/readme/usb_to_uart_1.png)
+
+2. Set up using USB to UART converter cable.
+
+  - Connect RX (Pin 5) of TTL convertor to P27 on WSTK
+  - Connect GND (Pin1) of TTL convertor to GND on WSTK
+
+    ![FTDI_prints](resources/readme/usb_to_uart_2.png)
+
+**Tera term set up - for NCP and SoC modes**
+
+1. Open the Tera Term tool. 
+   - For SoC mode, choose the serial port to which USB to UART converter is connected and click on **OK**. 
+
+     **![](resources/readme/port_selection_soc.png)**
+
+   - For NCP mode, choose the J-Link port and click on **OK**.
+
+     **![](resources/readme/port_selection.png)**
+
+2. Navigate to the Setup → Serial port and update the baud rate to **115200** and click on **OK**.
+
+    **![](resources/readme/serial_port_setup.png)**
+
+    **![](resources/readme/serial_port.png)**
+
+The serial port is now connected. 
+
+### SoC Mode:
+Prints can see as below in any Console terminal
+
+With data transfer disabled
+
+![ouput_prints](resources/readme/debug_prints_without_data_transfer_soc.png)
+
+With data transfer enabled
+
+![ouput_prints](resources/readme/debug_prints_with_data_transfer_soc.png)
+
+
 ### NCP Mode:
 Prints can see as below in any Console terminal
-![ouput_prints](resources/readme/ouputprints119.png)
+
+With data transfer disabled
+
+![ouput_prints](resources/readme/debug_prints_without_data_transfer_ncp.png)
+
+With data transfer enabled
+
+![ouput_prints](resources/readme/debug_prints_with_data_transfer_ncp.png)
+
+
+### Average current consumption measured in power-meter
+
+![ouput_prints](resources/readme/power_meter_avg_current_consumption.png)
+
+NOTE: The measured current may vary if the scenario is performed in open environment. AP to AP variation is also observed. 
+
+# Using Simplicity Studio Energy Profiler for current measurement:
+  
+  After flashing the application code to the module. Energy profiler can be used for current consumption measurements.
+
+- Go to launcher → Debug Adapters pane and click on the board name.
+  
+  ![Figure: Energy Profiler Step 1](resources/readme/energy_profiler_step_1.png)
+
+- Click on Device configuration symbol
+  
+  ![Figure: Energy Profiler Step 2](resources/readme/energy_profiler_step_2.png)
+
+- Open the device configuration tab
+  
+  ![Figure: Energy Profiler Step 3](resources/readme/energy_profiler_step_3.png)
+
+- Change the Target part name to "EFR32MG21A020F1024IM32"
+
+  ![Figure: Energy Profiler Step 4](resources/readme/energy_profiler_step_4.png)
+
+- Change board name to "BRD4180B", click "OK"
+
+  ![Figure: Energy Profiler Step 5](resources/readme/energy_profiler_step_5.png)
+
+- From tools, choose Energy Profiler and click "OK"
+
+  ![Figure: Energy Profiler Step 6](resources/readme/energy_profiler_step_6.png)
+
+- From Quick Access, choose Start Energy Capture option 
+
+  ![Figure: Energy Profiler Step 7](resources/readme/energy_profiler_step_7.png)
+
+**NOTE** : The target part and board name have to be reverted to default to flash application binary. 
+
+  ![Figure: Energy Profiler Step 8](resources/readme/energy_profiler_step_8.png)
+
 
 # Selecting Bare Metal
 The application has been designed to work with FreeRTOS and Bare Metal configurations. By default, the application project files (Simplicity Studio) are configured with FreeRTOS enabled. The following steps demonstrate how to configure Simplicity Studio to test the application in a Bare Metal environment.
@@ -266,7 +401,7 @@ The application has been designed to work with FreeRTOS and Bare Metal configura
 ## Bare Metal with Simplicity Studio
 > - Open the project in Simplicity Studio
 > - Right click on the project and choose 'Properties'
-> - Go to 'C/C++ Build' | 'Settings' | 'GNU ARM C Compiler' | 'Symbols' and remove macro 'RSI_WITH_OS=1'
+> - Go to 'C/C++ Build' | 'Settings' | 'GNU ARM C Compiler' | 'Preprocessor' and remove macro 'RSI_WITH_OS=1'
 > - Select 'Apply' and 'OK' to save the settings
 
 ![Figure: project settings in Simplicity Studio](resources/readme/image184b.png) 

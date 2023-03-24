@@ -41,14 +41,10 @@ Before running the application, the user will need the following things to setup
 ### 2.3 Setup Diagram:
    
 **SoC Mode :**
-<br>
-<img src="resources/readme/bledatalengthsoc.png" width=500 height=250 alt=""><br>
-
+![](resources/readme/bledatalengthsoc.png)
  
 **NCP Mode :**
-<br>
-<img src="resources/readme/bledatalengthncp.png" width=500 height=250 alt=""><br>
-
+![](resources/readme/bledatalengthncp.png)
  
 ### 2.2 Software Requirements  
 - Embedded Development Environment
@@ -68,7 +64,7 @@ Before running the application, the user will need the following things to setup
   
 ### 3.2 NCP Mode - Host Interface 
 
-This application supports bare metal and RTOS environment. By default, the application project files (Keil and Simplicity Studio) are provided with RTOS configuration. To select a bare metal configuration, see [Selecting bare metal](#selecting-bare-metal).
+This application  supports bare metal and RTOS environment. By default, the application project files (Keil and Simplicity Studio) are provided with RTOS configuration. To select a bare metal configuration, see [Selecting bare metal](#selecting-bare-metal).
 		
 ### 3.3 Bare Metal/RTOS Support
 
@@ -86,42 +82,33 @@ The application can be configured to suit your requirements and development envi
 
 
 **4.1.1** User must update the below parameters
-
-
--  `RSI_BLE_DEV_ADDR_TYPE` refers address type of the remote device to connect.
-
-```c
+-  `RSI_BLE_DEV_ADDR_TYPE` refers address type of the remote device to connect.  
+```c 
     #define RSI_BLE_DEV_ADDR_TYPE                           LE_PUBLIC_ADDRESS
 ```
-- Based on the address of the advertising device, Valid configurations are
+ - Based on the address of the advertising device, Valid configurations are
+
     - LE_RANDOM_ADDRESS
     - LE_PUBLIC_ADDRESS
-
-
-   **Note:** Depends on the remote device, address type will be changed.
--  `RSI_BLE_DEV_ADDR` refers address of the remote device to connect.
-```c
-    #define RSI_BLE_DEV_ADDR                                "00:23:A7:80:70:B9"
-```
-- `RSI_REMOTE_DEVICE_NAME` refers the name of remote device to which Silicon Labs device has to connect
-```c
+    
+    **Note:** Depends on the remote device, address type will be changed.
+-  `RSI_BLE_DEV_ADDR` refers address of the remote device to connect.  
+```c 
+    #define RSI_BLE_DEV_ADDR                                "00:23:A7:80:70:B9" ```
+- `RSI_REMOTE_DEVICE_NAME` refers the name of remote device to which Silicon Labs device has to connect  
+```c 
 
     #define RSI_REMOTE_DEVICE_NAME                         "SILABS_DEV"
 ```
 **Note:** Silicon Labs module can connect to remote device by referring either RSI_BLE_DEV_ADDR or RSI_REMOTE_DEVICE_NAME of the remote device.
    ```
 
- 
    **Power save configuration:**
-
-
-- By default, The Application is configured without power save.
-```c   
-    #define ENABLE_POWER_SAVE 0
-```
-
-- If user wants to run the application in power save, modify the below configuration.
-```c   
+- By default, The Application is configured without power save.  
+```c    
+    #define ENABLE_POWER_SAVE 0```
+- If user wants to run the application in power save, modify the below configuration.  
+```c    
     #define ENABLE_POWER_SAVE 1
 ```
 
@@ -129,37 +116,32 @@ The application can be configured to suit your requirements and development envi
 
 
 **Note:** Following are the non-configurable macros in the file.
-- `BT_GLOBAL_BUFF_LEN` refers Number of bytes required by the application and the driver
-
-```c
-    #define BT_GLOBAL_BUFF_LEN                              15000  
-```
-
-- Following are the event numbers for advertising, connection and Disconnection events,
-```c
+- `BT_GLOBAL_BUFF_LEN` refers Number of bytes required by the application and the driver  
+```c 
+    #define BT_GLOBAL_BUFF_LEN                              15000  ```
+- Following are the event numbers for advertising, connection and Disconnection events,  
+```c 
     #define RSI_APP_EVENT_ADV_REPORT                         0
     #define RSI_APP_EVENT_CONNECTED                          1
     #define RSI_APP_EVENT_DISCONNECTED                       2
     #define RSI_APP_EVENT_DATA_LENGTH_CHANGE                 3
     #define RSI_BLE_MTU_EVENT                                4
-```
-   
-- Following are the macros for setting data length(TX length and TX time)
-
-```c
+```   
+- Following are the macros for setting data length(TX length and TX time) 
+```c 
     #define TX_LEN                                          0x001e
     #define TX_TIME                                         0x01f4
 ```
 
-**4.2** Open `rsi_ble_config.h` file. User can also modify the below parameters as per their needs and requirements. 
-```c    
+**4.2** Open `rsi_ble_config.h` file. User can also modify the below parameters as per their needs and requirements.  
+```c     
      #define RSI_BLE_PWR_INX                                30
     #define RSI_BLE_PWR_SAVE_OPTIONS                       BLE_DISABLE_DUTY_CYCLING
 ```
 
 
-   **Opermode command parameters**
-```c
+   **Opermode command parameters** 
+```c 
 
     #define RSI_FEATURE_BIT_MAP                             FEAT_SECURITY_OPEN
     #define RSI_TCP_IP_BYPASS                               RSI_DISABLE
@@ -172,13 +154,13 @@ The application can be configured to suit your requirements and development envi
 
 ## 5. Testing the Application
 
-Follow the below steps for the successful execution of the application.
+- Follow the below steps for the successful execution of the application.
 
 
 ### 5.1 Loading the SiWx91x Firmware
 
 
-Refer [Getting started with a PC](https://docs.silabs.com/rs9116/latest/wiseconnect-getting-started) to load the firmware into SiWx91x EVK. The firmware file is located in `<SDK>/firmware/`
+Refer [Getting started with a PC](https://docs.silabs.com/rs9116/latest/wiseconnect-getting-started) to load the firmware into SiWx91x EVK. The firmware file is located in `<SDK>/connectivity_firmware/`
 
 
 ### 5.2 Creating the Project and builing the Application
@@ -192,16 +174,12 @@ Refer [Getting started with EFX32](https://docs.silabs.com/rs9116-wiseconnect/la
 - Connect your board. The Si917 compatible SoC board is **BRD4325A**.
 - Studio should detect your board. Your board will be shown here.
 ![soc_board_detection](resources/readme/socboarddetection111.png)
-
-
 #### 5.2.2 Project Creation - NCP Mode :
 
 
 - Connect your board. The supported NCP boards are: **BRD4180A,BRD4280B**
 - Studio should detect your board. Your board will be shown here.
 ![ncp_board_detection](resources/readme/ncpboarddetection112.png)
-
-
 #### 5.2.3 Selecting an example application and generate project
 
 
@@ -209,23 +187,19 @@ Refer [Getting started with EFX32](https://docs.silabs.com/rs9116-wiseconnect/la
 ![projct_selection](resources/readme/projctselection113.png)
 - Click 'Create'. The "New Project Wizard" window appears. Click 'Finish'
 ![creation_final](resources/readme/creationfinal114.png)
-
-
 #### 5.2.4 Build Project - SoC Mode
 
 
 - Once the project is created, right click on project and go to properties → C/C++ Build → Settings → Build Steps
-![postbuild_script](resources/readme/creationsoc.PNG)
+![postbuild_script](resources/readme/creationsoc1.png)
 - Add post_build_script_SimplicityStudio.bat file path (SI917_COMBO_SDK.X.X.X.XX\utilities\isp_scripts_common_flash) in build steps settings as shown in below image.
-![postbuild_script](resources/readme/buildsoc.PNG)
+![postbuild_script](resources/readme/buildsoc1.png)
 - Check for M4 projects macros in preprocessor settings(RSI_M4_INTERFACE=1)
 - Check for 9117 macro in preprocessor settings(CHIP_9117=1).
 - Click on the build icon (hammer) to build the project
 ![building_pjt](resources/readme/buildingsoc.png)
 - Successful build output will show as below.
-![build_success_soc](resources/readme/buildsuccesssoc.PNG)
-
-
+![build_success_soc](resources/readme/buildsuccesssoc1.png)
 #### 5.2.5 Build Project - NCP Mode :
 
 
@@ -233,32 +207,23 @@ Refer [Getting started with EFX32](https://docs.silabs.com/rs9116-wiseconnect/la
 - Click on the build icon (hammer) to build the project
 ![building_pjt](resources/readme/buildincp.png)
 - Successful build output will show as below.
-![build_success_soc](resources/readme/buildsuccessncp.PNG)
-
-
+![build_success_soc](resources/readme/buildsuccessncp1.png)
 ## 6. Program the device
 
-
-Once the build was successfull, right click on project and click on Debug As->Silicon Labs ARM Program as shown in below image.
+- Once the build was successfull, right click on project and click on Debug As->Silicon Labs ARM Program as shown in below image.
 ### SoC Mode :
 ![debug_mode_soc](resources/readme/debugmodesoc.png)
 ### NCP Mode :
 ![debug_mode_NCP](resources/readme/debugmodencp.png)
-
-
 **Note:** Simillary, choose the Debug As option for debuging.
 
 
 ### 6.1 Running the SiWx91x Application
 
 1. Configure the remote device in peripheral mode and put it in advertising mode.
-<br>
-<img src="resources/readme/advertiser.png" width=250 alt=""><br>
-
+![](resources/readme/advertiser.png)
 2. After the program gets executed, the Silicon Labs device initiates the scanning.
-![Scanning](resources/readme/scanning.PNG)
-
-
+![Scanning](resources/readme/scanning1.png)
 3. When the Silicon Labs device receives the advertising report of the remote device, which is specified in the **RSI_BLE_DEV_ADDR** or **RSI_REMOTE_DEVICE_NAME** macro, it initiates the connection.
 
 4. Observe that the connection is established between the desired device and Silicon Labs device.
@@ -266,31 +231,24 @@ Once the build was successfull, right click on project and click on Debug As->Si
 5. After connection, the Silicon Labs device will set data length of the remote device.
 
 6. Observe a data length change event after setting the data length.
-<br>
-<img src="resources/readme/device_connected1.png" width=250 alt=""><br>
-
-6. After successful program execution, the print in teraterm looks as shown below.    
-![Prints in Teraterm](resources/readme/device_connected.PNG)     
+![](resources/readme/device_connected2.png)
+7. After successful program execution, the print in teraterm looks as shown below.    
+![Prints in Teraterm](resources/readme/device_connected1.png)     
 ## 7. Observing the output prints on the serial terminal
 
 ### 7.1 SoC Mode:
 - Connect USB to UART connector Tx and GND pins to WSTK radio board.
    - Connect Tx(Pin-6) to P27 on WSTK
    - Connect GND (Pin 8 or 10) to GND on WSTK.
-
-    ![FTDI_prints](resources/readme/ftdiprints118.png)
+   ![FTDI_prints](resources/readme/ftdiprints118.png)
 - Prints can be seen in any Console terminal as shown below.
 
-  ![ouput_prints](resources/readme/serial_teriminal_prints_soc.PNG)
-
-
+  ![ouput_prints](resources/readme/serial_teriminal_prints_soc1.png)
 ### 7.2 NCP Mode:
 - Prints can be seen in any Console terminal as shown below.
-
-  ![ouput_prints](resources/readme/device_connected.PNG)
-
+  ![ouput_prints](resources/readme/serialteriminalprintsncp.png)
 ## 8. Selecting Bare Metal
-The application has been designed to work with FreeRTOS and Bare Metal configurations. By default, the application project files (Simplicity studio) are configured with FreeRTOS enabled. The following steps demonstrate how to configure Simplicity Studio to test the application in a Bare Metal environment.
+- The application has been designed to work with FreeRTOS and Bare Metal configurations. By default, the application project files (Simplicity studio) are configured with FreeRTOS enabled. The following steps demonstrate how to configure Simplicity Studio to test the application in a Bare Metal environment.
 
 ### 8.1 Bare Metal with Simplicity Studio
 - Open the project in Simplicity Studio
@@ -298,8 +256,7 @@ The application has been designed to work with FreeRTOS and Bare Metal configura
 ![Figure: project settings in Simplicity Studio](resources/readme/with_out_os.png) 
 - Go to 'C/C++ Build' | 'Settings' | 'GNU ARM C Compiler' | 'Symbols' and remove macro 'RSI_WITH_OS=1'
 - Select 'Apply' and 'OK' to save the settings
-![Figure: project settings in Simplicity Studio](resources/readme/with_out_os1.PNG)
-
+![Figure: project settings in Simplicity Studio](resources/readme/with_out_os2.png)
 ### 8.2 Bare Metal with Keil
 - Open project in Keil IDE and click on 'Options for Target'
 - Go to 'C/C++' tab and remove 'RSI_WITH_OS' macro present under Preprocessor Symbols

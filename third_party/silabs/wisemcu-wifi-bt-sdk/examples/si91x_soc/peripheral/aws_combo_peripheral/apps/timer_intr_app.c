@@ -26,7 +26,7 @@
 #include "rsi_os.h"
 #include <FreeRTOS.h>
 #include "task.h"
-extern rsi_semaphore_handle_t  i2c_thread_sem;
+extern rsi_semaphore_handle_t i2c_thread_sem;
 #endif
 /* Private typedef -----------------------------------------------------------*/
 
@@ -47,7 +47,6 @@ error_t Timer0Config(void);
  * @return None
  */
 
-
 void TIMER0_IRQHandler()
 {
   /* Clears interrupt */
@@ -56,7 +55,7 @@ void TIMER0_IRQHandler()
   //rsi_semaphore_post_from_isr(&i2c_thread_sem);
 #else
   peripheral = I2C;
-#endif 
+#endif
 }
 
 /**
@@ -71,35 +70,35 @@ error_t Timer0Config(void)
   /* Sets periodic mode */
   status = RSI_TIMERS_SetTimerMode(TIMERS, PERIODIC_TIMER, TIMER_0);
   if (status != RSI_OK) {
-      DEBUGOUT("\r\nFailed to Set Timer Mode as Periodic Timer, Error Code : %d\r\n", status);
-      return status;
+    DEBUGOUT("\r\nFailed to Set Timer Mode as Periodic Timer, Error Code : %d\r\n", status);
+    return status;
   }
 
   /* Sets timer in 1 Micro second mode */
   status = RSI_TIMERS_SetTimerType(TIMERS, MICRO_SEC_MODE, TIMER_0);
   if (status != RSI_OK) {
-      DEBUGOUT("\r\nFailed to Set Timer Type as MicroSec Timer, Error Code : %d\r\n", status);
-      return status;
+    DEBUGOUT("\r\nFailed to Set Timer Type as MicroSec Timer, Error Code : %d\r\n", status);
+    return status;
   }
 
   /* 1 Micro second timer configuration */
   status = RSI_TIMERS_MicroSecTimerConfig(TIMERS, TIMER_0, 32, 0, MICRO_SEC_MODE);
   if (status != RSI_OK) {
-      DEBUGOUT("\r\nFailed to Configure Parameters for MicroSec Timer, Error Code : %d\r\n", status);
-      return status;
+    DEBUGOUT("\r\nFailed to Configure Parameters for MicroSec Timer, Error Code : %d\r\n", status);
+    return status;
   }
 
   status = RSI_TIMERS_SetMatch(TIMERS, TIMER_0, 1000000);
   if (status != RSI_OK) {
-      DEBUGOUT("\r\nFailed to Set Match Value in Sec For Timer0 Interrupt, Error Code : %d\r\n", status);
-      return status;
+    DEBUGOUT("\r\nFailed to Set Match Value in Sec For Timer0 Interrupt, Error Code : %d\r\n", status);
+    return status;
   }
 
   /* Enables timer interrupt */
   status = RSI_TIMERS_InterruptEnable(TIMERS, TIMER_0);
   if (status != RSI_OK) {
-      DEBUGOUT("\r\nFailed to Enabled Timer0 Interrupt, Error Code : %d\r\n", status);
-      return status;
+    DEBUGOUT("\r\nFailed to Enabled Timer0 Interrupt, Error Code : %d\r\n", status);
+    return status;
   }
   return RSI_OK;
 }
@@ -122,15 +121,15 @@ int Timer_Intr_App()
   /* Timer clock config */
   status = RSI_ULPSS_TimerClkConfig(ULPCLK, ENABLE_STATIC_CLK, 0, ULP_TIMER_32MHZ_RC_CLK, 0);
   if (status != RSI_OK) {
-      DEBUGOUT("\r\nFailed to Set 32Mhz RC Clock to Timer Peripheral, Error Code : %d\r\n", status);
-      return status;
+    DEBUGOUT("\r\nFailed to Set 32Mhz RC Clock to Timer Peripheral, Error Code : %d\r\n", status);
+    return status;
   }
 
   /* Timer 0 Configuration */
   status = Timer0Config();
   if (status != RSI_OK) {
-      DEBUGOUT("\r\nFailed to Configured All Parameter to Timer0, Error Code : %d\r\n", status);
-      return status;
+    DEBUGOUT("\r\nFailed to Configured All Parameter to Timer0, Error Code : %d\r\n", status);
+    return status;
   }
 
   /* Interrupt map to ARM */
@@ -140,7 +139,7 @@ int Timer_Intr_App()
   /* Timers start */
   status = RSI_TIMERS_TimerStart(TIMERS, TIMER_0);
   if (status != RSI_OK) {
-      DEBUGOUT("\r\nFailed to Start Timer0, Error Code : %d\r\n", status);
-      return status;
+    DEBUGOUT("\r\nFailed to Start Timer0, Error Code : %d\r\n", status);
+    return status;
   }
 }
