@@ -26,7 +26,7 @@
     - For Silicon Labs Si91x, use the latest version of Simplicity Studio (refer **"Download and Install Simplicity Studio"** section in **getting-started-with-siwx917-soc** guide at **release_package/docs/index.html**)   
 
 ## Project Setup
-- **Silicon Labs Si91x** refer **"Download SDK"** section in **getting-started-with-siwx917-soc** guide at **release_package/docs/index.html** to work with Si91x and Simplicity Studio
+- **Silicon Labs Si91x** refer **"Download SDKs"**, **"Add SDK to Simplicity Studio"**, **"Connect SiWx917"**, **"Open Example Project in Simplicity Studio"** section in **getting-started-with-siwx917-soc** guide at **release_package/docs/index.html** to work with Si91x and Simplicity Studio
 
 ## Configuration and Steps for Execution
 
@@ -36,11 +36,6 @@
    #define BAUD_VALUE  // Number of bits transmitted per second
    ```
 
-## Loading Application on Simplicity Studio
-1. With the product Si917 selected, navigate to the example projects by clicking on Example Projects & Demos 
-   in simplicity studio and click on to USART_SLAVE Example application as shown below.
-
-![Figure:](resources/readme/image517b.png)
 
 ## Build
 1. Enable RTE_USART_MODE and RTE_CONTINUOUS_CLOCK_MODE in RTE_Device_9117.h(path: /$project/wiseconnect_1.0.0/platforms/si91x/drivers/cmsis_driver/config/RTE_Device_9117.h)

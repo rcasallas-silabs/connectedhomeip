@@ -2,7 +2,7 @@
 //! do not modifiy this file directly
 #ifndef DEBUGS_AUTOGEN_H
 #define DEBUGS_AUTOGEN_H
-#define SL_LOG_VERSION  "2023/02/03-15:38:33"
+#define SL_LOG_VERSION  "2023/03/18-05:55:51"
 
 enum {
 SL_RSI_BT_AVRCP_INIT,
@@ -637,9 +637,11 @@ SL_SETSOCKOPT_EXIT_16,
 SL_SETSOCKOPT_EXIT_17,
 SL_SETSOCKOPT_EXIT_18,
 SL_SETSOCKOPT_EXIT_19,
+SL_SETSOCKOPT_SOCK_ERROR_6,
+SL_SETSOCKOPT_EXIT_20,
 SL_SETSOCKOPT_SOCK_ERROR_4,
 SL_SETSOCKOPT_SOCK_ERROR_5,
-SL_SETSOCKOPT_EXIT20,
+SL_SETSOCKOPT_EXIT21,
 SL_GETSOCKOPT_EXIT1,
 SL_GETSOCKOPT_SOCK_ERROR_1,
 SL_GETSOCKOPT_SOCK_ERROR_2,
@@ -783,7 +785,6 @@ SL_SENDTO_ASYNC_NON_ROM_SOCK_ERROR_7,
 SL_CLEAR_SOCKET_NON_ROM_ENTRY,
 SL_DRIVER_INIT_MAX_SOCKETS_ERROR,
 SL_DRIVER_INIT_INSUFFICIENT_BUFFER_2,
-SL_DRIVER_INIT_UART_INIT_ERROR,
 SL_DRIVER_INIT_EXIT,
 SL_WIRELESS_INIT_ENTRY,
 SL_WIRELESS_INIT_COMMAND_GIVEN_IN_WRONG_STATE,
@@ -923,8 +924,6 @@ SL_DEVICE_INIT_EXIT_5,
 SL_DEVICE_DEINIT_ENTRY,
 SL_DEVICE_DEINIT_COMMAND_GIVEN_IN_WRONG_STATE,
 SL_DEVICE_INIT_EXIT,
-SL_BL_MODULE_POWER_CYCLE_ENTRY,
-SL_BL_MODULE_POWER_CYCLE_EXIT,
 SL_BL_WAITFOR_BOARDREADY_ENTRY,
 SL_BL_WAITFOR_BOARDREADY_EXIT,
 SL_BL_WAITFOR_BOARDREADY_BOOTLOADER_VERSION_NOT_MATCHING,
@@ -945,6 +944,8 @@ SL_GET_ROM_VERSION_ENTRY,
 SL_GET_RAM_DUMP_ENTRY,
 SL_SET_RTC_TIMER_NULL_BUFFER,
 SL_SET_RTC_TIMER_BUFFER_LENGTH_ERROR,
+SL_BL_MODULE_POWER_CYCLE_ENTRY,
+SL_BL_MODULE_POWER_CYCLE_EXIT,
 SL_NWK_REGISTER_CALLBACKS_ENTRY,
 SL_NWK_REGISTER_CALLBACKS_EXCEEDS_MAX_CALLBACKS,
 SL_NWK_REGISTER_CALLBACKS_EXIT,
@@ -1142,6 +1143,11 @@ SL_WLAN_CALIB_WRITE_COMMAND_GIVEN_IN_WRONG_STATE,
 SL_WLAN_CALIB_WRITE_PKT_ALLOCATION_FAILURE,
 SL_WLAN_CALIB_WRITE_WLAN_COMMAND_ERROR,
 SL_WLAN_CALIB_WRITE_ERROR_IN_SENDING_COMMAND,
+SL_WLAN_CALIB_READ_ENTRY,
+SL_WLAN_CALIB_READ_COMMAND_GIVEN_IN_WRONG_STATE,
+SL_WLAN_CALIB_READ_PKT_ALLOCATION_FAILURE,
+SL_WLAN_CALIB_READ_WLAN_COMMAND_ERROR,
+SL_WLAN_CALIB_READ_ERROR_IN_SENDING_COMMAND,
 SL_WLAN_WPS_GENERATE_PIN_ENTRY,
 SL_WLAN_WPS_GENERATE_PIN_COMMAND_GIVEN_IN_WRONG_STATE,
 SL_WLAN_WPS_GENERATE_PIN_PKT_ALLOCATION_FAILURE,
@@ -1276,7 +1282,6 @@ SL_WLAN_WFD_CONNECT_ERROR_IN_SENDING_COMMAND,
 SL_WLAN_SEND_DATA_ENTRY,
 SL_WLAN_SEND_DATA_INVALID_PARAM,
 SL_WLAN_SEND_DATA_PKT_ALLOCATION_FAILURE,
-SL_WLAN_SEND_DATA_RESPONSE_TIMEOUT,
 SL_WLAN_SEND_DATA_EXIT,
 SL_WLAN_PING_ASYNC_ENTRY,
 SL_WLAN_PING_ASYNC_COMMAND_GIVEN_IN_WRONG_STATE,
@@ -1336,6 +1341,10 @@ SL_WLAN_UPDATE_GAIN_TABLE_INVALID_PARAM,
 SL_WLAN_UPDATE_GAIN_TABLE_PKT_ALLOCATION_FAILURE,
 SL_WLAN_UPDATE_GAIN_TABLE_WLAN_COMMAND_ERROR,
 SL_WLAN_UPDATE_GAIN_TABLE_ERROR_IN_SENDING_COMMAND,
+SL_WLAN_CSI_CONFIG_ENTRY,
+SL_WLAN_CSI_CONFIG_PKT_ALLOCATION_FAILURE,
+SL_WLAN_CSI_CONFIG_WLAN_COMMAND_ERROR,
+SL_WLAN_CSI_CONFIG_ERROR_IN_SENDING_COMMAND,
 SL_SHA_PEN_ENTRY,
 SL_SHA_PEN_COMMAND_GIVEN_IN_WRONG_STATE,
 SL_SHA_PEN_INVALID_PARAM_1,
@@ -2031,9 +2040,11 @@ SL_ECDH_POINT_AFFINE_COMMAND_ERROR
 #define SL_SETSOCKOPT_EXIT_17_SIGNATURE(component, level)  ((SL_SETSOCKOPT_EXIT_17 & 0xfff) | (component << 18) | (level << 21))
 #define SL_SETSOCKOPT_EXIT_18_SIGNATURE(component, level)  ((SL_SETSOCKOPT_EXIT_18 & 0xfff) | (component << 18) | (level << 21))
 #define SL_SETSOCKOPT_EXIT_19_SIGNATURE(component, level)  ((SL_SETSOCKOPT_EXIT_19 & 0xfff) | (component << 18) | (level << 21))
+#define SL_SETSOCKOPT_SOCK_ERROR_6_SIGNATURE(component, level)  ((SL_SETSOCKOPT_SOCK_ERROR_6 & 0xfff) | (component << 18) | (level << 21))
+#define SL_SETSOCKOPT_EXIT_20_SIGNATURE(component, level)  ((SL_SETSOCKOPT_EXIT_20 & 0xfff) | (component << 18) | (level << 21))
 #define SL_SETSOCKOPT_SOCK_ERROR_4_SIGNATURE(component, level)  ((SL_SETSOCKOPT_SOCK_ERROR_4 & 0xfff) | (component << 18) | (level << 21))
 #define SL_SETSOCKOPT_SOCK_ERROR_5_SIGNATURE(component, level)  ((SL_SETSOCKOPT_SOCK_ERROR_5 & 0xfff) | (component << 18) | (level << 21))
-#define SL_SETSOCKOPT_EXIT20_SIGNATURE(component, level)  ((SL_SETSOCKOPT_EXIT20 & 0xfff) | (component << 18) | (level << 21))
+#define SL_SETSOCKOPT_EXIT21_SIGNATURE(component, level)  ((SL_SETSOCKOPT_EXIT21 & 0xfff) | (component << 18) | (level << 21))
 #define SL_GETSOCKOPT_EXIT1_SIGNATURE(component, level)  ((SL_GETSOCKOPT_EXIT1 & 0xfff) | (component << 18) | (level << 21))
 #define SL_GETSOCKOPT_SOCK_ERROR_1_SIGNATURE(component, level)  ((SL_GETSOCKOPT_SOCK_ERROR_1 & 0xfff) | (component << 18) | (level << 21))
 #define SL_GETSOCKOPT_SOCK_ERROR_2_SIGNATURE(component, level)  ((SL_GETSOCKOPT_SOCK_ERROR_2 & 0xfff) | (component << 18) | (level << 21))
@@ -2177,7 +2188,6 @@ SL_ECDH_POINT_AFFINE_COMMAND_ERROR
 #define SL_CLEAR_SOCKET_NON_ROM_ENTRY_SIGNATURE(component, level)  ((SL_CLEAR_SOCKET_NON_ROM_ENTRY & 0xfff) | (component << 18) | (level << 21))
 #define SL_DRIVER_INIT_MAX_SOCKETS_ERROR_SIGNATURE(component, level)  ((SL_DRIVER_INIT_MAX_SOCKETS_ERROR & 0xfff) | (3 << 12) | (component << 18) | (level << 21))
 #define SL_DRIVER_INIT_INSUFFICIENT_BUFFER_2_SIGNATURE(component, level)  ((SL_DRIVER_INIT_INSUFFICIENT_BUFFER_2 & 0xfff) | (3 << 12) | (component << 18) | (level << 21))
-#define SL_DRIVER_INIT_UART_INIT_ERROR_SIGNATURE(component, level)  ((SL_DRIVER_INIT_UART_INIT_ERROR & 0xfff) | (3 << 12) | (component << 18) | (level << 21))
 #define SL_DRIVER_INIT_EXIT_SIGNATURE(component, level)  ((SL_DRIVER_INIT_EXIT & 0xfff) | (3 << 12) | (component << 18) | (level << 21))
 #define SL_WIRELESS_INIT_ENTRY_SIGNATURE(component, level)  ((SL_WIRELESS_INIT_ENTRY & 0xfff) | (component << 18) | (level << 21))
 #define SL_WIRELESS_INIT_COMMAND_GIVEN_IN_WRONG_STATE_SIGNATURE(component, level)  ((SL_WIRELESS_INIT_COMMAND_GIVEN_IN_WRONG_STATE & 0xfff) | (component << 18) | (level << 21))
@@ -2317,8 +2327,6 @@ SL_ECDH_POINT_AFFINE_COMMAND_ERROR
 #define SL_DEVICE_DEINIT_ENTRY_SIGNATURE(component, level)  ((SL_DEVICE_DEINIT_ENTRY & 0xfff) | (component << 18) | (level << 21))
 #define SL_DEVICE_DEINIT_COMMAND_GIVEN_IN_WRONG_STATE_SIGNATURE(component, level)  ((SL_DEVICE_DEINIT_COMMAND_GIVEN_IN_WRONG_STATE & 0xfff) | (3 << 12) | (component << 18) | (level << 21))
 #define SL_DEVICE_INIT_EXIT_SIGNATURE(component, level)  ((SL_DEVICE_INIT_EXIT & 0xfff) | (component << 18) | (level << 21))
-#define SL_BL_MODULE_POWER_CYCLE_ENTRY_SIGNATURE(component, level)  ((SL_BL_MODULE_POWER_CYCLE_ENTRY & 0xfff) | (component << 18) | (level << 21))
-#define SL_BL_MODULE_POWER_CYCLE_EXIT_SIGNATURE(component, level)  ((SL_BL_MODULE_POWER_CYCLE_EXIT & 0xfff) | (component << 18) | (level << 21))
 #define SL_BL_WAITFOR_BOARDREADY_ENTRY_SIGNATURE(component, level)  ((SL_BL_WAITFOR_BOARDREADY_ENTRY & 0xfff) | (component << 18) | (level << 21))
 #define SL_BL_WAITFOR_BOARDREADY_EXIT_SIGNATURE(component, level)  ((SL_BL_WAITFOR_BOARDREADY_EXIT & 0xfff) | (3 << 12) | (component << 18) | (level << 21))
 #define SL_BL_WAITFOR_BOARDREADY_BOOTLOADER_VERSION_NOT_MATCHING_SIGNATURE(component, level)  ((SL_BL_WAITFOR_BOARDREADY_BOOTLOADER_VERSION_NOT_MATCHING & 0xfff) | (component << 18) | (level << 21))
@@ -2339,6 +2347,8 @@ SL_ECDH_POINT_AFFINE_COMMAND_ERROR
 #define SL_GET_RAM_DUMP_ENTRY_SIGNATURE(component, level)  ((SL_GET_RAM_DUMP_ENTRY & 0xfff) | (component << 18) | (level << 21))
 #define SL_SET_RTC_TIMER_NULL_BUFFER_SIGNATURE(component, level)  ((SL_SET_RTC_TIMER_NULL_BUFFER & 0xfff) | (component << 18) | (level << 21))
 #define SL_SET_RTC_TIMER_BUFFER_LENGTH_ERROR_SIGNATURE(component, level)  ((SL_SET_RTC_TIMER_BUFFER_LENGTH_ERROR & 0xfff) | (component << 18) | (level << 21))
+#define SL_BL_MODULE_POWER_CYCLE_ENTRY_SIGNATURE(component, level)  ((SL_BL_MODULE_POWER_CYCLE_ENTRY & 0xfff) | (component << 18) | (level << 21))
+#define SL_BL_MODULE_POWER_CYCLE_EXIT_SIGNATURE(component, level)  ((SL_BL_MODULE_POWER_CYCLE_EXIT & 0xfff) | (component << 18) | (level << 21))
 #define SL_NWK_REGISTER_CALLBACKS_ENTRY_SIGNATURE(component, level)  ((SL_NWK_REGISTER_CALLBACKS_ENTRY & 0xfff) | (component << 18) | (level << 21))
 #define SL_NWK_REGISTER_CALLBACKS_EXCEEDS_MAX_CALLBACKS_SIGNATURE(component, level)  ((SL_NWK_REGISTER_CALLBACKS_EXCEEDS_MAX_CALLBACKS & 0xfff) | (component << 18) | (level << 21))
 #define SL_NWK_REGISTER_CALLBACKS_EXIT_SIGNATURE(component, level)  ((SL_NWK_REGISTER_CALLBACKS_EXIT & 0xfff) | (component << 18) | (level << 21))
@@ -2536,6 +2546,11 @@ SL_ECDH_POINT_AFFINE_COMMAND_ERROR
 #define SL_WLAN_CALIB_WRITE_PKT_ALLOCATION_FAILURE_SIGNATURE(component, level)  ((SL_WLAN_CALIB_WRITE_PKT_ALLOCATION_FAILURE & 0xfff) | (3 << 12) | (component << 18) | (level << 21))
 #define SL_WLAN_CALIB_WRITE_WLAN_COMMAND_ERROR_SIGNATURE(component, level)  ((SL_WLAN_CALIB_WRITE_WLAN_COMMAND_ERROR & 0xfff) | (3 << 12) | (component << 18) | (level << 21))
 #define SL_WLAN_CALIB_WRITE_ERROR_IN_SENDING_COMMAND_SIGNATURE(component, level)  ((SL_WLAN_CALIB_WRITE_ERROR_IN_SENDING_COMMAND & 0xfff) | (3 << 12) | (component << 18) | (level << 21))
+#define SL_WLAN_CALIB_READ_ENTRY_SIGNATURE(component, level)  ((SL_WLAN_CALIB_READ_ENTRY & 0xfff) | (component << 18) | (level << 21))
+#define SL_WLAN_CALIB_READ_COMMAND_GIVEN_IN_WRONG_STATE_SIGNATURE(component, level)  ((SL_WLAN_CALIB_READ_COMMAND_GIVEN_IN_WRONG_STATE & 0xfff) | (3 << 12) | (component << 18) | (level << 21))
+#define SL_WLAN_CALIB_READ_PKT_ALLOCATION_FAILURE_SIGNATURE(component, level)  ((SL_WLAN_CALIB_READ_PKT_ALLOCATION_FAILURE & 0xfff) | (3 << 12) | (component << 18) | (level << 21))
+#define SL_WLAN_CALIB_READ_WLAN_COMMAND_ERROR_SIGNATURE(component, level)  ((SL_WLAN_CALIB_READ_WLAN_COMMAND_ERROR & 0xfff) | (3 << 12) | (component << 18) | (level << 21))
+#define SL_WLAN_CALIB_READ_ERROR_IN_SENDING_COMMAND_SIGNATURE(component, level)  ((SL_WLAN_CALIB_READ_ERROR_IN_SENDING_COMMAND & 0xfff) | (3 << 12) | (component << 18) | (level << 21))
 #define SL_WLAN_WPS_GENERATE_PIN_ENTRY_SIGNATURE(component, level)  ((SL_WLAN_WPS_GENERATE_PIN_ENTRY & 0xfff) | (component << 18) | (level << 21))
 #define SL_WLAN_WPS_GENERATE_PIN_COMMAND_GIVEN_IN_WRONG_STATE_SIGNATURE(component, level)  ((SL_WLAN_WPS_GENERATE_PIN_COMMAND_GIVEN_IN_WRONG_STATE & 0xfff) | (component << 18) | (level << 21))
 #define SL_WLAN_WPS_GENERATE_PIN_PKT_ALLOCATION_FAILURE_SIGNATURE(component, level)  ((SL_WLAN_WPS_GENERATE_PIN_PKT_ALLOCATION_FAILURE & 0xfff) | (component << 18) | (level << 21))
@@ -2670,7 +2685,6 @@ SL_ECDH_POINT_AFFINE_COMMAND_ERROR
 #define SL_WLAN_SEND_DATA_ENTRY_SIGNATURE(component, level)  ((SL_WLAN_SEND_DATA_ENTRY & 0xfff) | (component << 18) | (level << 21))
 #define SL_WLAN_SEND_DATA_INVALID_PARAM_SIGNATURE(component, level)  ((SL_WLAN_SEND_DATA_INVALID_PARAM & 0xfff) | (3 << 12) | (component << 18) | (level << 21))
 #define SL_WLAN_SEND_DATA_PKT_ALLOCATION_FAILURE_SIGNATURE(component, level)  ((SL_WLAN_SEND_DATA_PKT_ALLOCATION_FAILURE & 0xfff) | (3 << 12) | (component << 18) | (level << 21))
-#define SL_WLAN_SEND_DATA_RESPONSE_TIMEOUT_SIGNATURE(component, level)  ((SL_WLAN_SEND_DATA_RESPONSE_TIMEOUT & 0xfff) | (3 << 12) | (component << 18) | (level << 21))
 #define SL_WLAN_SEND_DATA_EXIT_SIGNATURE(component, level)  ((SL_WLAN_SEND_DATA_EXIT & 0xfff) | (3 << 12) | (component << 18) | (level << 21))
 #define SL_WLAN_PING_ASYNC_ENTRY_SIGNATURE(component, level)  ((SL_WLAN_PING_ASYNC_ENTRY & 0xfff) | (component << 18) | (level << 21))
 #define SL_WLAN_PING_ASYNC_COMMAND_GIVEN_IN_WRONG_STATE_SIGNATURE(component, level)  ((SL_WLAN_PING_ASYNC_COMMAND_GIVEN_IN_WRONG_STATE & 0xfff) | (3 << 12) | (component << 18) | (level << 21))
@@ -2730,6 +2744,10 @@ SL_ECDH_POINT_AFFINE_COMMAND_ERROR
 #define SL_WLAN_UPDATE_GAIN_TABLE_PKT_ALLOCATION_FAILURE_SIGNATURE(component, level)  ((SL_WLAN_UPDATE_GAIN_TABLE_PKT_ALLOCATION_FAILURE & 0xfff) | (3 << 12) | (component << 18) | (level << 21))
 #define SL_WLAN_UPDATE_GAIN_TABLE_WLAN_COMMAND_ERROR_SIGNATURE(component, level)  ((SL_WLAN_UPDATE_GAIN_TABLE_WLAN_COMMAND_ERROR & 0xfff) | (3 << 12) | (component << 18) | (level << 21))
 #define SL_WLAN_UPDATE_GAIN_TABLE_ERROR_IN_SENDING_COMMAND_SIGNATURE(component, level)  ((SL_WLAN_UPDATE_GAIN_TABLE_ERROR_IN_SENDING_COMMAND & 0xfff) | (3 << 12) | (component << 18) | (level << 21))
+#define SL_WLAN_CSI_CONFIG_ENTRY_SIGNATURE(component, level)  ((SL_WLAN_CSI_CONFIG_ENTRY & 0xfff) | (component << 18) | (level << 21))
+#define SL_WLAN_CSI_CONFIG_PKT_ALLOCATION_FAILURE_SIGNATURE(component, level)  ((SL_WLAN_CSI_CONFIG_PKT_ALLOCATION_FAILURE & 0xfff) | (3 << 12) | (component << 18) | (level << 21))
+#define SL_WLAN_CSI_CONFIG_WLAN_COMMAND_ERROR_SIGNATURE(component, level)  ((SL_WLAN_CSI_CONFIG_WLAN_COMMAND_ERROR & 0xfff) | (3 << 12) | (component << 18) | (level << 21))
+#define SL_WLAN_CSI_CONFIG_ERROR_IN_SENDING_COMMAND_SIGNATURE(component, level)  ((SL_WLAN_CSI_CONFIG_ERROR_IN_SENDING_COMMAND & 0xfff) | (3 << 12) | (component << 18) | (level << 21))
 #define SL_SHA_PEN_ENTRY_SIGNATURE(component, level)  ((SL_SHA_PEN_ENTRY & 0xfff) | (component << 18) | (level << 21))
 #define SL_SHA_PEN_COMMAND_GIVEN_IN_WRONG_STATE_SIGNATURE(component, level)  ((SL_SHA_PEN_COMMAND_GIVEN_IN_WRONG_STATE & 0xfff) | (component << 18) | (level << 21))
 #define SL_SHA_PEN_INVALID_PARAM_1_SIGNATURE(component, level)  ((SL_SHA_PEN_INVALID_PARAM_1 & 0xfff) | (component << 18) | (level << 21))
@@ -3422,9 +3440,11 @@ SL_ECDH_POINT_AFFINE_COMMAND_ERROR
 #define SL_PRINTF_SL_SETSOCKOPT_EXIT_17(debug_id, component, level)    sl_log_no_args(SL_SETSOCKOPT_EXIT_17_SIGNATURE(component, level)) 
 #define SL_PRINTF_SL_SETSOCKOPT_EXIT_18(debug_id, component, level)    sl_log_no_args(SL_SETSOCKOPT_EXIT_18_SIGNATURE(component, level)) 
 #define SL_PRINTF_SL_SETSOCKOPT_EXIT_19(debug_id, component, level)    sl_log_no_args(SL_SETSOCKOPT_EXIT_19_SIGNATURE(component, level)) 
+#define SL_PRINTF_SL_SETSOCKOPT_SOCK_ERROR_6(debug_id, component, level)    sl_log_no_args(SL_SETSOCKOPT_SOCK_ERROR_6_SIGNATURE(component, level)) 
+#define SL_PRINTF_SL_SETSOCKOPT_EXIT_20(debug_id, component, level)    sl_log_no_args(SL_SETSOCKOPT_EXIT_20_SIGNATURE(component, level)) 
 #define SL_PRINTF_SL_SETSOCKOPT_SOCK_ERROR_4(debug_id, component, level)    sl_log_no_args(SL_SETSOCKOPT_SOCK_ERROR_4_SIGNATURE(component, level)) 
 #define SL_PRINTF_SL_SETSOCKOPT_SOCK_ERROR_5(debug_id, component, level)    sl_log_no_args(SL_SETSOCKOPT_SOCK_ERROR_5_SIGNATURE(component, level)) 
-#define SL_PRINTF_SL_SETSOCKOPT_EXIT20(debug_id, component, level)    sl_log_no_args(SL_SETSOCKOPT_EXIT20_SIGNATURE(component, level)) 
+#define SL_PRINTF_SL_SETSOCKOPT_EXIT21(debug_id, component, level)    sl_log_no_args(SL_SETSOCKOPT_EXIT21_SIGNATURE(component, level)) 
 #define SL_PRINTF_SL_GETSOCKOPT_EXIT1(debug_id, component, level)    sl_log_no_args(SL_GETSOCKOPT_EXIT1_SIGNATURE(component, level)) 
 #define SL_PRINTF_SL_GETSOCKOPT_SOCK_ERROR_1(debug_id, component, level)    sl_log_no_args(SL_GETSOCKOPT_SOCK_ERROR_1_SIGNATURE(component, level)) 
 #define SL_PRINTF_SL_GETSOCKOPT_SOCK_ERROR_2(debug_id, component, level)    sl_log_no_args(SL_GETSOCKOPT_SOCK_ERROR_2_SIGNATURE(component, level)) 
@@ -3568,7 +3588,6 @@ SL_ECDH_POINT_AFFINE_COMMAND_ERROR
 #define SL_PRINTF_SL_CLEAR_SOCKET_NON_ROM_ENTRY(debug_id, component, level)    sl_log_no_args(SL_CLEAR_SOCKET_NON_ROM_ENTRY_SIGNATURE(component, level)) 
 #define SL_PRINTF_SL_DRIVER_INIT_MAX_SOCKETS_ERROR(debug_id, component, level, format, a)    sl_log_1_args(SL_DRIVER_INIT_MAX_SOCKETS_ERROR_SIGNATURE(component, level), a)
 #define SL_PRINTF_SL_DRIVER_INIT_INSUFFICIENT_BUFFER_2(debug_id, component, level, format, a)    sl_log_1_args(SL_DRIVER_INIT_INSUFFICIENT_BUFFER_2_SIGNATURE(component, level), a)
-#define SL_PRINTF_SL_DRIVER_INIT_UART_INIT_ERROR(debug_id, component, level, format, a)    sl_log_1_args(SL_DRIVER_INIT_UART_INIT_ERROR_SIGNATURE(component, level), a)
 #define SL_PRINTF_SL_DRIVER_INIT_EXIT(debug_id, component, level, format, a)    sl_log_1_args(SL_DRIVER_INIT_EXIT_SIGNATURE(component, level), a)
 #define SL_PRINTF_SL_WIRELESS_INIT_ENTRY(debug_id, component, level)    sl_log_no_args(SL_WIRELESS_INIT_ENTRY_SIGNATURE(component, level)) 
 #define SL_PRINTF_SL_WIRELESS_INIT_COMMAND_GIVEN_IN_WRONG_STATE(debug_id, component, level)    sl_log_no_args(SL_WIRELESS_INIT_COMMAND_GIVEN_IN_WRONG_STATE_SIGNATURE(component, level)) 
@@ -3708,8 +3727,6 @@ SL_ECDH_POINT_AFFINE_COMMAND_ERROR
 #define SL_PRINTF_SL_DEVICE_DEINIT_ENTRY(debug_id, component, level)    sl_log_no_args(SL_DEVICE_DEINIT_ENTRY_SIGNATURE(component, level)) 
 #define SL_PRINTF_SL_DEVICE_DEINIT_COMMAND_GIVEN_IN_WRONG_STATE(debug_id, component, level, format, a)    sl_log_1_args(SL_DEVICE_DEINIT_COMMAND_GIVEN_IN_WRONG_STATE_SIGNATURE(component, level), a)
 #define SL_PRINTF_SL_DEVICE_INIT_EXIT(debug_id, component, level)    sl_log_no_args(SL_DEVICE_INIT_EXIT_SIGNATURE(component, level)) 
-#define SL_PRINTF_SL_BL_MODULE_POWER_CYCLE_ENTRY(debug_id, component, level)    sl_log_no_args(SL_BL_MODULE_POWER_CYCLE_ENTRY_SIGNATURE(component, level)) 
-#define SL_PRINTF_SL_BL_MODULE_POWER_CYCLE_EXIT(debug_id, component, level)    sl_log_no_args(SL_BL_MODULE_POWER_CYCLE_EXIT_SIGNATURE(component, level)) 
 #define SL_PRINTF_SL_BL_WAITFOR_BOARDREADY_ENTRY(debug_id, component, level)    sl_log_no_args(SL_BL_WAITFOR_BOARDREADY_ENTRY_SIGNATURE(component, level)) 
 #define SL_PRINTF_SL_BL_WAITFOR_BOARDREADY_EXIT(debug_id, component, level, format, a)    sl_log_1_args(SL_BL_WAITFOR_BOARDREADY_EXIT_SIGNATURE(component, level), a)
 #define SL_PRINTF_SL_BL_WAITFOR_BOARDREADY_BOOTLOADER_VERSION_NOT_MATCHING(debug_id, component, level)    sl_log_no_args(SL_BL_WAITFOR_BOARDREADY_BOOTLOADER_VERSION_NOT_MATCHING_SIGNATURE(component, level)) 
@@ -3730,6 +3747,8 @@ SL_ECDH_POINT_AFFINE_COMMAND_ERROR
 #define SL_PRINTF_SL_GET_RAM_DUMP_ENTRY(debug_id, component, level)    sl_log_no_args(SL_GET_RAM_DUMP_ENTRY_SIGNATURE(component, level)) 
 #define SL_PRINTF_SL_SET_RTC_TIMER_NULL_BUFFER(debug_id, component, level)    sl_log_no_args(SL_SET_RTC_TIMER_NULL_BUFFER_SIGNATURE(component, level)) 
 #define SL_PRINTF_SL_SET_RTC_TIMER_BUFFER_LENGTH_ERROR(debug_id, component, level)    sl_log_no_args(SL_SET_RTC_TIMER_BUFFER_LENGTH_ERROR_SIGNATURE(component, level)) 
+#define SL_PRINTF_SL_BL_MODULE_POWER_CYCLE_ENTRY(debug_id, component, level)    sl_log_no_args(SL_BL_MODULE_POWER_CYCLE_ENTRY_SIGNATURE(component, level)) 
+#define SL_PRINTF_SL_BL_MODULE_POWER_CYCLE_EXIT(debug_id, component, level)    sl_log_no_args(SL_BL_MODULE_POWER_CYCLE_EXIT_SIGNATURE(component, level)) 
 #define SL_PRINTF_SL_NWK_REGISTER_CALLBACKS_ENTRY(debug_id, component, level)    sl_log_no_args(SL_NWK_REGISTER_CALLBACKS_ENTRY_SIGNATURE(component, level)) 
 #define SL_PRINTF_SL_NWK_REGISTER_CALLBACKS_EXCEEDS_MAX_CALLBACKS(debug_id, component, level)    sl_log_no_args(SL_NWK_REGISTER_CALLBACKS_EXCEEDS_MAX_CALLBACKS_SIGNATURE(component, level)) 
 #define SL_PRINTF_SL_NWK_REGISTER_CALLBACKS_EXIT(debug_id, component, level)    sl_log_no_args(SL_NWK_REGISTER_CALLBACKS_EXIT_SIGNATURE(component, level)) 
@@ -3927,6 +3946,11 @@ SL_ECDH_POINT_AFFINE_COMMAND_ERROR
 #define SL_PRINTF_SL_WLAN_CALIB_WRITE_PKT_ALLOCATION_FAILURE(debug_id, component, level, format, a)    sl_log_1_args(SL_WLAN_CALIB_WRITE_PKT_ALLOCATION_FAILURE_SIGNATURE(component, level), a)
 #define SL_PRINTF_SL_WLAN_CALIB_WRITE_WLAN_COMMAND_ERROR(debug_id, component, level, format, a)    sl_log_1_args(SL_WLAN_CALIB_WRITE_WLAN_COMMAND_ERROR_SIGNATURE(component, level), a)
 #define SL_PRINTF_SL_WLAN_CALIB_WRITE_ERROR_IN_SENDING_COMMAND(debug_id, component, level, format, a)    sl_log_1_args(SL_WLAN_CALIB_WRITE_ERROR_IN_SENDING_COMMAND_SIGNATURE(component, level), a)
+#define SL_PRINTF_SL_WLAN_CALIB_READ_ENTRY(debug_id, component, level)    sl_log_no_args(SL_WLAN_CALIB_READ_ENTRY_SIGNATURE(component, level)) 
+#define SL_PRINTF_SL_WLAN_CALIB_READ_COMMAND_GIVEN_IN_WRONG_STATE(debug_id, component, level, format, a)    sl_log_1_args(SL_WLAN_CALIB_READ_COMMAND_GIVEN_IN_WRONG_STATE_SIGNATURE(component, level), a)
+#define SL_PRINTF_SL_WLAN_CALIB_READ_PKT_ALLOCATION_FAILURE(debug_id, component, level, format, a)    sl_log_1_args(SL_WLAN_CALIB_READ_PKT_ALLOCATION_FAILURE_SIGNATURE(component, level), a)
+#define SL_PRINTF_SL_WLAN_CALIB_READ_WLAN_COMMAND_ERROR(debug_id, component, level, format, a)    sl_log_1_args(SL_WLAN_CALIB_READ_WLAN_COMMAND_ERROR_SIGNATURE(component, level), a)
+#define SL_PRINTF_SL_WLAN_CALIB_READ_ERROR_IN_SENDING_COMMAND(debug_id, component, level, format, a)    sl_log_1_args(SL_WLAN_CALIB_READ_ERROR_IN_SENDING_COMMAND_SIGNATURE(component, level), a)
 #define SL_PRINTF_SL_WLAN_WPS_GENERATE_PIN_ENTRY(debug_id, component, level)    sl_log_no_args(SL_WLAN_WPS_GENERATE_PIN_ENTRY_SIGNATURE(component, level)) 
 #define SL_PRINTF_SL_WLAN_WPS_GENERATE_PIN_COMMAND_GIVEN_IN_WRONG_STATE(debug_id, component, level)    sl_log_no_args(SL_WLAN_WPS_GENERATE_PIN_COMMAND_GIVEN_IN_WRONG_STATE_SIGNATURE(component, level)) 
 #define SL_PRINTF_SL_WLAN_WPS_GENERATE_PIN_PKT_ALLOCATION_FAILURE(debug_id, component, level)    sl_log_no_args(SL_WLAN_WPS_GENERATE_PIN_PKT_ALLOCATION_FAILURE_SIGNATURE(component, level)) 
@@ -4061,7 +4085,6 @@ SL_ECDH_POINT_AFFINE_COMMAND_ERROR
 #define SL_PRINTF_SL_WLAN_SEND_DATA_ENTRY(debug_id, component, level)    sl_log_no_args(SL_WLAN_SEND_DATA_ENTRY_SIGNATURE(component, level)) 
 #define SL_PRINTF_SL_WLAN_SEND_DATA_INVALID_PARAM(debug_id, component, level, format, a)    sl_log_1_args(SL_WLAN_SEND_DATA_INVALID_PARAM_SIGNATURE(component, level), a)
 #define SL_PRINTF_SL_WLAN_SEND_DATA_PKT_ALLOCATION_FAILURE(debug_id, component, level, format, a)    sl_log_1_args(SL_WLAN_SEND_DATA_PKT_ALLOCATION_FAILURE_SIGNATURE(component, level), a)
-#define SL_PRINTF_SL_WLAN_SEND_DATA_RESPONSE_TIMEOUT(debug_id, component, level, format, a)    sl_log_1_args(SL_WLAN_SEND_DATA_RESPONSE_TIMEOUT_SIGNATURE(component, level), a)
 #define SL_PRINTF_SL_WLAN_SEND_DATA_EXIT(debug_id, component, level, format, a)    sl_log_1_args(SL_WLAN_SEND_DATA_EXIT_SIGNATURE(component, level), a)
 #define SL_PRINTF_SL_WLAN_PING_ASYNC_ENTRY(debug_id, component, level)    sl_log_no_args(SL_WLAN_PING_ASYNC_ENTRY_SIGNATURE(component, level)) 
 #define SL_PRINTF_SL_WLAN_PING_ASYNC_COMMAND_GIVEN_IN_WRONG_STATE(debug_id, component, level, format, a)    sl_log_1_args(SL_WLAN_PING_ASYNC_COMMAND_GIVEN_IN_WRONG_STATE_SIGNATURE(component, level), a)
@@ -4121,6 +4144,10 @@ SL_ECDH_POINT_AFFINE_COMMAND_ERROR
 #define SL_PRINTF_SL_WLAN_UPDATE_GAIN_TABLE_PKT_ALLOCATION_FAILURE(debug_id, component, level, format, a)    sl_log_1_args(SL_WLAN_UPDATE_GAIN_TABLE_PKT_ALLOCATION_FAILURE_SIGNATURE(component, level), a)
 #define SL_PRINTF_SL_WLAN_UPDATE_GAIN_TABLE_WLAN_COMMAND_ERROR(debug_id, component, level, format, a)    sl_log_1_args(SL_WLAN_UPDATE_GAIN_TABLE_WLAN_COMMAND_ERROR_SIGNATURE(component, level), a)
 #define SL_PRINTF_SL_WLAN_UPDATE_GAIN_TABLE_ERROR_IN_SENDING_COMMAND(debug_id, component, level, format, a)    sl_log_1_args(SL_WLAN_UPDATE_GAIN_TABLE_ERROR_IN_SENDING_COMMAND_SIGNATURE(component, level), a)
+#define SL_PRINTF_SL_WLAN_CSI_CONFIG_ENTRY(debug_id, component, level)    sl_log_no_args(SL_WLAN_CSI_CONFIG_ENTRY_SIGNATURE(component, level)) 
+#define SL_PRINTF_SL_WLAN_CSI_CONFIG_PKT_ALLOCATION_FAILURE(debug_id, component, level, format, a)    sl_log_1_args(SL_WLAN_CSI_CONFIG_PKT_ALLOCATION_FAILURE_SIGNATURE(component, level), a)
+#define SL_PRINTF_SL_WLAN_CSI_CONFIG_WLAN_COMMAND_ERROR(debug_id, component, level, format, a)    sl_log_1_args(SL_WLAN_CSI_CONFIG_WLAN_COMMAND_ERROR_SIGNATURE(component, level), a)
+#define SL_PRINTF_SL_WLAN_CSI_CONFIG_ERROR_IN_SENDING_COMMAND(debug_id, component, level, format, a)    sl_log_1_args(SL_WLAN_CSI_CONFIG_ERROR_IN_SENDING_COMMAND_SIGNATURE(component, level), a)
 #define SL_PRINTF_SL_SHA_PEN_ENTRY(debug_id, component, level)    sl_log_no_args(SL_SHA_PEN_ENTRY_SIGNATURE(component, level)) 
 #define SL_PRINTF_SL_SHA_PEN_COMMAND_GIVEN_IN_WRONG_STATE(debug_id, component, level)    sl_log_no_args(SL_SHA_PEN_COMMAND_GIVEN_IN_WRONG_STATE_SIGNATURE(component, level)) 
 #define SL_PRINTF_SL_SHA_PEN_INVALID_PARAM_1(debug_id, component, level)    sl_log_no_args(SL_SHA_PEN_INVALID_PARAM_1_SIGNATURE(component, level)) 

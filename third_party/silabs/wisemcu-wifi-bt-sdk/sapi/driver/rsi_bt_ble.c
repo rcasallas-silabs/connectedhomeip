@@ -315,10 +315,12 @@ uint16_t rsi_bt_get_proto_type(uint16_t rsp_type, rsi_bt_cb_t **bt_cb)
            || (rsp_type == RSI_BT_EVENT_HID_CONN) || (rsp_type == RSI_BT_EVENT_HID_RXDATA)
            || (rsp_type == RSI_BT_EVENT_PKT_CHANGE) || (rsp_type == RSI_BT_DISABLED_EVENT)
            || (rsp_type == BT_VENDOR_DYNAMIC_PWR_OPCODE) || (rsp_type == RSI_BT_EVT_AR_STATS)
+           || (rsp_type == BT_VENDOR_AFH_CLASSIFICATION_CMD_OPCODE)
            || ((rsp_type >= RSI_BT_REQ_A2DP_PCM_MP3_DATA_PREFILL_1)
                && (rsp_type <= RSI_BT_REQ_AVRCP_GET_TOT_NUM_ITEMS_RESP))
            || (rsp_type == RSI_BT_EVENT_L2CAP_CONN) || (rsp_type == RSI_BT_EVENT_L2CAP_RXDATA)
-           || ((rsp_type >= RSI_BT_REQ_ENABLE_AUTH) && (rsp_type <= RSI_BT_REQ_DEL_LINKKEYS)))
+           || ((rsp_type >= RSI_BT_REQ_ENABLE_AUTH) && (rsp_type <= RSI_BT_REQ_DEL_LINKKEYS))
+           || (rsp_type == RSI_BT_LINK_POLICY_CONFIG))
 
   {
     return_value = RSI_PROTO_BT_CLASSIC;
@@ -339,7 +341,8 @@ uint16_t rsi_bt_get_proto_type(uint16_t rsp_type, rsi_bt_cb_t **bt_cb)
              || (rsp_type == RSI_BT_REQ_IAP2_SEND_FILE_TRANSFER_DATA)
              || (rsp_type == RSI_BT_EVENT_IAP2_RX_FILE_TRANSFER_STATE)
              || (rsp_type == RSI_BT_EVENT_IAP2_RX_FILE_TRANSFER_DATA) || (rsp_type == RSI_BT_EVENT_IAP_CONN)
-             || (rsp_type == RSI_BT_EVENT_PKT_CHANGE) || (rsp_type == RSI_BT_REQ_A2DP_PCM_MP3_DATA_PREFILL_1)) {
+             || (rsp_type == RSI_BT_EVENT_PKT_CHANGE) || (rsp_type == RSI_BT_REQ_A2DP_PCM_MP3_DATA_PREFILL_1)
+             || (rsp_type == RSI_BT_LINK_POLICY_CONFIG)) {
     return_value = RSI_PROTO_BT_CLASSIC;
     *bt_cb       = rsi_driver_cb->bt_classic_cb;
   }
@@ -355,10 +358,10 @@ uint16_t rsi_bt_get_proto_type(uint16_t rsp_type, rsi_bt_cb_t **bt_cb)
            || (rsp_type == RSI_BLE_CMD_ATT_ERROR) || (rsp_type == RSI_BLE_CMD_SET_BLE_TX_POWER)
            || (rsp_type == RSI_BLE_CMD_INDICATE_SYNC)
            || ((rsp_type >= RSI_BLE_REQ_PROFILES_ASYNC) && (rsp_type <= RSI_BLE_EXECUTE_LONGDESCWRITE_ASYNC))
-           || (rsp_type == RSI_BLE_SET_SMP_PAIRING_CAPABILITY_DATA)
+           || (rsp_type == RSI_BLE_SET_SMP_PAIRING_CAPABILITY_DATA) || (rsp_type == RSI_BLE_REQ_SMP_PAIRING_FAILED)
            || ((rsp_type >= RSI_BLE_CONN_PARAM_RESP_CMD) && (rsp_type <= RSI_BLE_CMD_MTU_EXCHANGE_RESP))
-           || ((rsp_type >= RSI_BLE_EVENT_GATT_ERROR_RESPONSE)
-               && (rsp_type <= RSI_BLE_EVENT_MTU_EXCHANGE_INFORMATION))) {
+           || ((rsp_type >= RSI_BLE_EVENT_GATT_ERROR_RESPONSE) && (rsp_type <= RSI_BLE_EVENT_MTU_EXCHANGE_INFORMATION))
+           || (rsp_type == RSI_BLE_REQ_CONN_ENHANCE)) {
 
     return_value = RSI_PROTO_BLE;
     *bt_cb       = rsi_driver_cb->ble_cb;
@@ -682,8 +685,12 @@ int32_t rsi_driver_process_bt_resp(
     rsi_bt_set_status(bt_cb, status);
     if (bt_cb->expected_response_type == RSI_BT_EVENT_CARD_READY) {
       bt_cb->state = RSI_BT_STATE_OPERMODE_DONE;
-    } else {
-      bt_cb->state = RSI_BT_STATE_NONE;
+    }
+    if (status == RSI_SUCCESS) { //To not allow BT SetAddress after these states are triggered
+      if (bt_cb->expected_response_type == RSI_BLE_REQ_ADV || bt_cb->expected_response_type == RSI_BLE_REQ_SCAN
+          || bt_cb->expected_response_type == RSI_BLE_REQ_CONN) {
+        bt_cb->state = RSI_BT_STATE_NONE;
+      }
     }
     expected_resp = bt_cb->expected_response_type;
     // Clear expected response type
@@ -918,6 +925,10 @@ void rsi_bt_common_init(void)
   rsi_semaphore_wait(&bt_common_cb->bt_sem, RSI_BT_BLE_CMD_MAX_RESP_WAIT_TIME);
 }
 
+/** @} */
+/** @addtogroup BT-CLASSIC6
+* @{
+*/
 #ifdef RSI_BT_ENABLE
 /**
  * @brief       Register the GAP callbacks.
@@ -992,6 +1003,7 @@ void rsi_bt_gap_register_callbacks(rsi_bt_on_role_change_t bt_on_role_change_sta
   bt_specific_cb->bt_on_sniff_subrating_event            = bt_on_sniff_subrating_event;
   bt_specific_cb->bt_on_connection_initiated             = bt_on_connection_initiated;
 }
+/** @} */
 /** @addtogroup DRIVER14
 * @{
 */
@@ -1017,6 +1029,9 @@ void rsi_bt_gatt_extended_register_callbacks(rsi_bt_on_gatt_connection_t bt_on_g
 }
 /** @} */
 
+/** @addtogroup BT-CLASSIC6
+* @{
+*/
 /**
  * @brief       Register the AVDTP Event callbacks
  * @param[in]   bt_on_avdtp_stats_event - AVDP stats callback
@@ -1051,6 +1066,7 @@ void rsi_bt_pkt_change_events_register_callbacks(rsi_bt_pkt_change_stats_t bt_pk
 
   bt_specific_cb->bt_pkt_change_stats_event = bt_pkt_change_stats_event;
 }
+/** @} */
 
 /**
  * @brief       Register the chip memory stats callbacks.
@@ -1072,6 +1088,9 @@ void rsi_bt_on_chip_memory_status_callbacks_register(
   bt_specific_cb->bt_on_chip_memory_stats_event = bt_on_chip_memory_stats_event;
 }
 
+/** @addtogroup  BT-CLASSIC6
+* @{
+*/
 
 /**
  * @brief       Register events stats callbacks.
@@ -1089,6 +1108,7 @@ void rsi_bt_ar_events_register_callbacks(rsi_bt_on_ar_stats_t bt_on_ar_stats_eve
   bt_specific_cb->bt_on_ar_stats_event = bt_on_ar_stats_event;
 }
 
+/** @} */
 
 /**
  * @brief       Register the l2cap callbacks
@@ -1149,6 +1169,9 @@ void rsi_bt_hid_register_callbacks(rsi_bt_on_hid_connect_t bt_on_hid_connect_eve
   bt_specific_cb->bt_on_hid_set_proto       = bt_on_hid_set_proto;
 }
 
+/** @addtogroup BT-CLASSIC6
+* @{
+*/
 
 /**
  * @brief       Register the SPP callbacks
@@ -1335,6 +1358,7 @@ void rsi_bt_avrcp_target_register_callbacks(
 
   return;
 }
+/** @} */
 
 /**
  * @brief       Register the bt_hfp callbacks
@@ -2813,7 +2837,7 @@ void rsi_ble_callbacks_handler(rsi_bt_cb_t *ble_cb, uint16_t rsp_type, uint8_t *
   if (le_cmd_inuse_check) {
     uint8_t inx                 = 0;
     uint8_t *remote_dev_bd_addr = (uint8_t *)payload;
-    for (inx = 0; inx <= (RSI_BLE_MAX_NBR_SLAVES + RSI_BLE_MAX_NBR_MASTERS); inx++) {
+    for (inx = 0; inx < (RSI_BLE_MAX_NBR_SLAVES + RSI_BLE_MAX_NBR_MASTERS); inx++) {
       if (!memcmp(ble_cb->remote_ble_info[inx].remote_dev_bd_addr, remote_dev_bd_addr, RSI_DEV_ADDR_LEN)) {
         if (ble_cb->remote_ble_info[inx].cmd_in_use) {
           if ((rsp_type == RSI_BLE_EVENT_GATT_ERROR_RESPONSE)
@@ -2822,6 +2846,7 @@ void rsi_ble_callbacks_handler(rsi_bt_cb_t *ble_cb, uint16_t rsp_type, uint8_t *
             ble_cb->remote_ble_info[inx].expected_resp = 0;
           }
         }
+        break;
       }
     }
   }
@@ -2977,6 +3002,10 @@ uint16_t rsi_bt_prepare_common_pkt(uint16_t cmd_type, void *cmd_struct, rsi_pkt_
           break;
         case BT_VENDOR_DYNAMIC_PWR_OPCODE:
           payload_size = sizeof(rsi_bt_vendor_dynamic_pwr_cmd_t);
+          memcpy(pkt->data, cmd_struct, payload_size);
+          break;
+        case BT_VENDOR_AFH_CLASSIFICATION_CMD_OPCODE:
+          payload_size = sizeof(rsi_bt_vendor_afh_classification_cmd_t);
           memcpy(pkt->data, cmd_struct, payload_size);
           break;
         default:
@@ -3224,6 +3253,11 @@ uint16_t rsi_bt_prepare_classic_pkt(uint16_t cmd_type, void *cmd_struct, rsi_pkt
 
     case RSI_BT_REQ_DEL_LINKKEYS: {
       payload_size = sizeof(rsi_bt_cmd_delete_linkkeys_t);
+      memcpy(pkt->data, cmd_struct, payload_size);
+    } break;
+
+    case RSI_BT_LINK_POLICY_CONFIG: {
+      payload_size = sizeof(rsi_bt_cmd_link_policy_settings_t);
       memcpy(pkt->data, cmd_struct, payload_size);
     } break;
 
@@ -3649,6 +3683,11 @@ uint16_t rsi_bt_prepare_le_pkt(uint16_t cmd_type, void *cmd_struct, rsi_pkt_t *p
       memcpy(pkt->data, cmd_struct, payload_size);
     } break;
 
+    case RSI_BLE_REQ_CONN_ENHANCE: {
+      payload_size = sizeof(rsi_ble_req_enhance_conn_t);
+      memcpy(pkt->data, cmd_struct, payload_size);
+    } break;
+
     case RSI_BLE_CMD_CONN_PARAMS_UPDATE: {
       payload_size = sizeof(rsi_ble_cmd_conn_params_update_t);
       memcpy(pkt->data, cmd_struct, payload_size);
@@ -3675,6 +3714,11 @@ uint16_t rsi_bt_prepare_le_pkt(uint16_t cmd_type, void *cmd_struct, rsi_pkt_t *p
 
     case RSI_BLE_SMP_PASSKEY: {
       payload_size = sizeof(rsi_ble_smp_passkey_t);
+      memcpy(pkt->data, cmd_struct, payload_size);
+    } break;
+
+    case RSI_BLE_REQ_SMP_PAIRING_FAILED: {
+      payload_size = sizeof(rsi_ble_req_smp_pair_failed_t);
       memcpy(pkt->data, cmd_struct, payload_size);
     } break;
 
@@ -4052,7 +4096,7 @@ uint16_t rsi_bt_prepare_le_pkt(uint16_t cmd_type, void *cmd_struct, rsi_pkt_t *p
   if (le_buf_check || le_cmd_inuse_check || le_buf_in_use_check) {
     uint8_t inx                 = 0;
     uint8_t *remote_dev_bd_addr = (uint8_t *)cmd_struct;
-    for (inx = 0; inx <= (RSI_BLE_MAX_NBR_SLAVES + RSI_BLE_MAX_NBR_MASTERS); inx++) {
+    for (inx = 0; inx < (RSI_BLE_MAX_NBR_SLAVES + RSI_BLE_MAX_NBR_MASTERS); inx++) {
       if (!memcmp(le_cb->remote_ble_info[inx].remote_dev_bd_addr, remote_dev_bd_addr, RSI_DEV_ADDR_LEN)) {
 
         /* ERROR PRONE : Do not changes if else checks order */
@@ -4091,6 +4135,7 @@ uint16_t rsi_bt_prepare_le_pkt(uint16_t cmd_type, void *cmd_struct, rsi_pkt_t *p
             le_cb->remote_ble_info[inx].expected_resp = expected_resp;
           }
         }
+        break;
       }
     }
   }
@@ -4216,6 +4261,9 @@ int32_t rsi_bt_driver_send_cmd(uint16_t cmd, void *cmd_struct, void *resp)
     // Memset data
     memset(pkt->data, 0, (RSI_BLE_CMD_LEN - sizeof(rsi_pkt_t)));
     payload_size = rsi_bt_prepare_le_pkt(cmd, cmd_struct, pkt);
+    if (cmd == RSI_BLE_REQ_CONN_ENHANCE) {
+      cmd = RSI_BLE_REQ_CONN;
+    }
   }
 #endif
 

@@ -41,6 +41,10 @@
 #define RSI_SUPPORT_HTTP_V_1_1             BIT(6)
 #define RSI_HTTP_USER_DEFINED_CONTENT_TYPE BIT(7)
 
+// To specify index of SSL cert to be used for HTTPS, for index 0 leave them unset
+#define HTTPS_CERT_INDEX_1 BIT(9)
+#define HTTPS_CERT_INDEX_2 BIT(10)
+
 /******************************************************
  * *                    Constants
  * ******************************************************/
@@ -155,7 +159,7 @@ typedef struct rsi_req_http_credentials_s {
  * ******************************************************/
 #if RSI_HTTP_STATUS_INDICATION_EN
 int32_t rsi_http_client_async(uint8_t type,
-                              uint8_t flags,
+                              uint16_t flags,
                               uint8_t *ip_address,
                               uint16_t port,
                               uint8_t *resource,
@@ -173,7 +177,7 @@ int32_t rsi_http_client_async(uint8_t type,
 #else
 int32_t rsi_http_client_async(
   uint8_t type,
-  uint8_t flags,
+  uint16_t flags,
   uint8_t *ip_address,
   uint16_t port,
   uint8_t *resource,
@@ -595,7 +599,7 @@ typedef struct rsi_sntp_client {
   } server_ip_address;
   // SNTP server method
   uint8_t sntp_method;
-  uint8_t sntp_timeout[2];
+  uint8_t sntp_retry_count[2];
 } rsi_sntp_client_t;
 
 typedef struct rsi_sntp_server_info_rsp_t {
@@ -1213,7 +1217,6 @@ typedef struct rsi_http_client_post_data_req_s {
 //! if (BIT(4) | BIT(5)) set will treat as 3sec like so on....
 #define RSI_EMB_MQTT_TCP_MAX_RETRANSMISSION_CAP BIT(4)
 #endif
-
 // Emb MQTT Connect flags
 #define RSI_EMB_MQTT_USER_FLAG   BIT(7)
 #define RSI_EMB_MQTT_PWD_FLAG    BIT(6)

@@ -64,7 +64,7 @@ static ARM_DRIVER_I2C *I2Cdrv = &Driver_I2C1;
 extern ARM_DRIVER_I2C Driver_I2C1;
 
 /* General return codes */
-#define ARM_DRIVER_OK                 0 ///< Operation succeeded
+#define ARM_DRIVER_OK                0  ///< Operation succeeded
 #define ARM_DRIVER_ERROR             -1 ///< Unspecified error
 #define ARM_DRIVER_ERROR_BUSY        -2 ///< Driver is busy
 #define ARM_DRIVER_ERROR_TIMEOUT     -3 ///< Timeout occurred
@@ -75,7 +75,7 @@ extern ARM_DRIVER_I2C Driver_I2C1;
 ARM_DRIVER_I2C *drv_info1;
 
 volatile uint32_t tx_done1 = 0, rx_done1 = 0, xfer_done1 = 0, stop_det1 = 0;
-uint32_t cnt_num1 = 0 , I2C1_TRANSFER = 1 ;
+uint32_t cnt_num1 = 0, I2C1_TRANSFER = 1;
 I2C_RESOURCES i2c1;
 ARM_I2C_CAPABILITIES drv_capabilities1;
 
@@ -131,11 +131,10 @@ int32_t EEPROM_WriteBuf1(uint8_t sub_addr, const uint8_t *buf, uint32_t len)
 
   start = rsi_hal_gettickcount();
 
-  while ((I2Cdrv->GetStatus().busy))
-     {
-      if(!(rsi_hal_gettickcount() - start < 100))
-           return ARM_DRIVER_ERROR_TIMEOUT;
-     }
+  while ((I2Cdrv->GetStatus().busy)) {
+    if (!(rsi_hal_gettickcount() - start < 100))
+      return ARM_DRIVER_ERROR_TIMEOUT;
+  }
 
   cnt_num1 = I2Cdrv->GetDataCount();
   if (cnt_num1 != (len + 1)) {
@@ -227,7 +226,7 @@ void setup_i2c1(void)
   ARM_DRIVER_VERSION version;
 
   drv_info1 = &Driver_I2C1;
-  version  = drv_info1->GetVersion();
+  version   = drv_info1->GetVersion();
   if (version.api < 0x10A) {
     // error handling
     ErrorHandler1();
@@ -278,7 +277,7 @@ void ARM_I2C_SignalEvent1(uint32_t event)
 }
 int I2C1_Init(void)
 {
-	int32_t status = ARM_DRIVER_OK;
+  int32_t status = ARM_DRIVER_OK;
 
   /* Enable SysTick Timer */
   SysTick_Config(SystemCoreClock / SYSTIC_TIMER_CONFIG);
@@ -316,47 +315,46 @@ int I2c1_Transfer(void)
 	 * startup_RS1xxxx.c file
 	 */
   uint32_t forever = 1, comp = 0;
-	int32_t status = ARM_DRIVER_OK;
+  int32_t status = ARM_DRIVER_OK;
 
-    /* Writes data to EEPROM slave */
-    status = EEPROM_WriteBuf1(OFFSET_ADDR, buf1, TX_LEN);
-    if (status != ARM_DRIVER_OK) {
-      DEBUGOUT("\r\nFailed to Write Data into EEPROM(I2C1 Slave), Error Code : %d\r\n", status);
-      return status;
+  /* Writes data to EEPROM slave */
+  status = EEPROM_WriteBuf1(OFFSET_ADDR, buf1, TX_LEN);
+  if (status != ARM_DRIVER_OK) {
+    DEBUGOUT("\r\nFailed to Write Data into EEPROM(I2C1 Slave), Error Code : %d\r\n", status);
+    return status;
+  } else {
+    DEBUGOUT("\r\nWrite Data into EEPROM(I2C1 Slave)\r\n");
+  }
+
+  //5ms delay after stop to start
+  rsi_delay_ms(5);
+
+  /* Reads data from EEPROM slave */
+  status = EEPROM_ReadBuf1(OFFSET_ADDR, rd_buf1, RX_LEN);
+  if (status != ARM_DRIVER_OK) {
+    DEBUGOUT("\r\nFailed to Read Data From EEPROM(I2C1 Slave), Error Code : %d\r\n", status);
+    return status;
+  } else {
+    DEBUGOUT("\r\nStart Reading Data From EEPROM(I2C1 Slave)\r\n");
+  }
+
+  /*waits until rx_done=0  */
+  while (!rx_done1)
+    ;
+  rx_done1 = 0;
+  DEBUGOUT("\r\nCompleted Reading Data From EEPROM\r\n");
+  for (comp = 0; comp < sizeof(rd_buf1); comp++) {
+    if (buf1[comp] == rd_buf1[comp]) {
+      continue;
     } else {
-        DEBUGOUT("\r\nWrite Data into EEPROM(I2C1 Slave)\r\n");
-      }
-
-    //5ms delay after stop to start
-    rsi_delay_ms(5);
-
-    /* Reads data from EEPROM slave */
-    status = EEPROM_ReadBuf1(OFFSET_ADDR, rd_buf1, RX_LEN);
-    if (status != ARM_DRIVER_OK) {
-      DEBUGOUT("\r\nFailed to Read Data From EEPROM(I2C1 Slave), Error Code : %d\r\n", status);
-      return status;
-    } else {
-        DEBUGOUT("\r\nStart Reading Data From EEPROM(I2C1 Slave)\r\n");
-      }
-
-    /*waits until rx_done=0  */
-    while (!rx_done1)
-      ;
-    rx_done1 = 0;
-    DEBUGOUT("\r\nCompleted Reading Data From EEPROM\r\n");
-    for (comp = 0; comp < sizeof(rd_buf1); comp++) {
-      if (buf1[comp] == rd_buf1[comp]) {
-        continue;
-      } else {
-        break;
-      }
+      break;
     }
+  }
 
-    if (comp == sizeof(rd_buf1)) {
-      DEBUGOUT("\r\nI2C1 Data Comparison Success\r\n");
-      I2C1_TRANSFER = 0 ;
-    } else {
-     DEBUGOUT("\r\nI2C1 Data Comparison Fail\r\n");
-    }
+  if (comp == sizeof(rd_buf1)) {
+    DEBUGOUT("\r\nI2C1 Data Comparison Success\r\n");
+    I2C1_TRANSFER = 0;
+  } else {
+    DEBUGOUT("\r\nI2C1 Data Comparison Fail\r\n");
+  }
 }
-

@@ -16,7 +16,7 @@ xml_filter: Undefined
 sdk: {id: gecko_sdk, version: 4.1.0}
 sdk_extension:
   - id: wiseconnect
-    version: 1.0.0
+    version: 1.0.1
 source:
   - path: rsi_ble_datalength.c
 include:
@@ -36,18 +36,27 @@ other_file:
   - path: resources/readme/creationfinal114.png
   - path: resources/readme/ncpboarddetection112.png
   - path: resources/readme/ftdiprints118.png
+  - path: resources/readme/creationsoc1.png
   - path: resources/readme/imagebdlradio.png
   - path: resources/readme/keil_with_out_os.png
+  - path: resources/readme/buildsoc1.png
+  - path: resources/readme/buildsuccesssoc1.png
   - path: resources/readme/debugmodencp.png
+  - path: resources/readme/serial_teriminal_prints_soc1.png
   - path: resources/readme/buildincp.png
+  - path: resources/readme/scanning1.png
   - path: resources/readme/advertiser.png
   - path: resources/readme/debugmodesoc.png
+  - path: resources/readme/serialteriminalprintsncp.png
   - path: resources/readme/bledatalengthsoc.png
   - path: resources/readme/bledatalengthncp.png
   - path: resources/readme/device_connected1.png
   - path: resources/readme/buildingsoc.png
   - path: resources/readme/socboarddetection111.png
   - path: resources/readme/with_out_os.png
+  - path: resources/readme/device_connected2.png
+  - path: resources/readme/with_out_os2.png
+  - path: resources/readme/buildsuccessncp1.png
   - path: resources/readme/projctselection113.png
 ui_hints:
   highlight:

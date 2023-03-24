@@ -22,5 +22,3 @@
 #include "rsi_board.h"
 
 int Pin_Int0(void);
-
-

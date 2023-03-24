@@ -22,7 +22,7 @@
 
 /* User Configurable MACROs */
 #define SAMPLING_RATE 500000
-float vref                   = 2.8;  // Reference voltage of LDO, Min is 1.8V and Max is 3.3V
+float vref                   = 2.8; // Reference voltage of LDO, Min is 1.8V and Max is 3.3V
 int16_t input_sample_data[1] = { 0x33A };
 #ifdef CHIP_9117
 volatile uint8_t intr_occur;

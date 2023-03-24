@@ -270,6 +270,14 @@ int32_t rsi_http_client_app()
 
 #if LOAD_CERTIFICATE
   if (flags & HTTPS_SUPPORT) {
+    status = rsi_wlan_set_certificate(5, NULL, 0);
+    if (status != RSI_SUCCESS) {
+      LOG_PRINT("\r\nClear Certificate Failed, Error Code : 0x%lX\r\n", status);
+      return status;
+    } else {
+      LOG_PRINT("\r\nClear Certificate Success\r\n");
+    }
+
     //! Load certificates
     status = rsi_wlan_set_certificate(5, cacert, (sizeof(cacert) - 1));
     if (status != RSI_SUCCESS) {

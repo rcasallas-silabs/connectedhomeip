@@ -16,7 +16,7 @@ xml_filter: Undefined
 sdk: {id: gecko_sdk, version: 4.1.0}
 sdk_extension:
   - id: wiseconnect
-    version: 1.0.0
+    version: 1.0.1
 source:
   - path: rsi_ble_device_info.c
   - path: rsi_ble_main_task.c
@@ -38,6 +38,7 @@ toolchain_settings: []
 readme:
   - path: readme.md
 other_file:
+  - path: resources/readme/creationfinal1.png
   - path: resources/readme/ncpboarddetection112.png
   - path: resources/readme/ftdiprints118.png
   - path: resources/readme/multi_gatt_master1.png
@@ -50,17 +51,23 @@ other_file:
   - path: resources/readme/multigattslave1.png
   - path: resources/readme/debugmodencp.png
   - path: resources/readme/multi_gatt_slave1.png
+  - path: resources/readme/buildsoc3.png
   - path: resources/readme/advertiser.png
   - path: resources/readme/debugmodesoc.png
+  - path: resources/readme/projctselection1.png
   - path: resources/readme/image79blemulticonngatt.png
   - path: resources/readme/socboarddetection111.png
+  - path: resources/readme/with_out_os.png
   - path: resources/readme/multi_gatt_master2.png
   - path: resources/readme/multigattmaster2.png
   - path: resources/readme/multi_gatt_slave2.png
+  - path: resources/readme/buildsoc4.png
   - path: resources/readme/multigattmaster1.png
   - path: resources/readme/image79blemulticonngattncp.png
   - path: resources/readme/with_out_os1.png
   - path: resources/readme/image1.png
+  - path: resources/readme/buildsoc5.png
+  - path: resources/readme/buildsuccessncp1.png
 ui_hints:
   highlight:
     - path: readme.md

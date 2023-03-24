@@ -84,7 +84,7 @@
 #define PF_INET6 AF_INET6
 
 #ifndef INADDR_ANY
-#define INADDR_ANY              0
+#define INADDR_ANY 0
 #endif
 
 #define BSD_LOCAL_IF_INADDR_ANY 0xFFFFFFFF
@@ -310,6 +310,7 @@
 #ifdef CHIP_9117
 #define SO_MAX_RETRANSMISSION_TIMEOUT_VAL 48 /* to configure max retransmission timeout value*/
 #define SO_SSL_V_1_3_ENABLE               49 /* To enable ssl 1.3*/
+#define SO_SSL_RECV_BUFF_SIZE             50 /* To configure SSL Data path enhancement*/
 #endif
 #define MAX_RETRANSMISSION_TIME_VALUE 32
 
@@ -396,9 +397,9 @@ typedef enum rsi_socket_state_e {
 /******************************************************
  * *                    Structures
  * ******************************************************/
-typedef uint32_t rsi_time_t;
+typedef unsigned long rsi_time_t;
 
-typedef uint32_t rsi_suseconds_t;
+typedef unsigned long rsi_suseconds_t;
 
 typedef uint32_t rsi_socklen_t;
 
@@ -420,7 +421,7 @@ struct rsi_in6_addr {
 };
 
 #ifndef s6_addr
-#define s6_addr   _S6_un._S6_u8
+#define s6_addr _S6_un._S6_u8
 #endif
 
 #ifndef s6_addr32

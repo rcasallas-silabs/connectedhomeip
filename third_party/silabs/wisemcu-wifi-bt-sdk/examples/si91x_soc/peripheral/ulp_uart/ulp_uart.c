@@ -29,10 +29,10 @@
 #include "rsi_egpio.h"
 #include "rsi_rom_egpio.h"
 
-#define RESERVED_IRQ_COUNT    16
-#define EXT_IRQ_COUNT         98
+#define RESERVED_IRQ_COUNT   16
+#define EXT_IRQ_COUNT        98
 #define VECTOR_TABLE_ENTRIES (RESERVED_IRQ_COUNT + EXT_IRQ_COUNT)
-uint32_t ramVector[VECTOR_TABLE_ENTRIES] __attribute__ ((aligned(256)));
+uint32_t ramVector[VECTOR_TABLE_ENTRIES] __attribute__((aligned(256)));
 
 #define BUFFER_SIZE 1024
 
@@ -56,7 +56,6 @@ volatile uint32_t match = 0, unmatch = 0;
 void hardware_setup(void);
 
 void ARM_USART_SignalEvent(uint32_t event);
-
 
 // read capabilities
 
@@ -132,16 +131,16 @@ int main(void)
   int forever             = 1;
   volatile uint32_t i     = 0;
   volatile int32_t status = 0;
-  
-  //copying the vector table from flash to ram
-  memcpy(ramVector, (uint32_t*)SCB->VTOR, sizeof(uint32_t) * VECTOR_TABLE_ENTRIES);
 
-  //assing the ram vector adress to VTOR register 
+  //copying the vector table from flash to ram
+  memcpy(ramVector, (uint32_t *)SCB->VTOR, sizeof(uint32_t) * VECTOR_TABLE_ENTRIES);
+
+  //assing the ram vector adress to VTOR register
   SCB->VTOR = (uint32_t)ramVector;
 
   // Configures the system default clock and power configurations
   SystemCoreClockUpdate();
-  
+
   //Switching MCU from PS4 to PS2 state
   hardware_setup();
 
@@ -157,40 +156,40 @@ int main(void)
 
   if (status != ARM_DRIVER_OK) {
     return status;
-  } 
-  
-  // Power up the UART peripheral 
+  }
+
+  // Power up the UART peripheral
   status = USARTdrv->PowerControl(ARM_POWER_FULL);
   if (status != ARM_DRIVER_OK) {
     return status;
   }
 
-  // Enable Receiver and Transmitter lines 
+  // Enable Receiver and Transmitter lines
   status = USARTdrv->Control(ARM_USART_CONTROL_TX, 1);
   if (status != ARM_DRIVER_OK) {
 
     return status;
-  } 
+  }
 
   status = USARTdrv->Control(ARM_USART_CONTROL_RX, 1);
   if (status != ARM_DRIVER_OK) {
     return status;
-  } 
+  }
 
-  // Configure the UART to 115200 Bits/sec 
+  // Configure the UART to 115200 Bits/sec
   status = USARTdrv->Control(ARM_USART_MODE_ASYNCHRONOUS | ARM_USART_DATA_BITS_8 | ARM_USART_PARITY_NONE
-                             | ARM_USART_STOP_BITS_1 | ARM_USART_FLOW_CONTROL_NONE,
-                           BAUD_VALUE);
+                               | ARM_USART_STOP_BITS_1 | ARM_USART_FLOW_CONTROL_NONE,
+                             BAUD_VALUE);
   if (status != ARM_DRIVER_OK) {
 
     return status;
-  } 
+  }
 
-  // Receives data 
+  // Receives data
   status = USARTdrv->Receive(rx_buffer, sizeof(rx_buffer));
   if (status != ARM_DRIVER_OK) {
     return status;
-  } 
+  }
 
   // sends data
   status = USARTdrv->Send(tx_buffer, sizeof(tx_buffer));
@@ -199,7 +198,7 @@ int main(void)
     return status;
   }
 
-  // wait for the receive complete event 
+  // wait for the receive complete event
   while (read_rx_cnt == 0)
     ;
 
@@ -212,18 +211,17 @@ int main(void)
     }
   }
   if (match == BUFFER_SIZE) {
-    while(1)
-    {
-      #ifdef GPIO_TOGGLE
-        //Set pin 0 in GPIO mode
-        RSI_EGPIO_SetPinMux(EGPIO1, 0, 0, EGPIO_PIN_MUX_MODE0);
-        //Set output direction
-        RSI_EGPIO_SetDir(EGPIO1, 0, 0, EGPIO_CONFIG_DIR_OUTPUT);
+    while (1) {
+#ifdef GPIO_TOGGLE
+      //Set pin 0 in GPIO mode
+      RSI_EGPIO_SetPinMux(EGPIO1, 0, 0, EGPIO_PIN_MUX_MODE0);
+      //Set output direction
+      RSI_EGPIO_SetDir(EGPIO1, 0, 0, EGPIO_CONFIG_DIR_OUTPUT);
 
-        RSI_EGPIO_SetPin(EGPIO1, 0, 0, 1);
-        
-        RSI_EGPIO_SetPin(EGPIO1, 0, 0, 0);
-      #endif
+      RSI_EGPIO_SetPin(EGPIO1, 0, 0, 1);
+
+      RSI_EGPIO_SetPin(EGPIO1, 0, 0, 0);
+#endif
     }
   }
 
@@ -232,4 +230,3 @@ int main(void)
   // Statement will never reach here , just to satisfy the standard main
   return 0;
 }
-

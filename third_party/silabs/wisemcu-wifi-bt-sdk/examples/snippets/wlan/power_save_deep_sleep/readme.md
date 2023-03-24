@@ -1,10 +1,10 @@
 # Power Save Deep Sleep
 
-## Introduction 
+## 1 Introduction 
 
 This application demonstrates how to enable power save deep sleep profile with SiWx91x EVK. This application enables power save profile mode 8 and then wait in a scheduler for some time. Once it will come out of delay, it will connect to the configured AP and open udp client socket. It sends some packets to the udp server, disconnects from AP and goes back to deep sleep.
 
-## Setting Up
+## 2 Setting Up
 
 Before running the application, set up the following:
 
@@ -18,25 +18,75 @@ Before running the application, set up the following:
   - **SoC Mode**: 
       - Silicon Labs [BRD4325A](https://www.silabs.com/)
   - **NCP Mode**:
-      - Silicon Labs [(BRD4180A, BRD4280B)](https://www.silabs.com/); **AND**
+      - Silicon Labs [(BRD4180A, BRD4280B)](https://www.silabs.com/)
       - Host MCU Eval Kit. This example has been tested with:
         - Silicon Labs [WSTK + EFR32MG21](https://www.silabs.com/development-tools/wireless/efr32xg21-bluetooth-starter-kit)
 
 #### SoC Mode : 
 
-![Figure: Setup Diagram NCP Mode for Power Save Deep Sleep soc Example](resources/readme/powersavedeepsoc.png)
+![Figure: Setup Diagram NCP Mode for Power Save Deep Sleep soc Example](resources/readme/setup_soc.png)
 
 #### NCP Mode :  
 
-![Figure: Setup Diagram NCP Mode for Power Save Deep Sleep Example](resources/readme/powersavedeepsleep.png)
+![Figure: Setup Diagram NCP Mode for Power Save Deep Sleep Example](resources/readme/setup_ncp.png)
 
-### Project Setup
+## 3 Project Setup
 - **SoC Mode**
   - **Silicon Labs SiWx91x SoC**. Follow the [Getting Started with SiWx91x SoC](https://docs.silabs.com/) to setup the example to work with SiWx91x SoC and Simplicity Studio.
 - **NCP Mode**
   - **Silicon Labs EFx32 Host**. Follow the [Getting Started with EFx32](https://docs.silabs.com/rs9116-wiseconnect/latest/wifibt-wc-getting-started-with-efx32/) to setup the example to work with EFx32 and Simplicity Studio.
 
-## Configuring the Application
+## 4 Creating the project
+
+1. Ensure the SiWx91x loaded with the latest firmware following the [Getting started with a PC](https://docs.silabs.com/rs9116/latest/wiseconnect-getting-started). The firmware file is located at `<Si917 COMBO SDK>/connectivity_firmware/`.
+
+2. Ensure the EFx32 and SiWx91x set up is connected to your PC.
+
+### 4.1 Board detection
+
+### 4.1.1 SoC mode
+1. In the Simplicity Studio IDE, 
+    - The 917 SoC board will be detected under **Debug Adapters** pane as shown below.
+
+      **![Soc Board detection](resources/readme/soc_board_detection.png)**
+
+### 4.1.2 NCP mode
+
+1. In the Simplicity Studio IDE, 
+    - The EFR32 board will be detected under **Debug Adapters** pane as shown below.
+
+      **![EFR32 Board detection](resources/readme/efr32.png)**
+
+    - The EFM32 board will be detected under **Debug Adapters** pane as shown below.
+
+      **![EFM32 Board detection](resources/readme/efm32.png)**
+
+### 4.2 Creation of project
+
+Ensure the latest Gecko SDK along with the extension Si917 COMBO SDK is added to Simplicity Studio.
+
+1. Click on the board detected and go to **EXAMPLE PROJECTS & DEMOS** section.
+
+   **![Examples and Demos](resources/readme/examples_demos.png)**
+
+2. Filter for Wi-Fi examples from the Gecko SDK added. For this, check the *Wi-Fi* checkbox under **Wireless Technology** and *Gecko SDK Suite* checkbox under **Provider**. 
+
+3. Under provider, for SoC based example, check the *SoC* checkbox and for NCP based example, check the *NCP* checkbox.
+
+4. Now choose Wi-Fi- NCP Deep-Sleep Powersave example for NCP mode or choose Wi-Fi- SoC Deep-Sleep Powersave example for SoC mode and click on **Create**.
+  For NCP mode:
+
+   **![Power save deep sleep project](resources/readme/powersave_deepsleep_example.png)**
+
+    For SoC mode:
+      
+   **![Power save deep sleep project](resources/readme/powersave_deepsleep_example_soc.png)**
+
+5. Give the desired name to your project and cick on **Finish**.
+
+   **![Power save deep sleep project](resources/readme/create_project.png)**
+
+## 5 Configuring the Application
 The application can be configured to suit user requirements and development environment.
 Read through the following sections and make any changes needed. 
   
@@ -44,10 +94,10 @@ Read through the following sections and make any changes needed.
 
 * By default, the application is configured to use the SPI bus for interfacing between Host platforms(EFR32MG21) and the SiWx91x EVK.
 * While using the expansion board, the `EXP_BOARD=1` preprocessor symbol should be added to the list of defined symbols from the preprocessor menu of project settings.
-![Figure: Adding pre-processor symbol required for Expansion board](resources/readme/Exp-board-preprocessor.png)
+![Figure: Adding pre-processor symbol required for Expansion board](resources/images/exp-board-preprocessor.png)
 
 ### Bare Metal/RTOS Support
-To select a bare metal configuration, see [Selecting bare metal](#selecting-bare-metal).
+To select a bare metal configuration, see [Selecting bare metal](#8-selecting-bare-metal).
 
 ### Wi-Fi Configuration
 Configure the following parameters in **rsi_wlan_power_save_profile.c** to enable your Silicon Labs Wi-Fi device to connect to your Wi-Fi network.
@@ -248,43 +298,104 @@ RSI_WMM_PS_UAPSD_BITMAP refers UAPSD bitmap
 > If RSI_WMM_PS_ENABLE is enabled then user has to set PSP_TYPE to RSI_UAPSD in order to work with WMM power save mode. 
 
 
-## Testing the Application
+## 6 Building and Testing the Application
 
-Follow the below steps for the successful execution of the application.. 
+Follow the below steps for the successful execution of the application.
 
-### Loading the SiWx91x Firmware
+### 6.1 Loading the SiWx91x Firmware
 
 Refer [Getting started with a PC](https://docs.silabs.com/rs9116/latest/wiseconnect-getting-started) to load the firmware into SiWx91x EVK. The firmware file is located in `<SDK>/firmware/`
 
-## Creating the Project and builing the Application
+### 6.2 Building the Project
+#### 6.2.1. Building the Project - SoC Mode
+
+- Once the project is created, right click on project and go to properties → C/C++ Build → Settings → Build Steps.
+
+- Add **post_build_script_SimplicityStudio.bat** file path present at SI917_COMBO_SDK.X.X.X.XX → utilities → isp_scripts_common_flash in build steps settings as shown in below image.
+
+  ![postbuild_script](resources/readme/post_build_script.png)
+
+- Go to properties → C/C++ Build → Settings → Tool Settings → GNU ARM C Compiler → Preprocessor → Defined symbols (-D) and check for M4 projects macro (RSI_M4_INTERFACE=1) and 9117 macro (CHIP_9117=1). If not present, add the macros and click **Apply and Close**.
   
-Refer [Getting started with EFX32](https://docs.silabs.com/rs9116-wiseconnect/latest/wifibt-wc-getting-started-with-efx32/), for settin-up EFR & EFM host platforms
-### Project Creation - NCP Mode : 
+  ![Build Project for SoC mode](resources/readme/soc_macros.png)
 
-- Connect your board. The supported NCP boards are: **BRD4180A,BRD4280B**
-- Studio should detect your board. Your board will be shown here.
-![ncp_board_detection](resources/readme/ncpboarddetection112.png)
+- Click on the build icon (hammer) or right click on project name and choose **Build Project** to build the project.
 
-### Selecting an example application and generate project
+  ![building_pjt](resources/readme/build_project_soc.png)
 
-- Go to the 'EXAMPLE PROJECT & DEMOS' tab and select your desired example application
-![projct_selection](resources/readme/projctselection113.png)
-- Click 'Create'. The "New Project Wizard" window appears. Click 'Finish'
-![creation_final](resources/readme/creationfinal114.png)
+- Make sure the build returns 0 Errors and 0 Warnings.
+  
 
-#### Build Project - NCP Mode :
+#### 6.2.2. Build the Project - NCP Mode
 
-- Check for 9117 macro in preprocessor settings(CHIP_9117=1).
-- Click on the build icon (hammer) to build the project
-![building_pjt](resources/readme/buildingpjt115.png)
-- Successful build output will show as below.
-![build_success_soc](resources/readme/buildsuccesssoc116.png)
+- Check for CHIP_9117 macro in preprocessor settings as mentioned below.
+   - Right click on project name.
+   - Go to properties → C/C++ Build → Settings → Tool Settings → GNU ARM C Compiler → Preprocessor → Defined symbols (-D).
+   - If CHIP_9117 macro is not present, add it by clicking on add macro option.
+   - Click on **Apply and Close**.
 
-## Program the device
-Once the build was successfull, right click on project and click on Debug As->Silicon Labs ARM Program as shown in below image.
-![debug_mode_NCP](resources/readme/debugmodencp120.png)
+     ![Build Project for NCP mode](resources/readme/ncp_macros.png)
 
-## Running the SiWx91x Application
+- Click on the build icon (hammer) or right click on project name and choose **Build Project** to build the project.
+
+  ![Build Project for NCP mode](resources/readme/build_project_ncp.png)
+
+- Make sure the build returns 0 Errors and 0 Warnings.
+
+### 6.3 Set up for application prints
+
+Before setting up Tera Term, do the following for SoC mode.
+
+**SoC mode**: 
+You can use either of the below USB to UART converters for application prints.
+1. Set up using USB to UART converter board.
+
+  - Connect Tx (Pin-6) to P27 on WSTK
+  - Connect GND (Pin 8 or 10) to GND on WSTK
+
+    ![FTDI_prints](resources/readme/usb_to_uart_1.png)
+
+2. Set up using USB to UART converter cable.
+
+  - Connect RX (Pin 5) of TTL convertor to P27 on WSTK
+  - Connect GND (Pin1) of TTL convertor to GND on WSTK
+
+    ![FTDI_prints](resources/readme/usb_to_uart_2.png)
+
+**Tera term set up - for NCP and SoC modes**
+
+1. Open the Tera Term tool. 
+   - For SoC mode, choose the serial port to which USB to UART converter is connected and click on **OK**. 
+
+     **![](resources/readme/port_selection_soc.png)**
+
+   - For NCP mode, choose the J-Link port and click on **OK**.
+
+     **![](resources/readme/port_selection.png)**
+
+2. Navigate to the Setup → Serial port and update the baud rate to **115200** and click on **OK**.
+
+    **![](resources/readme/serial_port_setup.png)**
+
+    **![](resources/readme/serial_port.png)**
+
+The serial port is now connected. 
+
+### 6.4 Execute the application
+
+1. Once the build was successful, right click on project and select Debug As → Silicon Labs ARM Program to program the device as shown in below image.
+
+   **![debug_mode_NCP](resources/readme/program_device.png)**
+
+2. As soon as the debug process is completed, the application control branches to the main().
+
+3. Go to the J-link Silicon Labs console pane to observe the debug prints in the Serial 1 tab.
+
+4. Click on the **Resume** icon in the Simplicity Studio IDE toolbar to run the application.
+
+   **![Run](resources/readme/run.png)**
+
+## 7 Running the SiWx91x Application
 
 - Configure the Access point in OPEN / WPA-PSK / WPA2-PSK mode to connect SiWx91x EVK in STA mode.
 
@@ -292,37 +403,40 @@ Once the build was successfull, right click on project and click on Debug As->Si
 
     `iperf_demo.exe –s -u -p <SERVER_PORT> -i 1`
 
-![Open UDP server application using iperf application](resources/readme/imagep2.png)
+   ![Open UDP server application using iperf application](resources/readme/imagep2.png)
 
 - After program gets executed, SiWx91x EVK will go to sleep based on the selected power mode and wakes up after deep sleep timeout (Default deep sleep time is 3sec in RSI_SLEEP_MODE_8 with message based hand shake). Refer the given below image for power save cycle for default deep sleep time.
 
-![Power save cycle for default deep sleep time](resources/readme/imagep3.png)
+   ![Power save cycle for default deep sleep time](resources/readme/imagep3.png)
 
 - After successful wake up from deep sleep, SiWx91x EVK connects to AP and sends configured number of (NUMBER_OF_PACKETS) UDP packets to remote peer which is connected to Access point. Refer the given below image for reception of UDP data on UDP server.
 
-![Reception of UDP data on UDP server](resources/readme/imagep4.png)
+   ![Reception of UDP data on UDP server](resources/readme/imagep4.png)
 
 - After sending configured number of packets, SiWx91x EVK disconnects from connected AP and again repeat the above steps (It will again go to sleep and wakes up after time out, connects to AP and sends configured number of packets). Find below image for power save profile cycle.
 
-![power save profile cycle](resources/readme/imagep5.png)
+   ![power save profile cycle](resources/readme/imagep5.png)
 
 > Note:
 > This Application is for TA deep sleep only, M4 will be active.
 
+### Application Prints
 
-## Observing the output prints on serial terminal
+#### SoC mode
 
-### NCP Mode:
-Prints can see as below in any Console terminal
-![ouput_prints](resources/readme/ouputprints119.png)
+![Application Prints Soc](resources/readme/application_prints_soc.png)
 
-# Selecting Bare Metal
+#### NCP mode
+
+![Application Prints NCP](resources/readme/application_prints_ncp.png)
+
+# 8 Selecting Bare Metal
 The application has been designed to work with FreeRTOS and Bare Metal configurations. By default, the application project files (Simplicity studio) are configured with FreeRTOS enabled. The following steps demonstrate how to configure Simplicity Studio to test the application in a Bare Metal environment.
 
 ## Bare Metal with Simplicity Studio
 > - Open the project in Simplicity Studio
 > - Right click on the project and choose 'Properties'
-> - Go to 'C/C++ Build' | 'Settings' | 'GNU ARM C Compiler' | 'Symbols' and remove macro 'RSI_WITH_OS=1'
+> - Go to 'C/C++ Build' | 'Settings' | 'GNU ARM C Compiler' | 'Preprocessor' and remove macro 'RSI_WITH_OS=1'
 > - Select 'Apply' and 'OK' to save the settings
 
 ![Figure: project settings in Simplicity Studio](resources/readme/image216b.png) 

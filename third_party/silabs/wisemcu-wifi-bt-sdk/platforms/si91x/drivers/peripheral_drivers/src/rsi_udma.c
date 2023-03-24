@@ -26,15 +26,15 @@ extern "C" {
 
 /*==============================================*/
 /**
- * @fn          RSI_DRIVER_VERSION RSI_UDMA_GetVersion(void)
+ * @fn          RSI_DRIVER_VERSION_M4 RSI_UDMA_GetVersion(void)
  * @brief		This API is used to get version information of the driver implementation
  * @return 		vsDriverVersion - if success 
  *              RSI_UDMA_API_VERSION : Version of the CMSIS-Driver specification used to implement this driver.
  *              RSI_UDMA_DRV_VERSION : UDMA peripheral source code version of the actual driver implementation.
  */
-RSI_DRIVER_VERSION RSI_UDMA_GetVersion(void)
+RSI_DRIVER_VERSION_M4 RSI_UDMA_GetVersion(void)
 {
-  RSI_DRIVER_VERSION vsDriverVersion;
+  RSI_DRIVER_VERSION_M4 vsDriverVersion;
 
   vsDriverVersion.api = RSI_UDMA_API_VERSION;
   vsDriverVersion.drv = RSI_UDMA_DRV_VERSION;

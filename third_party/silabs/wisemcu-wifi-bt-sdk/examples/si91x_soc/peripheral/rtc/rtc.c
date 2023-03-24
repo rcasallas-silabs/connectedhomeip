@@ -52,13 +52,12 @@
 #define NO_OF_DAYS_IN_A_MONTH_3   30
 #define NO_OF_DAYS_IN_A_MONTH_4   31
 
-#define ENABLE_RC_CLOCK   1         //By using macro enable the Rc_Clock
-#define ENABLE_RO_CLOCK   0         //By using macro enable the Ro_Clock
-#define ALARM_INTR        1         //By using macro enable the ALARM_INTR
-#define MILLI_SEC_INTR    0         //By using macro enable the MILLI_SEC_INTR
-#define SEC_INTR          0         //By using macro enable the SEC_INTR
-#define GPIO_TOGGLE       1         //By using macro enable the GPIO_TOGGLE
-
+#define ENABLE_RC_CLOCK 1 //By using macro enable the Rc_Clock
+#define ENABLE_RO_CLOCK 0 //By using macro enable the Ro_Clock
+#define ALARM_INTR      1 //By using macro enable the ALARM_INTR
+#define MILLI_SEC_INTR  0 //By using macro enable the MILLI_SEC_INTR
+#define SEC_INTR        0 //By using macro enable the SEC_INTR
+#define GPIO_TOGGLE     1 //By using macro enable the GPIO_TOGGLE
 
 /* Private variables ---------------------------------------------------------*/
 /*<!RTC configuration structures     */
@@ -78,16 +77,16 @@ void NPSS_RTC_IRQ_Handler(void)
 
   statusRead = RSI_RTC_GetIntrStatus();
 
-  #if GPIO_TOGGLE
-   
-   RSI_EGPIO_SetPinMux(EGPIO1, 0, 5, EGPIO_PIN_MUX_MODE0);     //Set pin 0 in GPIO mode
-   
-   RSI_EGPIO_SetDir(EGPIO1, 0, 5, EGPIO_CONFIG_DIR_OUTPUT);    //Set output direction
+#if GPIO_TOGGLE
 
-   RSI_EGPIO_SetPin(EGPIO1, 0, 5, 1);
+  RSI_EGPIO_SetPinMux(EGPIO1, 0, 5, EGPIO_PIN_MUX_MODE0); //Set pin 0 in GPIO mode
 
-   RSI_EGPIO_SetPin(EGPIO1, 0, 5, 0);
-  #endif
+  RSI_EGPIO_SetDir(EGPIO1, 0, 5, EGPIO_CONFIG_DIR_OUTPUT); //Set output direction
+
+  RSI_EGPIO_SetPin(EGPIO1, 0, 5, 1);
+
+  RSI_EGPIO_SetPin(EGPIO1, 0, 5, 0);
+#endif
 
   /*Clear the milli seconds interrupt */
   if (statusRead & NPSS_TO_MCU_MSEC_INTR) {
@@ -198,13 +197,13 @@ int main(void)
   /*Configures the system default clock and power configurations*/
   SystemCoreClockUpdate();
 
-  #if ENABLE_RO_CLOCK
-    RSI_PS_FsmLfClkSel(KHZ_RO_CLK_SEL);
-  #endif
+#if ENABLE_RO_CLOCK
+  RSI_PS_FsmLfClkSel(KHZ_RO_CLK_SEL);
+#endif
 
-  #if ENABLE_RC_CLOCK
-    RSI_PS_FsmLfClkSel(KHZ_RC_CLK_SEL);
-  #endif
+#if ENABLE_RC_CLOCK
+  RSI_PS_FsmLfClkSel(KHZ_RC_CLK_SEL);
+#endif
 
 #ifdef DEBUG_UART
   /*Init debug UART*/
@@ -296,20 +295,20 @@ int main(void)
   /*Enable Alarm feature*/
   RSI_RTC_AlamEnable(RTC, ENABLE);
 
-  #if ALARM_INTR
+#if ALARM_INTR
   /*Enable RTC ALARM interrupt*/
-    RSI_RTC_IntrUnMask(RTC_ALARM_INTR);
-  #endif
+  RSI_RTC_IntrUnMask(RTC_ALARM_INTR);
+#endif
 
-  #if SEC_INTR
+#if SEC_INTR
   /*Enable RTC seconds interrupts\*/
-    RSI_RTC_IntrUnMask(RTC_SEC_INTR);
-  #endif
+  RSI_RTC_IntrUnMask(RTC_SEC_INTR);
+#endif
 
-  #if MILLI_SEC_INTR
+#if MILLI_SEC_INTR
   /*Enable RTC Milli-seconds interrupt\*/
-    RSI_RTC_IntrUnMask(RTC_MSEC_INTR);
-  #endif
+  RSI_RTC_IntrUnMask(RTC_MSEC_INTR);
+#endif
 
   /*Initilization RTC CALIBRATION*/
   RSI_RTC_CalibInitilization();

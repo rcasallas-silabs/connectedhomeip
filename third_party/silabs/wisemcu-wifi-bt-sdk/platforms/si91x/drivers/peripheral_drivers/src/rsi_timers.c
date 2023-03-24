@@ -27,15 +27,15 @@ extern "C" {
 
 /*==============================================*/
 /**
- * @fn           RSI_DRIVER_VERSION RSI_TIMERS_GetVersion(void)
+ * @fn           RSI_DRIVER_VERSION_M4 RSI_TIMERS_GetVersion(void)
  * @brief		 This API is used to get version information of the driver implementation 
- * @return 		 structure of type RSI_DRIVER_VERSION and its members are as below
+ * @return 		 structure of type RSI_DRIVER_VERSION_M4 and its members are as below
  *			     RSI_TIMERS_API_VERSION : Version of the CMSIS-Driver specification used to implement this driver.
  *  			 RSI_TIMERS_DRV_VERSION : TIMERS peripheral source code version of the actual driver implementation.
  */
-RSI_DRIVER_VERSION RSI_TIMERS_GetVersion(void)
+RSI_DRIVER_VERSION_M4 RSI_TIMERS_GetVersion(void)
 {
-  RSI_DRIVER_VERSION vsDriverVersion;
+  RSI_DRIVER_VERSION_M4 vsDriverVersion;
 
   vsDriverVersion.api = RSI_TIMERS_API_VERSION;
   vsDriverVersion.drv = RSI_TIMERS_DRV_VERSION;

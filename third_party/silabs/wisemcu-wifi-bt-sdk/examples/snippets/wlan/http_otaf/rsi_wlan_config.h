@@ -47,16 +47,16 @@
 
 //! To set Extended custom feature select bit map
 #ifdef RSI_M4_INTERFACE
-#define RSI_EXT_CUSTOM_FEATURE_BIT_MAP EXT_FEAT_256K_MODE
+#define RSI_EXT_CUSTOM_FEATURE_BIT_MAP RAM_LEVEL_NWP_MEDIUM_MCU_MEDIUM
 #else
-#define RSI_EXT_CUSTOM_FEATURE_BIT_MAP EXT_FEAT_384K_MODE
+#define RSI_EXT_CUSTOM_FEATURE_BIT_MAP RAM_LEVEL_NWP_ALL_MCU_ZERO
 #endif
 
 //! To set Extended TCPIP feature select bit map
 #define RSI_EXT_TCPIP_FEATURE_BITMAP (EXT_FEAT_HTTP_OTAF_SUPPORT | EXT_TCP_IP_SSL_16K_RECORD)
 //! Extended custom feature is selected internally
-//! CCP         -- EXT_FEAT_256K_MODE
-//! Wiseconnect -- EXT_FEAT_384K_MODE
+//! CCP         -- RAM_LEVEL_NWP_MEDIUM_MCU_MEDIUM
+//! Wiseconnect -- RAM_LEVEL_NWP_ALL_MCU_ZERO
 /*=======================================================================*/
 //! Feature frame parameters
 /*=======================================================================*/

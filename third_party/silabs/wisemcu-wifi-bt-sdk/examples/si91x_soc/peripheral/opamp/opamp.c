@@ -37,7 +37,7 @@
 #define OUTPUT_MUX_ENABLE 1
 /* Private variables ---------------------------------------------------------*/
 /* Verf configuration */
-float vref_value = 2.48; 					// Reference voltage of LDO, Min is 1.6V and Max is 3.3V
+float vref_value = 2.48; // Reference voltage of LDO, Min is 1.6V and Max is 3.3V
 /* Standard sin wave samples */
 int16_t input_sample_data[SAMPLE_LENGTH] = { 0x33A };
 

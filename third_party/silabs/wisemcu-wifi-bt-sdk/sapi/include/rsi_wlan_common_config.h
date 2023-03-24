@@ -33,6 +33,11 @@
 #include "rsi_wlan_defines.h"
 #include "rsi_user.h"
 #include <rsi_data_types.h>
+
+#ifdef CHIP_9117B0
+#define CHIP_9117 1
+#endif
+
 /******************************************************
  * *                      WLAN
  * ******************************************************/
@@ -365,6 +370,16 @@
 #define RSI_PRIVATE_KEY_PASSWORD ""
 #endif
 
+/* OKC value of EAP command
+BIT[0] - OKC (Opportunistic Key Caching)
+BIT[1] - CA certificate for PEAP connection.
+BIT[2-12] - EAP Ciphers list
+BIT[13-31] - Reserved
+*/
+#ifndef OKC_VALUE
+#define OKC_VALUE 0
+#endif
+
 /*=======================================================================*/
 
 // AP configuration command parameters
@@ -431,6 +446,9 @@
 #ifndef RSI_TX_TEST_RATE_FLAGS
 #define RSI_TX_TEST_RATE_FLAGS 0
 #endif
+
+// BIT description of PER rate flags
+#define RSI_TX_IMMEDIATE_TRANSFER BIT(6)
 
 // TX TEST per channel bandwidth
 #ifndef RSI_TX_TEST_PER_CH_BW

@@ -59,7 +59,7 @@
 #define RSI_CUSTOM_FEATURE_BIT_MAP (FEAT_CUSTOM_FEAT_EXTENTION_VALID)
 
 // To set Extended custom feature select bit map
-#define RSI_EXT_CUSTOM_FEATURE_BIT_MAP (EXT_FEAT_256K_MODE | BIT(1) | BIT(3) | BIT(27))
+#define RSI_EXT_CUSTOM_FEATURE_BIT_MAP (RAM_LEVEL_NWP_MEDIUM_MCU_MEDIUM | BIT(1) | BIT(3) | BIT(27))
 
 #define RSI_EXT_TCPIP_FEATURE_BITMAP 0
 
@@ -79,7 +79,7 @@
 
 //! To set Extended custom feature select bit map
 #define RSI_EXT_CUSTOM_FEATURE_BIT_MAP \
-  (EXT_FEAT_LOW_POWER_MODE | EXT_FEAT_XTAL_CLK_ENABLE | EXT_FEAT_256K_MODE | BIT(1) | BIT(3) | BIT(27))
+  (EXT_FEAT_LOW_POWER_MODE | EXT_FEAT_XTAL_CLK_ENABLE | RAM_LEVEL_NWP_MEDIUM_MCU_MEDIUM | BIT(1) | BIT(3) | BIT(27))
 
 #define RSI_EXT_TCPIP_FEATURE_BITMAP CONFIG_FEAT_EXTENTION_VALID
 
@@ -399,10 +399,10 @@
 //RSI_ENABLE or RSI_DISABLE Timeout support
 #define RSI_TIMEOUT_SUPPORT RSI_DISABLE
 
-// roaming threshold value
-#define RSI_TIMEOUT_BIT_MAP 1
+// timeout bitmap
+#define RSI_TIMEOUT_BIT_MAP RSI_ASSOCIATION_AND_AUTHENTICATION_TIMEOUT_MSEC
 
-// roaming hysteresis value
+// timeout value
 #define RSI_TIMEOUT_VALUE 1500
 
 // Timeout for ping request

@@ -32,10 +32,10 @@
 //! include file to refer data types
 #include "rsi_data_types.h"
 
-//! COMMON include file to refer wlan APIs
+//! COMMON include file to refer WLAN APIs
 #include "rsi_common_apis.h"
 
-//! WLAN include file to refer wlan APIs
+//! WLAN include file to refer WLAN APIs
 #include "rsi_wlan_apis.h"
 #include "rsi_wlan_non_rom.h"
 
@@ -43,6 +43,7 @@
 #include "rsi_socket.h"
 
 #include "rsi_bootup_config.h"
+
 //! Error include files
 #include "rsi_error.h"
 
@@ -52,6 +53,7 @@
 #ifdef RSI_M4_INTERFACE
 #include "rsi_board.h"
 #endif
+
 // WLAN include file for configuration
 #include "rsi_wlan_config.h"
 
@@ -85,15 +87,12 @@
 #if !(DHCP_MODE)
 
 //! IP address of the module
-//! E.g: 0x650AA8C0 == 192.168.10.101
 #define DEVICE_IP "192.168.10.101"
 
 //! IP address of Gateway
-//! E.g: 0x010AA8C0 == 192.168.10.1
 #define GATEWAY "192.168.10.1"
 
 //! IP address of netmask
-//! E.g: 0x00FFFFFF == 255.255.255.0
 #define NETMASK "255.255.255.0"
 
 #endif
@@ -105,7 +104,6 @@
 #define SERVER_PORT 5001
 
 //! Server IP address. Should be in reverse long format
-//! E.g: 0x640AA8C0 == 192.168.10.100
 #define SERVER_IP_ADDRESS "192.168.10.100"
 
 //! Number of packet to send or receive
@@ -119,13 +117,13 @@
 #define GLOBAL_BUFF_LEN 15000
 #endif
 
-//! Wlan task priority
+//! WLAN task priority
 #define RSI_WLAN_TASK_PRIORITY 1
 
 //! Wireless driver task priority
 #define RSI_DRIVER_TASK_PRIORITY 2
 
-//! Wlan task stack size
+//! WLAN task stack size
 #define RSI_WLAN_TASK_STACK_SIZE 500
 
 //! Wireless driver task stack size
@@ -185,7 +183,7 @@ int32_t rsi_tcp_client()
 #endif
 
 #ifdef RSI_WITH_OS
-  //! Silabs module intialisation
+  //! Silabs module initialization
   status = rsi_device_init(LOAD_NWP_FW);
   if (status != RSI_SUCCESS) {
     LOG_PRINT("\r\nDevice Initialization Failed, Error Code : 0x%X\r\n", status);
@@ -195,7 +193,7 @@ int32_t rsi_tcp_client()
   }
 #endif
 
-  //! WC initialization
+  //! Wireless initialization
   status = rsi_wireless_init(0, 0);
   if (status != RSI_SUCCESS) {
     LOG_PRINT("\r\nWireless Initialization Failed, Error Code : 0x%lX\r\n", status);
@@ -203,6 +201,7 @@ int32_t rsi_tcp_client()
   } else {
     LOG_PRINT("\r\nWireless Initialization Success\r\n");
   }
+
 #ifdef FW_LOGGING_ENABLE
   //! Set log levels for firmware components
   sl_set_fw_component_log_levels(&fw_component_log_level);
@@ -220,6 +219,7 @@ int32_t rsi_tcp_client()
 #ifdef RSI_WITH_OS
   //! Create firmware logging semaphore
   rsi_semaphore_create(&fw_log_app_sem, 0);
+
   //! Create firmware logging task
   rsi_task_create((rsi_task_function_t)sl_fw_log_task,
                   (uint8_t *)"fw_log_task",
@@ -264,17 +264,19 @@ int32_t rsi_tcp_client()
                                 0,
                                 0);
 #endif
+
     if (status != RSI_SUCCESS) {
       LOG_PRINT("\r\nIP Config Failed, Error Code : 0x%lX\r\n", status);
       return status;
     } else {
       LOG_PRINT("\r\nIP Config Success\r\n");
     }
+
 #if ENABLE_NOVUS_TEST
     //! Apply power save profile
     status = rsi_wlan_power_save_profile(PSP_MODE, PSP_TYPE);
     if (status != RSI_SUCCESS) {
-        return status;
+      return status;
     }
     LOG_PRINT("\r\nENABLE_POWER_SAVE Success\r\n");
 #endif
@@ -289,7 +291,7 @@ int32_t rsi_tcp_client()
       LOG_PRINT("\r\nSocket Create Success\r\n");
     }
 
-    //! To provide the tcp max retry count
+    //! To provide the TCP max retry count
     status = rsi_setsockopt(client_socket, SOL_SOCKET, SO_MAXRETRY, &max_tcp_retry, sizeof(max_tcp_retry));
     if (status != RSI_SUCCESS) {
       LOG_PRINT("\r\nSet Socket Options Failed, Error Code : 0x%lX\r\n", status);
@@ -298,7 +300,7 @@ int32_t rsi_tcp_client()
       LOG_PRINT("\r\nSet Socket Options Success\r\n");
     }
 
-    //! Memset client structrue
+    //! Memset client structure
     memset(&client_addr, 0, sizeof(client_addr));
 
     //! Set family type
@@ -340,8 +342,8 @@ int32_t rsi_tcp_client()
     } else {
       LOG_PRINT("\r\nConnect to Server Socket Success\r\n");
     }
-	
-	LOG_PRINT("\r\nTCP TX start\r\n");
+
+    LOG_PRINT("\r\nTCP TX start\r\n");
 
     while (packet_count < NUMBER_OF_PACKETS) {
       //! Send data on socket
@@ -353,25 +355,28 @@ int32_t rsi_tcp_client()
         LOG_PRINT("\r\nFailed to Send data to TCP Server, Error Code : 0x%lX\r\n", status);
         return status;
       }
+
 #ifndef RSI_WITH_OS
       rsi_wireless_driver_task();
 #endif
+
       packet_count++;
+
 #if ENABLE_NOVUS_TEST
       LOG_PRINT("\r\n PKT sent\r\n");
       rsi_delay_ms(PKT_SEND_INTERVAL);
 #endif
     }
 
-  LOG_PRINT("\r\nTCP TX complete\r\n");
+    LOG_PRINT("\r\nTCP TX complete\r\n");
 
-  //! closing socket after completing data transfer
-  status = rsi_shutdown(client_socket, 0);
-  if(status != RSI_SUCCESS){
-      LOG_PRINT("\r\nSocket Close Failed, Error Code : 0x%lX\r\n",status);
-  }else{
+    //! closing socket after completing data transfer
+    status = rsi_shutdown(client_socket, 0);
+    if (status != RSI_SUCCESS) {
+      LOG_PRINT("\r\nSocket Close Failed, Error Code : 0x%lX\r\n", status);
+    } else {
       LOG_PRINT("\r\nSocket Close Success\r\n");
-  }
+    }
 
 #ifdef RSI_WITH_OS
     rsi_task_suspend(NULL);
@@ -410,7 +415,7 @@ int main()
   }
 
 #ifndef RSI_WITH_OS
-  //! Silabs module intialisation
+  //! Silabs module initialization
   status = rsi_device_init(LOAD_NWP_FW);
   if (status != RSI_SUCCESS) {
     LOG_PRINT("\r\nDevice Initialization Failed, Error Code : 0x%lX\r\n", status);

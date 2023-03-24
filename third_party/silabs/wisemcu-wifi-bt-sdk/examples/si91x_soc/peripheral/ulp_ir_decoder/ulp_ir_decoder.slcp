@@ -9,7 +9,7 @@ quality: alpha
 sdk: {id: gecko_sdk, version: 4.1.0}
 sdk_extension:
   - id: wiseconnect
-    version: 1.0.0
+    version: 1.0.1
 source:
   - path: ulp_ir_decoder.c
   - path: hardware_setup.c
@@ -34,7 +34,6 @@ component:
   - id: rsilib_ir
     from: wiseconnect
 define:
-  - name: COMMON_FLASH_EN
   - name: RSI_M4_INTERFACE
   - name: M4_PS2_STATE
 provides:
@@ -43,9 +42,8 @@ template_contribution:
   - name: RAM_EXECUTION
     value: 1    
 other_file:
-  - path: resources\readme\image505a.png
-  - path: resources\readme\image505b.png
-  - path: resources\readme\image505c.png
+  - path: resources/readme/image505a.png
+  - path: resources/readme/image505c.png
 readme:
   - path: readme.md
 ui_hints:

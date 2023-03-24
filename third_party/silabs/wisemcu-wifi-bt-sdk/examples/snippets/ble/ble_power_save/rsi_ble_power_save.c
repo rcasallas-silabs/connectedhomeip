@@ -1,5 +1,5 @@
 /*******************************************************************************
- * @file  rsi_ble_power_save_ccp.c
+ * @file  rsi_ble_power_save.c
  * @brief
  *******************************************************************************
  * # License
@@ -135,6 +135,7 @@ rsi_semaphore_handle_t ble_slave_conn_sem;
 rsi_semaphore_handle_t ble_main_task_sem;
 static uint32_t ble_app_event_map;
 static uint32_t ble_app_event_map1;
+volatile uint32_t msp_value, psp_value, control_reg_val, pendsv_pri, systic_pri;
 /*=======================================================================*/
 //   ! EXTERN VARIABLES
 /*=======================================================================*/
@@ -153,6 +154,44 @@ static uint32_t ble_app_event_map1;
 /*==============================================*/
 #ifdef RSI_M4_INTERFACE
 /**
+  * @fn           void RSI_Save_Context(void)
+  * @brief        This function is to save Stack pointer value and Control registers.
+  *
+  */
+void RSI_Save_Context(void)
+{
+  msp_value       = __get_MSP();
+  psp_value       = __get_PSP();
+  control_reg_val = __get_CONTROL();
+}
+
+/**
+  * @fn           void RSI_Restore_Context(void)
+  * @brief        This function is to Restore Stack pointer value and Control registers.
+  *
+  */
+STATIC INLINE void RSI_Restore_Context(void)
+{
+  __set_CONTROL(control_reg_val);
+  __set_PSP(psp_value);
+  __set_MSP(msp_value);
+  /* Make PendSV and SysTick the lowest priority interrupts. */
+  portNVIC_SHPR3_REG |= portNVIC_PENDSV_PRI;
+  portNVIC_SHPR3_REG |= portNVIC_SYSTICK_PRI;
+}
+void IRQ026_Handler()
+{
+  volatile uint32_t wakeUpSrc = 0;
+
+  /*Get the wake up source */
+  wakeUpSrc = RSI_PS_GetWkpUpStatus();
+
+  /*Clear interrupt */
+  RSI_PS_ClrWkpUpStatus(NPSS_TO_MCU_WIRELESS_INTR);
+
+  return;
+}
+/**
  * @fn         rsi_ble_only_Trigger_M4_Sleep
  * @brief      Keeps the M4 In the Sleep 
  * @param[in]  none
@@ -165,7 +204,8 @@ void rsi_ble_only_Trigger_M4_Sleep(void)
 {
   /* Configure Wakeup-Source */
   RSI_PS_SetWkpSources(WIRELESS_BASED_WAKEUP);
-
+  /* sets the priority of an Wireless wakeup interrupt. */
+  NVIC_SetPriority(WIRELESS_WAKEUP_IRQHandler, WIRELESS_WAKEUP_IRQ_PRI);
   NVIC_EnableIRQ(WIRELESS_WAKEUP_IRQHandler);
 
 #ifndef FLASH_BASED_EXECUTION_ENABLE
@@ -193,6 +233,10 @@ void rsi_ble_only_Trigger_M4_Sleep(void)
 #ifdef COMMON_FLASH_EN
   M4SS_P2P_INTR_SET_REG &= ~BIT(3);
 #endif
+#ifdef RSI_WITH_OS
+  /* Save Stack pointer value and Control registers */
+  RSI_Save_Context();
+#endif
   /* Configure RAM Usage and Retention Size */
   //  RSI_WISEMCU_ConfigRamRetention(WISEMCU_192KB_RAM_IN_USE, WISEMCU_RETAIN_DEFAULT_RAM_DURING_SLEEP);
   RSI_PS_SetRamRetention(M4ULP_RAM16K_RETENTION_MODE_EN | ULPSS_RAM_RETENTION_MODE_EN | M4ULP_RAM_RETENTION_MODE_EN
@@ -204,7 +248,14 @@ void rsi_ble_only_Trigger_M4_Sleep(void)
                            (uint32_t)RSI_PS_RestoreCpuContext,
                            IVT_OFFSET_ADDR,
                            RSI_WAKEUP_FROM_FLASH_MODE);
-
+#endif
+#ifdef RSI_WITH_OS
+  /* Restore Stack pointer value and Control registers */
+  RSI_Restore_Context();
+  /* Enable M4_TA interrupt */
+  rsi_m4_ta_interrupt_init();
+  /*  Setup the systick timer */
+  vPortSetupTimerInterrupt();
 #endif
 #ifdef DEBUG_UART
   fpuInit();

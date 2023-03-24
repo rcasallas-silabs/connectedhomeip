@@ -87,7 +87,7 @@ typedef void (*func_ptr_arg1_t)(uint8_t);
 typedef struct _RSI_DRIVER_VERSION {
   uint16_t api; ///< API version
   uint16_t drv; ///< Driver version
-} RSI_DRIVER_VERSION;
+} RSI_DRIVER_VERSION_M4;
 
 /* General return codes */
 #define RSI_DRIVER_OK                0  ///< Operation succeeded

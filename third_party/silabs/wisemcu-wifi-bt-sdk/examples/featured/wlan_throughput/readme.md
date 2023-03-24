@@ -21,11 +21,11 @@ To use this application, the following hardware, software and project setup is r
 
 #### SoC Mode : 
 
-![Figure: Setup Diagram SoC Mode for WLAN Throughput Example](resources/readme/image210soc.png)
+![Figure: Setup Diagram SoC Mode for WLAN Throughput Example](resources/readme/setup_soc.png)
   
 #### NCP Mode :  
 
-![Figure: Setup Diagram NCP Mode for WLAN Throughput Example](resources/readme/image210ncp.png)
+![Figure: Setup Diagram NCP Mode for WLAN Throughput Example](resources/readme/setup_ncp.png)
 
 ### Project Setup
 - **SoC Mode**
@@ -176,7 +176,7 @@ The Iperf command to start the UDP client is:
 > `C:\> iperf.exe -c 192.168.0.100 -u -p 5001 -i 1 -b 50M -t 30`  
 
 ![Figure: UDP_RX](resources/readme/image217a.png)
-## TCP Tx Throuhgput
+## TCP Tx Throughput
 To measure TCP Tx throughput, configure the SiWx91x as a TCP client and start a TCP server on the remote PC.
 The Iperf command to start the TCP server is: 
 		
@@ -247,16 +247,19 @@ Refer [Getting started with EFX32](https://docs.silabs.com/rs9116-wiseconnect/la
 - Connect your board. The Si917 compatible SoC board is **BRD4325A**.
 - Studio should detect your board. Your board will be shown here.
 
-  ![soc_board_detection](resources/readme/socboarddetection111.png)
+  **![Soc Board detection](resources/readme/soc_board_detection.png)**
 
 ### Project creation - NCP Mode : 
 - Connect your board. The supported NCP boards are: **BRD4180A,BRD4280B**
-- Studio should detect your board. Your board will be shown here.
+- The EFR32 board will be detected under **Debug Adapters** pane as shown below.
 
-  ![ncp_board_detection](resources/readme/ncpboarddetection112.png)
+  **![EFR32 Board detection](resources/readme/efr32.png)**
 
+- The EFM32 board will be detected under **Debug Adapters** pane as shown below.
+
+  **![EFM32 Board detection](resources/readme/efm32.png)**
 ### Selecting an example application and generate project
-<br>SoC
+SoC
 - Go to the 'EXAMPLE PROJECT & DEMOS' tab and select Wi-Fi - SoC Throughput Test application
 
   ![projct_selection](resources/readme/projctselection113.png)
@@ -264,7 +267,7 @@ Refer [Getting started with EFX32](https://docs.silabs.com/rs9116-wiseconnect/la
 
   ![creation_final](resources/readme/creationfinal114.png)
 
-<br>NCP
+NCP
 - Go to the 'EXAMPLE PROJECT & DEMOS' tab and select Wi-Fi - NCP Throughput Test application
 
   ![projct_selection](resources/readme/projctselectionncp113.png)
@@ -277,50 +280,89 @@ Refer [Getting started with EFX32](https://docs.silabs.com/rs9116-wiseconnect/la
 - Once the project is created, right click on project and go to properties → C/C++ Build → Settings → Build Steps
 - Add post_build_script_SimplicityStudio.bat file path (SI917_COMBO_SDK.X.X.X.XX\utilities\isp_scripts_common_flash) in build steps settings as shown in below image.
   ![postbuild_script](resources/readme/image359.png)
-- Check for M4 projects macros in preprocessor settings(RSI_M4_INTERFACE=1)
-- Check for 9117 macro in preprocessor settings(CHIP_9117=1).
-- Click on the build icon (hammer) to build the project
+- Go to properties → C/C++ Build → Settings → Tool Settings → GNU ARM C Compiler → Preprocessor → Defined symbols (-D) and check for M4 projects macro (RSI_M4_INTERFACE=1) and 9117 macro (CHIP_9117=1). If not present, add the macros and click **Apply and Close**.
+  
+  ![Build Project for SoC mode](resources/readme/soc_macros.png)
 
-  ![building_pjt](resources/readme/buildingpjt115.png)
+- Click on the build icon (hammer) or right click on project name and choose **Build Project** to build the project.
+
+  ![building_pjt](resources/readme/build_project_soc.png)
 - Successful build output will show as below. 
 
   ![build_success_soc](resources/readme/buildsuccesssoc116.png)
 
 #### Build Project - NCP Mode :
 
-- Check for 9117 macro in preprocessor settings(CHIP_9117=1).
-- Click on the build icon (hammer) to build the project
+- Check for CHIP_9117 macro in preprocessor settings as mentioned below.
+   - Right click on project name.
+   - Go to properties → C/C++ General → Paths and Symbols → Symbols → GNU C.
+   - If CHIP_9117 macro is not present, add it by clicking on **ADD**.
+   - Click on **Apply and Close**.
 
-  ![building_pjt](resources/readme/buildingpjt115.png)
+     ![Build Project for NCP mode](resources/readme/ncp_macros.png)
+- Click on the build icon (hammer) or right click on project name and choose **Build Project** to build the project.
+
+  ![Build Project for NCP mode](resources/readme/build_project_ncp.png)
 - Successful build output will show as below.
 
   ![build_success_ncp](resources/readme/buildsuccessncp116.png)
 
 ## Program the device
 Once the build was successful, right click on project and click on Debug As->Silicon Labs ARM Program as shown in below image.
-<br> SoC
+ SoC
 
 ![debug_mode_soc](resources/readme/debugmodesoc117.png)
-<br> NCP
+
+ NCP
 
 ![debug_mode_NCP](resources/readme/debugmodencp120.png)
 
 ## Observing the output prints on serial terminal
 
-### SoC Mode:
-> Connect USB to UART connector Tx and GND pins to WSTK radio board.
+Before setting up Tera Term, do the following for SoC mode.
 
-   - Connect Tx(Pin-6) to P27 on WSTK
-   - Connect GND(Pin 8 or 10) to GND on WSTK
-![FTDI_prints](resources/readme/ftdiprints118.png)
-> Prints can see as below in any Console terminal
+**SoC mode**: 
+You can use either of the below USB to UART converters for application prints.
+1. Set up using USB to UART converter board.
 
-![ouput_prints](resources/readme/ouputprints119.png)
+  - Connect Tx (Pin-6) to P27 on WSTK
+  - Connect GND (Pin 8 or 10) to GND on WSTK
 
-### NCP Mode:
-Prints can see as below in any Console terminal
+    ![FTDI_prints](resources/readme/usb_to_uart_1.png)
+2. Set up using USB to UART converter cable.
 
-![ouput_prints](resources/readme/ouputprintsncp119.png)
+  - Connect RX (Pin 5) of TTL convertor to P27 on WSTK
+  - Connect GND (Pin1) of TTL convertor to GND on WSTK
+
+    ![FTDI_prints](resources/readme/usb_to_uart_2.png)
+
+**Tera term set up - for NCP and SoC modes**
+
+1. Open the Tera Term tool. 
+   - For SoC mode, choose the serial port to which USB to UART converter is connected and click on **OK**. 
+
+     **![](resources/readme/port_selection_soc.png)**
+
+   - For NCP mode, choose the J-Link port and click on **OK**.
+
+     **![](resources/readme/port_selection.png)**
+
+2. Navigate to the Setup → Serial port and update the baud rate to **115200** and click on **OK**.
+
+    **![](resources/readme/serial_port_setup.png)**
+
+    **![](resources/readme/serial_port.png)**
+
+The serial port is now connected.
+
+Application Prints
+ Soc
+
+  ![Application_Prints_SoC](resources/readme/outputprints119.png)
+
+ NCP
+
+  ![Application_Prints_NCP](resources/readme/outputprintsncp119.png)
 
 # Selecting Bare Metal
 The application has been designed to work with FreeRTOS and Bare Metal configurations. By default, the application project files (Simplicity studio) are configured with FreeRTOS enabled. The following steps demonstrate how to configure Simplicity Studio to test the application in a Bare Metal environment.

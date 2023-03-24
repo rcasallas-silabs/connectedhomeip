@@ -83,10 +83,10 @@
 #define CHANNEL_NO 0
 
 //! Security type
-#define SECURITY_TYPE RSI_OPEN
+#define SECURITY_TYPE RSI_WPA2
 
 //! Password
-#define PSK NULL
+#define PSK "12345678"
 
 //!SSL TLS versions
 
@@ -138,21 +138,21 @@ RSI_SSL_V_1_2                       BIT(3)
 
 //! IP address of the module
 //! E.g: 0x650AA8C0 == 192.168.10.101
-#define DEVICE_IP 0x650AA8C0
+#define DEVICE_IP "192.168.10.101"
 
 //! IP address of Gateway
 //! E.g: 0x010AA8C0 == 192.168.10.1
-#define GATEWAY 0x010AA8C0
+#define GATEWAY "192.168.10.1"
 
 //! IP address of netmask
 //! E.g: 0x00FFFFFF == 255.255.255.0
-#define NETMASK 0x00FFFFFF
+#define NETMASK "255.255.255.0"
 
 #endif
 
 //! Load certificate to device flash :
 //! Certificate could be loaded once and need not be loaded for every boot up
-#define LOAD_CERTIFICATE 1
+#define LOAD_CERTIFICATE 0
 
 //! Enable this macro if Webpage content is returned as HTTP response
 #define WEBPAGE_AS_HTTP_PUT_RESPONSE 0
@@ -211,6 +211,10 @@ uint8_t global_buf[GLOBAL_BUFF_LEN];
 rsi_semaphore_handle_t rsi_http_response_sem;
 #endif
 
+uint64_t ip_to_reverse_hex(char *ip);
+
+uint8_t ip_buff[20];
+
 //! prototypes
 void rsi_http_client_put_response_handler(uint16_t status,
                                           const uint8_t type,
@@ -234,9 +238,9 @@ int32_t rsi_http_client_app()
 {
   int32_t status = RSI_SUCCESS;
 #if !(DHCP_MODE)
-  uint32_t ip_addr      = DEVICE_IP;
-  uint32_t network_mask = NETMASK;
-  uint32_t gateway      = GATEWAY;
+  uint32_t ip_addr      = ip_to_reverse_hex((char *)DEVICE_IP);
+  uint32_t network_mask = ip_to_reverse_hex((char *)NETMASK);
+  uint32_t gateway      = ip_to_reverse_hex((char *)GATEWAY);
 #else
   uint8_t dhcp_mode = (RSI_DHCP | RSI_DHCP_UNICAST_OFFER);
 #endif
@@ -304,7 +308,7 @@ int32_t rsi_http_client_app()
 
   //! Configure IP
 #if DHCP_MODE
-  status = rsi_config_ipaddress(RSI_IP_VERSION_4, dhcp_mode, 0, 0, 0, NULL, 0, 0);
+  status = rsi_config_ipaddress(RSI_IP_VERSION_4, dhcp_mode, 0, 0, 0, ip_buff, sizeof(ip_buff), 0);
 #else
   status            = rsi_config_ipaddress(RSI_IP_VERSION_4,
                                 RSI_STATIC,
@@ -320,6 +324,9 @@ int32_t rsi_http_client_app()
     return status;
   } else {
     LOG_PRINT("\r\nIP Config Success\r\n");
+#if DHCP_MODE
+    LOG_PRINT("\r\nStation IP address: %d.%d.%d.%d \r\n", ip_buff[6], ip_buff[7], ip_buff[8], ip_buff[9]);
+#endif
   }
 
   //! Create HTTP client for PUT method

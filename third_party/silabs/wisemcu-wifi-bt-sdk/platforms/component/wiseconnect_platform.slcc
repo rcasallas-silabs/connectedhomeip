@@ -14,12 +14,21 @@ requires:
   - name: rsilib_board
     condition: 
       - brd4325a
+  - name: rsilib_board
+    condition: 
+      - brd4325b
   - name: rsilib_userconfig
+    condition:
+      - brd4325a
+  - name: rsilib_userconfig
+    condition:
+      - brd4325b
+  - name: si917_hal
     condition:
       - brd4325a
   - name: si917_hal
     condition:
-      - brd4325a
+      - brd4325b
   - name: brd2204a-gg11
     condition: 
       - brd2204a

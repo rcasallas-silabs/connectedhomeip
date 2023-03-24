@@ -45,11 +45,11 @@ To use this application, the following hardware, software and project setup is r
   
 #### SoC Mode : 
 
-![Figure: Setup Diagram for Device Shadow Example](resources/readme/image91soc.png)
+![Figure: Setup Diagram for Device Shadow Example](resources/readme/setup_soc.png)
   
 #### NCP Mode :  
 
-![Figure: Setup Diagram for Device Shadow Example](resources/readme/image91ncp.png)
+![Figure: Setup Diagram for Device Shadow Example](resources/readme/setup_ncp.png)
 
 ### Project Setup
 - **SoC Mode**
@@ -112,7 +112,7 @@ $> python3 certificate_to_array.py <input filename> <output arrayname>
 
 For example:
 $> python3 certificate_to_array.py d8f3a44d3f.cert.pem    aws_client_certificate
-$> python3 certificate_to_array.py d8f3a44d3f.private.key aws_client_private_certificate
+$> python3 certificate_to_array.py d8f3a44d3f.private.key aws_client_private_key
 ```
 
 After running the script on the certificate and private key, two new files are created.
@@ -144,14 +144,18 @@ Refer [Getting started with EFX32](https://docs.silabs.com/rs9116-wiseconnect/la
 - Connect your board. The Si917 compatible SoC board is **BRD4325A**.
 - Studio should detect your board. Your board will be shown here.
 
-  ![soc_board_detection](resources/readme/socboarddetection111.png)
+  **![Soc Board detection](resources/readme/soc_board_detection.png)**
 
 ### Project Creation - NCP Mode : 
 
 - Connect your board. The supported NCP boards are: **BRD4180A,BRD4280B**
-- Studio should detect your board. Your board will be shown here.
+- The EFR32 board will be detected under **Debug Adapters** pane as shown below.
 
-  ![ncp_board_detection](resources/readme/ncpboarddetection112.png)
+    **![EFR32 Board detection](resources/readme/efr32.png)**
+
+- The EFM32 board will be detected under **Debug Adapters** pane as shown below.
+
+    **![EFM32 Board detection](resources/readme/efm32.png)**
 
 ### Selecting an example application and generate project - SoC Mode:
 
@@ -169,7 +173,7 @@ Refer [Getting started with EFX32](https://docs.silabs.com/rs9116-wiseconnect/la
   ![projct_selection](resources/readme/projctselectionncp113.png)
 - Click 'Create'. The "New Project Wizard" window appears. Click 'Finish'
 
-  ![creation_final](resources/readme/creationfinalNCP114.png)
+  ![creation_final](resources/readme/creationfinalncp114.png)
 
 #### Build Project - SoC Mode
 
@@ -177,21 +181,27 @@ Refer [Getting started with EFX32](https://docs.silabs.com/rs9116-wiseconnect/la
 - Add post_build_script_SimplicityStudio.bat file path (SI917_COMBO_SDK.X.X.X.XX\utilities\isp_scripts_common_flash) in build steps settings as shown in below image.
 
   ![postbuild_script](resources/readme/image359.png)
-- Check for M4 projects macros in preprocessor settings(RSI_M4_INTERFACE=1)
-- Check for 9117 macro in preprocessor settings(CHIP_9117=1).
-- Click on the build icon (hammer) to build the project
+- Go to properties → C/C++ Build → Settings → Tool Settings → GNU ARM C Compiler → Preprocessor → Defined symbols (-D) and check for M4 projects macro (RSI_M4_INTERFACE=1) and 9117 macro (CHIP_9117=1). If not present, add the macros and click **Apply and Close**.
+  
+  ![Build Project for SoC mode](resources/readme/soc_macros.png)
 
-  ![building_pjt](resources/readme/buildingpjt115.png)
+- Click on the build icon (hammer) or right click on project name and choose **Build Project** to build the project.
+
+  ![building_pjt](resources/readme/buildingpjtsoc115.png)
 - Successful build output will show as below.
 
   ![build_success_soc](resources/readme/buildsuccesssoc116.png)
 
 #### Build Project - NCP Mode :
+ - Go to properties → C/C++ Build → Settings → Tool Settings → GNU ARM C Compiler → Preprocessor → Defined symbols (-D)
+ - If CHIP_9117 macro is not present, add it by clicking on add symbol.
+ - Click on **Apply and Close**.
 
-- Check for 9117 macro in preprocessor settings(CHIP_9117=1).
+     ![Build Project for NCP mode](resources/readme/ncp_macros.png)
+
 - Click on the build icon (hammer) to build the project
 
-  ![building_pjt](resources/readme/buildingpjt115.png)
+  ![building_pjt](resources/readme/buildingpjtncp115.png)
 
 - Successful build output will show as below.
 
@@ -200,11 +210,11 @@ Refer [Getting started with EFX32](https://docs.silabs.com/rs9116-wiseconnect/la
 ## Program the device
 
 Once the build was successful, right click on project and click on Debug As->Silicon Labs ARM Program as shown in below image.
-<br>SoC
+SoC
 
 ![debug_mode_soc](resources/readme/debugmodesoc117.png)
 
-<br>NCP
+NCP
 
 ![debug_mode_NCP](resources/readme/debugmodencp120.png)
 
@@ -215,11 +225,11 @@ After successful execution, device updates written to AWS can be observed in the
 ![Figure: Shadow Update Activity](resources/readme/image94.png)
 
 The following debug prints are displayed when the application runs successfully.
-<br> SoC
+ SoC
 
 ![Figure: Debug Prints](resources/readme/outputprints119.png)
 
-<br> NCP
+ NCP
 
 ![Figure: Debug Prints](resources/readme/outputprintsncp119.png)
 
@@ -227,20 +237,40 @@ The following debug prints are displayed when the application runs successfully.
 ## Observing the output prints on serial terminal
 
 ### SoC Mode:
-> Connect USB to UART connector Tx and GND pins to WSTK radio board.
+You can use either of the below USB to UART converters for application prints.
+1. Set up using USB to UART converter board.
 
-   - Connect Tx(Pin-6) to P27 on WSTK
-   - Connect GND(Pin 8 or 10) to GND on WSTK
+  - Connect Tx (Pin-6) to P27 on WSTK
+  - Connect GND (Pin 8 or 10) to GND on WSTK
 
-![FTDI_prints](resources/readme/ftdiprints118.png)
-> Prints can see as below in any Console terminal
+    ![FTDI_prints](resources/readme/usb_to_uart_1.png)
 
-![ouput_prints](resources/readme/outputprints119.png)
+2. Set up using USB to UART converter cable.
 
-### NCP Mode:
-Prints can see as below in any Console terminal
+  - Connect RX (Pin 5) of TTL convertor to P27 on WSTK
+  - Connect GND (Pin1) of TTL convertor to GND on WSTK
 
-![ouput_prints](resources/readme/outputprintsncp119.png)
+    ![FTDI_prints](resources/readme/usb_to_uart_2.png)
+
+**Tera term set up - for NCP and SoC modes**
+
+1. Open the Tera Term tool. 
+   - For SoC mode, choose the serial port to which USB to UART converter is connected and click on **OK**. 
+
+     **![](resources/readme/port_selection_soc.png)**
+
+   - For NCP mode, choose the J-Link port and click on **OK**.
+
+     **![](resources/readme/port_selection.png)**
+
+2. Navigate to the Setup → Serial port and update the baud rate to **115200** and click on **OK**.
+
+    **![](resources/readme/serial_port_setup.png)**
+
+    **![](resources/readme/serial_port.png)**
+
+The serial port is now connected. 
+
 
 # Selecting Bare Metal
 The application has been designed to work with FreeRTOS and Bare Metal configurations. By default, the application project files (Simplicity studio) are configured with FreeRTOS enabled. The following steps demonstrate how to configure Simplicity Studio to test the application in a Bare Metal environment.
@@ -268,19 +298,19 @@ Create a thing in the AWS IoT registry to represent your IoT Device.
 * If a **You don't have any things yet** dialog box is displayed, choose **Register a thing**. Otherwise, choose **Create**.
 * Click on **Create things**.
 
-<img alt = "AWS thing" src = "resources/readme/aws_create_thing_step2.png" height = 60% width = 60%>
+![AWS thing](resources/readme/aws_create_thing_step2.png)
 
 * On the **Create things** page, choose **Create a single thing** and click next.
 
-<img alt = "AWS thing creation" src = "resources/readme/aws_create_thing_step3.png" height = 60% width = 60%>
+![AWS thing creation](resources/readme/aws_create_thing_step3.png)
 
 * On the **Specify thing properties** page, enter a name for your IoT thing (for example, **Test_IoT**), and choose **Unnamed shadow (classic)** in the Device Shadow section, then choose **Next**. You can't change the name of a thing after you create it. To change a thing's name, you must create a new thing, give it the new name, and then delete the old thing.
 
-<img alt = "Add Device" src = "resources/readme/aws_create_thing_step4.png" height = 60% width = 60%>
+![Add Device](resources/readme/aws_create_thing_step4.png)
 
 * During **Configure device certificate** step, choose **Auto-generate a new certificate (recommended)** option and click next.
 
-<img alt = "Add Device" src = "resources/readme/aws_create_thing_step5.png" height = 60% width = 60%>
+![Add Device](resources/readme/aws_create_thing_step5.png)
 
 * Choose the **Download** links to download the device certificate, private key, and root CA certificate. Root CA certificate is already present in SDK (aws_starfield_ca.pem.h), and can be directly used.
   > **Warning:** This is the only instance you can download your device certificate and private key. Make sure to save them safely. 
@@ -290,12 +320,12 @@ Create a thing in the AWS IoT registry to represent your IoT Device.
 * To attach an existing policy choose the policy and click on create thing, if policy is not yet created Choose Create policy and fill the fields as mentioned in the following images.
 
 choosing an existing policy
-<br>
-<img alt = "Attach Policy" src = "resources/readme/aws_choosing_policy.png" height = "50%" width = "50%">
+
+![Attach Policy](resources/readme/aws_choosing_policy.png)
 
 creating a policy - step 1
-<br>
-<img alt = "Create policy Policy" src = "resources/readme/aws_create_thing_attach_policy.png" height = "50%" width = "50%">
+
+![Create policy Policy](resources/readme/aws_create_thing_attach_policy.png)
 
 creating a policy - step 2 (filling the fields)
 Give the **Name** to your Policy, Fill **Action** and **Resource ARN** as shown in below image, Click on **Allow** under **Effect** and click **Create**
@@ -316,7 +346,7 @@ Give the **Name** to your Policy, Fill **Action** and **Resource ARN** as shown 
 
 * Click on **Create**
    
-<img src = "resources/readme/aws_create_policy.png"  alt = "create policy">
+![create policy](resources/readme/aws_create_policy.png)
 
 * Give the **Name** to your Policy, Fill **Action** and **Resource ARN** as shown in below image, Click on **Allow** under **Effect** and click **Create**
    

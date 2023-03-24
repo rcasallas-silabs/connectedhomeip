@@ -75,7 +75,9 @@ extern "C" {
 #define SENSOR6_ENABLE 0
 #define SENSOR7_ENABLE 1
 #define SENSOR8_ENABLE 1
-
+/** @addtogroup SOC21
+* @{
+*/
 /*===================================================*/
 /**   
  * @fn          STATIC INLINE void RSI_CTS_BypassPRS(CTS_Type *cts,boolean_t enable)
@@ -237,5 +239,5 @@ void RSI_CTS_TouchDetection(uint16_t *fifo_read, uint8_t *sensor_count);
 #endif
 
 #endif  // RSI_CTS_H
-
+/** @} */
 

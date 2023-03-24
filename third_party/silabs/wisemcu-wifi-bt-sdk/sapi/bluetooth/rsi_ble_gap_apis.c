@@ -30,6 +30,14 @@ uint8_t pwr_index_to_db_array[] = { 11, 13, 17, 23, 31, 44, 45, 47, 49, 52, 55, 
                                     63, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78 };
 
 /**
+ * Structure for Power index and corresponding output power in db for WMS module
+ * The values are in dBm at Antenna
+ * index 0 corresponds to -8 dBm , array size is 24
+ */
+uint8_t wms_pwr_index_to_db_array[] = { 8,  10, 13, 18, 29, 39, 40, 41, 42, 44, 45, 48,
+                                        50, 54, 61, 70, 71, 72, 73, 74, 75, 76, 77, 78 };
+
+/**
  * @fn         uint8_t rsi_convert_db_to_powindex(int8_t tx_power_in_dBm)
  * @brief      Convert power from dBm to power index.
  * @param[in]  tx_power_in_dBm - tx power in  dBm( -8 dBm to 15 dBm)
@@ -38,15 +46,33 @@ uint8_t pwr_index_to_db_array[] = { 11, 13, 17, 23, 31, 44, 45, 47, 49, 52, 55, 
  */
 uint8_t rsi_convert_db_to_powindex(int8_t tx_power_in_dBm)
 {
-
+  module_type mod_type_temp;
+  int16_t status;
   SL_PRINTF(SL_RSI_CONVERT_DB_TO_POWERINDEX_TRIGGER, BLE, LOG_INFO);
-  /* Converting At antenna  dBm to On screen dBm  */
-  tx_power_in_dBm += BLE_OUTPUT_POWER_FRONT_END_LOSS;
-  if ((tx_power_in_dBm < -8) || (tx_power_in_dBm > 15)) {
-    return 0;
+  status = rsi_get_module_type(&mod_type_temp);
+  if (status == RSI_SUCCESS) {
+    tx_power_in_dBm += BLE_OUTPUT_POWER_FRONT_END_LOSS;
+    if ((tx_power_in_dBm < RSI_MIN_OUTPUT_POWER_IN_DBM) || (tx_power_in_dBm > RSI_MAX_OUTPUT_POWER_IN_DBM)) {
+      return 0;
+    }
+    /* Converting At antenna  dBm to On screen dBm  */
+    tx_power_in_dBm -= RSI_MIN_OUTPUT_POWER_IN_DBM;
+    switch (mod_type_temp) {
+      case RSI_MODULE_TYPE_WMS: {
+        return (wms_pwr_index_to_db_array[tx_power_in_dBm]);
+        //no break
+      }
+      case RSI_MODULE_TYPE_Q7:
+      case RSI_MODULE_TYPE_SB:
+      case RSI_MODULE_TYPE_M7DB:
+      case RSI_MODULE_TYPE_M4SB:
+      default: {
+        return (pwr_index_to_db_array[tx_power_in_dBm]);
+        //no break
+      }
+    }
   }
-  tx_power_in_dBm += 8;
-  return (pwr_index_to_db_array[tx_power_in_dBm]);
+  return 0;
 }
 
 /** @addtogroup BT-LOW-ENERGY1
@@ -522,6 +548,30 @@ int32_t rsi_ble_connect(uint8_t remote_dev_addr_type, int8_t *remote_dev_addr)
 
 /*==============================================*/
 /**
+ * @fn         int32_t rsi_ble_enhance_connect_with_params(void* ble_enhance_conn_params)
+ * @brief      Connect to the remote BLE device with the user configured parameters.
+ * @pre        Call \ref rsi_wireless_init() before calling this API.
+ * @param[in]  ble_enhance_conn_params - BLE enhance connection parameter structure
+ * @return     0 - Success \n
+ *             Non-Zero Value - Failure \n
+ *             If the return value is less than 0 \n
+ *             -4 - Buffer not available to serve the command
+ */
+
+int32_t rsi_ble_enhance_connect_with_params(void *ble_enhance_conn_params)
+{
+  rsi_ble_req_enhance_conn_t ble_enhance_conn = { 0 };
+
+  if (ble_enhance_conn_params != NULL) {
+    memcpy(&ble_enhance_conn,
+           (rsi_ble_req_enhance_conn_t *)ble_enhance_conn_params,
+           sizeof(rsi_ble_req_enhance_conn_t));
+  }
+  return rsi_bt_driver_send_cmd(RSI_BLE_REQ_CONN_ENHANCE, &ble_enhance_conn, NULL);
+}
+
+/*==============================================*/
+/**
  * @fn         int32_t rsi_ble_connect_cancel(int8_t *remote_dev_address)
  * @brief      Cancel the connection to the remote BLE device. This is a blocking API. \n
  *             A received event \ref rsi_ble_on_disconnect_t indicates disconnect complete.
@@ -727,6 +777,41 @@ int32_t rsi_ble_smp_pair_request(uint8_t *remote_dev_address, uint8_t io_capabil
   smp_pair_req.mitm_req      = mitm_req;
 
   return rsi_bt_driver_send_cmd(RSI_BLE_REQ_SMP_PAIR, &smp_pair_req, NULL);
+}
+
+/** @} */
+/** @addtogroup BT-LOW-ENERGY1
+* @{
+*/
+/*==============================================*/
+/**
+ * @fn         int32_t rsi_ble_smp_pair_failed(uint8_t *remote_dev_address ,uint8_t reason)
+ * @brief      Send SMP pairing failure reason to the remote device.
+ * @pre        \ref rsi_ble_connect() API needs to be called before this API.
+ * @param[in]  remote_dev_address -  This is the remote device address
+ * @param[in]  reason - This is the reason for SMP Pairing Failure \n
+ *                            0x05 - Pairing Not Supported \n
+ *                            0x09 - Repeated Attempts \n
+ * @return     0 - Success \n
+ *             Non-Zero Value - Failure \n
+ *             If the return value is less than 0 \n
+ *             -4 - Buffer not available to serve the command
+ */
+
+int32_t rsi_ble_smp_pair_failed(uint8_t *remote_dev_address, uint8_t reason)
+{
+
+  rsi_ble_req_smp_pair_failed_t smp_pair_failed;
+  memset(&smp_pair_failed, 0, sizeof(smp_pair_failed));
+
+#ifdef BD_ADDR_IN_ASCII
+  rsi_ascii_dev_address_to_6bytes_rev(smp_pair_failed.dev_addr, remote_dev_address);
+#else
+  memcpy(smp_pair_failed.dev_addr, (int8_t *)remote_dev_address, 6);
+#endif
+  smp_pair_failed.reason = reason;
+
+  return rsi_bt_driver_send_cmd(RSI_BLE_REQ_SMP_PAIRING_FAILED, &smp_pair_failed, NULL);
 }
 
 /*==============================================*/

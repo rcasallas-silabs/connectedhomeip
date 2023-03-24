@@ -45,7 +45,6 @@
 //! Error include files
 #include "rsi_error.h"
 
-
 //! Hardware and powersave related include files
 #include "rsi_board.h"
 #include "rsi_chip.h"
@@ -242,13 +241,13 @@ int main()
   P2P_STATUS_REG &= ~(BIT(0));
 
 #ifndef GPIO_TOGGLE
-   //Set pin 0 in GPIO mode
-   RSI_EGPIO_SetPinMux(EGPIO1, 0, 0, EGPIO_PIN_MUX_MODE0);
-   //Set output direction
-   RSI_EGPIO_SetDir(EGPIO1, 0, 0, EGPIO_CONFIG_DIR_OUTPUT);
+  //Set pin 0 in GPIO mode
+  RSI_EGPIO_SetPinMux(EGPIO1, 0, 0, EGPIO_PIN_MUX_MODE0);
+  //Set output direction
+  RSI_EGPIO_SetDir(EGPIO1, 0, 0, EGPIO_CONFIG_DIR_OUTPUT);
 
-   RSI_EGPIO_SetPin(EGPIO1, 0, 0, 1);
-   RSI_EGPIO_SetPin(EGPIO1, 0, 0, 0);
+  RSI_EGPIO_SetPin(EGPIO1, 0, 0, 1);
+  RSI_EGPIO_SetPin(EGPIO1, 0, 0, 0);
 #endif
   //! Driver initialization
   status = rsi_driver_init(global_buf, GLOBAL_BUFF_LEN);
@@ -264,12 +263,12 @@ int main()
     DEBUGOUT("\r\nDevice Initialization Success\r\n");
   }
 
-	//I2c apploication
-  status=i2c_exp();
+  //I2c apploication
+  status = i2c_exp();
 
   DEBUGOUT("\r\nCCP-Power-save Deep_Sleep_Without_Retention Application Demo\r\n");
-  
-    //! NON - OS case
+
+  //! NON - OS case
   //! CallPower save application
   status = rsi_powersave_profile_app();
 

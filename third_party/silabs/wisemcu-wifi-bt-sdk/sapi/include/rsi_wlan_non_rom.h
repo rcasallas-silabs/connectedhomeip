@@ -42,7 +42,7 @@ typedef enum {
 
 #define RSI_SSL_HEADER_SIZE 90
 
-#define RSI_MAX_NUM_CALLBACKS 19
+#define RSI_MAX_NUM_CALLBACKS 20
 
 #ifdef CHIP_9117
 #define MAX_SIZE_OF_EXTENSION_DATA 256
@@ -121,6 +121,7 @@ typedef struct rsi_socket_info_non_rom_s {
 #ifdef CHIP_9117
   //! max retransmission timeout value.
   uint8_t max_retransmission_timeout_value;
+  uint16_t ssl_buff_len;
 #endif
 } rsi_socket_info_non_rom_t;
 
@@ -216,6 +217,9 @@ typedef struct rsi_callback_cb_s {
 
   //TWT status response handler
   void (*twt_response_handler)(uint16_t status, uint8_t *buffer, const uint32_t length);
+
+  //CSI data receive response handler
+  void (*wlan_receive_csi_data_response_handler)(uint16_t status, uint8_t *buffer, const uint32_t length);
 } rsi_callback_cb_t;
 
 // enumerations for call back types
@@ -239,7 +243,8 @@ typedef enum rsi_callback_id_e {
   RSI_FLASH_WRITE_RESPONSE                  = 16,
   RSI_WLAN_ASSERT_NOTIFY_CB                 = 17,
   RSI_WLAN_MAX_TCP_WINDOW_NOTIFY_CB         = 18,
-  RSI_WLAN_TWT_RESPONSE_CB                  = 19
+  RSI_WLAN_TWT_RESPONSE_CB                  = 19,
+  RSI_WLAN_RECEIVE_CSI_DATA                 = 20
 } rsi_callback_id_t;
 typedef struct rsi_nwk_callback_s {
 
@@ -377,7 +382,7 @@ typedef struct rsi_state_notification_s {
 
 /*==================================================*/
 #define WLAN_MODULE_STATES 11
-#define WLAN_REASON_CODES  6
+#define WLAN_REASON_CODES  50
 struct rsi_bit_2_string {
   uint8_t bit;
   char *string;
@@ -398,10 +403,56 @@ static const struct rsi_bit_2_string STATE[WLAN_MODULE_STATES] = {
 };
 
 static const struct rsi_bit_2_string REASONCODE[WLAN_REASON_CODES] = {
-  { 0x01, (char *)"Authentication denial" },       { 0x02, (char *)"Association denial" },
-  { 0x10, (char *)"Beacon Loss (Failover Roam)" }, { 0x20, (char *)"De-authentication (AP induced Roam/Deauth from supplicant)" },
-  { 0x07, (char *)"PSK not configured" },          { 0x05, (char *)"Roaming not enabled" },
-
+  { 0x01, (char *)"Authentication denial" },
+  { 0x02, (char *)"Association denial" },
+  { 0x10, (char *)"Beacon Loss (Failover Roam)" },
+  { 0x20, (char *)"De-authentication (AP induced Roam/Deauth from supplicant)" },
+  { 0x07, (char *)"PSK not configured" },
+  { 0x05, (char *)"Roaming not enabled" },
+  { 0x28, (char *)"TLS CA Cert not present" },
+  { 0x29, (char *)"TLS PRIVATE key not present " },
+  { 0x2A, (char *)"TLS Client Cert not present" },
+  { 0x2B, (char *)"TLS no Cert present" },
+  { 0x2C, (char *)"PEAP CA Cert not present" },
+  { 0x2D, (char *)"Server Cert Invalid Key Type" },
+  { 0x2E, (char *)"Server Intermediate CA Invalid Key Type" },
+  { 0x2F, (char *)"Server Root CA Invalid Key Type" },
+  { 0x30, (char *)"Client Cert Invalid Key Type" },
+  { 0x31, (char *)"Client Root CA Invalid Key Type" },
+  { 0x32, (char *)"FIPS Server Cert Invalid Length" },
+  { 0x33, (char *)"FIPS Server Intermediate CA Invalid Length" },
+  { 0x34, (char *)"FIPS Server Root CA Invalid Length" },
+  { 0x35, (char *)"FIPS Client Cert Invlaid Length" },
+  { 0x36, (char *)"FIPS Client Root CA Invalid Length" },
+  { 0x37, (char *)"Server Cert Invalid Length" },
+  { 0x38, (char *)"Server Intermediate CA Invalid Length" },
+  { 0x39, (char *)"Server Root CA Invalid Length" },
+  { 0x3A, (char *)"Client Cert Invalid Lenght" },
+  { 0x3B, (char *)"Client Root CA Invalid Length" },
+  { 0x3C, (char *)"Server Cert Invalid Sign Alg" },
+  { 0x3D, (char *)"Server Intermediate CA Invalid Sign Alg" },
+  { 0x3E, (char *)"Server Root CA Invalid Sign Length" },
+  { 0x3F, (char *)"Client Cert Invalid Sign Alg" },
+  { 0x40, (char *)"Client Root CA Invalid Sign Length" },
+  { 0x41, (char *)"Server Intermediate CA not Present" },
+  { 0x42, (char *)"Server Root CA Parse Error" },
+  { 0x43, (char *)"Server Intermediate Root CA Parse Error" },
+  { 0x44, (char *)"Sever Cert Parse Error" },
+  { 0x45, (char *)"Client Cert Parse Error" },
+  { 0x46, (char *)"Incorrect Private Key Password" },
+  { 0x47, (char *)"EAP Failure Received" },
+  { 0x48, (char *)"Client Cert Bad Date Error" },
+  { 0x49, (char *)"Server Cert Bad Date Error" },
+  { 0x4A, (char *)"Server Root CA Bad Date Error" },
+  { 0x4B, (char *)"Client Root CA Bad Date Error" },
+  { 0x4C, (char *)"Server Intermediate Root CA Bad Date Error" },
+  { 0x4D, (char *)"Pem Header Error" },
+  { 0x4E, (char *)"Pem Footer Error" },
+  { 0x4F, (char *)"Client Intermediate CA Invalid Sign Length" },
+  { 0x50, (char *)"Client Intermediate CA Invalid Length" },
+  { 0x51, (char *)"FIPS Client Intermediate CA Invalid Length" },
+  { 0x52, (char *)"Client Intermediate CA invalid Key Type" },
+  { 0x53, (char *)"Pem Error" }
 };
 
 int32_t rsi_socket_create_async(int32_t sockID, int32_t type, int32_t backlog);
@@ -512,20 +563,6 @@ typedef struct rsi_wlan_cb_non_rom_s {
 #define DNS_RESPONSE_PENDING  BIT(1)
 #define SNTP_RESPONSE_PENDING BIT(2)
 /*===================================================*/
-/**
- * RTC time from host
- */
-
-typedef struct module_rtc_time_s {
-  uint8_t tm_sec[4];  //@ seconds [0-59]
-  uint8_t tm_min[4];  //@ minutes [0-59]
-  uint8_t tm_hour[4]; //@ hours since midnight [0-23]
-  uint8_t tm_mday[4]; //@ day of the month [1-31]
-  uint8_t tm_mon[4];  //@ months since January [0-11]
-  uint8_t tm_year[4]; //@ year since 1990
-  uint8_t tm_wday[4]; //@ Weekday from Sunday to Saturday [1-7]
-} module_rtc_time_t;
-
 typedef struct rsi_rsp_waiting_cmds_s {
   uint16_t waiting_cmds;
   uint8_t rx_driver_flag;

@@ -33,11 +33,11 @@ Before running the application, the user will need the following things to setup
 ### 2.3 Setup Diagram:
    
 **SoC Mode :**   
- <br><img src="resources/readme/image31spps.png" width=500 height=250 alt=""><br> 
+ ![](resources/readme/image31spps.png) 
 
   
 **NCP Mode :**  
- <br><img src="resources/readme/image31sppsncp.png" width=500 height=250 alt=""><br> 
+ ![](resources/readme/image31sppsncp.png) 
 
    			  
 ## 3. Application Build Environment
@@ -50,15 +50,13 @@ Before running the application, the user will need the following things to setup
   
 ### 3.2 NCP Mode - Host Interface 
 
-* By default, the application is configured to use the SPI bus for interfacing between Host platforms(STM32F411 Nucleo / EFR32MG21) and the SiWx91x EVK.
+By default, the application is configured to use the SPI bus for interfacing between Host platforms(STM32F411 Nucleo / EFR32MG21) and the SiWx91x EVK.
 * This application is also configured to use the SDIO bus for interfacing between Host platforms(EFM32GG11) and the SiWx91x EVK.
 * While using the expansion board, the `EXP_BOARD=1` preprocessor symbol should be added to the list of defined symbols from the preprocessor menu of project settings.
-![Figure: Adding pre-processor symbol required for Expansion board](resources/readme/Exp-board-preprocessor.png)
-
-
+![Figure: Adding pre-processor symbol required for Expansion board](resources/readme/exp-board-preprocessor.png)
 ### 3.3 Bare Metal/RTOS Support
 
-This application supports bare metal and RTOS environment. By default, the application project files (Keil and Simplicity Studio) are provided with RTOS configuration.
+This application supports bare metal and RTOS environment. By default, the application project files (Keil and Simplicity Studio) are provided with Bare metal configuration.
  
 ## 4. Application Configuration Parameters
 
@@ -131,7 +129,9 @@ The application can be configured to suit your requirements and development envi
 	 #define RSI_TCP_IP_BYPASS                             RSI_DISABLE
 	 #define RSI_TCP_IP_FEATURE_BIT_MAP                    TCP_IP_FEAT_DHCPV4_CLIENT
 	 #define RSI_CUSTOM_FEATURE_BIT_MAP                    FEAT_CUSTOM_FEAT_EXTENTION_VALID
-	 #define RSI_EXT_CUSTOM_FEATURE_BIT_MAP                (EXT_FEAT_384K_MODE|EXT_FEAT_XTAL_CLK_ENABLE | 					EXT_FEAT_LOW_POWER_MODE)
+	 #define RSI_EXT_CUSTOM_FEATURE_BIT_MAP                (EXT_FEAT_XTAL_CLK_ENABLE | EXT_FEAT_LOW_POWER_MODE)
+   **Note:**
+	If no memory configuration is specified, it will take EXT_FEAT_384K_MODE by default.
 
 
    `RSI_HAND_SHAKE_TYPE` is used to select GPIO or Message based handshake in RSI_SLEEP_MODE_2 and RSI_SLEEP_MODE_8 modes.
@@ -155,63 +155,57 @@ The application can be configured to suit your requirements and development envi
 	 #define RSI_SELECT_LP_OR_ULP_MODE                     RSI_ULP_WITH_RAM_RET
 ## 5. Testing the Application
 
-Follow the below steps for the successful execution of the application.
+- Follow the below steps for the successful execution of the application.
 
 ### 5.1 Loading the SiWx91x Firmware
 
-Refer [Getting started with a PC](https://docs.silabs.com/rs9116/latest/wiseconnect-getting-started) to load the firmware into SiWx91x EVK. The firmware file is located in `<SDK>/firmware/`
+- Refer [Getting started with a PC](https://docs.silabs.com/rs9116/latest/wiseconnect-getting-started) to load the firmware into SiWx91x EVK. The firmware file is located in `<SDK>/connectivity_firmware/`
 
 ### 5.2 Creating the Project and builing the Application
   
-Refer [Getting started with EFX32](https://docs.silabs.com/rs9116-wiseconnect/latest/wifibt-wc-getting-started-with-efx32/), for settin-up EFR & EFM host platforms
+- Refer [Getting started with EFX32](https://docs.silabs.com/rs9116-wiseconnect/latest/wifibt-wc-getting-started-with-efx32/), for settin-up EFR & EFM host platforms
 
 #### 5.2.1 Project Creation - SoC Mode : 
 
 - Connect your board. The Si917 compatible SoC board is **BRD4325A**.
 - Studio should detect your board. Your board will be shown here.
 ![soc_board_detection](resources/readme/socboarddetection111.png)
-
 #### 5.2.2 Project Creation - NCP Mode : 
 
 - Connect your board. The supported NCP boards are: **BRD4180A,BRD4280B**
 - Studio should detect your board. Your board will be shown here.
 ![ncp_board_detection](resources/readme/ncpboarddetection112.png)
-
 #### 5.2.3 Selecting an example application and generate project
 
 - Go to the 'EXAMPLE PROJECT & DEMOS' tab and select your desired example application
-![projct_selection](resources/readme/projctselection.PNG)
+![projct_selection](resources/readme/projctselection1.png)
 - Click 'Create'. The "New Project Wizard" window appears. Click 'Finish'
-![creation_final](resources/readme/creationfinal.PNG)
-
+![creation_final](resources/readme/creationfinal1.png)
 #### 5.2.4 Build Project - SoC Mode
 
 - Once the project is created, right click on project and go to properties → C/C++ Build → Settings → Build Steps
 - Add post_build_script_SimplicityStudio.bat file path (SI917_COMBO_SDK.X.X.X.XX\utilities\isp_scripts_common_flash) in build steps settings as shown in below image.
-![postbuild_script](resources/readme/buildsoc.PNG)
+![postbuild_script](resources/readme/buildsoc2.png)
 - Check for M4 projects macros in preprocessor settings(RSI_M4_INTERFACE=1)
 - Check for 9117 macro in preprocessor settings(CHIP_9117=1).
 - Click on the build icon (hammer) to build the project
-![building_pjt](resources/readme/buildsoc1.PNG)
+![building_pjt](resources/readme/buildsoc3.png)
 - Successful build output will show as below.
-![build_success_soc](resources/readme/buildsuccesssoc.PNG)
-
+![build_success_soc](resources/readme/buildsuccesssoc_1.png)
 #### 5.2.5 Build Project - NCP Mode :
 
 - Check for 9117 macro in preprocessor settings(CHIP_9117=1).
 - Click on the build icon (hammer) to build the project
-![building_pjt](resources/readme/buildncp.PNG)
+![building_pjt](resources/readme/buildncp1.png)
 - Successful build output will show as below.
-![build_success_soc](resources/readme/buildsuccessncp.PNG)
-
+![build_success_soc](resources/readme/buildsuccessncp_1.png)
 ## 6. Program the device
 
-Once the build was successfull, right click on project and click on Debug As->Silicon Labs ARM Program as shown in below image.
+- Once the build was successfull, right click on project and click on Debug As->Silicon Labs ARM Program as shown in below image.
 ### SoC Mode :
 ![debug_mode_soc](resources/readme/debugmodesoc.png)
 ### NCP Mode : 
 ![debug_mode_NCP](resources/readme/debugmodencp.png)
-
 ### 6.1 Running the SiWx91x Application
 
 1. After the program gets executed, the Silicon Labs device  would be in Advertising state with configured power save the profile.
@@ -225,18 +219,18 @@ Once the build was successfull, right click on project and click on Debug As->Si
    
 5. In the App, Silicon Labs device will appear with the name configured in the macro **RSI\_BLE\_LOCAL\_NAME (Ex: "WLAN\_BLE\_SIMPLE")** or sometimes observed as the 
    Silicon Labs device as the internal name **"SILABS_DEVICE".** 
-   <br><img src="resources/readme/image33.png" width=250 alt=""><br>
+   ![](resources/readme/image33.png)
    
 6. Initiate connection from the mobile App.
    
 7. After successful connection, user can see the connected state in EFR connect app and also check the supported services by the Silicon Labs device.  
-<br><img src="resources/readme/image34.png" width=250 alt=""><br>
+![](resources/readme/image34.png)
    
 7. After successful connection, Silicon Labs device goes to sleep and wakes up for every connection interval. Check the below image for power save cycle after connection.
-<br><img src="resources/readme/bleconn200s.png" alt=""><br> 
+![](resources/readme/bleconn200s.png) 
    
 9. After successful program execution, if the Silicon Labs device is configured in SLAVE_MODE , the prints in teraterm looks as shown below.     
-<br><img src="resources/readme/imagepwlog.png" width=1000 alt=""><br>    
+![](resources/readme/imagepwlog.png)    
    
    
  **Note:** 
@@ -252,15 +246,12 @@ Once the build was successfull, right click on project and click on Debug As->Si
    - Connect GND(Pin 8 or 10) to GND on WSTK
       ![FTDI_prints](resources/readme/ftdiprints118.png)
 - Prints can see as below in any Console terminal
-   <br><img src="resources/readme/imagepwlog.png" width=1000 alt=""><br>
-
+   ![](resources/readme/imagepwlog.png)
 ### 7.2 NCP Mode:
 - Prints can see as below in any Console terminal
-   <br><img src="resources/readme/imagepwlog.png" width=1000 alt=""><br>
-
-
+   ![](resources/readme/imagepwlog.png)
 ## 8. Selecting Bare Metal
-The application has been designed to work with FreeRTOS and Bare Metal configurations. By default, the application project files (Simplicity studio) are configured with FreeRTOS enabled. The following steps demonstrate how to configure Simplicity Studio to test the application in a Bare Metal environment.
+- The application has been designed to work with FreeRTOS and Bare Metal configurations. By default, the application project files (Simplicity studio) are configured with FreeRTOS enabled. The following steps demonstrate how to configure Simplicity Studio to test the application in a Bare Metal environment.
 
 ### 8.1 Bare Metal with Simplicity Studio
 - Open the project in Simplicity Studio
@@ -269,8 +260,7 @@ The application has been designed to work with FreeRTOS and Bare Metal configura
 - Select 'Apply' and 'OK' to save the settings
    ![Figure: project settings in Simplicity Studio](resources/readme/with_out_os1.png) 
 
-   ![Figure: project settings in Simplicity Studio](resources/readme/with_out_os2.PNG)
-
+   ![Figure: project settings in Simplicity Studio](resources/readme/with_out_os3.png)
 ### 8.2 Bare Metal with Keil
 - Open project in Keil IDE and click on 'Options for Target'
 - Go to 'C/C++' tab and remove 'RSI_WITH_OS' macro present under Preprocessor Symbols

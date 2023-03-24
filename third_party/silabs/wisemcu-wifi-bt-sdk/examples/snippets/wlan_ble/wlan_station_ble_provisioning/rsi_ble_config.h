@@ -38,7 +38,6 @@
  * *                      Macros
  * ******************************************************/
 
-
 #define RSI_BLE_SET_RAND_ADDR "00:23:A7:12:34:56"
 
 #define CLEAR_WHITELIST              0x00

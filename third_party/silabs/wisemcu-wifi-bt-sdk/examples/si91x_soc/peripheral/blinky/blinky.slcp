@@ -9,7 +9,7 @@ quality: alpha
 sdk: {id: gecko_sdk, version: 4.1.0}
 sdk_extension:
   - id: wiseconnect
-    version: 1.0.0
+    version: 1.0.1
 source:
   - path: blinky.c
 toolchain_settings: []
@@ -29,9 +29,8 @@ provides:
 readme:
   - path: readme.md
 other_file:
-  - path: resources\readme\image508a.png
-  - path: resources\readme\image508b.png
-  - path: resources\readme\image508c.png
+  - path: resources/readme/image508a.png
+  - path: resources/readme/image508c.png
 ui_hints:
   highlight: readme.md
   focus: true

@@ -32,11 +32,11 @@ Before running the application, the user will need the following things to setup
 ### 2.3 Setup Diagram:
    
 **SoC Mode :** 
- <br><img src="resources/readme/testmodessoc.png" width=500 height=350 alt=""><br> 
+ ![](resources/readme/testmodessoc.png) 
 
   
 **NCP Mode :** 
- <br><img src="resources/readme/testmodesncp.png" width=500 height=350 alt=""><br> 
+ ![](resources/readme/testmodesncp.png) 
 	
 
 ## 3. Application Build Environment
@@ -50,7 +50,7 @@ Before running the application, the user will need the following things to setup
   
 ### 3.2 NCP Mode - Host Interface 
 
-* By default, the application is configured to use the SPI bus for interfacing between Host platforms(EFR32MG21) and the SiWx91x EVK.
+By default, the application is configured to use the SPI bus for interfacing between Host platforms(EFR32MG21) and the SiWx91x EVK.
 		
 ### 3.3 Bare Metal/RTOS Support
 
@@ -72,8 +72,7 @@ The application can be configured to suit your requirements and development envi
 
 -  `RSI_BLE_TX_PAYLOAD_LEN` refers the Transmit packet length.
 ```c
-	 #define RSI_BLE_TX_PAYLOAD_LEN                        0x20
-```
+	 #define RSI_BLE_TX_PAYLOAD_LEN                        0x20```
 - `RSI_BLE_TX_PAYLOAD_TYPE` referes the Transmit packet payload type
 ```c
 	 #define RSI_BLE_TX_PAYLOAD_TYPE                       PRBS9_SEQ
@@ -104,8 +103,7 @@ The application can be configured to suit your requirements and development envi
 1. User must update the below parameters 
 -  `RSI_CONFIG_TEST_MODE` refers the Receive Mode of the Silicon Labs module to be selected.
 ```c
-	 #define RSI_CONFIG_TEST_MODE                    RSI_BLE_TESTMODE_RECEIVE
-```
+	 #define RSI_CONFIG_TEST_MODE                    RSI_BLE_TESTMODE_RECEIVE```
 - `RSI_SEL_ANTENNA` refers to the antenna which is to be used by Silicon Labs module. 
 > If the user using internal antenna then set,
 ```c
@@ -119,63 +117,57 @@ The application can be configured to suit your requirements and development envi
    
 ## 5. Testing the Application
 
-Follow the below steps for the successful execution of the application.
+- Follow the below steps for the successful execution of the application.
 
 ### 5.1 Loading the SiWx91x Firmware
 
-Refer [Getting started with a PC](https://docs.silabs.com/rs9116/latest/wiseconnect-getting-started) to load the firmware into SiWx91x EVK. The firmware file is located in `<SDK>/firmware/`
+- Refer [Getting started with a PC](https://docs.silabs.com/rs9116/latest/wiseconnect-getting-started) to load the firmware into SiWx91x EVK. The firmware file is located in `<SDK>/connectivity_firmware/`
 
 ### 5.2 Creating the Project and builing the Application
   
-Refer [Getting started with EFX32](https://docs.silabs.com/rs9116-wiseconnect/latest/wifibt-wc-getting-started-with-efx32/), for settin-up EFR & EFM host platforms
+- Refer [Getting started with EFX32](https://docs.silabs.com/rs9116-wiseconnect/latest/wifibt-wc-getting-started-with-efx32/), for settin-up EFR & EFM host platforms
 
 #### 5.2.1 Project Creation - SoC Mode : 
 
 - Connect your board. The Si917 compatible SoC board is **BRD4325A**.
 - Studio should detect your board. Your board will be shown here.
 ![soc_board_detection](resources/readme/socboarddetection111.png)
-
 #### 5.2.2 Project Creation - NCP Mode : 
 
 - Connect your board. The supported NCP boards are: **BRD4180A,BRD4280B**
 - Studio should detect your board. Your board will be shown here.
 ![ncp_board_detection](resources/readme/ncpboarddetection112.png)
-
 #### 5.2.3 Selecting an example application and generate project
 
 - Go to the 'EXAMPLE PROJECT & DEMOS' tab and select your desired example application
-![projct_selection](resources/readme/projctselection.PNG)
+![projct_selection](resources/readme/projctselection1.png)
 - Click 'Create'. The "New Project Wizard" window appears. Click 'Finish'
-![creation_final](resources/readme/creationfinal.PNG)
-
+![creation_final](resources/readme/creationfinal1.png)
 #### 5.2.4 Build Project - SoC Mode
 
 - Once the project is created, right click on project and go to properties → C/C++ Build → Settings → Build Steps
 - Add post_build_script_SimplicityStudio.bat file path (SI917_COMBO_SDK.X.X.X.XX\utilities\isp_scripts_common_flash) in build steps settings as shown in below image.
-![postbuild_script](resources/readme/buildsoc.PNG)
+![postbuild_script](resources/readme/buildsoc1.png)
 - Check for M4 projects macros in preprocessor settings(RSI_M4_INTERFACE=1)
 - Check for 9117 macro in preprocessor settings(CHIP_9117=1).
 - Click on the build icon (hammer) to build the project
-![building_pjt](resources/readme/buildsoc1.PNG)
+![building_pjt](resources/readme/buildsoc4.png)
 - Successful build output will show as below.
-![build_success_soc](resources/readme/buildsuccesssoc.PNG)
-
+![build_success_soc](resources/readme/buildsuccesssoc1.png)
 #### 5.2.5 Build Project - NCP Mode :
 
 - Check for 9117 macro in preprocessor settings(CHIP_9117=1).
 - Click on the build icon (hammer) to build the project
-![building_pjt](resources/readme/buildncp.PNG)
+![building_pjt](resources/readme/buildncp1.png)
 - Successful build output will show as below.
-![build_success_soc](resources/readme/buildsuccessncp.PNG)
-
+![build_success_soc](resources/readme/buildsuccessncp1.png)
 ## 6. Program the device
 
-Once the build was successfull, right click on project and click on Debug As->Silicon Labs ARM Program as shown in below image.
+- Once the build was successfull, right click on project and click on Debug As->Silicon Labs ARM Program as shown in below image.
 ### SoC Mode :
 ![debug_mode_soc](resources/readme/debugmodesoc.png)
 ### NCP Mode : 
 ![debug_mode_NCP](resources/readme/debugmodencp.png)
-
 ### 6.1 Running the SiWx91x Application
    
 ### Configuring the Application for Tx:
@@ -188,10 +180,9 @@ Once the build was successfull, right click on project and click on Debug As->Si
 7. Verify the status parameters whether the packets are received or not after receiving stop command.
 8. Refer the below images for Third party dongle prints
    - commands log
-   ![ouput_prints](resources/readme/Tx_testmode.PNG)
+   ![ouput_prints](resources/readme/tx_testmode1.png)
    - bt mon log
-   ![ouput_prints](resources/readme/Tx_testmode_btmon.PNG)
-
+   ![ouput_prints](resources/readme/tx_testmode_btmon1.png)
 ### Configuring the Application for Rx:
 1. After the program gets executed, Silicon Labs module will Receive the packets.
 2. Run the below command using Third party dongle to transmit the packets to Silicon Labs module.
@@ -199,11 +190,9 @@ Once the build was successfull, right click on project and click on Debug As->Si
 4. Received channel of Silicon Labs module should be same as transmit channel of Third party dongle.
 5. Refer the below images for Third party dongle prints
    - Command log:
-   ![ouput_prints](resources/readme/Rx_testmode_1.PNG)
+   ![ouput_prints](resources/readme/rx_testmode1.png)
    - btmon log:
-   ![ouput_prints](resources/readme/Rx_testmode_btmon_log_1.PNG)
-
-
+   ![ouput_prints](resources/readme/rx_testmode_btmon_log_2.png)
 ## 7. Observing the output prints on serial terminal
 
 ### 7.1 SoC Mode:
@@ -216,13 +205,11 @@ Once the build was successfull, right click on project and click on Debug As->Si
 - Prints can see as below in any Console terminal
 
    ![ouput_prints](resources/readme/serial_teriminal_soc_prints.png)
-
 ### 7.2 NCP Mode:
 - Prints can see as below in any Console terminal
-<br><img src="resources/readme/serial_teriminal_ncp_prints.png" width=525 alt=""><br>
-
+![](resources/readme/serial_teriminal_ncp_prints.png)
 ## 8. Selecting Bare Metal
-The application has been designed to work with FreeRTOS and Bare Metal configurations. By default, the application project files (Simplicity studio) are configured with FreeRTOS enabled. The following steps demonstrate how to configure Simplicity Studio to test the application in a Bare Metal environment.
+- The application has been designed to work with FreeRTOS and Bare Metal configurations. By default, the application project files (Simplicity studio) are configured with FreeRTOS enabled. The following steps demonstrate how to configure Simplicity Studio to test the application in a Bare Metal environment.
 
 ### 8.1 Bare Metal with Simplicity Studio
 - Open project in Simplicity Studio
@@ -230,8 +217,7 @@ The application has been designed to work with FreeRTOS and Bare Metal configura
 - GO to 'C/C++ Build' | 'Settings' | 'GNU ARM C Compiler' | 'Preprocessor' and remove macro 'RSI_WITH_OS=1'
 - Click on 'Apply' and 'OK' to save the settings
 ![project settings in Simplicity Studio](resources/readme/with_out_os.png)
-![project settings in Simplicity Studio](resources/readme/with_out_os1.PNG)
-
+![project settings in Simplicity Studio](resources/readme/with_out_os2.png)
 ### 8.2 Bare Metal with Keil
 - Open project in Keil IDE and click on 'Options for Target'
 - Go to 'C/C++' tab and remove 'RSI_WITH_OS' macro present under Preprocessor Symbols

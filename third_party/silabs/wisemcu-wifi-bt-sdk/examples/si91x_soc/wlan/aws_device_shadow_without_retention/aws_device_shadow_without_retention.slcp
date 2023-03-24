@@ -1,7 +1,7 @@
-project_name: aws_device_shadow_without_rentention
+project_name: aws_device_shadow_without_retention
 package: wiseconnect
 quality: alpha
-label: AWS IoT Device Shadow
+label: AWS IoT Device Shadow without retention
 category: Example|AWS IoT
 description: >
   Creates an AWS IoT 'thing' that connects to the AWS IoT device shadow service using the MQTT protocol
@@ -16,7 +16,7 @@ xml_filter: Undefined
 sdk: {id: gecko_sdk, version: 4.1.0}
 sdk_extension:
   - id: wiseconnect
-    version: 1.0.0
+    version: 1.0.1
 source:
   - path: rsi_aws_device_shadow.c
 include:
@@ -33,11 +33,11 @@ requires:
   - name: wiseconnect_sapi_freertos
   - name: wiseconnect_third_party_freertos
 define:
-   - name: FLOAT_PRINT_BYPASS
-   - name: EXECUTION_FROM_RAM
-   - name: ALARM_CONFIG
-   - name: TA_DEEP_SLEEP_COMMON_FLASH
-   - name: RSI_M4_INTERFACE
+  - name: FLOAT_PRINT_BYPASS
+  - name: EXECUTION_FROM_RAM
+  - name: ALARM_CONFIG
+  - name: TA_DEEP_SLEEP_COMMON_FLASH
+  - name: RSI_M4_INTERFACE
 template_contribution:
   - name: EXECUTION_FROM_RAM
     value: 1

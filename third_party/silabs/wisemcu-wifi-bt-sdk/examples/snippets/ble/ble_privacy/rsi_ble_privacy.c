@@ -608,10 +608,9 @@ void rsi_ble_on_remote_features_event(rsi_ble_event_remote_features_t *rsi_ble_e
 {
   memcpy(&remote_dev_feature, rsi_ble_event_remote_features, sizeof(rsi_ble_event_remote_features_t));
   LOG_PRINT("\nFeature received is %d\n");
-  for(int i=0; i<8;i++)
-    {
-      LOG_PRINT("remote_features:[%d]0x%x\n",i,remote_dev_feature.remote_features[i]);
-    }
+  for (int i = 0; i < 8; i++) {
+    LOG_PRINT("remote_features:[%d]0x%x\n", i, remote_dev_feature.remote_features[i]);
+  }
   LOG_PRINT("\n");
   rsi_ble_app_set_event(RSI_BLE_RECEIVE_REMOTE_FEATURES);
 }

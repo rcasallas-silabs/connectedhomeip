@@ -75,10 +75,10 @@
 #endif
 
 //! Server IP address.
-#define SERVER_IP_ADDRESS "192.168.63.113"
+#define SERVER_IP_ADDRESS "192.168.10.100"
 
 //! Server port number
-#define SERVER_PORT 1883
+#define SERVER_PORT 1234
 
 //! Client port number
 #define CLIENT_PORT 5001
@@ -90,7 +90,7 @@
 #define RSI_WLAN_TASK_PRIORITY 1
 
 //! Wireless driver task priority
-#define RSI_DRIVER_TASK_PRIORITY 1
+#define RSI_DRIVER_TASK_PRIORITY 2
 
 //! Wlan task stack size
 #define RSI_WLAN_TASK_STACK_SIZE 500
@@ -273,21 +273,27 @@ int32_t rsi_mqtt_client_app()
                                     (int8_t *)password);
 
   if (status != RSI_SUCCESS) {
+    LOG_PRINT("\r\nMQTT Client Init Failed, Error Code : 0x%lX\r\n", status);
     return status;
   }
-  LOG_PRINT("\r\nMQTT Client Initialization Success\r\n");
+  LOG_PRINT("\r\nMQTT Client Init Success\r\n");
+
   //! Connect to the MQTT brohker/server
   status = rsi_emb_mqtt_connect((RSI_EMB_MQTT_USER_FLAG | RSI_EMB_MQTT_PWD_FLAG), NULL, 0, NULL);
   if (status != RSI_SUCCESS) {
+    LOG_PRINT("\r\nMQTT Connect Failed, Error Code : 0x%lX\r\n", status);
     return status;
   }
-  LOG_PRINT("\r\nMQTT Client Connect Success\r\n");
+  LOG_PRINT("\r\nMQTT Connect Success\r\n");
+
   //! Subscribe to the topic given
   status = rsi_emb_mqtt_subscribe(QOS, (int8_t *)RSI_MQTT_TOPIC);
   if (status != RSI_SUCCESS) {
+    LOG_PRINT("\r\nMQTT Subscribe Failed, Error Code : 0x%lX\r\n", status);
     return status;
   }
-  LOG_PRINT("\r\nMQTT Topic Subscribe Success\r\n");
+  LOG_PRINT("\r\nMQTT Subscribe Success\r\n");
+
   //!The DUP flag MUST be set to 1 by the Client or Server when it attempts to re-deliver a PUBLISH Packet
   //!The DUP flag MUST be set to 0 for all QoS 0 messages
   publish_msg.dup = 0;
@@ -312,29 +318,34 @@ int32_t rsi_mqtt_client_app()
   //! Publish message on the topic
   status = rsi_emb_mqtt_publish((int8_t *)RSI_MQTT_TOPIC, &publish_msg);
   if (status != RSI_SUCCESS) {
+    LOG_PRINT("\r\nMQTT Publish Failed, Error Code : 0x%lX\r\n", status);
     return status;
   }
-  LOG_PRINT("\r\nMQTT Message Publish Success\r\n");
+  LOG_PRINT("\r\nMQTT Publish Success\r\n");
+
   //! UnSubscribe to the topic given
   status = rsi_emb_mqtt_unsubscribe((int8_t *)RSI_MQTT_TOPIC);
   if (status != RSI_SUCCESS) {
-    //! Error in receiving
+    LOG_PRINT("\r\nMQTT Unsubscribe Failed, Error Code : 0x%lX\r\n", status);
     return status;
   }
-  LOG_PRINT("\r\nMQTT Topic Unsubscribe Success\r\n");
+  LOG_PRINT("\r\nMQTT Unsubscribe Success\r\n");
+
   //! Disconnect to the MQTT broker
   status = rsi_emb_mqtt_disconnect();
   if (status != RSI_SUCCESS) {
-    //! Error in receiving
+    LOG_PRINT("\r\nMQTT Disconnect Failed, Error Code : 0x%lX\r\n", status);
     return status;
   }
-  LOG_PRINT("\r\nMQTT Client Disconnect Success\r\n");
+  LOG_PRINT("\r\nMQTT Disconnect Success\r\n");
+
   status = rsi_emb_mqtt_destroy();
   if (status != RSI_SUCCESS) {
-    //! Error in receiving
+    LOG_PRINT("\r\nMQTT Destroy Failed, Error Code : 0x%lX\r\n", status);
     return status;
   }
-  LOG_PRINT("\r\nMQTT Client Destroy Success\r\n");
+  LOG_PRINT("\r\nMQTT Destroy Success\r\n");
+
   return 0;
 }
 
@@ -355,23 +366,23 @@ int main()
   int32_t status = RSI_SUCCESS;
 #ifdef RSI_M4_INTERFACE
   //! Driver initialization
-   status = rsi_driver_init(global_buf, GLOBAL_BUFF_LEN);
-   if ((status < 0) || (status > GLOBAL_BUFF_LEN)) {
-     return status;
-   }
+  status = rsi_driver_init(global_buf, GLOBAL_BUFF_LEN);
+  if ((status < 0) || (status > GLOBAL_BUFF_LEN)) {
+    return status;
+  }
 
-   //! SiLabs module intialisation
-   status = rsi_device_init(LOAD_NWP_FW);
-   if (status != RSI_SUCCESS) {
-     LOG_PRINT("\r\nDevice Initialization Failed\r\n");
-     return status;
-   } else {
-     LOG_PRINT("\r\nDevice Initialization Success\r\n");
-   }
+  //! SiLabs module intialisation
+  status = rsi_device_init(LOAD_NWP_FW);
+  if (status != RSI_SUCCESS) {
+    LOG_PRINT("\r\nDevice Initialization Failed\r\n");
+    return status;
+  } else {
+    LOG_PRINT("\r\nDevice Initialization Success\r\n");
+  }
 #endif
 
 #ifdef RSI_WITH_OS
-   rsi_task_handle_t wlan_task_handle = NULL;
+  rsi_task_handle_t wlan_task_handle = NULL;
   //! OS case
   //! Task created for WLAN task
   rsi_task_create((rsi_task_function_t)(int32_t)rsi_mqtt_client_app,

@@ -2,7 +2,7 @@
 
 ## Introduction
 This application demonstrates the procedure to setup TWT session and configure the SiWx91x in TCP client role.
-In this application, the SiWx91x connects to a Wi-Fi access point, obtains an IP address, connects to Iperf server running on a remote PC and transmits TCP Keep Alive packet periodically to remote PC and enables powersave.
+In this application, the SiWx91x connects to a Wi-Fi access point, obtains an IP address, connects to Iperf server running on a remote PC and maintains  TCP Socket connection and periodically wakes up as per the configured TWT wakeup interval in powersave.
 
 ## Setting Up 
 To use this application, the following hardware, software and project setup is required.
@@ -23,11 +23,11 @@ To use this application, the following hardware, software and project setup is r
 
 #### SoC Mode : 
 
-![Figure: Setup Diagram SoC Mode for WLAN Throughput Example](resources/readme/image211.png)
+![Figure: Setup Diagram SoC Mode for WLAN Throughput Example](resources/readme/setup_soc.png)
   
 #### NCP Mode :  
 
-![Figure: Setup Diagram NCP Mode for WLAN Throughput Example](resources/readme/twt.png)
+![Figure: Setup Diagram NCP Mode for WLAN Throughput Example](resources/readme/setup_ncp.png)
 
 ### Project Setup
 - **SoC Mode**
@@ -35,6 +35,52 @@ To use this application, the following hardware, software and project setup is r
 - **NCP Mode**
   - **Silicon Labs EFx32 Host**. Follow the [Getting Started with EFx32](https://docs.silabs.com/rs9116-wiseconnect/latest/wifibt-wc-getting-started-with-efx32/) to setup the example to work with EFx32 and Simplicity Studio.
   - **STM32F411 Host**. Follow the [Getting Started with STM32](https://docs.silabs.com/rs9116-wiseconnect/latest/wifibt-wc-getting-started-with-stm32/) to setup the example to work with STM32 and Keil.
+
+## Creating the project
+
+### Board detection
+
+### SoC mode
+1. In the Simplicity Studio IDE, 
+    - The 917 SoC board will be detected under **Debug Adapters** pane as shown below.
+
+      **![Soc Board detection](resources/readme/soc_board_detection.png)**
+
+### NCP mode
+
+1. In the Simplicity Studio IDE, 
+    - The EFR32 board will be detected under **Debug Adapters** pane as shown below.
+
+      **![EFR32 Board detection](resources/readme/efr32.png)**
+
+    - The EFM32 board will be detected under **Debug Adapters** pane as shown below.
+
+      **![EFM32 Board detection](resources/readme/efm32.png)**
+
+### Creation of project
+
+Ensure the latest Gecko SDK along with the extension Si917 COMBO SDK is added to Simplicity Studio.
+
+1. Click on the board detected and go to **EXAMPLE PROJECTS & DEMOS** section.
+
+   **![Examples and Demos](resources/readme/examples_demos.png)**
+
+2. Filter for Wi-Fi examples from the Gecko SDK added. For this, check the *Wi-Fi* checkbox under **Wireless Technology** and *Gecko SDK Suite* checkbox under **Provider**. 
+
+3. Under provider, for SoC based example, check the *SoC* checkbox and for NCP based example, check the *NCP* checkbox.
+
+4. Now choose Wi-Fi- NCP TCP Client TWT example for NCP mode or choose Wi-Fi- SoC TCP Client TWT example for SoC mode and click on **Create**.
+  For NCP mode:
+
+   **![TCP TWT project](resources/readme/tcp_twt_example_ncp.png)**
+
+    For SoC mode:
+      
+   **![TCP TWT  project](resources/readme/tcp_twt_example_soc.png)**
+
+5. Give the desired name to your project and cick on **Finish**.
+
+   **![Create TCP TWT project](resources/readme/create_project.png)**
 
 ## Configuring the Application
 The application can be configured to suit your requirements and development environment.
@@ -173,7 +219,12 @@ TCP Keep alive timeout (in seconds) can be configured as shown below.
 TWT (Target Wake Time) setup is only supported in 11ax (HE) connectivity. Please follow below procedure to enable TWT.
 
 - In NCP mode, right click on the project, go to *properties > C/C++ Build > Settings > Tool Settings > GNU ARM C compiler > Preprocessor > Defined Symbols* and add CHIP_9117 = 1 to the list. It is by default enabled in CCP mode.
-- In the project explorer, go to *<project_name> > includes > "C:/silabs/gecko_sdk/extension/wiseconnect/sapi/include" > rsi_wlan_common_config.h* (To enable HE and TWT).
+
+- In simplicity IDE, upon hovering over TWT_SUPPORT macro in rsi_twt_tcp_client.c file and using ctrl + left click, Simplicity Studio opens rsi_wlan_common_config.h file in which the user can enable the below mentioned parameters. In case, ctrl+left click operation does not open the rsi_wlan_common_config.h file, user can navigate to rsi_wlan_common_config.h in the Project Explorer pane as follows:
+*<project_name> > includes > "C:/silabs/gecko_sdk/extension/wiseconnect/sapi/include" > rsi_wlan_common_config.h*
+    
+    ![Figure: Studio Path to rsi_wlan_common_config.h](resources/readme/studio_path_rsi_wlan_common_config_1.png)
+    ![Figure: Studio Path to rsi_wlan_common_config.h](resources/readme/studio_path_rsi_wlan_common_config_2.png)
 
 ```c
 #define HE_PARAMS_SUPPORT  RSI_ENABLE
@@ -181,8 +232,9 @@ TWT (Target Wake Time) setup is only supported in 11ax (HE) connectivity. Please
 ```c
 #define TWT_SUPPORT  	   RSI_ENABLE
 ```
-> Note :
-> In simplicity IDE, user can ctrl + click on TWT_SUPPORT macro to open the containing file.
+- While editing the above mentioned parameters, Simplicity Studio shows a warning, click on the "Make a Copy" option and edit the above mentioned parameters
+
+  ![Figure: SiWx91x TWT enable warning](resources/readme/sdk_edit_warning.png) 
 
 ### iTWT Configuration API:
 
@@ -199,7 +251,7 @@ Parameters of function are explained below :
 
 ### iTWT Setup Configuration
 
-iTWT parameters should be configured and filled into the structure type *twt_user_params_t*  in .c and passed as a parameter to *rsi_wlan_twt_config()* API.
+iTWT parameters should be configured and filled into the structure type *twt_user_params_t*  in rsi_twt_tcp_client.c and passed as a parameter to *rsi_wlan_twt_config()* API.
 
 Given below are sample configurations.
 
@@ -251,9 +303,13 @@ status = rsi_wlan_twt_config(1,1, &twt_req);
 > Note:
 > * TWT Wake duration depends on the wake duration unit. For example, for the above configuration, wake duration value is  (0xE0 * 256 = 57.3 msec).
 > * TWT Wake interval is calculated as mantissa *2 ^ exp.  For example, for the above configuration, wake interval value is (0x1B00 * 2^13  = 55.2 sec).
+> * Configuring TWT Wake interval beyond 1 min might lead to disconnections from the AP.
+> * There might be disconnections while using TWT with wake interval > 4sec when connected to an AP with non-zero GTK key renewal time.
+> * Keep Alive timeout should be non-zero when negotiated TWT setup is **unannounced**, otherwise there might be disconnections.
 
 If TWT session setup is successful, the following notification will be printed with TWT Response parameters from the AP.
-![Figure: TWT Setup Success Response](resources/readme/image218.png)
+
+   ![Figure: TWT Setup Success Response](resources/readme/image218.png)
 
 ### iTWT Teardown Configuration
 
@@ -304,12 +360,114 @@ User can get asynchronous TWT session updates if *twt_response_handler* is defin
 > Note:
 > **twt_session_active** variable is provided in the example application and is updated according to the asychronous TWT session notifications. User can utilise this variable to teardown or configure new session parameters depending upon existing session status. 
 
+Macros to check for and enable (steps to enable the macros included in [building the project](#building-the-project) section): 
+For SoC mode - RSI_M4_INTERFACE, CHIP_9117
+For NCP mode - CHIP_9117, EXP_BOARD
+
+
+## Building and Testing the Application
+
+Follow the below steps for the successful execution of the application.
+
+### Loading the SiWx91x Firmware
+
+Refer [Getting started with a PC](https://docs.silabs.com/rs9116/latest/wiseconnect-getting-started) to load the firmware into SiWx91x EVK. The firmware file is located in `<SDK>/connectivity_firmware/`
+
+### Building the Project
+#### Building the Project - SoC Mode
+
+- Once the project is created, right click on project and go to properties → C/C++ Build → Settings → Build Steps.
+
+- Add **post_build_script_SimplicityStudio.bat** file path present at SI917_COMBO_SDK.X.X.X.XX → utilities → isp_scripts_common_flash in build steps settings as shown in below image.
+
+  ![postbuild_script](resources/readme/post_build_script.png)
+
+- Go to properties → C/C++ Build → Settings → Tool Settings → GNU ARM C Compiler → Preprocessor → Defined symbols (-D) and check for M4 projects macro (RSI_M4_INTERFACE=1) and 9117 macro (CHIP_9117=1). If not present, add the macros and click **Apply and Close**.
+  
+  ![Build Project for SoC mode](resources/readme/soc_macros.png)
+
+- Click on the build icon (hammer) or right click on project name and choose **Build Project** to build the project.
+
+  ![building_pjt](resources/readme/build_project_soc.png)
+
+- Make sure the build returns 0 Errors and 0 Warnings.
+  
+
+#### Build the Project - NCP Mode
+
+- Check for CHIP_9117 macro in preprocessor settings as mentioned below.
+   - Right click on project name.
+   - Go to properties → C/C++ Build → Settings → Tool Settings → GNU ARM C Compiler → Preprocessor → Defined symbols (-D).
+   - If **CHIP_9117 macro** and **EXP_BOARD** are not present, add them by clicking on add macro option.
+    
+      **NOTE**: In this example, **EXP_BOARD** macro should also be enabled
+   - Click on **Apply and Close**.
+
+     ![Build Project for NCP mode](resources/readme/ncp_macros.png)
+
+- Click on the build icon (hammer) or right click on project name and choose **Build Project** to build the project.
+
+  ![Build Project for NCP mode](resources/readme/build_project_ncp.png)
+
+- Make sure the build returns 0 Errors and 0 Warnings.
+
+### Set up for application prints
+
+Before setting up Tera Term, do the following for SoC mode.
+
+**SoC mode**: 
+You can use either of the below USB to UART converters for application prints.
+1. Set up using USB to UART converter board.
+
+  - Connect Tx (Pin-6) to P27 on WSTK
+  - Connect GND (Pin 8 or 10) to GND on WSTK
+
+    ![FTDI_prints](resources/readme/usb_to_uart_1.png)
+
+2. Set up using USB to UART converter cable.
+
+  - Connect RX (Pin 5) of TTL convertor to P27 on WSTK
+  - Connect GND (Pin1) of TTL convertor to GND on WSTK
+
+    ![FTDI_prints](resources/readme/usb_to_uart_2.png)
+
+**Tera term set up - for NCP and SoC modes**
+
+1. Open the Tera Term tool. 
+   - For SoC mode, choose the serial port to which USB to UART converter is connected and click on **OK**. 
+
+     **![](resources/readme/port_selection_soc.png)**
+
+   - For NCP mode, choose the J-Link port and click on **OK**.
+
+     **![](resources/readme/port_selection.png)**
+
+2. Navigate to the Setup → Serial port and update the baud rate to **115200** and click on **OK**.
+
+    **![](resources/readme/serial_port_setup.png)**
+
+    **![](resources/readme/serial_port.png)**
+
+The serial port is now connected. 
+
+### Execute the application
+
+1. Once the build was successful, right click on project and select Debug As → Silicon Labs ARM Program to program the device as shown in below image.
+
+   **![debug_mode_NCP](resources/readme/program_device.png)**
+
+2. As soon as the debug process is completed, the application control branches to the main().
+
+3. Click on the **Resume** icon in the Simplicity Studio IDE toolbar to run the application.
+
+   **![Run](resources/readme/run.png)**
+
 ## Running the SiWx91x Application
 
 After making any custom configuration changes required, build, download and run the application as described in the [EFx32 Getting Started](https://docs.silabs.com/rs9116-wiseconnect/latest/wifibt-wc-getting-started-with-efx32/) or [STM32 Getting Started](https://docs.silabs.com/rs9116-wiseconnect/latest/wifibt-wc-getting-started-with-stm32/).
 
 Configure the SiWx91x as a TCP client and start a TCP server on the remote PC.
-In general, it is advisable to start the server before the client since the client will immediately begin to try to connect to the server to send data. 
+In general, it is advisable to start the server before the client since the client will immediately begin to try to connect to the server. 
 
 The Iperf command to start the TCP server is: 
 		
@@ -319,15 +477,66 @@ The Iperf command to start the TCP server is:
 >
 > `C:\> iperf.exe -s -p 5001 -i 1`
 
-![Figure: TCP_TX](resources/readme/image217d.png)
+![Figure: TCP_TX](resources/readme/outputs_1.png)
 
 > Note : 
-> To avoid loss of TCP connection due to ARP loss while the device is in sleep, it is suggested to add the device IP address to the Remote PC's ARP table.
-> For example, for device IP "192.168.0.101", MAC address "80-C9-55-XX-XX-XX" and ethernet interface 7, following is the command used in a Windows system
+> To avoid loss of TCP connection due to ARP loss while the device is in sleep, it is suggested to add the device IP address to the Remote PC's ARP table. 
+> For example, for device IP "192.168.0.101", MAC address "80-C9-55-XX-XX-XX" and ethernet interface 7, following is the command used in a Windows system. The MAC address and IP of SiWx917 can be observed in the serial prints.  
+
+For Ethernet:
 ```c
 netsh interface ipv4 set neighbors interface="Ethernet 7" "192.168.0.101" "80-c9-55-XX-XX-XX"
 ```
+For Wi-Fi:
+```c
+netsh interface ipv4 set neighbors interface="Wi-Fi" "192.168.0.101" "80-c9-55-XX-XX-XX"
+```
 
+Application prints
+
+![Figure: Serial prints](resources/readme/application_prints_1.png)
+
+# Using Simplicity Studio Energy Profiler for current measurement:
+  
+  After flashing the application code to the module. Energy profiler can be used for current consumption measurements.
+
+- Go to launcher → Debug Adapters pane and click on the board name.
+  
+  ![Figure: Energy Profiler Step 1](resources/readme/energy_profiler_step_1.png)
+
+- Click on Device configuration symbol
+  
+  ![Figure: Energy Profiler Step 2](resources/readme/energy_profiler_step_2.png)
+
+- Open the device configuration tab
+  
+  ![Figure: Energy Profiler Step 3](resources/readme/energy_profiler_step_3.png)
+
+- Change the Target part name to "EFR32MG21A020F1024IM32"
+
+  ![Figure: Energy Profiler Step 4](resources/readme/energy_profiler_step_4.png)
+
+- Change board name to "BRD4180B", click "OK"
+
+  ![Figure: Energy Profiler Step 5](resources/readme/energy_profiler_step_5.png)
+
+- From tools, choose Energy Profiler and click "OK"
+
+  ![Figure: Energy Profiler Step 6](resources/readme/energy_profiler_step_6.png)
+
+- From Quick Access, choose Start Energy Capture option 
+
+  ![Figure: Energy Profiler Step 7](resources/readme/energy_profiler_step_7.png)
+
+**NOTE** : The target part and board name have to be reverted to default to flash application binary. 
+
+  ![Figure: Energy Profiler Step 8](resources/readme/energy_profiler_step_8.png)
+
+# Expected output in Energy Profiler
+
+  ![Figure: Energy Profiler Output](resources/readme/outputs_2.png)
+
+**NOTE**: The average current consumption may vary based on the environment, the above image is for reference 
 
 # Selecting Bare Metal
 The application has been designed to work with FreeRTOS and Bare Metal configurations. By default, the application project files (Keil and Simplicity studio) are configured with FreeRTOS enabled. The following steps demonstrate how to configure Simplicity Studio and Keil to test the application in a Bare Metal environment.

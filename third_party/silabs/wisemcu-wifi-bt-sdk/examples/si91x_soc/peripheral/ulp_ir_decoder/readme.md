@@ -24,7 +24,7 @@ receiver buffer.
     - For Silicon Labs Si91x, use the latest version of Simplicity Studio (refer **"Download and Install Simplicity Studio"** section in **getting-started-with-siwx917-soc** guide at **release_package/docs/index.html**)
   
 ## Project Setup
-- **Silicon Labs Si91x** refer **"Download SDK"** section in **getting-started-with-siwx917-soc** guide at **release_package/docs/index.html** to work with Si91x and Simplicity Studio
+- **Silicon Labs Si91x** refer **"Download SDKs"**, **"Add SDK to Simplicity Studio"**, **"Connect SiWx917"**, **"Open Example Project in Simplicity Studio"** section in **getting-started-with-siwx917-soc** guide at **release_package/docs/index.html** to work with Si91x and Simplicity Studio
 
 ## Configuration and Steps for Execution
 - Configure the following parameters in ulp_ir_decoder.c file and update/modify following macros if required
@@ -36,11 +36,6 @@ receiver buffer.
     #define TEST_PIN_IR_INPUT       10U         //Ir decoder input pin
    ``` 
 
-## Loading Application on Simplicity Studio
-1. With the product Si917 selected, navigate to the example projects by clicking on Example Projects & Demos 
-in simplicity studio and click on to ULP_IR_DECODER Example application as shown below.
-
-![Figure:](resources/readme/image505b.png)
 
 ## Build 
 1. Compile the application in Simplicity Studio using build icon

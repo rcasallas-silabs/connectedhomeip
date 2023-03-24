@@ -22,7 +22,7 @@ To use this application, the following hardware, software and project setup is r
   
 #### SoC Mode : 
 
-![Figure: Setup Diagram for SoC mode Wake on Wireless Example](resources/readme/image184soc.png)
+![Figure: Setup Diagram for SoC mode Wake on Wireless Example](resources/readme/setup_soc.png)
   
 
 ### Software Requirements
@@ -141,10 +141,83 @@ The application defaults to the `RSI_SLEEP_MODE_2` configuration.
 - `RSI_WMM_PS_UAPSD_BITMAP` refers to the UAPSD bitmap. If `RSI_WMM_PS_ENABLE` is enabled, then `PSP_TYPE` must be set to `RSI_UAPSD` in order to WMM power save to work.
 
 
-# Build Application
+# Build and execute the Application
 
-After making any custom configuration changes required, build, download and run the application as described in the [SoC Getting Started](https://docs.silabs.com/). 
+### Board detection
+In the Simplicity Studio IDE, 
+  - The 917 SoC board will be detected under **Debug Adapters** pane as shown below.
 
+    **![Soc Board detection](resources/readme/soc_board_detection.png)**
+
+### Creation of project
+
+Ensure the latest Gecko SDK along with the extension Si917 COMBO SDK is added to Simplicity Studio.
+
+1. Click on the board detected and go to **EXAMPLE PROJECTS & DEMOS** section.
+
+   **![Examples and Demos](resources/readme/examples_demos.png)**
+
+2. Search for wake_on_wireless and choose Wi-Fi - SoC Wake on Wireless example and click on **Create**.  
+   
+   **![project](resources/readme/project_creation_soc.png)**
+
+3. Give the desired name to your project and cick on **Finish**.
+
+   **![Create project](resources/readme/create_project.png)** 
+
+4. Once the project is created, right click on project and go to properties → C/C++ Build → Settings → Build Steps.
+
+5. Add **post_build_script_SimplicityStudio.bat** file path present at SI917_COMBO_SDK.X.X.X.XX → utilities → isp_scripts_common_flash in build steps settings as shown in below image.
+  ![postbuild_script](resources/readme/post_build_script.png)
+
+6. Click on the build icon (hammer) or right click on project name and choose **Build Project** to build the project.
+  
+    ![building_pjt](resources/readme/build_project_soc.png)
+
+### Set up for application prints
+
+Before setting up Tera Term, do the following:
+
+You can use either of the below USB to UART converters for application prints.
+1. Set up using USB to UART converter board.
+
+  - Connect Tx (Pin-6) to P27 on WSTK
+  - Connect GND (Pin 8 or 10) to GND on WSTK
+
+    ![FTDI_prints](resources/readme/usb_to_uart_1.png)
+
+2. Set up using USB to UART converter cable.
+
+  - Connect RX (Pin 5) of TTL convertor to P27 on WSTK
+  - Connect GND (Pin1) of TTL convertor to GND on WSTK
+
+    ![FTDI_prints](resources/readme/usb_to_uart_2.png)
+
+**Tera term set up**
+
+1. Open the Tera Term tool.Choose the serial port to which USB to UART converter is connected and click on **OK**. 
+
+    **![](resources/readme/port_selection_soc.png)**
+
+2. Navigate to the Setup → Serial port and update the baud rate to **115200** and click on **OK**.
+
+    **![](resources/readme/serial_port_setup.png)**
+
+    **![](resources/readme/serial_port.png)**
+
+The serial port is now connected. 
+
+### Execute the application
+
+1. Once the build was successful, right click on project and select Debug As → Silicon Labs ARM Program to program the device as shown in below image or Run As → Silicon Labs ARM Program can also be used to directly flash the application binary and execute the program.
+
+   **![debug_mode](resources/readme/debugmodesoc117.png)**
+
+2. As soon as the debug process is completed, the application control branches to the main().
+
+3. Click on the **Resume** icon in the Simplicity Studio IDE toolbar to run the application.
+
+   **![Run](resources/readme/run.png)**
 # Testing Application 
 
 After successful connection with access point, module starts TCP Server connects to TCP Client on remote PC enter SERVER PORT and IP address then click on Connect on Hercules application .
@@ -157,3 +230,5 @@ After successful connection with access point, module starts TCP Server connects
 
 As the wake on wireless, SiWx91x scans and connects to the Wi-Fi access point and obtains an IP address. After a successful connection, If any packet is pending from NWP, NWP wakes up M4, posts the packet to M4 and goes back to sleep.
 
+### Application Prints
+![Figure: Application Prints](resources/readme/application_prints.png)

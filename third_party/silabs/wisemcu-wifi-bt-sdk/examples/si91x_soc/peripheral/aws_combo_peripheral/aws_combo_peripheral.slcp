@@ -9,7 +9,7 @@ quality: alpha
 sdk: {id: gecko_sdk, version: 4.1.0}
 sdk_extension:
   - id: wiseconnect
-    version: 1.0.0
+    version: 1.0.1
 source:
   - path: apps/i2c0_app.c
   - path: apps/i2c1_app.c

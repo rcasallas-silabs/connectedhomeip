@@ -9,7 +9,7 @@ quality: alpha
 sdk: {id: gecko_sdk, version: 4.1.0}
 sdk_extension:
   - id: wiseconnect
-    version: 1.0.0
+    version: 1.0.1
 source:
   - path: usart_master.c
 toolchain_settings: []
@@ -28,9 +28,8 @@ define:
 provides:
   - name: si91x_soc
 other_file:
-  - path: resources\readme\image516a.png
-  - path: resources\readme\image516b.png
-  - path: resources\readme\image516c.png
+  - path: resources/readme/image516a.png
+  - path: resources/readme/image516c.png
 readme:
   - path: readme.md
 ui_hints:

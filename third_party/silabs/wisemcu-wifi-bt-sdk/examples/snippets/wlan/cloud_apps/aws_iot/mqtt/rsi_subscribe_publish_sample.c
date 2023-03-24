@@ -239,7 +239,7 @@ int32_t rsi_mqtt_client_app()
   connectParams.usernameLen = strlen((char *)username_mq);
   connectParams.pPassword   = (char *)password_mq;
   connectParams.passwordLen = strlen((char *)password_mq);
-  
+
 #ifndef RSI_M4_INTERFACE
   status = rsi_driver_init(global_buf, GLOBAL_BUFF_LEN);
   if ((status < 0) || (status > GLOBAL_BUFF_LEN)) {

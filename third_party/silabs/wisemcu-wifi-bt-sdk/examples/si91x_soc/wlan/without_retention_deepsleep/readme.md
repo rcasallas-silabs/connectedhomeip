@@ -20,7 +20,7 @@ To use this application, the following hardware, software and project setup is r
  
 #### SoC Mode : 
 
-![Figure: Setup Diagram for SoC mode Without Retention Deepsleep Example](resources/readme/image184soc.png)
+![Figure: Setup Diagram for SoC mode Without Retention Deepsleep Example](resources/readme/setup_soc.png)
   
 ### Software Requirements
   - [Hercules Application](https://www.hw-group.com/files/download/sw/version/hercules_3-2-8.exe)
@@ -146,23 +146,102 @@ SEC_BASED_WKP
 UULP_GPIO_BASED_WKP   
 ```
 
-- The sleep period of M4 while using ```ALARM_CONFIG``` can be configured by adjusting the value of ```ALARM_PERIODIC_TIME``` macro.<br>
-- The sleep period of M4 while using ```DS_BASED_WKP``` can be configured by adjusting the value of ```DS_TIMER_DURATION``` macro (in microseconds).<br>
-- The sleep period of M4 while using ```SEC_BASED_WKP``` is 1 second.<br>
+- The sleep period of M4 while using ```ALARM_CONFIG``` can be configured by adjusting the value of ```ALARM_PERIODIC_TIME``` macro.
+- The sleep period of M4 while using ```DS_BASED_WKP``` can be configured by adjusting the value of ```DS_TIMER_DURATION``` macro (in microseconds).
+- The sleep period of M4 while using ```SEC_BASED_WKP``` is 1 second.
 - The sleep period of M4 while using ```UULP_GPIO_BASED_WKP``` depends on when the GPIO interrupt arises, the interrupt is mapped to UULP GPIO 2, UULP GPIO 2 terminates at BTN1 on the Wireless STK/ Wireless Pro Kit Mainboard. When BTN1 on Wireless STK/ Wireless Pro Kit Mainboard is pressed, the interrupt arises and M4 goes to sleep, when button is released, M4 wakes up.
 For, M4 to wake up upon pressing the BTN1, modify the following ```RSI_NPSSGPIO_SetPolarity(NPSS_GPIO_2, NPSS_GPIO_INTR_HIGH);``` function call to ```RSI_NPSSGPIO_SetPolarity(NPSS_GPIO_2, NPSS_GPIO_INTR_LOW);``` in ```RSI_Wakeupsw_config()``` function
 
 ## Adding or removing the pre-processor macros
-> Right click on the project and open properties
-![changing macros](resources/readme/changing_preprocessor.png)
+- Right click on the project and open properties
 
-> Navigate to C/C++ build > Settings > Preprocessor and remove the (4 in figure) existing wake up source macro, if you wish to test one wake up source at a time
+  ![changing macros](resources/readme/changing_preprocessor.png)
 
-![changing macros step 2](resources/readme/changing_preprocessor_2.png)
+- Navigate to C/C++ build > Settings > Preprocessor and remove the (4 in figure) existing wake up source macro, if you wish to test one wake up source at a time
 
-> click on add (5 in figure) and the required macro
-![changing macros step 3](resources/readme/changing_preprocessor_3.png)
+  ![changing macros step 2](resources/readme/changing_preprocessor_2.png)
+- click on add (5 in figure) and the required macro
 
-# Building and testing the application
+  ![changing macros step 3](resources/readme/changing_preprocessor_3.png)
 
-After making any custom configuration changes required, build, download and run the application as described in the [SoC Getting Started](https://docs.silabs.com/). 
+# Build and execute the Application
+
+### Board detection
+In the Simplicity Studio IDE, 
+  - The 917 SoC board will be detected under **Debug Adapters** pane as shown below.
+
+    **![Soc Board detection](resources/readme/soc_board_detection.png)**
+
+### Creation of project
+
+Ensure the latest Gecko SDK along with the extension Si917 COMBO SDK is added to Simplicity Studio.
+
+1. Click on the board detected and go to **EXAMPLE PROJECTS & DEMOS** section.
+
+   **![Examples and Demos](resources/readme/examples_demos.png)**
+
+2. Search for without_retention_deepsleep and choose Wi-Fi - SoC Without Retention Deep Sleep example and click on **Create**.  
+   
+   **![project](resources/readme/project_creation_soc.png)**
+
+3. Give the desired name to your project and cick on **Finish**.
+
+   **![Create project](resources/readme/create_project.png)** 
+
+4. Once the project is created, right click on project and go to properties → C/C++ Build → Settings → Build Steps.
+
+5. Add **post_build_script_SimplicityStudio.bat** file path present at SI917_COMBO_SDK.X.X.X.XX → utilities → isp_scripts_common_flash in build steps settings as shown in below image.
+  ![postbuild_script](resources/readme/post_build_script.png)
+
+6. Click on the build icon (hammer) or right click on project name and choose **Build Project** to build the project.
+  
+    ![building_pjt](resources/readme/build_project_soc.png)
+
+### Set up for application prints
+
+Before setting up Tera Term, do the following:
+
+You can use either of the below USB to UART converters for application prints.
+1. Set up using USB to UART converter board.
+
+  - Connect Tx (Pin-6) to P27 on WSTK
+  - Connect GND (Pin 8 or 10) to GND on WSTK
+
+    ![FTDI_prints](resources/readme/usb_to_uart_1.png)
+
+2. Set up using USB to UART converter cable.
+
+  - Connect RX (Pin 5) of TTL convertor to P27 on WSTK
+  - Connect GND (Pin1) of TTL convertor to GND on WSTK
+
+    ![FTDI_prints](resources/readme/usb_to_uart_2.png)
+
+**Tera term set up**
+
+1. Open the Tera Term tool.Choose the serial port to which USB to UART converter is connected and click on **OK**. 
+
+    **![](resources/readme/port_selection_soc.png)**
+
+2. Navigate to the Setup → Serial port and update the baud rate to **115200** and click on **OK**.
+
+    **![](resources/readme/serial_port_setup.png)**
+
+    **![](resources/readme/serial_port.png)**
+
+The serial port is now connected. 
+
+### Execute the application
+
+1. Once the build was successful, right click on project and select Debug As → Silicon Labs ARM Program to program the device as shown in below image or Run As → Silicon Labs ARM Program can also be used to directly flash the application binary and execute the program.
+
+   **![debug_mode](resources/readme/debugmodesoc117.png)**
+
+2. As soon as the debug process is completed, the application control branches to the main().
+
+3. Click on the **Resume** icon in the Simplicity Studio IDE toolbar to run the application.
+
+   **![Run](resources/readme/run.png)**
+
+### Application Prints
+
+**![Application Prints](resources/readme/application_prints.png)**

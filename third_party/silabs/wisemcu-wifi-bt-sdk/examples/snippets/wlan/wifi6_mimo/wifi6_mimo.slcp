@@ -16,7 +16,7 @@ xml_filter: Undefined
 sdk: {id: gecko_sdk, version: 4.1.0}
 sdk_extension:
   - id: wiseconnect
-    version: 1.0.0
+    version: 1.0.1
 source:
   - path: rsi_wifi6_mimo.c
 include:
@@ -31,8 +31,8 @@ requires:
   - name: wiseconnect_sapi_freertos
   - name: wiseconnect_third_party_freertos
 define:
-   - name: FLOAT_PRINT_BYPASS
-   - name: EXECUTION_FROM_RAM
+  - name: FLOAT_PRINT_BYPASS
+  - name: EXECUTION_FROM_RAM
 template_contribution:
   - name: EXECUTION_FROM_RAM
     value: 1
@@ -40,20 +40,21 @@ toolchain_settings: []
 readme:
   - path: readme.md
 other_file:
-  - path: resources/readme/ULOFDMA2.png
   - path: resources/readme/creationfinal114.png
   - path: resources/readme/debugmodesoc117.png
+  - path: resources/readme/ofdma.png
   - path: resources/readme/image217c.png
   - path: resources/readme/buildingpjt115.png
   - path: resources/readme/ncpboarddetection112.png
   - path: resources/readme/ftdiprints118.png
   - path: resources/readme/wifimimoncp.png
+  - path: resources/readme/ulofdma2.png
   - path: resources/readme/image216b.png
   - path: resources/readme/image211.png
   - path: resources/readme/image217b.png
   - path: resources/readme/image217d.png
   - path: resources/readme/image213.png
-  - path: resources/readme/DLOFDMA.png
+  - path: resources/readme/dlofdma.png
   - path: resources/readme/image359.png
   - path: resources/readme/image216c.png
   - path: resources/readme/wifimimosoc.png
@@ -61,13 +62,12 @@ other_file:
   - path: resources/readme/buildsuccesssoc116.png
   - path: resources/readme/image214.png
   - path: resources/readme/debugmodencp120.png
-  - path: resources/readme/ULOFDMA1.png
-  - path: resources/readme/OFDMA.png
   - path: resources/readme/image212.png
   - path: resources/readme/image217a.png
   - path: resources/readme/socboarddetection111.png
   - path: resources/readme/ap8011.png
   - path: resources/readme/projctselection113.png
+  - path: resources/readme/ulofdma1.png
 ui_hints:
   highlight:
     - path: readme.md

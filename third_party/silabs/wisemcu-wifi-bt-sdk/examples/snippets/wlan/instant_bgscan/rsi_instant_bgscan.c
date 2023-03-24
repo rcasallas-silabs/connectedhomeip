@@ -51,10 +51,10 @@
 #define CHANNEL_NO 0
 
 //! Security type
-#define SECURITY_TYPE RSI_OPEN
+#define SECURITY_TYPE RSI_WPA2
 
 //! Password
-#define PSK NULL
+#define PSK "12345678"
 
 //! DHCP mode 1- Enable 0- Disable
 #define DHCP_MODE 1
@@ -64,30 +64,17 @@
 
 //! IP address of the module
 //! E.g: 0x650AA8C0 == 192.168.10.101
-#define DEVICE_IP 0x650AA8C0
+#define DEVICE_IP "192.168.10.101"
 
 //! IP address of Gateway
 //! E.g: 0x010AA8C0 == 192.168.10.1
-#define GATEWAY 0x010AA8C0
+#define GATEWAY "192.168.10.1"
 
 //! IP address of netmask
 //! E.g: 0x00FFFFFF == 255.255.255.0
-#define NETMASK 0x00FFFFFF
+#define NETMASK "255.255.255.0"
 
 #endif
-
-//! Device port number
-#define DEVICE_PORT 5001
-
-//! Server port number
-#define SERVER_PORT 5001
-
-//! Server IP address. Should be in reverse long format
-//! E.g: 0x640AA8C0 == 192.168.10.100
-#define SERVER_IP_ADDRESS 0x640AA8C0
-
-//! Number of packet to send or receive
-#define NUMBER_OF_PACKETS 1000
 
 //! Memory length for driver
 #define GLOBAL_BUFF_LEN 15000
@@ -115,13 +102,14 @@ uint8_t ip_buff[20];
 uint8_t scan_ix;
 rsi_rsp_scan_t *bgscan_results2;
 
+extern uint64_t ip_to_reverse_hex(char *ip);
 int32_t rsi_instant_bgscan()
 {
   int32_t status = RSI_SUCCESS;
 #if !(DHCP_MODE)
-  uint32_t ip_addr      = DEVICE_IP;
-  uint32_t network_mask = NETMASK;
-  uint32_t gateway      = GATEWAY;
+  uint32_t ip_addr      = ip_to_reverse_hex((char *)DEVICE_IP);
+  uint32_t network_mask = ip_to_reverse_hex((char *)NETMASK);
+  uint32_t gateway      = ip_to_reverse_hex((char *)GATEWAY);
 #else
   uint8_t dhcp_mode = (RSI_DHCP | RSI_DHCP_UNICAST_OFFER);
 #endif
@@ -139,9 +127,11 @@ int32_t rsi_instant_bgscan()
   //! WC initialization
   status = rsi_wireless_init(0, 0);
   if (status != RSI_SUCCESS) {
+    LOG_PRINT("\r\nWireless Initialization Failed, Error Code : 0x%X\r\n", status);
     return status;
+  } else {
+    LOG_PRINT("\r\nWireless Initialization Success\r\n");
   }
-  LOG_PRINT("\r\nrsi_wireless_init Success\r\n");
 
 #ifdef RSI_WITH_OS
   while (1) {
@@ -149,15 +139,20 @@ int32_t rsi_instant_bgscan()
     //! Scan for Access points
     status = rsi_wlan_scan((int8_t *)SSID, (uint8_t)CHANNEL_NO, NULL, 0);
     if (status != RSI_SUCCESS) {
+      LOG_PRINT("\r\nWLAN Scan Failed, Error Code : 0x%X\r\n", status);
       return status;
+    } else {
+      LOG_PRINT("\r\nWLAN Scan Success\r\n");
     }
 
     //! Connect to an Access point
     status = rsi_wlan_connect((int8_t *)SSID, SECURITY_TYPE, PSK);
     if (status != RSI_SUCCESS) {
+      LOG_PRINT("\r\nWLAN Connect Failed, Error Code : 0x%X\r\n", status);
       return status;
+    } else {
+      LOG_PRINT("\r\nWLAN Connect Success\r\n");
     }
-    LOG_PRINT("\r\nrsi_wlan_connect Success\r\n");
 
     //! Configure IP
 #if DHCP_MODE
@@ -173,10 +168,14 @@ int32_t rsi_instant_bgscan()
                                 0);
 #endif
     if (status != RSI_SUCCESS) {
+      LOG_PRINT("\r\nIP Config Failed, Error Code : 0x%X\r\n", status);
       return status;
+    } else {
+      LOG_PRINT("\r\nIP Config Success\r\n");
     }
-    LOG_PRINT("\r\nIP Config Success\r\n");
+#if DHCP_MODE
     LOG_PRINT("RSI_STA IP ADDR: %d.%d.%d.%d \r\n", ip_buff[6], ip_buff[7], ip_buff[8], ip_buff[9]);
+#endif
 
     status = rsi_wlan_bgscan_profile(RSI_INSTANT_BGSCAN, (rsi_rsp_scan_t *)bgscan_results, APP_BUFF_LEN);
     if (status != RSI_SUCCESS) {
@@ -233,9 +232,10 @@ int main()
   //! Silabs module intialisation
   status = rsi_device_init(LOAD_NWP_FW);
   if (status != RSI_SUCCESS) {
+    LOG_PRINT("\r\nDevice Initialisation Failed, Error Code : 0x%X\r\n", status);
     return status;
   }
-  LOG_PRINT("\r\nrsi_device_init Success\r\n");
+  LOG_PRINT("\r\nDevice Initialisation Success\r\n");
 #endif
 
 #ifdef RSI_WITH_OS

@@ -19,7 +19,7 @@
     - For Silicon Labs Si91x, use the latest version of Simplicity Studio (refer **"Download and Install Simplicity Studio"** section in **getting-started-with-siwx917-soc** guide at **release_package/docs/index.html**)
  
 ## Project Setup
-- **Silicon Labs Si91x** refer **"Download SDK"** section in **getting-started-with-siwx917-soc** guide at **release_package/docs/index.html** to work with Si91x and Simplicity Studio
+- **Silicon Labs Si91x** refer **"Download SDKs"**, **"Add SDK to Simplicity Studio"**, **"Connect SiWx917"**, **"Open Example Project in Simplicity Studio"** section in **getting-started-with-siwx917-soc** guide at **release_package/docs/index.html** to work with Si91x and Simplicity Studio
 
 ## Configuration and Steps for Execution
 
@@ -30,12 +30,6 @@
    #define PORT 0        // Port selection
    #define PIN  6       // Pin number to connect ( P36 on WSTK board)
    ```
-
-## Loading Application on Simplicity Studio
-1. With the product Si917 selected, navigate to the example projects by clicking on Example Projects & Demos 
-  in simplicity studio and click on to ULP_GPIO Example application as shown below. 
-  
-![Figure:](resources/readme/image501b.png) 
 
 ## Build 
 1. Compile the application in Simplicity Studio using build icon.
@@ -50,7 +44,7 @@
 2. Use logic analyzer to see toggle on selected gpio pin
 
 ## Expected Results 
- - GPIO should be continously toggled ,connect logic analyzer to observe the toggle state
+ - GPIO will be toggled once (High to Low), connect logic analyzer to observe the toggle state
 
 ## Note
  - This applicatin is executed from RAM.

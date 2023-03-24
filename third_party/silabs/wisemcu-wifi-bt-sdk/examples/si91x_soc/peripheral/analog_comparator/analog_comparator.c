@@ -22,6 +22,9 @@
 #define COMP1_POS_INPUT_EXTERNAL_NEG_INPUT_EXTERNAL   1
 #define COMP1_POS_INPUT_EXTERNAL_NEG_INPUT_REF_SCALER 0
 
+/* Chip Reference Voltage*/
+#define CHIP_REF_VOL 2.8 // Chip Reference voltage for LDO i.e., it should be between 2.8V and 3.3V
+
 /* Private define ------------------------------------------------------------*/
 #define COMP1_INTERRUPT_HANDLER IRQ008_Handler /* Comparator1 IRQ handler number */
 #define HYST_ENABLE             0
@@ -41,7 +44,7 @@
 #endif
 
 /* Private variable */
-float vref_value = 2.4;        // Reference voltage to LDO, Min is 1.8V and Max is 3.3V
+float vref_value = 2.4; // Reference voltage to LDO, Min is 1.8V and Max is 3.3V
 
 /**
  * @brief  This function is comparator IRQ handler , its disable the comparator IRQ.
@@ -53,14 +56,14 @@ void COMP1_INTERRUPT_HANDLER(void)
   /* Toggle the UULP_GPIO3 for comparator interrupt indication */
   RSI_NPSSGPIO_SetPin(NPSS_GPIO_PIN, 1);
   RSI_NPSSGPIO_SetPin(NPSS_GPIO_PIN, 0);
-			#ifdef GPIO_TOGGLE
-		// Set pin 0 in GPIO mode
-		RSI_EGPIO_SetPinMux(EGPIO1, 0, 5, EGPIO_PIN_MUX_MODE0);
-		// Set output direction
-		RSI_EGPIO_SetDir(EGPIO1, 0, 5, EGPIO_CONFIG_DIR_OUTPUT);   
-		RSI_EGPIO_SetPin(EGPIO1, 0, 5, 1);
-		RSI_EGPIO_SetPin(EGPIO1, 0, 5, 0); 
-		#endif
+#ifdef GPIO_TOGGLE
+  // Set pin 0 in GPIO mode
+  RSI_EGPIO_SetPinMux(EGPIO1, 0, 5, EGPIO_PIN_MUX_MODE0);
+  // Set output direction
+  RSI_EGPIO_SetDir(EGPIO1, 0, 5, EGPIO_CONFIG_DIR_OUTPUT);
+  RSI_EGPIO_SetPin(EGPIO1, 0, 5, 1);
+  RSI_EGPIO_SetPin(EGPIO1, 0, 5, 0);
+#endif
 
   /* Mask the comparator interrupt */
   RSI_COMP_OutputMaskConfig(COMP1, ENABLE);
@@ -93,13 +96,13 @@ int main()
   /* Configure the AUX clock source */
   RSI_ULPSS_AuxClkConfig(ULPCLK, ENABLE_STATIC_CLK, ULP_AUX_32MHZ_RC_CLK);
 
-  /*  Configure the reference LDO voltage as 2.48v */
-  RSI_AUX_RefVoltageConfig(vref_value, 3.2);
+  /*  Configure the reference LDO voltage as 2.8v */
+  RSI_AUX_RefVoltageConfig(vref_value, CHIP_REF_VOL);
 
-/* Configure the comparator parameters,Here non-inverting input 
+  /* Configure the comparator parameters,Here non-inverting input 
 	   configured for ULP_GPIO0 and inverting input configured for ULP_GPIO1 */
-  RSI_COMP_Config(AUX_ADC_DAC_COMP, COMP1, COMP1_POSITIVE_INPUT, COMP1_NEGATIVE_INPUT, HYST_ENABLE, FILTER_ENABLE);\
-  
+  RSI_COMP_Config(AUX_ADC_DAC_COMP, COMP1, COMP1_POSITIVE_INPUT, COMP1_NEGATIVE_INPUT, HYST_ENABLE, FILTER_ENABLE);
+
 #if COMP1_POS_INPUT_EXTERNAL_NEG_INPUT_EXTERNAL
   /* enable  the comparator */
   RSI_COMP_Enable(AUX_ADC_DAC_COMP, COMP1, ENABLE);
@@ -109,7 +112,7 @@ int main()
   /* Set the reference scaler factor value set as 7,
 	   so inverting terminal input is 0.8V*/
   RSI_COMP_ReferenceScaler(AUX_ADC_DAC_COMP, SCALER_FACT_VAL);
-    /* enable  the comparator */
+  /* enable  the comparator */
   RSI_COMP_Enable(AUX_ADC_DAC_COMP, COMP1, ENABLE);
 #endif
 

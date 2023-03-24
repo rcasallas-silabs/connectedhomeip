@@ -16,7 +16,7 @@ xml_filter: Undefined
 sdk: {id: gecko_sdk, version: 4.1.0}
 sdk_extension:
   - id: wiseconnect
-    version: 1.0.0
+    version: 1.0.1
 source:
   - path: rsi_wlan_power_save_profile.c
 include:
@@ -33,27 +33,51 @@ toolchain_settings: []
 readme:
   - path: readme.md
 other_file:
+  - path: resources/readme/application_prints_ncp.png
   - path: resources/readme/creationfinal114.png
   - path: resources/readme/debugmodesoc117.png
+  - path: resources/readme/application_prints_soc.png
   - path: resources/readme/buildingpjt115.png
   - path: resources/readme/ncpboarddetection112.png
   - path: resources/readme/ftdiprints118.png
   - path: resources/readme/image216b.png
+  - path: resources/readme/usb_to_uart_2.png
+  - path: resources/readme/powersave_deepsleep_example.png
   - path: resources/readme/powersavedeepsoc.png
+  - path: resources/readme/post_build_script.png
+  - path: resources/readme/serial_port.png
+  - path: resources/readme/build_project_ncp.png
+  - path: resources/readme/usb_to_uart_1.png
+  - path: resources/readme/efm32.png
   - path: resources/readme/imagep3.png
-  - path: resources/readme/Exp-board-preprocessor.png
   - path: resources/readme/image359.png
+  - path: resources/readme/create_project.png
+  - path: resources/readme/run.png
+  - path: resources/readme/efr32.png
+  - path: resources/readme/exp-board-preprocessor.png
   - path: resources/readme/image216c.png
+  - path: resources/readme/ncp_macros.png
   - path: resources/readme/imagep5.png
   - path: resources/readme/ouputprints119.png
   - path: resources/readme/buildsuccesssoc116.png
+  - path: resources/readme/soc_board_detection.png
   - path: resources/readme/debugmodencp120.png
   - path: resources/readme/powersavedeepsleep.png
   - path: resources/readme/socboarddetection111.png
+  - path: resources/readme/setup_soc.png
+  - path: resources/readme/soc_macros.png
+  - path: resources/readme/build_project_soc.png
+  - path: resources/readme/setup_ncp.png
+  - path: resources/readme/port_selection.png
+  - path: resources/readme/powersave_deepsleep_example_soc.png
   - path: resources/readme/imagep4.png
   - path: resources/readme/imagep1a.png
+  - path: resources/readme/port_selection_soc.png
+  - path: resources/readme/serial_port_setup.png
+  - path: resources/readme/program_device.png
   - path: resources/readme/projctselection113.png
   - path: resources/readme/imagep2.png
+  - path: resources/readme/examples_demos.png
 ui_hints:
   highlight:
     - path: readme.md

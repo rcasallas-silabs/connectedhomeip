@@ -16,7 +16,7 @@ xml_filter: Undefined
 sdk: {id: gecko_sdk, version: 4.1.0}
 sdk_extension:
   - id: wiseconnect
-    version: 1.0.0
+    version: 1.0.1
 source:
   - path: rsi_ble_whitelist.c
 include:
@@ -33,28 +33,24 @@ toolchain_settings: []
 readme:
   - path: readme.md
 other_file:
-  - path: resources/readme/creationfinal114.png
-  - path: resources/readme/debugmodesoc117.png
-  - path: resources/readme/whitelist_NCP.png
-  - path: resources/readme/buildingpjt115.png
+  - path: resources/readme/creationfinal1.png
   - path: resources/readme/ncpboarddetection112.png
   - path: resources/readme/ftdiprints118.png
-  - path: resources/readme/image216b.png
   - path: resources/readme/whitelistsoc.png
   - path: resources/readme/keil_with_out_os.png
+  - path: resources/readme/buildncp1.png
+  - path: resources/readme/buildsoc.png
+  - path: resources/readme/buildsuccesssoc1.png
+  - path: resources/readme/buildsoc2.png
   - path: resources/readme/debugmodencp.png
-  - path: resources/readme/image78b.png
-  - path: resources/readme/image359.png
   - path: resources/readme/debugmodesoc.png
-  - path: resources/readme/whitelist_soc.png
-  - path: resources/readme/image78a.png
-  - path: resources/readme/image216c.png
-  - path: resources/readme/buildsuccesssoc116.png
-  - path: resources/readme/debugmodencp120.png
+  - path: resources/readme/serial_teriminal_ncp_prints1.png
+  - path: resources/readme/projctselection1.png
   - path: resources/readme/socboarddetection111.png
   - path: resources/readme/with_out_os.png
-  - path: resources/readme/image78.png
-  - path: resources/readme/projctselection113.png
+  - path: resources/readme/serial_teriminal_soc_prints1.png
+  - path: resources/readme/with_out_os2.png
+  - path: resources/readme/buildsuccessncp1.png
   - path: resources/readme/whitelistncp.png
 ui_hints:
   highlight:

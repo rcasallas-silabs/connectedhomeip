@@ -102,7 +102,7 @@
 #define RSI_WLAN_TASK_PRIORITY 1
 
 //! Wireless driver task priority
-#define RSI_DRIVER_TASK_PRIORITY 1
+#define RSI_DRIVER_TASK_PRIORITY 2
 
 //! Wlan task stack size
 #define RSI_WLAN_TASK_STACK_SIZE 500
@@ -146,6 +146,10 @@ int8_t password[] = "password";
 volatile int halt = 0;
 
 int8_t mqqt_client_buffer[MQTT_CLIENT_INIT_BUFF_LEN];
+
+#ifdef RSI_M4_INTERFACE
+uint32_t xtal_enable = 1;
+#endif
 
 #if ENABLE_POWER_SAVE
 //! Power Save Profile mode
@@ -264,6 +268,11 @@ int32_t rsi_mqtt_client_app()
                   &driver_task_handle);
 #endif
 
+#ifdef RSI_M4_INTERFACE
+  /* MCU Hardware Configuration for Low-Power Applications */
+  RSI_WISEMCU_HardwareSetup();
+#endif
+
   //! WC initialization
   status = rsi_wireless_init(0, 0);
   if (status != RSI_SUCCESS) {
@@ -272,6 +281,13 @@ int32_t rsi_mqtt_client_app()
   } else {
     LOG_PRINT("\r\nWireless Initialization Success\r\n");
   }
+
+#ifdef RSI_M4_INTERFACE
+  status = rsi_cmd_m4_ta_secure_handshake(RSI_ENABLE_XTAL, 1, &xtal_enable, 0, NULL);
+  if (status != RSI_SUCCESS) {
+    return status;
+  }
+#endif
 
   //! Send feature frame
   status = rsi_send_feature_frame();
@@ -453,7 +469,14 @@ start:
   publish_msg.payloadlen = sizeof(publish_message);
 
   //! Publish message on the topic
-  rsi_mqtt_publish(rsi_mqtt_client, (int8_t *)RSI_MQTT_TOPIC, &publish_msg);
+  status = rsi_mqtt_publish(rsi_mqtt_client, (int8_t *)RSI_MQTT_TOPIC, &publish_msg);
+  if (status != RSI_SUCCESS) {
+    status = rsi_wlan_socket_get_status(rsi_mqtt_client->mqtt_client.ipstack->my_socket);
+    LOG_PRINT("\r\nPublish to Topic Failed, Error Code : 0x%lX\r\n", status);
+    return status;
+  } else {
+    LOG_PRINT("\r\nPublish to Topic Success\r\n");
+  }
 
   while (!halt) {
     //! Recv data published on the subscribed topic

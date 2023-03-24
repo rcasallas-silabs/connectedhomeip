@@ -127,6 +127,7 @@ typedef enum rsi_ble_cmd_request_e {
   RSI_BLE_CMD_WRITE_RESP                             = 0x010A,
   RSI_BLE_CMD_PREPARE_WRITE_RESP                     = 0x010B,
   RSI_BLE_CMD_SET_LOCAL_IRK                          = 0x010C,
+  RSI_BLE_REQ_SMP_PAIRING_FAILED                     = 0x0111,
   RSI_BLE_CMD_SET_PROP_PROTOCOL_BLE_BANDEDGE_TXPOWER = 0x012A,
   RSI_BLE_CMD_MTU_EXCHANGE_RESP                      = 0x012B,
   RSI_BLE_CMD_SET_BLE_TX_POWER                       = 0x012D,
@@ -135,6 +136,7 @@ typedef enum rsi_ble_cmd_request_e {
   RSI_PROP_PROTOCOL_CMD     = 0xE000,
   RSI_PROP_PROTOCOL_CMD_PER = 0xE001,
 #endif
+  RSI_BLE_REQ_CONN_ENHANCE = 0x1FFF, //Please add new cmd ids above this cmd id.
 } rsi_ble_cmd_request_t;
 
 // enumeration for BLE command response codes
@@ -220,6 +222,7 @@ typedef enum rsi_ble_cmd_resp_e {
   RSI_BLE_RSP_MTU_EXCHANGE_REQUEST                   = 0x0107,
   RSI_BLE_RSP_SET_WWO_RESP_NOTIFY_BUF_INFO           = 0x0108,
   RSI_BLE_RSP_SET_LOCAL_IRK                          = 0x010C,
+  RSI_BLE_RSP_SMP_PAIRING_FAILED                     = 0x0111,
   RSI_BLE_RSP_SET_PROP_PROTOCOL_BLE_BANDEDGE_TXPOWER = 0x012A,
   RSI_BLE_RSP_MTU_EXCHANGE_RESP                      = 0x012B,
   RSI_BLE_RSP_SET_BLE_TX_POWER                       = 0x012D,
@@ -282,6 +285,12 @@ typedef enum rsi_ble_event_e {
   RSI_BLE_EVENT_SC_METHOD                   = 0x1540,
   RSI_BLE_EVENT_MTU_EXCHANGE_INFORMATION    = 0x1541,
 } rsi_ble_event_t;
+
+typedef enum {
+  RSI_SMP_PAIRING_NOT_SUPPORTED = 0x05,
+  RSI_SMP_UNSPECIFIED_REASON    = 0x08,
+  RSI_SMP_REPEATED_ATTEMPTS     = 0x09,
+} smp_failure_error;
 
 /********************************************************
  * *                 Structure Definitions
@@ -471,6 +480,33 @@ typedef struct rsi_ble_req_conn_s {
   uint16_t supervision_tout;
 } rsi_ble_req_conn_t;
 
+typedef struct rsi_ble_req_enhance_conn_s {
+  //uint8, address type of the device to connect
+  uint8_t dev_addr_type;
+  //uint8[6], address of the device to connect
+  uint8_t dev_addr[RSI_DEV_ADDR_LEN];
+  //uint8, filter policy
+  uint8_t filter_policy;
+  //uint8, own address type
+  uint8_t own_addr_type;
+  //uint16, scan interval
+  uint16_t le_scan_interval;
+  //uint16, scan window
+  uint16_t le_scan_window;
+  //uint16, minimum connection interval
+  uint16_t conn_interval_min;
+  //uint16, maximum connection interval
+  uint16_t conn_interval_max;
+  //uint16, connection latency
+  uint16_t conn_latency;
+  //uint16, supervision timeout
+  uint16_t supervision_tout;
+  //uint16, minimum connection event length
+  uint16_t min_ce_length;
+  //uint16, maximum connection event length
+  uint16_t max_ce_length;
+} rsi_ble_req_enhance_conn_t;
+
 //Disconnect command structure
 typedef struct rsi_ble_req_disconnect_s {
   //uint8[6], address of the device to disconnect
@@ -646,6 +682,12 @@ typedef struct rsi_ble_set_le_ltkreqreply_s {
   uint8_t replytype;
   uint8_t localltk[16];
 } rsi_ble_set_le_ltkreqreply_t;
+
+//SMP Pairing Failed (cmd), cmd_ix = 0x0111
+typedef struct rsi_ble_req_smp_pair_failed_s {
+  uint8_t dev_addr[RSI_DEV_ADDR_LEN];
+  uint8_t reason;
+} rsi_ble_req_smp_pair_failed_t;
 
 // GATT structures
 

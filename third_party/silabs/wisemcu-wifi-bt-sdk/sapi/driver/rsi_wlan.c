@@ -168,9 +168,10 @@ int32_t rsi_driver_wlan_send_cmd(rsi_wlan_cmd_request_t cmd, rsi_pkt_t *pkt)
 
       multicast_bitmap = (uint16_t)cmd_type;
 
+      /* not supported
       if ((cmd_type == RSI_MULTICAST_MAC_ADD_BIT) || (cmd_type == RSI_MULTICAST_MAC_CLEAR_BIT)) {
         multicast_bitmap |= (multicast_mac_hash((uint8_t *)multicast_filter->mac_address) << 8);
-      }
+      }*/
 
       // memset the pkt
       memset(&pkt->data, 0, 2);
@@ -264,7 +265,7 @@ int32_t rsi_driver_wlan_send_cmd(rsi_wlan_cmd_request_t cmd, rsi_pkt_t *pkt)
       // copy enterprise configuratiomn data
       rsi_strcpy((int8_t *)rsi_eap_req->eap_method, RSI_EAP_METHOD);
       rsi_strcpy((int8_t *)rsi_eap_req->inner_method, RSI_EAP_INNER_METHOD);
-      rsi_uint32_to_4bytes((uint8_t *)rsi_eap_req->okc_enable, 0);
+      rsi_uint32_to_4bytes((uint8_t *)rsi_eap_req->okc_enable, OKC_VALUE);
       rsi_strcpy((int8_t *)rsi_eap_req->private_key_password, RSI_PRIVATE_KEY_PASSWORD);
 
       // fill payload size
@@ -587,7 +588,8 @@ int32_t rsi_driver_wlan_send_cmd(rsi_wlan_cmd_request_t cmd, rsi_pkt_t *pkt)
       rsi_uint32_to_4bytes(wmm_ps->wmm_ps_wakeup_interval, RSI_WMM_PS_WAKE_INTERVAL);
 
       // set wmm UAPSD bitmap
-      wmm_ps->wmm_ps_uapsd_bitmap = RSI_WMM_PS_UAPSD_BITMAP;
+      // Resetting this bit as it is affecting throughput in COEX scenarios
+      wmm_ps->wmm_ps_uapsd_bitmap = 0; //RSI_WMM_PS_UAPSD_BITMAP;
 
       //fill payload size wmm ps parameters
       payload_size = sizeof(rsi_wmm_ps_parms_t);
@@ -686,6 +688,14 @@ int32_t rsi_driver_wlan_send_cmd(rsi_wlan_cmd_request_t cmd, rsi_pkt_t *pkt)
     case RSI_WLAN_REQ_CALIB_WRITE: {
       payload_size = sizeof(rsi_calib_write_t);
     } break;
+    case RSI_WLAN_REQ_CALIB_READ: {
+      payload_size = sizeof(rsi_calib_read_t);
+    } break;
+    case RSI_WLAN_REQ_GET_CSI_DATA: {
+      rsi_csi_config_t *csi_config = (rsi_csi_config_t *)pkt->data;
+      payload_size                 = sizeof(rsi_csi_config_t) + (csi_config->num_of_mac_addr * RSI_MAC_ADDR_LEN)
+                     - RSI_MAC_ADDR_LEN; // -6 is for csi_config->mac_addresses
+    } break;
     case RSI_WLAN_REQ_EMB_MQTT_CLIENT: {
       rsi_req_emb_mqtt_command_t *mqtt_cmd = (rsi_req_emb_mqtt_command_t *)pkt->data;
       mqtt_command_type                    = rsi_bytes4R_to_uint32(mqtt_cmd->command_type);
@@ -730,6 +740,7 @@ int32_t rsi_driver_wlan_send_cmd(rsi_wlan_cmd_request_t cmd, rsi_pkt_t *pkt)
     case RSI_WLAN_REQ_FTP_FILE_WRITE:
     case RSI_WLAN_REQ_GET_RANDOM:
     case RSI_WLAN_REQ_GET_STATS:
+    case RSI_WLAN_REQ_EXT_STATS:
       break;
 
     default: {
@@ -936,6 +947,8 @@ int32_t rsi_driver_process_wlan_recv_cmd(rsi_pkt_t *pkt)
       // update state  wlan_cb state to init done
       if (status == RSI_SUCCESS) {
         rsi_wlan_cb->state      = RSI_WLAN_STATE_INIT_DONE;
+        rsi_wlan_cb->sta_state  = RSI_WLAN_STATE_INIT_DONE;
+        rsi_wlan_cb->ap_state   = RSI_WLAN_STATE_INIT_DONE;
         common_cb->ps_coex_mode = (common_cb->ps_coex_mode | BIT(0));
       }
 
@@ -1088,6 +1101,23 @@ int32_t rsi_driver_process_wlan_recv_cmd(rsi_pkt_t *pkt)
           for (ii = 5; ii < 25; ii++)
             LOG_PRINT(" PowerIndex For Rate %d    :%d\n", ii, payload[ii]);
         }
+      }
+    } break;
+    case RSI_WLAN_RSP_EXT_STATS: {
+      if (status == RSI_SUCCESS) {
+        if ((rsi_wlan_cb->app_buffer != NULL) && (rsi_wlan_cb->app_buffer_length != 0)) {
+
+          if (rsi_wlan_cb->query_cmd == RSI_WLAN_EXT_STATS) {
+            // copy wlan related information in to output buffer
+            if ((rsi_wlan_cb->app_buffer != NULL) && (rsi_wlan_cb->app_buffer_length != 0)) {
+              copy_length = (payload_length < rsi_wlan_cb->app_buffer_length) ? sizeof(rsi_wlan_ext_stats_t)
+                                                                              : (rsi_wlan_cb->app_buffer_length);
+
+              memcpy(rsi_wlan_cb->app_buffer, payload, copy_length);
+            }
+          }
+        }
+        rsi_wlan_cb->app_buffer = NULL;
       }
     } break;
     case RSI_WLAN_RSP_QUERY_GO_PARAMS: {
@@ -1257,6 +1287,14 @@ int32_t rsi_driver_process_wlan_recv_cmd(rsi_pkt_t *pkt)
       if (status == RSI_SUCCESS) {
         if (rsi_wlan_cb->opermode == RSI_WLAN_ACCESS_POINT_MODE) {
           rsi_wlan_cb->state = RSI_WLAN_STATE_IP_CONFIG_DONE;
+        } else if (rsi_wlan_cb->opermode == RSI_WLAN_CONCURRENT_MODE) {
+          if (payload_length) {
+            if (payload[0] == 'C') {
+              rsi_wlan_cb->sta_state = RSI_WLAN_STATE_CONNECTED;
+            } else if (payload[0] == 'G') {
+              rsi_wlan_cb->ap_state = RSI_WLAN_STATE_CONNECTED;
+            }
+          }
         } else {
           rsi_wlan_cb->state = RSI_WLAN_STATE_CONNECTED;
         }
@@ -2180,7 +2218,6 @@ int32_t rsi_driver_process_wlan_recv_cmd(rsi_pkt_t *pkt)
         }
       }
     } break;
-
 #endif
 #ifdef PROCESS_SCAN_RESULTS_AT_HOST
     case RSI_WLAN_RSP_SCAN_RESULTS: {
@@ -2218,6 +2255,22 @@ int32_t rsi_driver_process_wlan_recv_cmd(rsi_pkt_t *pkt)
     case RSI_WLAN_RSP_EMB_MQTT_PUBLISH_PKT: {
       if (rsi_wlan_cb_non_rom->nwk_callbacks.rsi_emb_mqtt_publish_message_callback != NULL) {
         rsi_wlan_cb_non_rom->nwk_callbacks.rsi_emb_mqtt_publish_message_callback(status, pkt->data, payload_length);
+      }
+    } break;
+    case RSI_WLAN_RSP_GET_CSI_DATA: {
+      if (rsi_wlan_cb_non_rom->callback_list.wlan_receive_csi_data_response_handler != NULL) {
+        rsi_wlan_cb_non_rom->callback_list.wlan_receive_csi_data_response_handler(status, pkt->data, payload_length);
+      }
+    } break;
+    case RSI_WLAN_RSP_CALIB_READ: {
+      if (status == RSI_SUCCESS) {
+        // check the length of application buffer and copy received
+        if (rsi_wlan_cb->app_buffer != NULL) {
+          copy_length = (payload_length < rsi_wlan_cb->app_buffer_length) ? (payload_length)
+                                                                          : (rsi_wlan_cb->app_buffer_length);
+          memcpy(rsi_wlan_cb->app_buffer, payload, copy_length);
+          rsi_wlan_cb->app_buffer = NULL;
+        }
       }
     } break;
 
@@ -2274,14 +2327,15 @@ int32_t rsi_driver_process_wlan_recv_cmd(rsi_pkt_t *pkt)
              || (cmd_type == RSI_WLAN_REQ_HT_CAPABILITIES) || (cmd_type == RSI_WLAN_REQ_SET_PROFILE)
              || (cmd_type == RSI_WLAN_REQ_CFG_SAVE) || (cmd_type == RSI_WLAN_REQ_TX_TEST_MODE)
              || (cmd_type == RSI_WLAN_REQ_GET_PROFILE) || (cmd_type == RSI_WLAN_REQ_FREQ_OFFSET)
-             || (cmd_type == RSI_WLAN_REQ_CALIB_WRITE) || (cmd_type == RSI_WLAN_REQ_DELETE_PROFILE)
-             || (cmd_type == RSI_WLAN_REQ_SET_SLEEP_TIMER) || (cmd_type == RSI_WLAN_REQ_FILTER_BCAST_PACKETS)
-             || (cmd_type == RSI_WLAN_REQ_AUTO_CONFIG_ENABLE) || (cmd_type == RSI_WLAN_REQ_SOCKET_CONFIG)
-             || (cmd_type == RSI_WLAN_RSP_IPCONFV6) || (cmd_type == RSI_WLAN_REQ_SET_REGION_AP)
-             || (cmd_type == RSI_WLAN_REQ_DYNAMIC_POOL) || (cmd_type == RSI_WLAN_REQ_GAIN_TABLE)
-             || (cmd_type == RSI_WLAN_REQ_RX_STATS) || (cmd_type == RSI_WLAN_REQ_RADIO)
-             || (cmd_type == RSI_WLAN_REQ_GET_STATS) || (cmd_type == RSI_WLAN_REQ_11AX_PARAMS)
-             || (cmd_type == RSI_WLAN_REQ_TWT_PARAMS)
+             || (cmd_type == RSI_WLAN_REQ_CALIB_WRITE) || (cmd_type == RSI_WLAN_REQ_CALIB_READ)
+             || (cmd_type == RSI_WLAN_REQ_DELETE_PROFILE) || (cmd_type == RSI_WLAN_REQ_SET_SLEEP_TIMER)
+             || (cmd_type == RSI_WLAN_REQ_FILTER_BCAST_PACKETS) || (cmd_type == RSI_WLAN_REQ_AUTO_CONFIG_ENABLE)
+             || (cmd_type == RSI_WLAN_REQ_SOCKET_CONFIG) || (cmd_type == RSI_WLAN_RSP_IPCONFV6)
+             || (cmd_type == RSI_WLAN_REQ_SET_REGION_AP) || (cmd_type == RSI_WLAN_REQ_DYNAMIC_POOL)
+             || (cmd_type == RSI_WLAN_REQ_GAIN_TABLE) || (cmd_type == RSI_WLAN_REQ_RX_STATS)
+             || (cmd_type == RSI_WLAN_REQ_RADIO) || (cmd_type == RSI_WLAN_REQ_GET_STATS)
+             || (cmd_type == RSI_WLAN_REQ_11AX_PARAMS) || (cmd_type == RSI_WLAN_REQ_TWT_PARAMS)
+             || (cmd_type == RSI_WLAN_REQ_EXT_STATS)
 #ifdef RSI_WAC_MFI_ENABLE
              || (cmd_type == RSI_WLAN_REQ_ADD_MFI_IE)
 #endif
@@ -2382,7 +2436,7 @@ int32_t rsi_wlan_radio_init(void)
         }
 
 #if HE_PARAMS_SUPPORT
-        status = rsi_wlan_11ax_config();
+        status = rsi_wlan_11ax_config(GUARD_INTERVAL);
         if (status != RSI_SUCCESS) {
           SL_PRINTF(SL_WLAN_RADIO_INIT_EXIT_2, WLAN, LOG_INFO, "status: %4x", status);
           return status;

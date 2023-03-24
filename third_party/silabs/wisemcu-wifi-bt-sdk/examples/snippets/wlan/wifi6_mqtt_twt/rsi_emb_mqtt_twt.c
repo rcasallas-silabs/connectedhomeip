@@ -58,7 +58,7 @@
 #define PSK "1234567890"
 
 //! DHCP mode 1- Enable 0- Disable
-#define DHCP_MODE 0
+#define DHCP_MODE 1
 
 //! If DHCP mode is disabled give IP statically
 #if !(DHCP_MODE)
@@ -93,7 +93,7 @@
 #define RSI_WLAN_TASK_PRIORITY 1
 
 //! Wireless driver task priority
-#define RSI_DRIVER_TASK_PRIORITY 1
+#define RSI_DRIVER_TASK_PRIORITY 2
 
 //! Wlan task stack size
 #define RSI_WLAN_TASK_STACK_SIZE 500
@@ -286,6 +286,22 @@ int32_t rsi_mqtt_client_app()
     return status;
   } else {
     LOG_PRINT("\r\nConnect to Access point Success\r\n");
+  }
+
+  // ! Display MAC address
+  uint8_t response[6];
+  status = rsi_wlan_get(RSI_MAC_ADDRESS, response, 6);
+  if (status != RSI_SUCCESS) {
+    LOG_PRINT("\r\nMAC address query command failed, Error Code: 0x%1X!\r\n", status);
+    return status;
+  } else {
+    LOG_PRINT("\r\nMAC Address - %02X:%02X:%02X:%02X:%02X:%02X\r\n",
+              response[0],
+              response[1],
+              response[2],
+              response[3],
+              response[4],
+              response[5]);
   }
 
   //! Configure IP

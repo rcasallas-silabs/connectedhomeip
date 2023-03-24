@@ -23,7 +23,7 @@ The data received should match with the transmitted data
     - For Silicon Labs Si91x, use the latest version of Simplicity Studio (refer **"Download and Install Simplicity Studio"** section in **getting-started-with-siwx917-soc** guide at **release_package/docs/index.html**)
  
 ## Project Setup
-- **Silicon Labs Si91x** refer **"Download SDK"** section in **getting-started-with-siwx917-soc** guide at **release_package/docs/index.html** to work with Si91x and Simplicity Studio
+- **Silicon Labs Si91x** refer **"Download SDKs"**, **"Add SDK to Simplicity Studio"**, **"Connect SiWx917"**, **"Open Example Project in Simplicity Studio"** section in **getting-started-with-siwx917-soc** guide at **release_package/docs/index.html** to work with Si91x and Simplicity Studio
 
 ## Configuration and Steps for Execution
 - Configure the following parameters in ulp_i2s.c file and update/modify following macros if required
@@ -36,11 +36,6 @@ The data received should match with the transmitted data
    #define SAMPLING_RATE             // This macro is used for Sampling frequency(KHz)   
    ``` 
    
-## Loading Application on Simplicity Studio
-1. With the product Si917 selected, navigate to the example projects by clicking on Example Projects & Demos 
-in simplicity studio and click on to ULP_I2S Example application as shown below.
-
-![Figure:](resources/readme/image504b.png)
 
 ## Build and run
 1. Compile the application in Simplicity Studio using build icon

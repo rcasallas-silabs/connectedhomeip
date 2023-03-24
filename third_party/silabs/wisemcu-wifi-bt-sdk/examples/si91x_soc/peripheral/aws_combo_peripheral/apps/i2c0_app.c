@@ -53,7 +53,7 @@
 #define SYSTIC_TIMER_CONFIG 1000
 
 /* General return codes */
-#define ARM_DRIVER_OK                 0 ///< Operation succeeded
+#define ARM_DRIVER_OK                0  ///< Operation succeeded
 #define ARM_DRIVER_ERROR             -1 ///< Unspecified error
 #define ARM_DRIVER_ERROR_BUSY        -2 ///< Driver is busy
 #define ARM_DRIVER_ERROR_TIMEOUT     -3 ///< Timeout occurred
@@ -74,9 +74,8 @@ extern ARM_DRIVER_I2C Driver_I2C0;
 #ifdef RSI_WITH_OS
 
 #include "rsi_os.h"
-extern  rsi_semaphore_handle_t i2c_thread_sem, publish_msg_sem ;
+extern rsi_semaphore_handle_t i2c_thread_sem, publish_msg_sem;
 #endif
-
 
 ARM_DRIVER_I2C *drv_info;
 
@@ -96,7 +95,7 @@ void setup_i2c(void);
 void read_capabilities(void);
 void ARM_I2C_SignalEvent(uint32_t event);
 
-uint8_t Data_buff[SIZE_BUFFERS]="AWS_LED_Toggle";
+uint8_t Data_buff[SIZE_BUFFERS] = "AWS_LED_Toggle";
 
 /* Private functions ---------------------------------------------------------*/
 void ErrorHandler(void)
@@ -139,11 +138,10 @@ int32_t EEPROM_WriteBuf(uint8_t sub_addr, const uint8_t *buf, uint32_t len)
 
   start = rsi_hal_gettickcount();
 
-  while ((I2Cdrv->GetStatus().busy))
-    {
-     if(!(rsi_hal_gettickcount() - start < 100))
-         return ARM_DRIVER_ERROR_TIMEOUT;
-    }
+  while ((I2Cdrv->GetStatus().busy)) {
+    if (!(rsi_hal_gettickcount() - start < 100))
+      return ARM_DRIVER_ERROR_TIMEOUT;
+  }
 
   cnt_num = I2Cdrv->GetDataCount();
   if (cnt_num != (EEPROM_MAX_WRITE + 2)) {
@@ -326,54 +324,53 @@ int I2C0_Init(void)
   EEPROM_GetSize();
 }
 
-
 int I2c0_Transfer(void)
 {
   uint32_t forever = 1, comp = 0;
   int32_t status = ARM_DRIVER_OK;
-    /* Writes data to EEPROM slave */
-    status = EEPROM_WriteBuf(OFFSET_ADDR, buf, TX_LEN);
-    if (status != ARM_DRIVER_OK) {
-      DEBUGOUT("\r\nFailed to Write Data into EEPROM(I2C0 Slave), Error Code : %d\r\n", status);
-      return status;
+  /* Writes data to EEPROM slave */
+  status = EEPROM_WriteBuf(OFFSET_ADDR, buf, TX_LEN);
+  if (status != ARM_DRIVER_OK) {
+    DEBUGOUT("\r\nFailed to Write Data into EEPROM(I2C0 Slave), Error Code : %d\r\n", status);
+    return status;
+  } else {
+    DEBUGOUT("\r\nWrite Data into EEPROM(I2C0 Slave)\r\n");
+  }
+
+  //5ms delay after stop to start
+  rsi_delay_ms(5);
+
+  /* Reads data from EEPROM slave */
+  status = EEPROM_ReadBuf(OFFSET_ADDR, rd_buf, RX_LEN);
+  if (status != ARM_DRIVER_OK) {
+    DEBUGOUT("\r\nFailed to Read Data From EEPROM(I2C0 Slave), Error Code : %d\r\n", status);
+    return status;
+  } else {
+    DEBUGOUT("\r\nStart Reading Data From EEPROM(I2C0 Slave)\r\n");
+  }
+
+  /*waits until rx_done=0  */
+  while (!rx_done)
+    ;
+  rx_done = 0;
+
+  DEBUGOUT("\r\nCompleted Reading Data From EEPROM\r\n");
+
+  for (comp = 0; comp < sizeof(rd_buf); comp++) {
+    if (Data_buff[comp] == rd_buf[comp]) {
+      continue;
     } else {
-        DEBUGOUT("\r\nWrite Data into EEPROM(I2C0 Slave)\r\n");
-      }
-
-    //5ms delay after stop to start
-    rsi_delay_ms(5);
-
-    /* Reads data from EEPROM slave */
-    status = EEPROM_ReadBuf(OFFSET_ADDR, rd_buf, RX_LEN);
-    if (status != ARM_DRIVER_OK) {
-      DEBUGOUT("\r\nFailed to Read Data From EEPROM(I2C0 Slave), Error Code : %d\r\n", status);
-      return status;
-    } else {
-        DEBUGOUT("\r\nStart Reading Data From EEPROM(I2C0 Slave)\r\n");
-      }
-
-    /*waits until rx_done=0  */
-    while (!rx_done)
-      ;
-    rx_done = 0;
-
-    DEBUGOUT("\r\nCompleted Reading Data From EEPROM\r\n");
-
-    for (comp = 0; comp < sizeof(rd_buf); comp++) {
-      if (Data_buff[comp] == rd_buf[comp]) {
-        continue;
-      } else {
-        break;
-      }
+      break;
     }
+  }
 
-    if (comp == sizeof(rd_buf)) {
-      DEBUGOUT("\r\nI2C0 Data Comparison Success\r\n");
-      I2C0_TRANSFER = 0 ;
+  if (comp == sizeof(rd_buf)) {
+    DEBUGOUT("\r\nI2C0 Data Comparison Success\r\n");
+    I2C0_TRANSFER = 0;
 #ifdef RSI_WITH_OS
-        rsi_semaphore_post(&publish_msg_sem);
+    rsi_semaphore_post(&publish_msg_sem);
 #endif
-    } else {
-      DEBUGOUT("\r\nI2C0 Data Comparison Fail\r\n");
-    }
+  } else {
+    DEBUGOUT("\r\nI2C0 Data Comparison Fail\r\n");
+  }
 }

@@ -29,25 +29,25 @@
 #include "SAI.h"
 #include "rsi_board.h"
 
-#define RESERVED_IRQ_COUNT    16
-#define EXT_IRQ_COUNT         98
+#define RESERVED_IRQ_COUNT   16
+#define EXT_IRQ_COUNT        98
 #define VECTOR_TABLE_ENTRIES (RESERVED_IRQ_COUNT + EXT_IRQ_COUNT)
-uint32_t ramVector[VECTOR_TABLE_ENTRIES] __attribute__ ((aligned(256)));
+uint32_t ramVector[VECTOR_TABLE_ENTRIES] __attribute__((aligned(256)));
 
-#define ULP_BANK_OFFSET    0x800
-#define TX_BUF_MEMORY   (ULP_SRAM_START_ADDR+(1*ULP_BANK_OFFSET))
-#define RX_BUF_MEMORY   (ULP_SRAM_START_ADDR+(2*ULP_BANK_OFFSET))
+#define ULP_BANK_OFFSET 0x800
+#define TX_BUF_MEMORY   (ULP_SRAM_START_ADDR + (1 * ULP_BANK_OFFSET))
+#define RX_BUF_MEMORY   (ULP_SRAM_START_ADDR + (2 * ULP_BANK_OFFSET))
 
 #define BUFFER_SIZE 1024
 
-#define SOC_PLL_REF_FREQUENCY 40000000 // PLL input REFERENCE clock 40MHZ 
+#define SOC_PLL_REF_FREQUENCY 40000000 // PLL input REFERENCE clock 40MHZ
 
-#define DATA_RESOLUTION   16      // This macro is used for Data Resolution(Frame length)
-#define DATA_SIZE         32      // This macro is used for Data length(Bits)
-#define SAMPLING_RATE     8000    // This macro is used for Sampling frequency(KHz)
+#define DATA_RESOLUTION 16   // This macro is used for Data Resolution(Frame length)
+#define DATA_SIZE       32   // This macro is used for Data length(Bits)
+#define SAMPLING_RATE   8000 // This macro is used for Sampling frequency(KHz)
 
 //Note: Change this macro to required PLL frequency in hertz
-#define PS4_SOC_FREQ 180000000 // PLL out clock 180MHz            
+#define PS4_SOC_FREQ 180000000 // PLL out clock 180MHz
 
 uint8_t tx_buf[BUFFER_SIZE];
 uint8_t rx_buf[BUFFER_SIZE];
@@ -55,7 +55,7 @@ uint32_t tx_cnt           = 0;
 uint32_t rx_cnt           = 0;
 volatile uint32_t tx_done = 0, rx_done = 0;
 
-// SAI Driver 
+// SAI Driver
 extern ARM_DRIVER_SAI Driver_SAI1;
 static ARM_DRIVER_SAI *SAIdrv = &Driver_SAI1;
 void ARM_SAI_SignalEvent(uint32_t event);
@@ -135,10 +135,10 @@ void BufferInit(uint16_t seed)
   uint32_t loop;
 
   for (loop = 0; loop < BUFFER_SIZE; loop++) {
-    // Clear RX buffers, so we know something was received 
+    // Clear RX buffers, so we know something was received
     rx_buf[loop] = 0;
 
-    // Seed data for master transmit buffers 
+    // Seed data for master transmit buffers
     tx_buf[loop] = seed;
 
     seed++;
@@ -164,8 +164,8 @@ int main()
   volatile uint32_t status;
   volatile uint32_t ret = 0;
 
- //copying the vector table from flash to ram
-  memcpy(ramVector, (uint32_t*)SCB->VTOR, sizeof(uint32_t) * VECTOR_TABLE_ENTRIES);
+  //copying the vector table from flash to ram
+  memcpy(ramVector, (uint32_t *)SCB->VTOR, sizeof(uint32_t) * VECTOR_TABLE_ENTRIES);
 
   //assing the ram vector adress to VTOR register
   SCB->VTOR = (uint32_t)ramVector;
@@ -176,22 +176,22 @@ int main()
   //Switching MCU from PS4 to PS2 state
   hardware_setup();
 
-  // Initialized board UART 
+  // Initialized board UART
   DEBUGINIT();
 
-  // Fills the transmit buffer with data 
+  // Fills the transmit buffer with data
   BufferInit(1);
 
   //Copying the tx buf into ulpmemory location
-  memcpy((uint8_t *)TX_BUF_MEMORY,tx_buf,BUFFER_SIZE);
+  memcpy((uint8_t *)TX_BUF_MEMORY, tx_buf, BUFFER_SIZE);
 
-  // checks the SAI driver version  
+  // checks the SAI driver version
   setup_sai();
 
   // Read capabilities of SAI driver
   read_capabilities();
 
-  // Initializes SAI interface 
+  // Initializes SAI interface
   status = SAIdrv->Initialize(ARM_SAI_SignalEvent);
   if (status != ARM_DRIVER_OK) {
     DEBUGOUT("\r\nSAI Initialization Failed, Error Code : %d\r\n", status);
@@ -200,7 +200,7 @@ int main()
     DEBUGOUT("\r\nSAI Initialization Success\r\n");
   }
 
-  // Control the power modes of the SAI interface. 
+  // Control the power modes of the SAI interface.
   status = SAIdrv->PowerControl(ARM_POWER_FULL);
   if (status != ARM_DRIVER_OK) {
     DEBUGOUT("\r\nFailed to Set Power to SAI, Error Code : %d\r\n", status);
@@ -209,10 +209,11 @@ int main()
     DEBUGOUT("\r\nConfigured Power to SAI\r\n");
   }
 
-  // configure Transmitter to Asynchronous Master: I2S Protocol, 16-bit data, 8kHz Audio frequency 
-  status = SAIdrv->Control(
-    ARM_SAI_CONFIGURE_TX | ARM_SAI_MODE_MASTER | ARM_SAI_ASYNCHRONOUS | ARM_SAI_PROTOCOL_I2S | ARM_SAI_DATA_SIZE(DATA_SIZE),
-    DATA_RESOLUTION,SAMPLING_RATE);
+  // configure Transmitter to Asynchronous Master: I2S Protocol, 16-bit data, 8kHz Audio frequency
+  status = SAIdrv->Control(ARM_SAI_CONFIGURE_TX | ARM_SAI_MODE_MASTER | ARM_SAI_ASYNCHRONOUS | ARM_SAI_PROTOCOL_I2S
+                             | ARM_SAI_DATA_SIZE(DATA_SIZE),
+                           DATA_RESOLUTION,
+                           SAMPLING_RATE);
   if (status != ARM_DRIVER_OK) {
     DEBUGOUT("\r\nFailed to Set Configuration Parameters to SAI TX, Error Code : %d\r\n", status);
     return status;
@@ -220,10 +221,11 @@ int main()
     DEBUGOUT("\r\nSet Configuration Parameters to SAI TX\r\n");
   }
 
-  // configure Receiver to Asynchronous Master: I2S Protocol, 16-bit data, 8kHz Audio frequency 
-	status = SAIdrv->Control(
-    ARM_SAI_CONFIGURE_RX | ARM_SAI_MODE_MASTER | ARM_SAI_ASYNCHRONOUS | ARM_SAI_PROTOCOL_I2S | ARM_SAI_DATA_SIZE(DATA_SIZE),
-    DATA_RESOLUTION,SAMPLING_RATE);
+  // configure Receiver to Asynchronous Master: I2S Protocol, 16-bit data, 8kHz Audio frequency
+  status = SAIdrv->Control(ARM_SAI_CONFIGURE_RX | ARM_SAI_MODE_MASTER | ARM_SAI_ASYNCHRONOUS | ARM_SAI_PROTOCOL_I2S
+                             | ARM_SAI_DATA_SIZE(DATA_SIZE),
+                           DATA_RESOLUTION,
+                           SAMPLING_RATE);
   if (status != ARM_DRIVER_OK) {
     DEBUGOUT("\r\nFailed to Set Configuration Parameters to SAI RX, Error Code : %d\r\n", status);
     return status;
@@ -231,7 +233,7 @@ int main()
     DEBUGOUT("\r\nSet Configuration Parameters to SAI RX\r\n");
   }
 
-  // enable Transmitter 
+  // enable Transmitter
   status = SAIdrv->Control(ARM_SAI_CONTROL_TX, 1, 0);
   if (status != ARM_DRIVER_OK) {
     DEBUGOUT("\r\nFailed to Set Configuration Parameters to SAI, Error Code : %d\r\n", status);
@@ -240,7 +242,7 @@ int main()
     DEBUGOUT("\r\nSet Configuration Parameters to SAI\r\n");
   }
 
-  // enable Receiver 
+  // enable Receiver
   status = SAIdrv->Control(ARM_SAI_CONTROL_RX, 1, 0);
   if (status != ARM_DRIVER_OK) {
     DEBUGOUT("\r\nFailed to Set Configuration Parameters to SAI, Error Code : %d\r\n", status);
@@ -256,18 +258,18 @@ int main()
     return status;
   }
 
-  // Start receiving data from SAI receiver 
+  // Start receiving data from SAI receiver
   status = SAIdrv->Receive((uint8_t *)RX_BUF_MEMORY, BUFFER_SIZE);
   if (status != ARM_DRIVER_OK) {
     DEBUGOUT("\r\nFailed to Receiving data from SAI Slave, Error Code : %d\r\n", status);
     return status;
   }
 
-  // wait until tx_done=0  
+  // wait until tx_done=0
   while (!tx_done)
     ;
 
-  // Get transmitted data count. 
+  // Get transmitted data count.
   tx_cnt = SAIdrv->GetTxCount();
   if (tx_cnt != (BUFFER_SIZE)) {
     while (1)
@@ -276,10 +278,10 @@ int main()
 
   DEBUGOUT("\r\nCompleted Sending Data to SAI Slave\r\n");
 
-  // wait until rx_done=0  
+  // wait until rx_done=0
   while (!rx_done)
     ;
-  // Get received data count. 
+  // Get received data count.
   rx_cnt = SAIdrv->GetRxCount();
   if (rx_cnt != (BUFFER_SIZE)) {
     while (1)
@@ -287,7 +289,7 @@ int main()
   }
 
   DEBUGOUT("\r\nCompleted Receiving Data from SAI Slave\r\n");
-  memcpy(rx_buf,(uint8_t *)RX_BUF_MEMORY,BUFFER_SIZE);
+  memcpy(rx_buf, (uint8_t *)RX_BUF_MEMORY, BUFFER_SIZE);
   for (ret = 0; ret < BUFFER_SIZE; ret++) {
     if (tx_buf[ret] == rx_buf[ret]) {
       continue;

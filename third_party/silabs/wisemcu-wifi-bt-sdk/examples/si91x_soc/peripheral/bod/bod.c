@@ -65,7 +65,7 @@ volatile float vbatt_status = 0;
 void NPSS_TO_MCU_BOD_IRQHandler(void)
 {
   DEBUGOUT("Vbatt status is less than the threshold voltage i.e %dV \n", (int)RSI_BOD_SoftTriggerGetBatteryStatus());
-/* Clears the BOD interrupt */
+  /* Clears the BOD interrupt */
   RSI_BOD_IntrClr();
 }
 

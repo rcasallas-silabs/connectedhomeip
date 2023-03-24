@@ -1,14 +1,14 @@
 # Embedded MQTT with TWT
 
-## Introduction
+## 1 Introduction
 
 This application demonstrates how to configure the SiWx91x EVK as MQTT client and establish connection with MQTT broker and how to subscribe, publish and receive the MQTT messages from MQTT broker.
 
 This application uses MQTT library present in our Firmware.
 
-In this application, SiWx91x EVK configured as WiFi station and connects to the Access Point. After successful WiFi connection, SiWx91x EVK connects to MQTT broker and subscribes to the topic "SILABS_TEST" and publishes a message "THIS IS MQTT CLIENT DEMO FROM SILABS" on that subscribed topic. After publishing the message on the subscribed topic, the MQTT client un-subscribes and disconnects with the MQTT broker.
+In this application, SiWx91x EVK configured as WiFi station and connects to the Access Point. After successful WiFi connection, SiWx91x EVK connects to MQTT broker and subscribes to the topic "SILABS_TEST" and publishes a message "THIS IS MQTT CLIENT DEMO FROM SILABS" on that subscribed topic. After publishing the message on the subscribed topic, the MQTT client un-subscribes and disconnects with the MQTT broker.After the disconnection, module enters powersave, module wakes as per the configured TWT interval. 
 
-## Setting Up
+## 2 Setting Up
 
 Before running the application, the user will need the following things to setup.
 
@@ -22,7 +22,7 @@ Before running the application, the user will need the following things to setup
   - **SoC Mode**:
       - Silicon Labs [BRD4325A](https://www.silabs.com/)
   - **NCP Mode**:
-      - Silicon Labs [(BRD4180A, BRD4280B)](https://www.silabs.com/); **AND**
+      - Silicon Labs [(BRD4180A, BRD4280B)](https://www.silabs.com/)
       - Host MCU Eval Kit. This example has been tested with:
         - Silicon Labs [WSTK + EFR32MG21](https://www.silabs.com/development-tools/wireless/efr32xg21-bluetooth-starter-kit)
         - Silicon Labs [WSTK + EFM32GG11](https://www.silabs.com/development-tools/mcu/32-bit/efm32gg11-starter-kit)
@@ -35,14 +35,14 @@ Before running the application, the user will need the following things to setup
 	  
 #### SoC Mode : 
 
-![Figure: Setup Diagram SoC Mode for MQTT Subscribe-Publish Example](resources/readme/twtsoc.png)
+![Figure: Setup Diagram SoC Mode for MQTT Subscribe-Publish Example](resources/readme/setup_soc.png)
   
 #### NCP Mode :  
 
-![Figure: Setup Diagram NCP Mode for MQTT Subscribe-Publish Example](resources/readme/twtncp.png)
+![Figure: Setup Diagram NCP Mode for MQTT Subscribe-Publish Example](resources/readme/setup_ncp.png)
 
 
-### Project Setup
+### 3 Project Setup
 - **SoC Mode**
   - **Silicon Labs SiWx91x SoC**. Follow the [Getting Started with SiWx91x SoC](https://docs.silabs.com/) to setup the example to work with SiWx91x SoC and Simplicity Studio.
 - **NCP Mode**
@@ -56,11 +56,59 @@ Read through the following sections and make any changes needed.
 
 * By default, the application is configured to use the SPI bus for interfacing between Host platforms(STM32F411 Nucleo / EFR32MG21) and the SiWx91x EVK.
 
-### 3.4 Bare Metal/RTOS Support
+### Bare Metal/RTOS Support
 
 This application supports bare metal and RTOS configuration. By default, the application project files (Keil and Simplicity studio) are provided with bare metal environment in the SDK. 
 
-## 4. Application Configuration Parameters
+## 4 Creating the project
+
+### 4.1 Board detection
+
+### 4.1.1 SoC mode
+1. In the Simplicity Studio IDE, 
+    - The 917 SoC board will be detected under **Debug Adapters** pane as shown below.
+
+      **![Soc Board detection](resources/readme/soc_board_detection.png)**
+
+### 4.1.2 NCP mode
+
+1. In the Simplicity Studio IDE, 
+    - The EFR32 board will be detected under **Debug Adapters** pane as shown below.
+
+      **![EFR32 Board detection](resources/readme/efr32.png)**
+
+    - The EFM32 board will be detected under **Debug Adapters** pane as shown below.
+
+      **![EFM32 Board detection](resources/readme/efm32.png)**
+
+### 4.2 Creation of project
+
+Ensure the latest Gecko SDK along with the extension Si917 COMBO SDK is added to Simplicity Studio.
+
+1. Click on the board detected and go to **EXAMPLE PROJECTS & DEMOS** section.
+
+   **![Examples and Demos](resources/readme/examples_demos.png)**
+
+2. Filter for Wi-Fi examples from the Gecko SDK added. For this, check the *Wi-Fi* checkbox under **Wireless Technology** and *Gecko SDK Suite* checkbox under **Provider**. 
+
+3. Under provider, for SoC based example, check the *SoC* checkbox and for NCP based example, check the *NCP* checkbox.
+
+4. Now choose Wi-Fi- NCP Embedded MQTT TWT example for NCP mode or choose Wi-Fi- SoC Embedded MQTT TWT example for SoC mode and click on **Create**.
+  For NCP mode:
+
+   **![MQTT TWT project](resources/readme/mqtt_twt_example_ncp.png)**
+
+    For SoC mode:
+      
+   **![MQTT TWT  project](resources/readme/mqtt_twt_example.png)**
+
+5. Give the desired name to your project and cick on **Finish**.
+
+   **![Create MQTT TWT project](resources/readme/create_project.png)**
+
+
+
+## 5 Application Configuration Parameters
 
 >  Note :
 >  If the user wants to use embedded (in firmware) MQTT library, then user can opt for this emb_mqtt application. 
@@ -339,9 +387,13 @@ status = rsi_wlan_twt_config(1,1, &twt_req);
 > Note:
 > * TWT Wake duration depends on the wake duration unit. For example, for the above configuration, wake duration value is  (0xE0 * 256 = 57.3 msec).
 > * TWT Wake interval is calculated as mantissa *2 ^ exp.  For example, for the above configuration, wake interval value is (0x1B00 * 2^13  = 55.2 sec). 
-
+> * Configuring TWT Wake interval beyond 1 min might lead to disconnections from the AP.
+> * There might be disconnections while using TWT with wake interval > 4sec when connected to an AP with non-zero GTK key renewal time.
+> * Keep Alive timeout should be non-zero when negotiated TWT setup is **unannounced**, otherwise there might be disconnections.
+   
 If TWT session setup is successful, the following notification will be printed with TWT Response parameters from the AP.
-![Figure: TWT Setup Success Response](resources/readme/image218.png)
+
+   ![Figure: TWT Setup Success Response](resources/readme/image218.png)
 
 
 ### iTWT Teardown Configuration
@@ -393,58 +445,107 @@ User can get asynchronous TWT session updates if *twt_response_handler* is defin
 > Note:
 > **twt_session_active** variable is provided in the example application and is updated according to the asychronous TWT session notifications. User can utilise this variable to teardown or configure new session parameters depending upon existing session status. 
 
-## Testing the Application
+Macros to check for and enable (steps to enable the macros included in [building the project](#building-the-project) section): 
+For SoC mode - RSI_M4_INTERFACE, CHIP_9117
+For NCP mode - CHIP_9117, EXP_BOARD
 
-Follow the steps below for the successful execution of the application.
 
-### Loading the SiWx91x Firmware
+## 5 Building and Testing the Application
 
-Refer [Getting started with a PC](https://docs.silabs.com/rs9116/latest/wiseconnect-getting-started) to load the firmware into SiWx91x EVK.
+Follow the below steps for the successful execution of the application.
 
-### Project Creation - SoC Mode : 
+### 5.1 Loading the SiWx91x Firmware
 
-- Connect your board. The Si917 compatible SoC board is **BRD4325A**.
-- Studio should detect your board. Your board will be shown here.
-![soc_board_detection](resources/readme/socboarddetection111.png)
+Refer [Getting started with a PC](https://docs.silabs.com/rs9116/latest/wiseconnect-getting-started) to load the firmware into SiWx91x EVK. The firmware file is located in `<SDK>/connectivity_firmware/`
 
-### Project Creation - NCP Mode : 
+### 5.2 Building the Project
+#### 5.2.1 Building the Project - SoC Mode
 
-- Connect your board. The supported NCP boards are: **BRD4180A,BRD4280B**
-- Studio should detect your board. Your board will be shown here.
-![ncp_board_detection](resources/readme/ncpboarddetection112.png)
+- Once the project is created, right click on project and go to properties → C/C++ Build → Settings → Build Steps.
 
-### Selecting an example application and generate project
+- Add **post_build_script_SimplicityStudio.bat** file path present at SI917_COMBO_SDK.X.X.X.XX → utilities → isp_scripts_common_flash in build steps settings as shown in below image.
 
-- Go to the 'EXAMPLE PROJECT & DEMOS' tab and select your desired example application
-![projct_selection](resources/readme/projctselection113.png)
-- Click 'Create'. The "New Project Wizard" window appears. Click 'Finish'
-![creation_final](resources/readme/creationfinal114.png)
+  ![postbuild_script](resources/readme/post_build_script.png)
 
-#### Build Project - SoC Mode
+- Go to properties → C/C++ Build → Settings → Tool Settings → GNU ARM C Compiler → Preprocessor → Defined symbols (-D) and check for M4 projects macro (RSI_M4_INTERFACE=1) and 9117 macro (CHIP_9117=1). If not present, add the macros and click **Apply and Close**.
+  
+  ![Build Project for SoC mode](resources/readme/soc_macros.png)
 
-- Once the project is created, right click on project and go to properties → C/C++ Build → Settings → Build Steps
-- Add post_build_script_SimplicityStudio.bat file path (SI917_COMBO_SDK.X.X.X.XX\utilities\isp_scripts_common_flash) in build steps settings as shown in below image.
-![postbuild_script](resources/readme/image359.png)
-- Check for M4 projects macros in preprocessor settings(RSI_M4_INTERFACE=1)
-- Check for 9117 macro in preprocessor settings(CHIP_9117=1).
-- Click on the build icon (hammer) to build the project
-![building_pjt](resources/readme/buildingpjt115.png)
-- Successful build output will show as below.
-![build_success_soc](resources/readme/buildsuccesssoc116.png)
+- Click on the build icon (hammer) or right click on project name and choose **Build Project** to build the project.
 
-#### Build Project - NCP Mode :
+  ![building_pjt](resources/readme/build_project_soc.png)
 
-- Check for 9117 macro in preprocessor settings(CHIP_9117=1).
-- Click on the build icon (hammer) to build the project
-![building_pjt](resources/readme/buildingpjt115.png)
-- Successful build output will show as below.
-![build_success_soc](resources/readme/buildsuccesssoc116.png)
+- Make sure the build returns 0 Errors and 0 Warnings.
+  
 
-## Program the device
+#### 5.2.2 Build the Project - NCP Mode
 
-Once the build was successfull, right click on project and click on Debug As->Silicon Labs ARM Program as shown in below image.
-![debug_mode_soc](resources/readme/debugmodesoc117.png)
-![debug_mode_NCP](resources/readme/debugmodencp120.png)
+- Check for CHIP_9117 macro in preprocessor settings as mentioned below.
+   - Right click on project name.
+   - Go to properties → C/C++ Build → Settings → Tool Settings → GNU ARM C Compiler → Preprocessor → Defined symbols (-D).
+   -  If **CHIP_9117 macro** and **EXP_BOARD** are not present, add them by clicking on add macro option.
+    
+      **NOTE**: In this example, **EXP_BOARD** macro should also be enabled
+   - Click on **Apply and Close**.
+
+     ![Build Project for NCP mode](resources/readme/ncp_macros.png)
+
+- Click on the build icon (hammer) or right click on project name and choose **Build Project** to build the project.
+
+  ![Build Project for NCP mode](resources/readme/build_project_ncp.png)
+
+- Make sure the build returns 0 Errors and 0 Warnings.
+
+### 5.3 Set up for application prints
+
+Before setting up Tera Term, do the following for SoC mode.
+
+**SoC mode**: 
+You can use either of the below USB to UART converters for application prints.
+1. Set up using USB to UART converter board.
+
+  - Connect Tx (Pin-6) to P27 on WSTK
+  - Connect GND (Pin 8 or 10) to GND on WSTK
+
+    ![FTDI_prints](resources/readme/usb_to_uart_1.png)
+
+2. Set up using USB to UART converter cable.
+
+  - Connect RX (Pin 5) of TTL convertor to P27 on WSTK
+  - Connect GND (Pin1) of TTL convertor to GND on WSTK
+
+    ![FTDI_prints](resources/readme/usb_to_uart_2.png)
+
+**Tera term set up - for NCP and SoC modes**
+
+1. Open the Tera Term tool. 
+   - For SoC mode, choose the serial port to which USB to UART converter is connected and click on **OK**. 
+
+     **![](resources/readme/port_selection_soc.png)**
+
+   - For NCP mode, choose the J-Link port and click on **OK**.
+
+     **![](resources/readme/port_selection.png)**
+
+2. Navigate to the Setup → Serial port and update the baud rate to **115200** and click on **OK**.
+
+    **![](resources/readme/serial_port_setup.png)**
+
+    **![](resources/readme/serial_port.png)**
+
+The serial port is now connected. 
+
+### 5.4 Execute the application
+
+1. Once the build was successful, right click on project and select Debug As → Silicon Labs ARM Program to program the device as shown in below image.
+
+   **![debug_mode_NCP](resources/readme/program_device.png)**
+
+2. As soon as the debug process is completed, the application control branches to the main().
+
+3. Click on the **Resume** icon in the Simplicity Studio IDE toolbar to run the application.
+
+   **![Run](resources/readme/run.png)**
 
 ### Running the SiWx91x Application
 
@@ -454,36 +555,36 @@ Once the build was successfull, right click on project and click on Debug As->Si
 
 3. Run MQTT broker in Windows PC1 using following command. Open Command prompt and go to MQTT installed folder (Ex: C:\Program Files\mosquitto) and run the following command:
 
-  `mosquito.exe -p 1883 -v`
+   `mosquito.exe -p 1883 -v`
    
-![Run MQTT broker in Windows PC1](resources/readme/image148.png)
+   ![Run MQTT broker in Windows PC1](resources/readme/image148.png)
 
 4. Open MQTT.fx client in Windows PC2 and connect to MQTT broker by giving Windows PC1 IP address and MQTT broker port number in Broker Address and Broker Port fields respectively.
    
-![MQTT.fx client in Windows PC2](resources/readme/image149.png)
+   ![MQTT.fx client in Windows PC2](resources/readme/image149.png)
    
 5. After successful connection, subscribe to the topic from MQTT.fx client.
    
-![Subscribe to the topic from MQTT client utility](resources/readme/image150.png)
+   ![Subscribe to the topic from MQTT client utility](resources/readme/image150.png)
 
 6. After the program gets executed, SI917 EVK will get connected to the same access point having the configuration same as that of in the application and get IP.
 
 7. Once the SI917 EVK gets connected to the MQTT broker, it will subscribe to the topic RSI_MQTT_TOPIC (Ex: "SILABS_TEST"). The user can see the client connected and subscribe information in the MQTT broker.
    
-![Client Connected and Subscribe Information in the MQTT broker](resources/readme/image151.png)
+   ![Client Connected and Subscribe Information in the MQTT broker](resources/readme/image151.png)
 
 8. After successful subscription to the topic RSI_MQTT_TOPIC (Ex: "SILABS"), the device publishes a message which is given in publish_message array (Ex: "THIS IS MQTT CLIENT DEMO FROM SILABS") on the subscribed topic.
 
 9. MQTT.fx client which is running on Windows PC3 will receive the message published by the device as it subscribes to the same topic.
    - Refer to the below image for MQTT.fx client and message history.
    
-![MQTT.fx client and message history](resources/readme/image152.png)
+   ![MQTT.fx client and message history](resources/readme/image152.png)
 
 10. Now publish a message using MQTT.fx on the same topic. Now this message is the message received by the device.
-
-![Publish a message using MQTT.fx](resources/readme/image153.png)
-
-![Publish a message using MQTT.fx](resources/readme/image155.png)
+   
+      ![Publish a message using MQTT.fx](resources/readme/image153.png) 
+   
+      ![Publish a message using MQTT.fx](resources/readme/image155.png)
   
    **Note:**
    Multiple MQTT client instances can be created
@@ -500,24 +601,10 @@ Once the build was successfull, right click on project and click on Debug As->Si
 5. Execute the following command in MQTT server installed folder. (Ex:  C:\Program Files\mosquitto>mosquitto.exe -c mosquitto.conf -v) (Port can be 1883/8883)
    
    `mosquitto.exe -c mosquitto.conf -v`  
-  
-  ![For opening MQTT server ](resources/readme/image154.png)  
+   
+   ![For opening MQTT server ](resources/readme/image154.png)  
 
 6. If you see any error - Unsupported tls_version "tlsv1", just comment the "tls_version tlsv1" in mosquitto.conf file.
-## Observing the output prints on serial terminal
-
-### SoC Mode:
-> Connect USB to UART connector Tx and GND pins to WSTK radio board.
-
-   - Connect Tx(Pin-6) to P27 on WSTK
-   - Connect GND(Pin 8 or 10) to GND on WSTK
-![FTDI_prints](resources/readme/ftdiprints118.png)
-> Prints can see as below in any Console terminal
-![ouput_prints](resources/readme/ouputprints119.png)
-
-### NCP Mode:
-Prints can see as below in any Console terminal
-![ouput_prints](resources/readme/ouputprints119.png)
 
 # Selecting Bare Metal
 The application has been designed to work with FreeRTOS and Bare Metal configurations. By default, the application project files (Simplicity studio) are configured with FreeRTOS enabled. The following steps demonstrate how to configure Simplicity Studio to test the application in a Bare Metal environment.
@@ -525,7 +612,7 @@ The application has been designed to work with FreeRTOS and Bare Metal configura
 ## Bare Metal with Simplicity Studio
 > - Open the project in Simplicity Studio
 > - Right click on the project and choose 'Properties'
-> - Go to 'C/C++ Build' | 'Settings' | 'GNU ARM C Compiler' | 'Symbols' and remove macro 'RSI_WITH_OS=1'
+> - Go to 'C/C++ Build' | 'Settings' | 'GNU ARM C Compiler' | 'Preprocessor' and remove macro 'RSI_WITH_OS=1'
 > - Select 'Apply' and 'OK' to save the settings
 
 ![Figure: project settings in Simplicity Studio](resources/readme/image216b.png) 

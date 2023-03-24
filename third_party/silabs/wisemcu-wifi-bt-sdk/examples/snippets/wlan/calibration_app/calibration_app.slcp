@@ -16,7 +16,7 @@ xml_filter: Undefined
 sdk: {id: gecko_sdk, version: 4.1.0}
 sdk_extension:
   - id: wiseconnect
-    version: 1.0.0
+    version: 1.0.1
 source:
   - path: rsi_calib_app.c
 include:
@@ -30,7 +30,7 @@ requires:
   - name: wiseconnect_sapi_freertos
   - name: wiseconnect_third_party_freertos
 define:
-   - name: RSI_CALIB_MODE_EN
+  - name: RSI_CALIB_MODE_EN
 toolchain_settings: []
 readme:
   - path: readme.md

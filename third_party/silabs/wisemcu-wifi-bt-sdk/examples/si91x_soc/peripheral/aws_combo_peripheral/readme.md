@@ -39,7 +39,7 @@ This example contains 3 tasks;
 
 **Application Flow**
    
-   ![Flow of the project](resources/readme/Application_flow.png)
+   ![Flow of the project](resources/readme/application_flow.png)
 
 ## Overview of AWS SDK
 
@@ -73,7 +73,7 @@ Before running the application, set up the following:
 ### Project Setup
 - **SoC Mode**
    - **Silicon Labs SiWx91x SoC**. Follow the [Getting Started with SiWx91x SoC](https://docs.silabs.com/) to setup the example to work with SiWx91x SoC and Simplicity Studio.
-   - **Silicon Labs Si91x** refer **"Download SDK"** section in **getting-started-with-siwx917-soc** guide at **release_package/docs/index.html** to work with Si91x and Simplicity Studio
+  - **Silicon Labs Si91x** refer **"Download SDKs"**, **"Add SDK to Simplicity Studio"**, **"Connect SiWx917"**, **"Open Example Project in Simplicity Studio"** section in **getting-started-with-siwx917-soc** guide at **release_package/docs/index.html** to work with Si91x and Simplicity Studio
 
 ## Pin Configuration
 **I2C0**
@@ -104,13 +104,15 @@ Read through the following sections and make any changes needed.
 
 ### Wi-Fi Configuration
 Configure the following parameters in **aws_combo_peripheral.c** to enable your Silicon Labs Wi-Fi device to connect to your Wi-Fi network.
-  
-```c                                      
+
+```c
 #define SSID           "SILABS_AP"      // Wi-Fi Network Name
 #define PSK            "1234567890"     // Wi-Fi Password
 #define SECURITY_TYPE  RSI_WPA2         // Wi-Fi Security Type: RSI_OPEN / RSI_WPA / RSI_WPA2
 #define CHANNEL_NO     0                // Wi-Fi channel if the softAP is used (0 = auto select)
 ```
+    
+
 
 DHCP_MODE refers whether IP address configured through DHCP or STATIC
 
@@ -121,7 +123,7 @@ DHCP_MODE refers whether IP address configured through DHCP or STATIC
 RSI_MQTT_TOPIC refres to the topic to which the device subscribes and publishes
 
 ```c
-#define RSI_MQTT_TOPIC          "$aws/things/Test_IoT/shadow/update"
+#define RSI_MQTT_TOPIC          "$aws/things/thingsName/shadow/update"  //thingsName: This should be renamed with user's created Things name//
 ```
 
 > Note:
@@ -129,31 +131,19 @@ RSI_MQTT_TOPIC refres to the topic to which the device subscribes and publishes
 > (Or)
 > To configure, STA IP address through STATIC then set DHCP_MODE macro to "0" and configure following DEVICE_IP, GATEWAY and NETMASK macros.
 
-The IP address needs to be configuring to the SiWx91x EVk should be in long format and in little endian byte order.
-
-   Example: To configure "192.168.10.10" as IP address, update the macro DEVICE_IP as 0x0A0AA8C0.
-
 ```c
-#define DEVICE_IP                        0X0A0AA8C0
-```
-IP address of the gateway should also be in long format and in little endian byte order
-
-   Example: To configure "192.168.10.1" as Gateway, update the macro GATEWAY as 0x010AA8C0
-
-```c
-#define GATEWAY                          0x010AA8C0
+#define DEVICE_IP                        "192.168.10.10"
 ```
 
-IP address of the network mask should also be in long format and in little endian byte order.
-
-   Example: To configure "255.255.255.0" as network mask, update the macro NETMASK as 0x00FFFFFF
-
 ```c
-#define NETMASK                          0x00FFFFFF
+#define GATEWAY                          "192.168.10.1"
 ```
 
-**Power save configuration**
-
+```c
+#define NETMASK                          "255.255.255.0"
+```
+### Power Save Configuration
+Configure below parameter in **rsi_wlan_config.h** to enable power save mode
    - By default, the application is configured without power save.
   
 ```c
@@ -166,43 +156,51 @@ IP address of the network mask should also be in long format and in little endia
 #define ENABLE_POWER_SAVE              1
 ```
 
-### Configure below parameters in aws_iot_config.h file in apps/inc folder
+### Configure below parameters in **aws_iot_config.h** file in apps/inc folder
 
    ```C
-   //AWS Host name 
-   #define AWS_IOT_MQTT_HOST          "xxxxxxxxxxxxx-ats.iot.us-east-2.amazonaws.com" 
+   #define AWS_IOT_MQTT_PORT          "8883"                               //default port for MQTT
 
-   //default port for MQTT
-   #define AWS_IOT_MQTT_PORT          "8883"
+   #define AWS_IOT_MQTT_CLIENT_ID     "Test_IoT"                           // MQTT client ID should be unique for every device and this is "Things name" which is created by user
 
-   // MQTT client ID should be unique for every device  
-   #define AWS_IOT_MQTT_CLIENT_ID     "Test_IoT" 
+   #define AWS_IOT_MQTT_HOST "xxxxxxxxxxxxx-ats.iot.us-east-2.amazonaws.com"
    ```
+
+- AWS_IOT_MQTT_HOST parameter can be found as follows:
+
+ !["AWS_IOT_MQTT_HOST_PAGE_1"](resources/readme/aws_iot_mqtt_host_url_1.png)
+ !["AWS_IOT_MQTT_HOST_PAGE_2"](resources/readme/aws_iot_mqtt_host_url_2.png)
+
+
  
 ### Setting up Security Certificates
 
-To authenticate and securely connect with AWS, your Wi-Fi device requires a unique x.509 security certificate and private key, as well as a CA certificate which is used to verify the AWS server. Security credentials need to be converted into a C-array rather than [PEM format](https://en.wikipedia.org/wiki/Privacy-Enhanced_Mail) provided by AWS; they also need to be added to your project. 
+- To authenticate and securely connect with AWS, your Wi-Fi device requires a unique x.509 security certificate and private key, as well as a CA certificate which is used to verify the AWS server. Security credentials need to be converted into a C-array rather than [PEM format](https://en.wikipedia.org/wiki/Privacy-Enhanced_Mail) provided by AWS; they also need to be added to your project. 
 
-The WiSeConnect SDK provides a conversion script (written in Python 3) to make the conversion straightforward. The script is provided in the SDK 'resources' directory and is called [certificate_to_array.py](https://github.com/SiliconLabs/wiseconnect-wifi-bt-sdk/tree/master/resources/certificates/).
+- The WiSeConnect SDK provides a conversion script (written in Python 3) to make the conversion straightforward. The script is provided in the SDK 'resources' directory and is called [certificate_to_array.py](https://github.com/SiliconLabs/wiseconnect-wifi-bt-sdk/tree/master/resources/certificates/).
 
-To convert the device certificate and private key to C arrays, open a system command prompt and use the script as indicated in the following examples.
+
+
+- To convert the device certificate and private key to C arrays, open a system command prompt and use the script as indicated in the following examples. 
+- After running the script on the certificate and private key, two new files are created.
+- certificate_to_array.py can be found in <SDK>resources/certificates path
 
 ```sh
 $> python3 certificate_to_array.py <input filename> <output arrayname>
 
 For example:
 $> python3 certificate_to_array.py d8f3a44d3f.cert.pem    aws_client_certificate
-$> python3 certificate_to_array.py d8f3a44d3f.private.key aws_client_private_certificate
+$> python3 certificate_to_array.py d8f3a44d3f.private.key aws_client_private_key
 ```
 
-After running the script on the certificate and private key, two new files are created.
+- Below are the two new files which gets created after running the script.
 
 ```sh
 aws_client_certificate.pem.crt.h
 aws_client_private_key.pem.key.h
 ```
 
-Before proceeding, copy both of the new files to the WiSeConnect directory: `<SDK>/resources/certificates`  
+Before proceeding, copy both of the new files to the WiSeConnect directory: `<SDK>/resources/certificates`   
 Go ahead and overwrite any existing files with the same name in that directory, the originals are not needed.
 
 The Root CA certificate used by your Wi-Fi device to verify the AWS server is already included in the WiSeConnect SDK; no additional setup is required.
@@ -246,24 +244,24 @@ Refer [Getting Started with SiWx917 in SoC Mode] located in `<SDK>/extension/wis
 
 - Go to the 'EXAMPLE PROJECT & DEMOS' tab and click on aws_peripheral example application as shown below.
 
-![Create Project window](resources/readme/Create_project.png)
+![Create Project window](resources/readme/create_project.png)
 
 - Click 'Create'. The "New Project Wizard" window appears. Click 'Finish'
 
-![New project wizard window](resources/readme/New_project_wizard.png)
+![New project wizard window](resources/readme/new_project_wizard.png)
 
 #### Build Project - SoC Mode
 
 - Once the project is created, right click on project and go to properties → C/C++ Build → Settings → Build Steps
 - Add post_build_script_SimplicityStudio.bat file path (SI917_COMBO_SDK.X.X.X.XX\utilities\isp_scripts_common_flash) in build steps settings as shown in below image.
 
-![Post Build Script](resources/readme/Adding_bat_file.png)
+![Post Build Script](resources/readme/adding_bat_file.png)
 
 - Check for M4 projects macros in preprocessor settings(RSI_M4_INTERFACE=1)
 - Check for 9117 macro in preprocessor settings(CHIP_9117=1).
 - Click on the build icon (hammer) to build the project
 
-![Build](resources/readme/Build_icon.png)
+![Build](resources/readme/build_icon.png)
 
 - Successful build output will show as below.
 
@@ -275,7 +273,7 @@ Refer [Getting Started with SiWx917 in SoC Mode] located in `<SDK>/extension/wis
 
    - Once the build was successfull, right click on project and click on Debug As->Silicon Labs ARM Program as shown in below image.
 
-   ![Debug the project](resources/readme/Debug_As.png)
+   ![Debug the project](resources/readme/debug_as.png)
 
 ## Running the SiWx91x Application
 
@@ -317,7 +315,7 @@ Refer [Getting Started with SiWx917 in SoC Mode] located in `<SDK>/extension/wis
 
 > Prints can be seen as below in the console
 
-![Output prints](resources/readme/Output_prints.png)
+![Output prints](resources/readme/output_prints.png)
 
 ## Appendix
 
@@ -325,52 +323,70 @@ Refer [Getting Started with SiWx917 in SoC Mode] located in `<SDK>/extension/wis
 
 Create a thing in the AWS IoT registry to represent your IoT Device.
 
-* In the [AWS IoT console](https://console.aws.amazon.com/iot/home), in the navigation pane, choose Manage, and then choose Things.
+* In the [AWS IoT console](https://console.aws.amazon.com/iot/home), in the navigation pane, under Manage, choose All devices, and then choose Things.
 
-![AWS console](resources/readme/image444.png)
+![AWS console](resources/readme/aws_create_thing_step1.png)
 
 * If a **You don't have any things yet** dialog box is displayed, choose **Register a thing**. Otherwise, choose **Create**.
-* Click on **Create**.
+* Click on **Create things**.
 
-![AWS Thing](resources/readme/image445.png)
+![AWS thing](resources/readme/aws_create_thing_step2.png)
 
-* On the **Creating AWS IoT things** page, choose **Create a single thing**.
+* On the **Create things** page, choose **Create a single thing** and click next.
 
-![AWS thing creation](resources/readme/image446.png)
+![AWS thing creation](resources/readme/aws_create_thing_step3.png)
 
-* On the **Add your device to the device registry** page, enter a name for your IoT thing (for example, **Test_IoT**), and then choose **Next**. You can't change the name of a thing after you create it. To change a thing's name, you must create a new thing, give it the new name, and then delete the old thing.
+* On the **Specify thing properties** page, enter a name for your IoT thing (for example, **Test_IoT**), and choose **Unnamed shadow (classic)** in the Device Shadow section, then choose **Next**. You can't change the name of a thing after you create it. To change a thing's name, you must create a new thing, give it the new name, and then delete the old thing.
 
-![Add Device](resources/readme/image447.png)
+![Add Device](resources/readme/aws_create_thing_step4.png)
 
-* On the **Add a certificate for your thing page**, choose **Create certificate**.
+* During **Configure device certificate** step, choose **Auto-generate a new certificate (recommended)** option and click next.
 
-![Add certificate](resources/readme/image448.png)
+![Add Device](resources/readme/aws_create_thing_step5.png)
 
-* Choose the **Download** links to download the certificate, private key, and root CA certificate.
-  > **Warning:** This is the only instance you can download your certificate and private key. Make sure to save them safely. 
+* In **Attach Policies to Certificate - optional** page, click on  **Create thing** button.
 
-* Choose **Activate**.
-* Choose **Attach a policy**.
+![Attach Policy](resources/readme/policy_optional.png)
 
-![Attach Policy](resources/readme/image449.png)
+* Choose the **Download** links to download the device certificate, private key, and root CA certificate. Root CA certificate is already present in SDK (aws_starfield_ca.pem.h), and can be directly used.
 
-* Choose the Policy created and then choose **Register Thing**.
-  > **Note :** If you don't have any policy created, follow the steps in **Create Policy** section in the below and then choose the created Policy
+- Recommended: To Download these files in *SDK*\resources\certificates path.
 
-* View list of devices as shown
+  > **Warning:** This is the only instance you can download your device certificate and private key. Make sure to save them safely. 
 
-![Register Thing](resources/readme/image450.png)
+![Downloading certificates](resources/readme/aws_thing_certificates_download.png)
 
-### Create Policy
+* To attach an existing policy choose the policy and click on create thing, if policy is not yet created Choose Create policy and fill the fields as mentioned in the following images.
+
+choosing an existing policy
+
+![Attach Policy](resources/readme/aws_choosing_policy.png)
+
+creating a policy - step 1
+
+![Create policy Policy](resources/readme/aws_create_thing_attach_policy.png)
+
+creating a policy - step 2 (filling the fields)
+Give the **Name** to your Policy, Fill **Action** and **Resource ARN** as shown in below image, Click on **Allow** under **Effect** and click **Create**
+   
+![Filling fields for policy](resources/readme/aws_create_thing_policy_create.png)
+
+
+* choose the created policy and click on **Create thing**
+
+* The created thing should now be visible on the AWS console (Manage > All devices > Things)
+
+### **Appendix**: Steps to create a policy from AWS console
+
 * Navigate to **AWS IoT console**
 * Choose **Policies** under **Secure**
 
-![Register Thing](resources/readme/image451.png) 
+![AWS console create policy](resources/readme/image422.png) 
 
 * Click on **Create**
    
-![Register Thing](resources/readme/image452.png)
+![create policy](resources/readme/aws_create_policy.png)
 
 * Give the **Name** to your Policy, Fill **Action** and **Resource ARN** as shown in below image, Click on **Allow** under **Effect** and click **Create**
    
-![Register Thing](resources/readme/image453.png)
+![Register Thing](resources/readme/aws_create_thing_policy_create.png)

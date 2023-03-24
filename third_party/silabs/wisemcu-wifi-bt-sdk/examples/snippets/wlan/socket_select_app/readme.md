@@ -155,6 +155,17 @@ Configure the following parameters in **rsi_wlan_config.h**
 #define ENABLE_POWER_SAVE          1
 ```
 
+For SoC mode use handshake type as shown below:
+```c
+#define RSI_HAND_SHAKE_TYPE M4_BASED
+```
+
+For NCP mode handshake type can be GPIO_BASED or MSG_BASED, as shown below
+
+```c
+#define RSI_HAND_SHAKE_TYPE GPIO_BASED
+```
+
 ## Testing the Application 
 
 Follow the below steps for the successful execution of the application.

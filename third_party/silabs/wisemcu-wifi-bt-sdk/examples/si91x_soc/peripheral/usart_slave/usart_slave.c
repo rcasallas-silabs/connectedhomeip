@@ -66,7 +66,7 @@ void ARM_USART_SignalEvent(uint32_t event)
       read_rx_cnt = USARTdrv->GetRxCount();
       break;
     case ARM_USART_EVENT_TRANSFER_COMPLETE:
-	  read_rx_cnt = USARTdrv->GetRxCount();
+      read_rx_cnt = USARTdrv->GetRxCount();
       break;
     case ARM_USART_EVENT_TX_COMPLETE:
       break;
@@ -107,15 +107,15 @@ int main(void)
 	 * To reconfigure the default setting of SystemInit() function, refer to
 	 * system_rs9116.c file 
 	 */
-  int forever = 1;
+  int forever             = 1;
   volatile uint32_t i     = 0;
   volatile int32_t status = 0;
   // Configures the system default clock and power configurations
   SystemCoreClockUpdate();
 
-  // Initialized board UART 
+  // Initialized board UART
   DEBUGINIT();
-  
+
   // fill some data in input buffer
   for (i = 0; i < BUFFER_SIZE; i++) {
     tx_buffer[i] = i;
@@ -125,7 +125,7 @@ int main(void)
   Read_Capabilities();
 
   // Initialise USART(Enable Clock)
-  status= USARTdrv->Initialize(ARM_USART_SignalEvent);
+  status = USARTdrv->Initialize(ARM_USART_SignalEvent);
   if (status != ARM_DRIVER_OK) {
     DEBUGOUT("\r\n USART Initialization Failed, Error Code : %d\r\n", status);
     return status;
@@ -133,8 +133,8 @@ int main(void)
     DEBUGOUT("\r\n USART Initialization Success\r\n");
   }
   // Power up the USART peripheral
- status = USARTdrv->PowerControl(ARM_POWER_FULL);
-if (status != ARM_DRIVER_OK) {
+  status = USARTdrv->PowerControl(ARM_POWER_FULL);
+  if (status != ARM_DRIVER_OK) {
     DEBUGOUT("\r\n Failed to Set Power to USART, Error Code : %d\r\n", status);
     return status;
   } else {
@@ -142,14 +142,14 @@ if (status != ARM_DRIVER_OK) {
   }
   // Enable Receiver and Transmitter lines
   status = USARTdrv->Control(ARM_USART_CONTROL_TX, 1);
-    if (status != ARM_DRIVER_OK) {
+  if (status != ARM_DRIVER_OK) {
     DEBUGOUT("\r\n Failed to Set  Transmitter lines to USART, Error Code : %d\r\n", status);
     return status;
   } else {
     DEBUGOUT("\r\n Set  Transmitter lines to USART is sucess \r\n");
   }
 
- status = USARTdrv->Control(ARM_USART_CONTROL_RX, 1);
+  status = USARTdrv->Control(ARM_USART_CONTROL_RX, 1);
   if (status != ARM_DRIVER_OK) {
     DEBUGOUT("\r\n Failed to Set  Receiver lines to USART, Error Code : %d \r\n", status);
     return status;
@@ -159,9 +159,9 @@ if (status != ARM_DRIVER_OK) {
 
   // Configure the USART to 9600 Bits/sec
   status = USARTdrv->Control(ARM_USART_MODE_SYNCHRONOUS_SLAVE | ARM_USART_DATA_BITS_8 | ARM_USART_PARITY_NONE
-                      | ARM_USART_STOP_BITS_1 | ARM_USART_FLOW_CONTROL_NONE,
-                    BAUD_VALUE);
-if (status != ARM_DRIVER_OK) {
+                               | ARM_USART_STOP_BITS_1 | ARM_USART_FLOW_CONTROL_NONE,
+                             BAUD_VALUE);
+  if (status != ARM_DRIVER_OK) {
     DEBUGOUT("\r\n Failed to set  UART control Configuration , Error Code : %d \r\n", status);
     return status;
   } else {
@@ -169,16 +169,16 @@ if (status != ARM_DRIVER_OK) {
   }
   // transfer data in USART mode
   status = USARTdrv->Transfer(tx_buffer, rx_buffer, sizeof(tx_buffer));
-if (status != ARM_DRIVER_OK) {
+  if (status != ARM_DRIVER_OK) {
     DEBUGOUT("\r\n Failed to send and receive data , Error Code : %d \r\n", status);
     return status;
   } else {
     DEBUGOUT("\r\n send and receive data success  \r\n");
-  } 
+  }
   // wait for transfer done
   while (read_rx_cnt == 0)
     ;
- DEBUGOUT("\r\n Data transfer success  \r\n");
+  DEBUGOUT("\r\n Data transfer success  \r\n");
 
   // compare both send receive data
   for (i = 0; i < BUFFER_SIZE; i++) {

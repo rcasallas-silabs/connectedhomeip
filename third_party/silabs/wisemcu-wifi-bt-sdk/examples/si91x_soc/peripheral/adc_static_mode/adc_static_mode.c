@@ -23,14 +23,15 @@
 #include "rsi_bod.h"
 #include "rsi_board.h"
 
-#define NUMBER_OF_CHA_EN       1       // In ADC static mode enable only one ADC channel  
-#define CHANNEL0_SAMPLE_LENGTH 1       // Length of sample to collect   
-#define CHANNEL0_SAMPLING_RATE 1000000 // Number of samples to collect Minimum is 1msps(1000000) and Maximum is 2.5msps (2500000)
-#define ADC_INPUT_TYPE         1       // Single ended - 0 , Differential ended - 1
-float vref_value = 2.8;                // Reference voltage to LDO for ADC conversion operation. Min is 1.8V and Max is 3.3V
+#define NUMBER_OF_CHA_EN       1 // In ADC static mode enable only one ADC channel
+#define CHANNEL0_SAMPLE_LENGTH 1 // Length of sample to collect
+#define CHANNEL0_SAMPLING_RATE \
+  1000000                // Number of samples to collect Minimum is 1msps(1000000) and Maximum is 2.5msps (2500000)
+#define ADC_INPUT_TYPE 1 // Single ended - 0 , Differential ended - 1
+float vref_value = 2.8;  // Reference voltage to LDO for ADC conversion operation. Min is 1.8V and Max is 3.3V
 
 volatile uint8_t intr_done = 0;
-int16_t adc_output_ch0[CHANNEL0_SAMPLE_LENGTH]; // ADC output buffer  
+int16_t adc_output_ch0[CHANNEL0_SAMPLE_LENGTH]; // ADC output buffer
 
 /*==============================================*/
 /**
@@ -42,7 +43,7 @@ int16_t adc_output_ch0[CHANNEL0_SAMPLE_LENGTH]; // ADC output buffer
 void callback_handler(uint8_t channel_no, uint8_t event)
 {
 #ifdef CHIP_9118
-  // Call back handler never call in ADC static mode  
+  // Call back handler never call in ADC static mode
 #endif
 #ifdef CHIP_9117
   if (event == ADC_STATIC_MODE_CALLBACK) {
@@ -70,40 +71,41 @@ int main()
   float battery_status;
   float max_ip_volt_scdc = 2.4;
 
-  // ADC Channel configuration structure variable  
+  // ADC Channel configuration structure variable
   adc_ch_config_t adcChConfig;
-  // ADC module configuration structure variable  
+  // ADC module configuration structure variable
   adc_config_t adcConfig;
 
-  //Configures the system default clock and power configurations 
+  //Configures the system default clock and power configurations
   SystemCoreClockUpdate();
 
-  // Read the input supply of chip  
+  // Read the input supply of chip
   battery_status = RSI_BOD_SoftTriggerGetBatteryStatus();
 
-  //If input to chip less than 2.4V then swith input voltage supply from SCDC to HPLDO  
+  //If input to chip less than 2.4V then swith input voltage supply from SCDC to HPLDO
   if (battery_status < max_ip_volt_scdc) {
     RSI_IPMU_ProgramConfigData(hp_ldo_voltsel);
   }
 
-  // Initialize board UART  
+  // Initialize board UART
   DEBUGINIT();
 
-  // Configure ADC module related parameter  
+  // Configure ADC module related parameter
   adcConfig.num_of_channel_enable =
-    NUMBER_OF_CHA_EN; // Number of channel enable for ADC operation,here enable two ADC channel  
-  adcConfig.operation_mode = ADC_STATICMODE_ENABLE; // ADC operation mode  
+    NUMBER_OF_CHA_EN; // Number of channel enable for ADC operation,here enable two ADC channel
+  adcConfig.operation_mode = ADC_STATICMODE_ENABLE; // ADC operation mode
 
   // Configure ADC channel related parameter
   adcChConfig.input_type[0]    = ADC_INPUT_TYPE;         // Differential ended input to ADC
   adcChConfig.sampling_rate[0] = CHANNEL0_SAMPLING_RATE; // Sampling rate value ,Maximum value is 2.5msps (2500000)
   adcChConfig.pos_inp_sel[0]   = 2;                      // Positive input to ADC from ULP_GPIO4
-  adcChConfig.neg_inp_sel[0] = 2;                        // Negative input to ADC from ULP_GPIO5,For single ended data aqcquisition this parameter not used
+  adcChConfig.neg_inp_sel[0] =
+    2; // Negative input to ADC from ULP_GPIO5,For single ended data aqcquisition this parameter not used
   adcChConfig.opamp_gain[0]     = 0;                      // OPAMP gain value if opamp output is one of input to ADC
   adcChConfig.rx_buf[0]         = adc_output_ch0;         // Output buffer
   adcChConfig.num_of_samples[0] = CHANNEL0_SAMPLE_LENGTH; // Number of ADC samples collect for operation
 
-  // Configure the Verf value ADC calibration and enable ADC power gate) 
+  // Configure the Verf value ADC calibration and enable ADC power gate)
   status = ADC_Init(adcChConfig, adcConfig, callback_handler);
   if (status != RSI_OK) {
     DEBUGOUT("\r\nADC Initialization Failed,Error Code : %d\r\n", status);
@@ -113,7 +115,7 @@ int main()
   }
 
   /* Configure reference voltage for analog peripheral ,here till 2.8V generate by using
-     AUX_LDO so more than 2.8V enable LDO bypass mode */  
+     AUX_LDO so more than 2.8V enable LDO bypass mode */
   status = RSI_AUX_RefVoltageConfig(vref_value, battery_status);
   if (status != RSI_OK) {
     DEBUGOUT("\r\nFailed to Set Reference Voltage to ADC,Error Code : %d\r\n", status);
@@ -133,7 +135,7 @@ int main()
   DEBUGOUT("\r\nStart ADC\r\n");
 
 #ifdef CHIP_9118
-  // Start the ADC block  
+  // Start the ADC block
   status = ADC_Start();
 #endif
 
@@ -151,7 +153,7 @@ int main()
       ;
     intr_done = 0;
 #endif
-    // wait for two ADC cycle before reading ADC sample,here ADC sampling rate=1M so 1 ADC Cycle=1us 
+    // wait for two ADC cycle before reading ADC sample,here ADC sampling rate=1M so 1 ADC Cycle=1us
     adc_output_ch0[0] = RSI_ADC_ReadDataStatic(AUX_ADC_DAC_COMP, 1, adcChConfig.input_type[0]);
 
     if (adc_output_ch0[0] & BIT(11)) {
@@ -166,13 +168,12 @@ int main()
 
     if (adcChConfig.input_type[0]) {
       vout = vout - (vref_value / 2);
-      DEBUGOUT("Differential ended input  :%d\n", (int) vout);
-      } else {
-      DEBUGOUT("Single ended input :%d\n", (int) vout);
-      }
+      DEBUGOUT("Differential ended input  :%d\n", (int)vout);
+    } else {
+      DEBUGOUT("Single ended input :%d\n", (int)vout);
+    }
 #ifdef CHIP_9117
     RSI_ADC_ChnlIntrUnMask(AUX_ADC_DAC_COMP, 0, adcConfig.operation_mode);
 #endif
   }
 }
-

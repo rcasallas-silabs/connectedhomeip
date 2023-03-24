@@ -30,22 +30,17 @@ Before running the application, the user will need the following things to setup
 - Embedded Development Environment
 
    - For STM32, use licensed [Keil IDE](https://www.keil.com/demo/eval/arm.htm)
-
-   - For Silicon Labs EFx32, use the latest version of [Simplicity Studio](https://www.silabs.com/developers/simplicity-studio)
-   
-- Download and install the Silicon Labs [EFR Connect App](https://www.silabs.com/developers/efr-connect-mobile-app) in the android smart phones for testing BLE applications. Users can also use their choice of BLE apps available in Android/iOS smart phones.
+   - For Silicon Labs EFx32, use the latest version of [Simplicity Studio](https://www.silabs.com/developers/simplicity-studio)- Download and install the Silicon Labs [EFR Connect App](https://www.silabs.com/developers/efr-connect-mobile-app) in the android smart phones for testing BLE applications. Users can also use their choice of BLE apps available in Android/iOS smart phones.
 
 ### 2.3 Setup Diagram:
    
 **SoC Mode :** 
-   <br>
-<img src="resources/readme/blelrsoc.png" width=500 height=200 alt=""><br>
+   
+![](resources/readme/blelrsoc.png)
   
 **NCP Mode :**   
-   <br>
-<img src="resources/readme/blelrncp.png" width=500 height=200 alt=""><br>
-
-
+   
+![](resources/readme/blelrncp.png)
 ## 3. Application Build Environment
 
 ### 3.1 Host Interface
@@ -80,14 +75,17 @@ The application can be configured to suit your requirements and development envi
 
 - If user configures, **TWO_MBPS**, Silicon Labs module will update 2Mbps PHY data rates. 
 ```c
-    #define RSI_DEVICE_DATA_RATE                LONG_RANGE
-```
+    #define RSI_DEVICE_DATA_RATE                LONG_RANGE```
 - `RSI_BLE_DEV_ADDR_TYPE` refers address type of the remote device to connect.
 ```c
 	 #define RSI_BLE_DEV_ADDR_TYPE                         LE_PUBLIC_ADDRESS
 ``` 
-- Based on the address of the advertising device, Valid configurations are
+  - Based on the address of the advertising device, Valid configurations are
+
     - LE_RANDOM_ADDRESS
+    - LE_PUBLIC_ADDRESS
+    
+    **Note:** Depends 
     - LE_PUBLIC_ADDRESS
 
    **Note:** Depends on the remote device, address type will be changed. 
@@ -109,8 +107,7 @@ The application can be configured to suit your requirements and development envi
 
 - By default, The Application is configured without power save.
 ```c	 
-	 #define ENABLE_POWER_SAVE 0
-```
+	 #define ENABLE_POWER_SAVE 0```
 - If user wants to run the application in power save, modify the below configuration. 
 ```c	 
 	 #define ENABLE_POWER_SAVE 1
@@ -157,68 +154,59 @@ User has to follow the below steps for the successful execution of the applicati
 
 ### 5.1 Loading the SiWx91x Firmware
 
-Refer [Getting started with PC ](https://docs.silabs.com/rs9116/latest/wiseconnect-getting-started) to load the firmware into SiWx91x EVK. The firmware binary is located in `<SDK>/firmware/`
+- Refer [Getting started with PC ](https://docs.silabs.com/rs9116/latest/wiseconnect-getting-started) to load the firmware into SiWx91x EVK. The firmware binary is located in `<SDK>/connectivity_firmware/`
 
 ### 5.2 Creating the Project and builing the Application
   
-Refer [Getting started with EFX32](https://docs.silabs.com/rs9116-wiseconnect/latest/wifibt-wc-getting-started-with-efx32/), for settin-up EFR & EFM host platforms
+- Refer [Getting started with EFX32](https://docs.silabs.com/rs9116-wiseconnect/latest/wifibt-wc-getting-started-with-efx32/), for settin-up EFR & EFM host platforms
 
 #### 5.2.1 Project Creation - SoC Mode : 
 
 - Connect your board. The Si917 compatible SoC board is **BRD4325A**.
 - Studio should detect your board. Your board will be shown here.
 ![soc_board_detection](resources/readme/socboarddetection111.png)
-
 #### 5.2.2 Project Creation - NCP Mode : 
 
 - Connect your board. The supported NCP boards are: **BRD4180A,BRD4280B**
 - Studio should detect your board. Your board will be shown here.
 ![ncp_board_detection](resources/readme/ncpboarddetection112.png)
-
 #### 5.2.3 Selecting an example application and generate project
 
 - Go to the 'EXAMPLE PROJECT & DEMOS' tab and select your desired example application
-![projct_selection](resources/readme/projctselection.PNG)
+![projct_selection](resources/readme/projctselection1.png)
 - Click 'Create'. The "New Project Wizard" window appears. Click 'Finish'
-![creation_final](resources/readme/creationfinal.PNG)
-
+![creation_final](resources/readme/creationfinal1.png)
 #### 5.2.4 Build Project - SoC Mode
 
 - Once the project is created, right click on project and go to properties → C/C++ Build → Settings → Build Steps
 - Add post_build_script_SimplicityStudio.bat file path (SI917_COMBO_SDK.X.X.X.XX\utilities\isp_scripts_common_flash) in build steps settings as shown in below image.
-![postbuild_script](resources/readme/buildsoc.PNG)
+![postbuild_script](resources/readme/buildsoc2.png)
 - Check for M4 projects macros in preprocessor settings(RSI_M4_INTERFACE=1)
 - Check for 9117 macro in preprocessor settings(CHIP_9117=1).
 - Click on the build icon (hammer) to build the project
 ![building_pjt](resources/readme/buildsoc1.png)
 - Successful build output will show as below.
-![build_success_soc](resources/readme/buildsuccessncp.PNG)
-
+![build_success_soc](resources/readme/buildsuccessncp1.png)
 #### 5.2.5 Build Project - NCP Mode :
 
 - Check for 9117 macro in preprocessor settings(CHIP_9117=1).
 - Click on the build icon (hammer) to build the project
-![building_pjt](resources/readme/buildncp.PNG)
+![building_pjt](resources/readme/buildncp1.png)
 - Successful build output will show as below.
-![build_success_soc](resources/readme/buildsuccessncp.PNG)
-
+![build_success_soc](resources/readme/buildsuccessncp1.png)
 ## 6. Program the device
 
-Once the build was successfull, right click on project and click on Debug As->Silicon Labs ARM Program as shown in below image.
+- Once the build was successfull, right click on project and click on Debug As->Silicon Labs ARM Program as shown in below image.
 ### SoC Mode :
 ![debug_mode_soc](resources/readme/debugmodesoc.png)
 ### NCP Mode : 
 ![debug_mode_NCP](resources/readme/debugmodencp.png)
-
-
 ## 6.1 Running the SiWx91x Application
 
 ### 6.1.1 Steps to be followed to verify BLE Hear rate profile application as a SERVER
 
 1. Configure the remote BLE device in advertising mode.For remote mobile if connecting using name ensure that the device is named same as the value mentioned in RSI_REMOTE_DEVICE_NAME macro also see to it that Complete local name record is added to advertising data and Scan response data and connectable is ticked in options.
-<br><img src="resources/readme/remote_device_advertising.png"  width=250
-alt=""><br>
-
+![](resources/readme/remote_device_advertising.png)
     **Note:** Refer the [Creating New Advertisement Sets](https://docs.silabs.com/bluetooth/5.0/miscellaneous/mobile/efr-connect-mobile-app) for configuring the EFR connect mobile APP as advertiser.
 
 2. Connect any serial console for prints.
@@ -226,43 +214,33 @@ alt=""><br>
 3. After the program gets executed, Silicon Labs device tries to connect with the remote device specified in **RSI\_BLE\_DEV\_ADDR** **or RSI\_REMOTE\_DEVICE\_NAME** macro.
 
 4. Clicks on "YES AND OPEN" button and Observe that the connection is established between the desired device and Silicon Labs device.
-<br><img src="resources/readme/connection.png"  width=250
-alt=""><br> 
+![](resources/readme/connection.png) 
 
 5. After connection, Silicon Labs device will read PHY rate of the remote device and set PHY rate of the remote device.
-<br><img src="resources/readme/connection_established.png"  width=250
-alt=""><br>
-
+![](resources/readme/connection_established.png)
 6. Observe PHY update complete event after setting PHY rate.
 
 7. When Silicon Labs module is configured as **LONG_RANGE** PHY data rate, the Slicon Labs module and remote device updates its PHY data rate to 500kbps and prints in teraterm looks as shown below.   
-<br><img src="resources/readme/coded_500kbps.PNG"  
-alt=""><br>
-
+![](resources/readme/coded_500kbps_1.png)
 8. When Silicon Labs module is configured as **TWO_MBPS** PHY data rate, the Slicon Labs module and remote device updates its PHY data rate to 1mbps and prints in teraterm looks as shown below.   
-<br><img src="resources/readme/serial_teriminal_ncp_2mbps_print.PNG"  
-alt=""><br>    
+![](resources/readme/serial_teriminal_ncp_2mbps_print1.png)    
 
 9. Refer the below images for console prints
 - For SOC the console prints are shown below
   - Long Range
-   <br>
-<img src="resources/readme/serial_teriminal_soc_long_range_print.PNG" alt=""><br>
-
+   
+![](resources/readme/serial_teriminal_soc_long_range_print1.png)
   - 2Mbps
-   <br>
-<img src="resources/readme/serial_teriminal_soc_2mbps_print.PNG" alt=""><br>
-
+   
+![](resources/readme/serial_teriminal_soc_2mbps_print1.png)
 - For NCP the console prints are shown below
 
   - Long Range
-   <br>
-<img src="resources/readme/serial_teriminal_ncp_long_range_print.PNG" alt=""><br>
-
+   
+![](resources/readme/serial_teriminal_ncp_long_range_print1.png)
   - 2Mbps
-   <br>
-<img src="resources/readme/serial_teriminal_ncp_2mbps_print.PNG" alt=""><br>
-
+   
+![](resources/readme/serial_teriminal_ncp_2mbps_print1.png)
 ## 7. Observing the output prints on serial terminal
 
 ### 7.1 SoC Mode:
@@ -274,15 +252,13 @@ alt=""><br>
       ![FTDI_prints](resources/readme/ftdiprints118.png)
 - Prints can see as below in any Console terminal
 
-   ![ouput_prints](resources/readme/serial_teriminal_soc_2mbps_print.PNG)
-
+   ![ouput_prints](resources/readme/serial_teriminal_soc_2mbps_print1.png)
 ### 7.2 NCP Mode:
 - Prints can see as below in any Console terminal
 
-   ![ouput_prints](resources/readme/serial_teriminal_ncp_2mbps_print.PNG)
-
+   ![ouput_prints](resources/readme/serial_teriminal_ncp_2mbps_print1.png)
 ## 8. Selecting Bare Metal
-The application has been designed to work with FreeRTOS and Bare Metal configurations. By default, the application project files (Simplicity studio) are configured with FreeRTOS enabled. The following steps demonstrate how to configure Simplicity Studio to test the application in a Bare Metal environment.
+- The application has been designed to work with FreeRTOS and Bare Metal configurations. By default, the application project files (Simplicity studio) are configured with FreeRTOS enabled. The following steps demonstrate how to configure Simplicity Studio to test the application in a Bare Metal environment.
 
 ### 8.1 Bare Metal with Simplicity Studio
 - Open project in Simplicity Studio
@@ -290,8 +266,7 @@ The application has been designed to work with FreeRTOS and Bare Metal configura
 - GO to 'C/C++ Build' | 'Settings' | 'GNU ARM C Compiler' | 'Preprocessor' and remove macro 'RSI_WITH_OS=1'
 - Click on 'Apply' and 'OK' to save the settings
 ![project settings in Simplicity Studio](resources/readme/with_out_os.png)
-![project settings in Simplicity Studio](resources/readme/with_out_os1.PNG)
-
+![project settings in Simplicity Studio](resources/readme/with_out_os2.png)
 ### 8.2 Bare Metal with Keil
 - Open project in Keil IDE and click on 'Options for Target'
 - Go to 'C/C++' tab and remove 'RSI_WITH_OS' macro present under Preprocessor Symbols

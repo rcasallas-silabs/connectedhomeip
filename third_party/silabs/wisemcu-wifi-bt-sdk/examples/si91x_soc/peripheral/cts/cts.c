@@ -51,9 +51,9 @@ extern RSI_UDMA_DESC_T UDMA0_Table[CONTROL_STRUCT0];
 extern RSI_UDMA_DESC_T UDMA1_Table[CONTROL_STRUCT1];
 #endif /* defined (__CC_ARM) */
 
-#if defined( __GNUC__ )
-extern RSI_UDMA_DESC_T __attribute__ ((section(".udma_addr0"))) UDMA0_Table[CONTROL_STRUCT0];
-extern RSI_UDMA_DESC_T __attribute__ ((section(".udma_addr1"))) UDMA1_Table[CONTROL_STRUCT1];
+#if defined(__GNUC__)
+extern RSI_UDMA_DESC_T __attribute__((section(".udma_addr0"))) UDMA0_Table[CONTROL_STRUCT0];
+extern RSI_UDMA_DESC_T __attribute__((section(".udma_addr1"))) UDMA1_Table[CONTROL_STRUCT1];
 #endif /* defined (__GNUC__) */
 
 extern UDMA_Channel_Info udma1_chnl_info[12];
@@ -63,10 +63,10 @@ extern UDMA_RESOURCES UDMA1_Resources;
 
 volatile uint32_t done, ret;
 
-uint16_t Samples[NO_OF_SLOW_SAMPLES];// __attribute__((at(0x24063800)));
-uint16_t Avg_Samples[NO_OF_SLOW_AVG_SAMPLES];// __attribute__((at(0x240638C8)));
-uint8_t sensor_count[8];// __attribute__((at(0x24063FD0)));
-uint16_t rx_buffer[BUFFER_SIZE];// __attribute__((at(0x24063000)));
+uint16_t Samples[NO_OF_SLOW_SAMPLES];         // __attribute__((at(0x24063800)));
+uint16_t Avg_Samples[NO_OF_SLOW_AVG_SAMPLES]; // __attribute__((at(0x240638C8)));
+uint8_t sensor_count[8];                      // __attribute__((at(0x24063FD0)));
+uint16_t rx_buffer[BUFFER_SIZE];              // __attribute__((at(0x24063000)));
 
 extern uint32_t Threshold;
 extern uint32_t sample_count;
@@ -201,7 +201,7 @@ void RSI_CTS()
     /*config ref voltage*/
     RSI_CTS_ConfigRefVoltage(CTS, Ref_voltage, ENABLE, Samples, Avg_Samples);
     /*if average is enabled write 1 to wakeup register*/
-    RSI_CTS_ConfigWakeUp(CTS,1,Threshold);
+    RSI_CTS_ConfigWakeUp(CTS, 1, Threshold);
     //RSI_CTS_ConfigWakeUp(CTS, 1, 150);
     /*if wake interrupt enabled enable the fifo afull interrupt*/
     RSI_CTS_FifoInterruptEnable(CTS, ENABLE);
@@ -251,7 +251,6 @@ void RSI_CTS()
   }
 }
 
-
 /*slow calibration function*/
 void RSI_SlowCalibration()
 {
@@ -281,7 +280,7 @@ void RSI_SlowCalibration()
 
   sample_sum = 0;
 
- // memset(rx_buffer, 0, sizeof(rx_buffer));
+  // memset(rx_buffer, 0, sizeof(rx_buffer));
 }
 
 /**
@@ -294,7 +293,7 @@ int main()
   /*Configures the system default clock and power configurations*/
   SystemCoreClockUpdate();
 #ifdef DEBUG_UART
- // DEBUGINIT();
+  // DEBUGINIT();
 #endif
 
   sample_count = 0, avg_count = 0, Threshold = 0;
@@ -306,7 +305,7 @@ int main()
   memset(rx_buffer, 0, sizeof(rx_buffer));
   /*Assign all the varibles with deafult value*/
   default_cal = 1, Ref_voltage = 4, calib = 1;
-//  DEBUGOUT("\r\nConfigured Touch_Sensor Interface\r\n");
+  //  DEBUGOUT("\r\nConfigured Touch_Sensor Interface\r\n");
 
   while (1) {
     memset(sensor_count, 0, sizeof(sensor_count));
@@ -321,8 +320,7 @@ int main()
       DEBUGINIT();
 
       for (i = 0; i < 8; i++) {
-        if (sensor_count[i] >= 1)
-        {
+        if (sensor_count[i] >= 1) {
           DEBUGOUT("\nsensor '%d' is pressed", i + 1);
         }
       }

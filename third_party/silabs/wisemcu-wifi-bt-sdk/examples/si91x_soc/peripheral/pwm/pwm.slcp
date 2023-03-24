@@ -9,9 +9,9 @@ quality: alpha
 sdk: {id: gecko_sdk, version: 4.1.0}
 sdk_extension:
   - id: wiseconnect
-    version: 1.0.0
+    version: 1.0.1
 source:
-  - path: mcpwm_led.c
+  - path: pwm.c
 toolchain_settings: []
 component:
   - id: rsilib_userconfig
@@ -29,9 +29,8 @@ define:
 provides:
   - name: si91x_soc
 other_file:
-  - path: resources\readme\image505a.png
-  - path: resources\readme\image505b.png
-  - path: resources\readme\image505c.png
+  - path: resources/readme/image505a.png
+  - path: resources/readme/image505c.png
 readme:
   - path: readme.md
 ui_hints:

@@ -16,7 +16,7 @@ xml_filter: Undefined
 sdk: {id: gecko_sdk, version: 4.1.0}
 sdk_extension:
   - id: wiseconnect
-    version: 1.0.0
+    version: 1.0.1
 source:
   - path: rsi_ble_privacy.c
 include:
@@ -34,19 +34,32 @@ readme:
   - path: readme.md
 other_file:
   - path: resources/readme/smp_pair_req1.png
+  - path: resources/readme/creationfinal1.png
   - path: resources/readme/ncpboarddetection112.png
   - path: resources/readme/ftdiprints118.png
+  - path: resources/readme/ble_master1.png
   - path: resources/readme/keil_with_out_os.png
+  - path: resources/readme/buildncp1.png
+  - path: resources/readme/buildsuccesssoc1.png
   - path: resources/readme/ble_slave2.png
   - path: resources/readme/debugmodencp.png
+  - path: resources/readme/serial_teriminal_server_soc1.png
+  - path: resources/readme/serial_teriminal_client_soc1.png
+  - path: resources/readme/buildsoc3.png
   - path: resources/readme/debugmodesoc.png
+  - path: resources/readme/with_out_os3.png
+  - path: resources/readme/ble_slave4.png
+  - path: resources/readme/projctselection1.png
   - path: resources/readme/bleprivacyncp.png
   - path: resources/readme/bleprivacysoc.png
   - path: resources/readme/socboarddetection111.png
   - path: resources/readme/with_out_os.png
+  - path: resources/readme/buildncp2.png
+  - path: resources/readme/buildsoc4.png
   - path: resources/readme/ble_slave1.png
   - path: resources/readme/image40b.png
   - path: resources/readme/smp_passkey.png
+  - path: resources/readme/buildsuccessncp1.png
   - path: resources/readme/smp_pair_req2.png
 ui_hints:
   highlight:

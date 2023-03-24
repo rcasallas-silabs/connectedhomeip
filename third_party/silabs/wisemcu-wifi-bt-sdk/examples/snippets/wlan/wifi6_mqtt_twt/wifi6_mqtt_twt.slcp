@@ -16,7 +16,7 @@ xml_filter: Undefined
 sdk: {id: gecko_sdk, version: 4.1.0}
 sdk_extension:
   - id: wiseconnect
-    version: 1.0.0
+    version: 1.0.1
 source:
   - path: rsi_emb_mqtt_twt.c
 include:
@@ -40,29 +40,51 @@ other_file:
   - path: resources/readme/buildingpjt115.png
   - path: resources/readme/ncpboarddetection112.png
   - path: resources/readme/ftdiprints118.png
+  - path: resources/readme/mqtt_twt_example_ncp.png
   - path: resources/readme/image149.png
   - path: resources/readme/image216b.png
+  - path: resources/readme/usb_to_uart_2.png
   - path: resources/readme/image147a.png
+  - path: resources/readme/post_build_script.png
+  - path: resources/readme/serial_port.png
   - path: resources/readme/image102.png
   - path: resources/readme/image150.png
   - path: resources/readme/image218.png
   - path: resources/readme/image151.png
   - path: resources/readme/image153.png
+  - path: resources/readme/build_project_ncp.png
+  - path: resources/readme/usb_to_uart_1.png
+  - path: resources/readme/efm32.png
   - path: resources/readme/image155.png
   - path: resources/readme/image359.png
+  - path: resources/readme/create_project.png
+  - path: resources/readme/mqtt_twt_example.png
   - path: resources/readme/twtsoc.png
+  - path: resources/readme/run.png
+  - path: resources/readme/efr32.png
   - path: resources/readme/image152.png
   - path: resources/readme/image216c.png
   - path: resources/readme/image147.png
+  - path: resources/readme/ncp_macros.png
   - path: resources/readme/ouputprints119.png
   - path: resources/readme/buildsuccesssoc116.png
+  - path: resources/readme/soc_board_detection.png
   - path: resources/readme/debugmodencp120.png
   - path: resources/readme/image103.png
   - path: resources/readme/socboarddetection111.png
+  - path: resources/readme/setup_soc.png
+  - path: resources/readme/soc_macros.png
+  - path: resources/readme/build_project_soc.png
+  - path: resources/readme/setup_ncp.png
+  - path: resources/readme/port_selection.png
   - path: resources/readme/twtncp.png
   - path: resources/readme/image148.png
+  - path: resources/readme/port_selection_soc.png
   - path: resources/readme/image154.png
+  - path: resources/readme/serial_port_setup.png
+  - path: resources/readme/program_device.png
   - path: resources/readme/projctselection113.png
+  - path: resources/readme/examples_demos.png
 ui_hints:
   highlight:
     - path: readme.md

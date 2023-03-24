@@ -1,10 +1,10 @@
 # WLAN Station BLE Throughput
 
-## Introduction
-The coex application demonstrates throughput measurement of wifi while BLE is in connection.
-The coex application has WLAN and BLE tasks and acts as an interface between Smartphone and PC. Smartphone interacts with BLE task, while Both PC and Silicon Labs WLAN would be connected to a Wireless Access Point, thus both are connected together wirelessly interacts with WLAN task. When Smartphone connects and sends message to Silicon Labs device, BT task accepts .Similarly, data transfer will happen for Station between AP.
+## 1 Introduction
+The coex application demonstrates throughput measurement of Wi-Fi while BLE is in connection.
+The coex application has WLAN and BLE tasks and acts as an interface between Smartphone and PC. Smartphone interacts with BLE task, while Both PC and Silicon Labs device would be connected to a Wireless Access Point, thus both are connected together wirelessly. When Smartphone connects and sends message to Silicon Labs device, BLE task accepts. Similarly, data transfer will happen between Station and AP.
 
-## Setting Up 
+## 2 Setting Up 
 To use this application, the following hardware, software and project setup is required.
 
 ### Hardware Requirements
@@ -15,19 +15,19 @@ To use this application, the following hardware, software and project setup is r
   - **SoC Mode**: 
       - Silicon Labs [BRD4325A](https://www.silabs.com/)
   - **NCP Mode**:
-      - Silicon Labs [(BRD4180A, BRD4280B)](https://www.silabs.com/); **AND**
+      - Silicon Labs [(BRD4180A, BRD4280B)](https://www.silabs.com/)
       - Host MCU Eval Kit. This example has been tested with:
         - Silicon Labs [WSTK + EFR32MG21](https://www.silabs.com/development-tools/wireless/efr32xg21-bluetooth-starter-kit)
 -  Android Mobile Phone with BLE scanner App.
 
 #### SoC Mode : 
-<br><img src="resources/readme/wbtsoc.png" width=500 height=300 alt=""><br>
+![](resources/readme/wbtsoc.png)
 
   
 #### NCP Mode :  
-<br><img src="resources/readme/wbtncp.png" width=500 height=300 alt=""><br>
+![](resources/readme/wbtncp.png)
 
-### Project Setup
+## 3 Project Setup
 - **SoC Mode**
   - **Silicon Labs SiWx91x SoC**. Follow the [Getting Started with SiWx91x SoC](https://docs.silabs.com/) to setup the example to work with SiWx91x SoC and Simplicity Studio.
 - **NCP Mode**
@@ -42,9 +42,59 @@ Read through the following sections and make any changes needed.
 * By default, the application is configured to use the SPI bus for interfacing between Host platforms(EFR32MG21) and the SiWx91x EVK.
 
 ### Bare Metal/RTOS Support
-To select a bare metal configuration, see [Selecting bare metal](#selecting-bare-metal).
+To select a bare metal configuration, see [Selecting bare metal](#8-selecting-bare-metal).
 
-## Application Configuration Parameters
+## 4 Creating the project
+
+1. Ensure the SiWx91x loaded with the latest firmware following the [Getting started with a PC](https://docs.silabs.com/rs9116/latest/wiseconnect-getting-started). The firmware file is located at `<Si917 COMBO SDK>/connectivity_firmware/`.
+
+2. Ensure the EFx32 and SiWx91x set up is connected to your PC.
+
+### 4.1 Board detection
+
+### 4.1.1 SoC mode
+1. In the Simplicity Studio IDE, 
+    - The 917 SoC board will be detected under **Debug Adapters** pane as shown below.
+
+      **![Soc Board detection](resources/readme/soc_board_detection.png)**
+
+### 4.1.2 NCP mode
+
+1. In the Simplicity Studio IDE, 
+    - The EFR32 board will be detected under **Debug Adapters** pane as shown below.
+
+      **![EFR32 Board detection](resources/readme/efr32.png)**
+
+    - The EFM32 board will be detected under **Debug Adapters** pane as shown below.
+
+      **![EFM32 Board detection](resources/readme/efm32.png)**
+
+### 4.2 Creation of project
+
+Ensure the latest Gecko SDK along with the extension Si917 COMBO SDK is added to Simplicity Studio.
+
+1. Click on the board detected and go to **EXAMPLE PROJECTS & DEMOS** section.
+
+   **![Examples and Demos](resources/readme/examples_demos.png)**
+
+2. Filter for Wi-Fi examples from the Gecko SDK added. For this, check the *Wi-Fi* checkbox under **Wireless Technology** and *Gecko SDK Suite* checkbox under **Provider**. 
+
+3. Under provider, for SoC based example, check the *SoC* checkbox and for NCP based example, check the *NCP* checkbox.
+
+4. Now choose Wi-Fi+BLE - NCP WLAN Station BLE Throughput App example for NCP mode or choose Wi-Fi+BLE - SoC WLAN Station BLE Throughput App example for SoC mode and click on **Create**.
+  For NCP mode:
+
+   **![Coex throughput project NCP](resources/readme/coex_throughput_example_ncp.png)**
+
+    For SoC mode:
+      
+   **![Coex throughput project SoC](resources/readme/coex_throughput_example_soc.png)**
+
+5. Give the desired name to your project and cick on **Finish**.
+
+   **![Create Coex throughput project](resources/readme/create_project.png)**
+
+## 5 Application Configuration Parameters
 
 The application can be configured to suit your requirements and development environment. Read through the following sections and make any changes needed.
 
@@ -222,65 +272,108 @@ BT\_GLOBAL\_BUFF\_LEN refers to the number of bytes required by the application 
 
 **SiWx91x is a SSL Server (receives SSL packets from a remote client) ...**
 
-![Figure: SiWx91x Configured in SSL Server Mode](resources/readme/sslrx.png)
+![Figure: SiWx91x Configured in SSL Server Mode](resources/readme/image216.png)
 
 
 
-## Testing the Application 
+## 6 Building and Testing the Application
 
 Follow the below steps for the successful execution of the application.
 
-### Loading the SiWx91x Firmware
+### 6.1 Loading the SiWx91x Firmware
 
-Refer [Getting started with a PC](https://docs.silabs.com/rs9116/latest/wiseconnect-getting-started) to load the firmware into SiWx91x EVK. The firmware file is located in `<SDK>/connectivity_firmware/`
+Refer [Getting started with a PC](https://docs.silabs.com/rs9116/latest/wiseconnect-getting-started) to load the firmware into SiWx91x EVK. The firmware file is located in `<SDK>/firmware/`
 
+### 6.2 Building the Project
+#### 6.2.1. Building the Project - SoC Mode
 
-## Creating the Project and builing the Application
+- Once the project is created, right click on project and go to properties → C/C++ Build → Settings → Build Steps.
+
+- Add **post_build_script_SimplicityStudio.bat** file path present at SI917_COMBO_SDK.X.X.X.XX → utilities → isp_scripts_common_flash in build steps settings as shown in below image.
+
+  ![postbuild_script](resources/readme/post_build_script.png)
+
+- Go to properties → C/C++ Build → Settings → Tool Settings → GNU ARM C Compiler → Preprocessor → Defined symbols (-D) and check for M4 projects macro (RSI_M4_INTERFACE=1) and 9117 macro (CHIP_9117=1). If not present, add the macros and click **Apply and Close**.
   
-Refer [Getting started with EFX32](https://docs.silabs.com/rs9116-wiseconnect/latest/wifibt-wc-getting-started-with-efx32/), for settin-up EFR & EFM host platforms
+  ![Build Project for SoC mode](resources/readme/soc_macros.png)
 
-### Project creation - SoC Mode : 
-- Connect your board. The Si917 compatible SoC board is **BRD4325A**.
-- Studio should detect your board. Your board will be shown here.
-![soc_board_detection](resources/readme/socboarddetection111.png)
+- Click on the build icon (hammer) or right click on project name and choose **Build Project** to build the project.
 
-### Project creation - NCP Mode : 
-- Connect your board. The supported NCP boards are: **BRD4180A,BRD4280B**
-- Studio should detect your board. Your board will be shown here.
-![ncp_board_detection](resources/readme/ncpboarddetection112.png)
+  ![building_pjt](resources/readme/build_project_soc.png)
 
-### Selecting an example application and generate project
-- Go to the 'EXAMPLE PROJECT & DEMOS' tab and select your desired example application
-![projct_selection](resources/readme/projctselection113.png)
-- Click 'Create'. The "New Project Wizard" window appears. Click 'Finish'
-![creation_final](resources/readme/creationfinal114.png)
+- Make sure the build returns 0 Errors and 0 Warnings.
+  
 
-#### Build Project - SoC Mode :
+#### 6.2.2. Build the Project - NCP Mode
 
-- Once the project is created, right click on project and go to properties → C/C++ Build → Settings → Build Steps
-- Add post_build_script_SimplicityStudio.bat file path (SI917_COMBO_SDK.X.X.X.XX\utilities\isp_scripts_common_flash) in build steps settings as shown in below image.
-![postbuild_script](resources/readme/image359.png)
-- Check for M4 projects macros in preprocessor settings(RSI_M4_INTERFACE=1)
-- Check for 9117 macro in preprocessor settings(CHIP_9117=1).
-- Click on the build icon (hammer) to build the project
-![building_pjt](resources/readme/buildingpjt115.png)
-- Successful build output will show as below.
-![build_success_soc](resources/readme/buildsuccesssoc116.png)
+- Check for CHIP_9117 macro in preprocessor settings as mentioned below.
+   - Right click on project name.
+   - Go to properties → C/C++ Build → Settings → Tool Settings → GNU ARM C Compiler → Preprocessor → Defined symbols (-D).
+   - If CHIP_9117 macro is not present, add it by clicking on add macro option.
+   - Click on **Apply and Close**.
 
-#### Build Project - NCP Mode :
+     ![Build Project for NCP mode](resources/readme/ncp_macros.png)
 
-- Check for 9117 macro in preprocessor settings(CHIP_9117=1).
-- Click on the build icon (hammer) to build the project
-![building_pjt](resources/readme/buildingpjt115.png)
-- Successful build output will show as below.
-![build_success_soc](resources/readme/buildsuccesssoc116.png)
+- Click on the build icon (hammer) or right click on project name and choose **Build Project** to build the project.
 
-## Program the device
-Once the build was successfull, right click on project and click on Debug As->Silicon Labs ARM Program as shown in below image.
-![debug_mode_soc](resources/readme/debugmodesoc117.png)
-![debug_mode_NCP](resources/readme/debugmodencp120.png)
+  ![Build Project for NCP mode](resources/readme/build_project_ncp.png)
 
-## Steps to verify the WLAN Station BLE Throughput Example
+- Make sure the build returns 0 Errors and 0 Warnings.
+
+### 6.3 Set up for application prints
+
+Before setting up Tera Term, do the following for SoC mode.
+
+**SoC mode**: 
+You can use either of the below USB to UART converters for application prints.
+1. Set up using USB to UART converter board.
+
+  - Connect Tx (Pin-6) to P27 on WSTK
+  - Connect GND (Pin 8 or 10) to GND on WSTK
+
+    ![FTDI_prints](resources/readme/usb_to_uart_1.png)
+
+2. Set up using USB to UART converter cable.
+
+  - Connect RX (Pin 5) of TTL convertor to P27 on WSTK
+  - Connect GND (Pin1) of TTL convertor to GND on WSTK
+
+    ![FTDI_prints](resources/readme/usb_to_uart_2.png)
+
+**Tera term set up - for NCP and SoC modes**
+
+1. Open the Tera Term tool. 
+   - For SoC mode, choose the serial port to which USB to UART converter is connected and click on **OK**. 
+
+     **![](resources/readme/port_selection_soc.png)**
+
+   - For NCP mode, choose the J-Link port and click on **OK**.
+
+     **![](resources/readme/port_selection.png)**
+
+2. Navigate to the Setup → Serial port and update the baud rate to **115200** and click on **OK**.
+
+    **![](resources/readme/serial_port_setup.png)**
+
+    **![](resources/readme/serial_port.png)**
+
+The serial port is now connected. 
+
+### 6.4 Execute the application
+
+1. Once the build was successful, right click on project and select Debug As → Silicon Labs ARM Program to program the device as shown in below image.
+
+   **![debug_mode_NCP](resources/readme/program_device.png)**
+
+2. As soon as the debug process is completed, the application control branches to the main().
+
+3. Go to the J-link Silicon Labs console pane to observe the debug prints in the Serial 1 tab.
+
+4. Click on the **Resume** icon in the Simplicity Studio IDE toolbar to run the application.
+
+   **![Run](resources/readme/run.png)**
+
+## 7 Steps to verify the WLAN Station BLE Throughput Example
 
 1. Configure the Access point with internet connection in OPEN/WPA-PSK/WPA2-PSK mode to connect the SiWx91x EVK in STA mode.
 2. Connect any serial console for prints.
@@ -318,6 +411,8 @@ The Iperf command to start the UDP client is:
 > For example ...
 >
 > `C:\> iperf.exe -c 192.168.0.100 -u -p 5001 -i 1 -b 50M -t 30`  
+
+**Note**: Increase the value of -t parameter, if it appears as if the application is hanging at data transmission stage, it is usually because application is waiting to receive more data. 
 
 ![Figure: UDP_RX](resources/readme/image217a.png)
 #### TCP Tx Throuhgput
@@ -359,27 +454,13 @@ To measure SSL RX throughput, configure the SiWx91x as a SSL client and open a S
 
 The SiWx91x, which is configured as a UDP/TCP/SSL server/client, connects to the iperf server/client and sends/receives data for configured intervals. While module is transmitting/receiving the data, application prints the throughput numbers in serial console.
 
-## Observing the output prints on serial terminal
-
-### SoC Mode:
-> Connect USB to UART connector Tx and GND pins to WSTK radio board.
-
-   - Connect Tx(Pin-6) to P27 on WSTK
-   - Connect GND(Pin 8 or 10) to GND on WSTK
-![FTDI_prints](resources/readme/ftdiprints118.png)
-> Prints can see as below in any Console terminal
-![ouput_prints](resources/readme/ouputprints119.png)
-### NCP Mode:
-Prints can see as below in any Console terminal
-![ouput_prints](resources/readme/ouputprints119.png)
-
-# Selecting Bare Metal
+## 8 Selecting Bare Metal
 The application has been designed to work with FreeRTOS and Bare Metal configurations. By default, the application project files (Simplicity studio) are configured with FreeRTOS enabled. The following steps demonstrate how to configure Simplicity Studio to test the application in a Bare Metal environment.
 
-## Bare Metal with Simplicity Studio
+### 8.1 Bare Metal with Simplicity Studio
 > - Open the project in Simplicity Studio
 > - Right click on the project and choose 'Properties'
-> - Go to 'C/C++ Build' | 'Settings' | 'GNU ARM C Compiler' | 'Symbols' and remove macro 'RSI_WITH_OS=1'
+> - Go to 'C/C++ Build' | 'Settings' | 'GNU ARM C Compiler' | 'Preprocessor' and remove macro 'RSI_WITH_OS=1'
 > - Select 'Apply' and 'OK' to save the settings
 
 ![Figure: project settings in Simplicity Studio](resources/readme/image216b.png) 

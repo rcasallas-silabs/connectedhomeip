@@ -110,6 +110,9 @@
 //! Wireless driver task stack size
 #define RSI_DRIVER_TASK_STACK_SIZE 500
 
+//! Module sleep time configured in ms
+#define SLEEP_DELAY 3000
+
 //! set sleep timer  enable or disable
 #define SET_SLEEP_TIME RSI_DISABLE
 #ifdef RSI_M4_INTERFACE
@@ -216,12 +219,8 @@ int32_t rsi_powersave_profile_app()
     } else {
       LOG_PRINT("\r\nPower save profile with deep sleep Success\r\n");
     }
-    //! wait in scheduler for some time
-    for (delay = 0; delay < RSI_DELAY; delay++) {
-#ifndef RSI_WITH_OS
-      rsi_wireless_driver_task();
-#endif
-    }
+
+    rsi_delay_ms(SLEEP_DELAY);
 
     //! Disable power save profile
     status = rsi_wlan_power_save_profile(RSI_ACTIVE, PSP_TYPE);
@@ -330,6 +329,7 @@ void main_loop(void)
 int main()
 {
   int32_t status = RSI_SUCCESS;
+
 #ifdef RSI_WITH_OS
 
   rsi_task_handle_t wlan_task_handle = NULL;

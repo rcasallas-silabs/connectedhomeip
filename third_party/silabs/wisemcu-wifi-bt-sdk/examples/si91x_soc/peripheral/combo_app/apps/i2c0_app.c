@@ -62,7 +62,6 @@ extern ARM_DRIVER_I2C Driver_I2C0;
 static ARM_DRIVER_I2C *I2Cdrv = &Driver_I2C0;
 extern ARM_DRIVER_I2C Driver_I2C0;
 
-
 ARM_DRIVER_I2C *drv_info;
 
 volatile uint32_t tx_done = 0, rx_done = 0, xfer_done = 0, stop_det = 0;
@@ -122,11 +121,10 @@ int32_t EEPROM_WriteBuf(uint8_t sub_addr, const uint8_t *buf, uint32_t len)
 
   start = rsi_hal_gettickcount();
 
-  while ((I2Cdrv->GetStatus().busy))
-    {
-     if(!(rsi_hal_gettickcount() - start < 100))
-         return ARM_DRIVER_ERROR_TIMEOUT;
-    }
+  while ((I2Cdrv->GetStatus().busy)) {
+    if (!(rsi_hal_gettickcount() - start < 100))
+      return ARM_DRIVER_ERROR_TIMEOUT;
+  }
 
   cnt_num = I2Cdrv->GetDataCount();
   if (cnt_num != (len + 1)) {
@@ -301,48 +299,48 @@ int I2C0_Init(void)
 }
 int I2c0_Transfer(void)
 {
-	uint32_t forever = 1, comp = 0;
+  uint32_t forever = 1, comp = 0;
   int32_t status = ARM_DRIVER_OK;
-    /* Writes data to EEPROM slave */
-    status = EEPROM_WriteBuf(OFFSET_ADDR, buf, TX_LEN);
-    if (status != ARM_DRIVER_OK) {
-      DEBUGOUT("\r\nFailed to Write Data into EEPROM(I2C0 Slave), Error Code : %d\r\n", status);
-      return status;
+  /* Writes data to EEPROM slave */
+  status = EEPROM_WriteBuf(OFFSET_ADDR, buf, TX_LEN);
+  if (status != ARM_DRIVER_OK) {
+    DEBUGOUT("\r\nFailed to Write Data into EEPROM(I2C0 Slave), Error Code : %d\r\n", status);
+    return status;
+  } else {
+    DEBUGOUT("\r\nWrite Data into EEPROM(I2C0 Slave)\r\n");
+  }
+
+  //5ms delay after stop to start
+  rsi_delay_ms(5);
+
+  /* Reads data from EEPROM slave */
+  status = EEPROM_ReadBuf(OFFSET_ADDR, rd_buf, RX_LEN);
+  if (status != ARM_DRIVER_OK) {
+    DEBUGOUT("\r\nFailed to Read Data From EEPROM(I2C0 Slave), Error Code : %d\r\n", status);
+    return status;
+  } else {
+    DEBUGOUT("\r\nStart Reading Data From EEPROM(I2C0 Slave)\r\n");
+  }
+
+  /*waits until rx_done=0  */
+  while (!rx_done)
+    ;
+  rx_done = 0;
+
+  DEBUGOUT("\r\nCompleted Reading Data From EEPROM\r\n");
+
+  for (comp = 0; comp < sizeof(rd_buf); comp++) {
+    if (buf[comp] == rd_buf[comp]) {
+      continue;
     } else {
-        DEBUGOUT("\r\nWrite Data into EEPROM(I2C0 Slave)\r\n");
-      }
-
-    //5ms delay after stop to start
-    rsi_delay_ms(5);
-
-    /* Reads data from EEPROM slave */
-    status = EEPROM_ReadBuf(OFFSET_ADDR, rd_buf, RX_LEN);
-    if (status != ARM_DRIVER_OK) {
-      DEBUGOUT("\r\nFailed to Read Data From EEPROM(I2C0 Slave), Error Code : %d\r\n", status);
-      return status;
-    } else {
-        DEBUGOUT("\r\nStart Reading Data From EEPROM(I2C0 Slave)\r\n");
-      }
-
-    /*waits until rx_done=0  */
-    while (!rx_done)
-      ;
-    rx_done = 0;
-
-    DEBUGOUT("\r\nCompleted Reading Data From EEPROM\r\n");
-
-    for (comp = 0; comp < sizeof(rd_buf); comp++) {
-      if (buf[comp] == rd_buf[comp]) {
-        continue;
-      } else {
-        break;
-      }
+      break;
     }
+  }
 
-    if (comp == sizeof(rd_buf)) {
-      DEBUGOUT("\r\nI2C0 Data Comparison Success\r\n");
-      I2C0_TRANSFER = 0 ;
-    } else {
-      DEBUGOUT("\r\nI2C0 Data Comparison Fail\r\n");
-    }
+  if (comp == sizeof(rd_buf)) {
+    DEBUGOUT("\r\nI2C0 Data Comparison Success\r\n");
+    I2C0_TRANSFER = 0;
+  } else {
+    DEBUGOUT("\r\nI2C0 Data Comparison Fail\r\n");
+  }
 }

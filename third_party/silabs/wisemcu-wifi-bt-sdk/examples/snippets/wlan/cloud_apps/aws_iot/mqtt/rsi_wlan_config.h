@@ -60,7 +60,7 @@
 #define RSI_CUSTOM_FEATURE_BIT_MAP (FEAT_CUSTOM_FEAT_EXTENTION_VALID)
 
 //! To set Extended custom feature select bit map
-#define RSI_EXT_CUSTOM_FEATURE_BIT_MAP (EXT_FEAT_256K_MODE | BIT(1) | BIT(3) | BIT(27))
+#define RSI_EXT_CUSTOM_FEATURE_BIT_MAP (RAM_LEVEL_NWP_MEDIUM_MCU_MEDIUM | BIT(1) | BIT(3) | BIT(27))
 
 #define RSI_EXT_TCPIP_FEATURE_BITMAP 0
 
@@ -333,7 +333,11 @@
 //! Power save command parameters
 /*=======================================================================*/
 //! set handshake type of power mode
+#ifdef RSI_M4_INTERFACE
+#define RSI_HAND_SHAKE_TYPE M4_BASED
+#else
 #define RSI_HAND_SHAKE_TYPE GPIO_BASED
+#endif
 
 //! 0 - LP, 1- ULP mode with RAM retention and 2 - ULP with Non RAM retention
 #define RSI_SELECT_LP_OR_ULP_MODE RSI_ULP_WITH_RAM_RET

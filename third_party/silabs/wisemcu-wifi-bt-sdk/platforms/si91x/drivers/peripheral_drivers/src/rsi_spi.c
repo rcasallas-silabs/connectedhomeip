@@ -18,9 +18,9 @@
  *
  */
 
-/**
- * Includes
- */
+
+// Includes
+
 
 #include "rsi_ccp_user_config.h"
 
