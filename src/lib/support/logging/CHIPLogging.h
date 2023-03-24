@@ -454,5 +454,10 @@ void LogV(uint8_t module, uint8_t category, const char * msg, va_list args) ENFO
 
 #endif // _CHIP_USE_LOGGING
 
+#define SHELL(format, ...)            \
+    do                           \
+    {                            \
+        chip::Logging::Log(chip::Logging::kLogModule_Shell, CHIP_LOG_CATEGORY_PROGRESS, format, ##__VA_ARGS__); \
+    } while (0)
 } // namespace Logging
 } // namespace chip

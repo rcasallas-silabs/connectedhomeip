@@ -153,7 +153,6 @@ void SetLogRedirectCallback(LogRedirectCallback_t callback)
  */
 void Log(uint8_t module, uint8_t category, const char * msg, ...)
 {
-
     va_list v;
     va_start(v, msg);
     LogV(module, category, msg, v);
