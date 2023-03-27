@@ -331,6 +331,12 @@ def buildWiFiExample(platform, app, board, wifiRadio, args, radioName, buildCust
             {
                 exampleType = "examples"
                 relPath = "silabs/${platform}"
+            }   
+
+            // Only the wifi ncp builds require to specify the --wifi radio used.
+            if (platform != "SiWx917")
+            {
+                args = args + " --wifi " + wifiRadio
             }
 
             withDockerRegistry([url: "https://artifactory.silabs.net ", credentialsId: 'svc_gsdk']){
@@ -345,8 +351,8 @@ def buildWiFiExample(platform, app, board, wifiRadio, args, radioName, buildCust
                         withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
                         {
 
-                            sh "./scripts/examples/gn_efr32_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName} ${board} ${args} --wifi ${wifiRadio}"
-                            sh "./scripts/examples/gn_efr32_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName}/release ${board} ${args} --release --wifi ${wifiRadio}"
+                            sh "./scripts/examples/gn_efr32_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName} ${board} ${args}"
+                            sh "./scripts/examples/gn_efr32_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName}/release ${board} ${args} --release"
                         }
                     }
                 } catch (e) {
