@@ -420,7 +420,7 @@ def buildChipToolAndOTAProvider()
             deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
                                        workspaceTmpDir,
                                        'matter/out/',
-                                       '-name "chip-tool"')
+                                       '-name "chip-tool" -o -name "chip-ota-provider-app"')
         }
     }
 }
