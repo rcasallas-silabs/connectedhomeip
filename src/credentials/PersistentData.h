@@ -93,8 +93,6 @@ private:
     bool mLoaded = false;
 };
 
-
-
 enum class PersistentTags : uint8_t
 {
     kCount = 1,
@@ -103,28 +101,12 @@ enum class PersistentTags : uint8_t
     kEntryData = 10,
 };
 
-
 using PersistentId = uint16_t;
-
-struct PersistentEntry {
-
-    PersistentEntry(): id(0) {}
-    PersistentEntry(PersistentId id): id(id) {}
-    virtual ~PersistentEntry() = default;
-    virtual void Clear() = 0;
-    virtual CHIP_ERROR Serialize(TLV::TLVWriter & writer) const = 0;
-    virtual CHIP_ERROR Deserialize(TLV::TLVReader & reader) = 0;
-
-    PersistentId id = 0;
-};
-
 
 template <size_t kMaxSerializedSize, size_t kMaxListSize, typename EntryType>
 struct PersistentList: public PersistentData<kMaxSerializedSize> {
 
     PersistentList(PersistentStorageDelegate * storage): PersistentData<kMaxSerializedSize>(storage) {}
-
-    virtual bool Compare(const EntryType & a, const EntryType & b) const = 0;
 
     void Clear() override
     {
@@ -164,6 +146,9 @@ struct PersistentList: public PersistentData<kMaxSerializedSize> {
         SetId(id, true);
         return CHIP_NO_ERROR;
     }
+protected:
+    uint16_t mLimit = kMaxListSize;
+    uint16_t mCount = 0;
 
 private:
     uint8_t mBitmap[kMaxListSize / 8 + 1] = { 0 };
@@ -173,17 +158,26 @@ private:
 template <size_t kMaxSerializedSize, size_t kMaxListSize, typename EntryType>
 struct PersistentArray: public PersistentList<kMaxSerializedSize, kMaxListSize, EntryType> {
 
+    struct Entry
+    {
+        PersistentId id = 0;
+        EntryType value;
+    };
+
     PersistentArray(PersistentStorageDelegate * storage): PersistentList<kMaxSerializedSize, kMaxListSize, EntryType>(storage) {}
 
     void Clear() override
     {
+        // Clear bitmap
         PersistentList<kMaxSerializedSize, kMaxListSize, EntryType>::Clear();
-        for (size_t i = 0; i < mLimit; ++i)
+        // Clear entries
+        for (size_t i = 0; i < this->mLimit; ++i)
         {
-            At(i).id = 0;
-            At(i).Clear();
+            Entry & e = mEntries[i];
+            e.id = 0;
+            this->Clear(e.value);
         }
-        mCount = 0;
+        this->mCount = 0;
     }
 
     CHIP_ERROR Serialize(TLV::TLVWriter & writer) const override
@@ -192,18 +186,18 @@ struct PersistentArray: public PersistentList<kMaxSerializedSize, kMaxListSize, 
         ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag(), TLV::kTLVType_Structure, container));
 
         // Count
-        ReturnErrorOnFailure(writer.Put(TLV::ContextTag(PersistentTags::kCount), static_cast<uint16_t>(mCount)));
+        ReturnErrorOnFailure(writer.Put(TLV::ContextTag(PersistentTags::kCount), static_cast<uint16_t>(this->mCount)));
 
         // Entries
         ReturnErrorOnFailure(writer.StartContainer(TLV::ContextTag(PersistentTags::kList), TLV::kTLVType_List, list));
-        for (size_t i = 0; (i < mCount) && (i < mLimit); ++i)
+        for (size_t i = 0; (i < this->mCount) && (i < this->mLimit); ++i)
         {
             ReturnErrorOnFailure(writer.StartContainer(TLV::AnonymousTag(), TLV::kTLVType_Structure, entry));
-            const EntryType & e = mEntries[i];
+            const Entry & e = mEntries[i];
             // Entry Id
             ReturnErrorOnFailure(writer.Put(TLV::ContextTag(PersistentTags::kEntryId), e.id));
             // Entry data
-            ReturnErrorOnFailure(e.Serialize(writer));
+            ReturnErrorOnFailure(Serialize(writer, e.value));
             ReturnErrorOnFailure(writer.EndContainer(entry));
         }
         ReturnErrorOnFailure(writer.EndContainer(list));
@@ -221,24 +215,24 @@ struct PersistentArray: public PersistentList<kMaxSerializedSize, kMaxListSize, 
 
         // Count
         ReturnErrorOnFailure(reader.Next(TLV::ContextTag(PersistentTags::kCount)));
-        ReturnErrorOnFailure(reader.Get(mCount));
+        ReturnErrorOnFailure(reader.Get(this->mCount));
 
         // Entries
         ReturnErrorOnFailure(reader.Next(TLV::ContextTag(PersistentTags::kList)));
         VerifyOrReturnError(TLV::kTLVType_List == reader.GetType(), CHIP_ERROR_INTERNAL);
 
         ReturnErrorOnFailure(reader.EnterContainer(list));
-        for (size_t i = 0; i < mCount && i < mLimit; ++i)
+        for (size_t i = 0; i < this->mCount && i < this->mLimit; ++i)
         {
             ReturnErrorOnFailure(reader.Next(TLV::AnonymousTag()));
             VerifyOrReturnError(TLV::kTLVType_Structure == reader.GetType(), CHIP_ERROR_INTERNAL);
             ReturnErrorOnFailure(reader.EnterContainer(entry));
-            EntryType & e = At(i);
+            Entry & e = mEntries[i];
             // Entry Id
             ReturnErrorOnFailure(reader.Next(TLV::ContextTag(PersistentTags::kEntryId)));
             ReturnErrorOnFailure(reader.Get(e.id));
             // Entry data
-            ReturnErrorOnFailure(e.Deserialize(reader));
+            ReturnErrorOnFailure(Deserialize(reader, e.value));
             ReturnErrorOnFailure(reader.ExitContainer(entry));
             this->SetId(e.id, true);
         }
@@ -247,128 +241,135 @@ struct PersistentArray: public PersistentList<kMaxSerializedSize, kMaxListSize, 
         return reader.ExitContainer(container);
     }
 
-    CHIP_ERROR Set(size_t index, EntryType & entry)
+    CHIP_ERROR Set(size_t index, const EntryType & value)
     {
         CHIP_ERROR err = this->Load();
         VerifyOrReturnError(CHIP_ERROR_NOT_FOUND == err || CHIP_NO_ERROR == err, err);
 
         // Check existing
-        for(size_t i = 0; i < mCount; ++i)
+        for(size_t i = 0; i < this->mCount; ++i)
         {
-            EntryType & e = At(i);
-            if(this->Compare(e, entry))
+            Entry & e = mEntries[i];
+            if(this->Compare(value, e.value))
             {
-                // Existing entry, index must match
+                // Existing value, index must match
                 VerifyOrReturnError(i == index, CHIP_ERROR_DUPLICATE_KEY_ID);
-                e = entry;
+                e.value = value;
                 return this->Save();
             }
         }
 
-        // New entry
-        VerifyOrReturnError(mCount < mLimit, CHIP_ERROR_INVALID_LIST_LENGTH);
-        VerifyOrReturnError(index <= mCount, CHIP_ERROR_INVALID_ARGUMENT);
-        if(index < mCount) {
+        // New value
+        VerifyOrReturnError(this->mCount < this->mLimit, CHIP_ERROR_INVALID_LIST_LENGTH);
+        VerifyOrReturnError(index <= this->mCount, CHIP_ERROR_INVALID_ARGUMENT);
+        if(index < this->mCount) {
             // Override (implicit remove)
-            EntryType old = At(index);
-            entry.id = old.id;
-            At(index) = entry;
+            EntryType old_value = mEntries[index].value;
+            mEntries[index].value = value;
             ReturnErrorOnFailure(this->Save());
-            OnEntryRemoved(old);
+            OnEntryRemoved(old_value);
         }
         else {
             // Insert last
-            ReturnErrorOnFailure(this->GetId(entry.id));
-            At(mCount++) = entry;
+            PersistentId next_id = 0;
+            ReturnErrorOnFailure(this->GetId(next_id));
+            Entry & e = mEntries[this->mCount++];
+            e.id = next_id;
+            e.value = value;
             ReturnErrorOnFailure(this->Save());
         }
-        OnEntryAdded(entry);
+        OnEntryAdded(value);
         return CHIP_NO_ERROR;
     }
 
-    CHIP_ERROR Set(EntryType & entry, bool do_override = true)
+    CHIP_ERROR Set(const EntryType & value, bool do_override = true)
     {
         CHIP_ERROR err = this->Load();
         VerifyOrReturnError(CHIP_ERROR_NOT_FOUND == err || CHIP_NO_ERROR == err, err);
         
         // Check existing
-        for(size_t i = 0; i < mCount; ++i)
+        for(size_t i = 0; i < this->mCount; ++i)
         {
-            EntryType & e = At(i);
-            if(this->Compare(e, entry))
+            Entry & e = mEntries[i];
+            if(this->Compare(value, e.value))
             {
                 // Already registered
                 VerifyOrReturnError(do_override, CHIP_ERROR_DUPLICATE_KEY_ID);
-                e = entry;
+                e.value = value;
                 return this->Save();
             }
         }
         // Insert last
-        size_t next_id = 0;
-        VerifyOrReturnError(mCount < mLimit, CHIP_ERROR_INVALID_LIST_LENGTH);
-        ReturnErrorOnFailure(this->GetId(entry.id));
-        At(mCount++) = entry;
+        PersistentId next_id = 0;
+        VerifyOrReturnError(this->mCount < this->mLimit, CHIP_ERROR_INVALID_LIST_LENGTH);
+        ReturnErrorOnFailure(this->GetId(next_id));
+        Entry & e = mEntries[this->mCount++];
+        e.id = next_id;
+        e.value = value;
         ReturnErrorOnFailure(this->Save());
-        OnEntryAdded(entry);
+        OnEntryAdded(value);
         return CHIP_NO_ERROR;
     }
 
-    CHIP_ERROR Get(size_t index, EntryType & entry)
+    CHIP_ERROR Get(size_t index, EntryType & value, PersistentId & id)
     {
         ReturnErrorOnFailure(this->Load());
-        VerifyOrReturnError(index < mLimit, CHIP_ERROR_NOT_FOUND);
-        VerifyOrReturnError(index < mCount, CHIP_ERROR_NOT_FOUND);
-        entry = At(index);
+        VerifyOrReturnError(index < this->mLimit, CHIP_ERROR_NOT_FOUND);
+        VerifyOrReturnError(index < this->mCount, CHIP_ERROR_NOT_FOUND);
+        Entry & e = mEntries[index];
+        id = e.id;
+        value = e.value;
         return CHIP_NO_ERROR;
     }
 
-    CHIP_ERROR Get(EntryType & entry, bool do_create = false)
+    CHIP_ERROR Get(EntryType & value, PersistentId & id, bool do_create = false)
     {
         CHIP_ERROR err = this->Load();
         VerifyOrReturnError(CHIP_ERROR_NOT_FOUND == err || CHIP_NO_ERROR == err, err);
 
         // Check existing
-        for(size_t i = 0; i < mCount; ++i)
+        for(size_t i = 0; i < this->mCount; ++i)
         {
-            EntryType & e = At(i);
-            if(this->Compare(e, entry))
+            Entry & e = mEntries[i];
+            if(this->Compare(value, e.value))
             {
-                entry = e;
+                value = e.value;
                 return CHIP_NO_ERROR;
             }
         }
         // Insert last ?
         VerifyOrReturnError(do_create, CHIP_ERROR_NOT_FOUND);
-        VerifyOrReturnError(mCount < mLimit, CHIP_ERROR_INVALID_LIST_LENGTH);
-        At(mCount++) = entry;
+        VerifyOrReturnError(this->mCount < this->mLimit, CHIP_ERROR_INVALID_LIST_LENGTH);
+        mEntries[this->mCount++].value = value;
         return this->Save();
     }
 
     CHIP_ERROR Remove(size_t index)
     {
         ReturnErrorOnFailure(this->Load());
-        VerifyOrReturnError(index < mLimit, CHIP_ERROR_NOT_FOUND);
-        VerifyOrReturnError(index < mCount, CHIP_ERROR_NOT_FOUND);
-        EntryType old = At(index);
-        mCount--;
-        for(size_t i = index; i < mCount; ++i)
+        VerifyOrReturnError(index < this->mLimit, CHIP_ERROR_NOT_FOUND);
+        VerifyOrReturnError(index < this->mCount, CHIP_ERROR_NOT_FOUND);
+        Entry old = mEntries[index];
+        this->mCount--;
+        for(size_t i = index; i < this->mCount; ++i)
         {
-            At(i) = At(i + 1);
+            mEntries[i] = mEntries[i + 1];
         }
-        At(mCount).id = 0;
-        At(mCount).Clear();
+        Entry & last = mEntries[this->mCount];
+        last.id = 0;
+        Clear(last.value);
         ReturnErrorOnFailure(this->Save());
         this->SetId(old.id, false);
-        OnEntryRemoved(old);
+        OnEntryRemoved(old.value);
         return CHIP_NO_ERROR;
     }
 
-    CHIP_ERROR Remove(EntryType & entry)
+    CHIP_ERROR Remove(EntryType & value)
     {
         ReturnErrorOnFailure(this->Load());
-        for(size_t i = 0; i < mCount; ++i)
+        for(size_t i = 0; i < this->mCount; ++i)
         {
-            if(this->Compare(At(i), entry))
+            if(this->Compare(mEntries[i].value, value))
             {
                 return Remove(i);
             }
@@ -376,16 +377,21 @@ struct PersistentArray: public PersistentList<kMaxSerializedSize, kMaxListSize, 
         return CHIP_NO_ERROR;
     }
     
+    virtual bool Compare(const EntryType & a, const EntryType & b) const
+    {
+        return a == b;
+    }
+    virtual void Clear(EntryType & entry) = 0;
+    virtual CHIP_ERROR Serialize(TLV::TLVWriter & writer, const EntryType & entry) const = 0;
+    virtual CHIP_ERROR Deserialize(TLV::TLVReader & reader, EntryType & entry) = 0;
+
 protected:
     virtual void OnEntryAdded(const EntryType & entry) {}
     virtual void OnEntryRemoved(const EntryType & entry) {}
 
 private:
-    EntryType & At(size_t index) { return (index < mLimit) ? mEntries[index] : mEntries[0]; }
-    
-    EntryType mEntries[kMaxListSize];
-    uint16_t mLimit = kMaxListSize;
-    uint16_t mCount = 0;
+    // Entry & At(size_t index) { return (index < this->mLimit) ? mEntries[index] : mEntries[0]; }
+    Entry mEntries[kMaxListSize];
 };
 
 
