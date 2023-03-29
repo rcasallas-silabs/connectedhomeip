@@ -939,6 +939,106 @@ def utfWiFiTestSuite(nomadNode,deviceGroup,testBedName,appName,matterType,board,
     }
 }
 
+def generateGblFileAndOTAfiles()
+{
+    actionWithRetry {
+        node(buildFarmLabel)
+        {
+ 
+            def boards = "BRD4161A,BRD4187C,BRD4325B"
+            def technology = "openThread,WiFi"
+            def wifiPlatforms = "wf200,rs9116,91x"
+            def appName = "lighting-app"
+            def workspaceTmpDir = createWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
+                                                            buildOverlayDir)
+            def dirPath = workspaceTmpDir + createWorkspaceOverlay.overlayMatterPath
+            def saveDir = 'matter/'
+
+            def image = "artifactory.silabs.net/gsdk-docker-production/sqa-testnode-lite:latest"
+
+            // Closure to generate the gbl and ota files
+            def genFiles = {app, tech, board, radioName ->
+
+                sh """
+                        
+                        commander --version
+                        pwd
+
+                        if [ "${tech}" = "openThread" ] ; then
+                            bin_path="${dirPath}/out/CSA/${app}/OpenThread/release/${board}"
+                            file="\$(find \$bin_path/*.s37 | grep -o '[^/]*\$')"
+                        else
+                            bin_path="${dirPath}/out/${app}_wifi_${radioName}/release/${board}"
+                            file="\$(find \$bin_path/*.s37 | grep -o '[^/]*\$')"
+                        fi
+
+                        gbl_file="\$(basename \$file .s37).gbl"
+                        ota_file="\$(basename \$file .s37).ota"
+
+                        commander gbl create \$bin_path/\$gbl_file --app \$bin_path/\$file
+                        src/app/ota_image_tool.py create -v 0xFFF1 -p 0x8005 -vn 2 -vs 2.0 -da sha256 \$bin_path/\$gbl_file \$bin_path/\$ota_file
+
+                        ls -al \$bin_path
+
+                    """
+                return 0
+            }
+
+            withDockerRegistry([url: "https://artifactory.silabs.net ", credentialsId: 'svc_gsdk']){
+                sh "docker pull $image"
+            }
+
+            dir(dirPath) {
+                try{
+                    withDockerContainer(image: image)
+                    {
+                        withCredentials([usernamePassword(credentialsId: 'svc_gsdk', passwordVariable: 'SL_PASSWORD', usernameVariable: 'SL_USERNAME')])
+                        {
+                            withEnv(['file=""',
+                                     'gbl_file=""',
+                                     'ota_file=""',
+                                     'bin_path=""']){
+
+                                    technology.tokenize(",").each{ tech_ ->   
+                                        boards.tokenize(",").each{ brd ->
+                                            
+                                            if(tech_ == "WiFi"){
+                                                wifiPlatforms.tokenize(",").each{ platform -> 
+                                                    if (brd == "BRD4161A" && (platform != "91x" && platform != "917_soc")){
+                                                        genFiles.call(appName, tech_, brd, platform)
+                                                    }
+                                                    else if (brd == "BRD4187C" && platform != "917_soc"){
+                                                        genFiles.call(appName, tech_, brd, platform)
+                                                    }
+                                                    else if (brd == "BRD4325B" && platform == "917_soc"){
+                                                        genFiles.call(appName, tech_, brd, platform)
+                                                    }
+                                                }
+                                            }
+                                            else if (tech_ == "openThread" && brd != "BRD4325B"){
+                                                genFiles.call(appName, tech_, brd, "")
+                                            }
+                                    
+                                        }
+                                    }
+                            }
+                        }
+                    }
+                }
+                catch (e)
+                {
+                        deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
+                                  workspaceTmpDir,
+                                  saveDir,
+                                  '-name no-files')
+                        throw e
+                }
+            }
+            deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(), workspaceTmpDir, 'matter/out','-name "*.gbl" -o -name "*.ota"')
+        }
+    }
+}
+
 def pushToArtifactoryAndUbai()
 {
     actionWithRetry {
@@ -974,7 +1074,7 @@ def pushToArtifactoryAndUbai()
                                     pwd
                                     file="build-binaries.zip"
 
-                                    zip -r "${file}" out
+                                    zip -r "${file}" out -x *.gbl *.ota 
                                     ls -al
 
                                     status_code=$(curl -s  -w "%{http_code}" --upload-file "$file" \
@@ -987,6 +1087,9 @@ def pushToArtifactoryAndUbai()
                                             else
                                                     echo "$file File upload was successful."
                                             fi
+
+                                    rm "${file}"
+                                    zip -r "${file}" out 
 
                                     echo 'UBAI uploading ......'
                                     ubai_upload_cli --client-id jenkins-gsdk-pipelines-Matter --file-path build-binaries.zip  --metadata app_name matter \
@@ -1267,7 +1370,19 @@ def pipeline()
             exportIoTReports()
         }
     }
-
+    stage("Generate GBL and OTA files")
+    {
+        advanceStageMarker()
+        /*
+        Generate .gbl and .ota files for the following combinations
+        openThread
+            BRD4161A and BRD4187C
+        WiFi
+            mg12 + wf200/rs9116             ( one per each combo)
+            mg24 + wf200/rs9116/917/917_soc ( one per each combo)
+        */
+        generateGblFileAndOTAfiles()
+    }
     stage("Push to Artifactory and UBAI")
     {
         advanceStageMarker()
