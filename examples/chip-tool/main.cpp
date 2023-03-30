@@ -32,18 +32,34 @@
 
 #include <sys/ioctl.h>
 #include <stdio.h>
+#include <string.h>
+
+void printRight(const char *text)
+{
+    static const char *LINE = "................................................................................................................................";
+    struct winsize w;
+    size_t text_len = strlen(text);
+    size_t line_len = strlen(LINE);
+
+    ioctl(0, TIOCGWINSZ, &w);
+
+    printf ("* lines %d\n", w.ws_row);
+    printf ("* columns %d\n", w.ws_col);
+    if(text_len > line_len) {
+        printf("%s\n", text);
+    }
+    else {
+        printf("%s%s\n", LINE + text_len, text);
+    }
+    printf("TEST(%zu; %zu): %s\n", line_len, text_len, &LINE[line_len - 10]);
+}
 
 // ================================================================================
 // Main Code
 // ================================================================================
 int main(int argc, char * argv[])
 {
-    struct winsize w;
-    ioctl(0, TIOCGWINSZ, &w);
-
-    printf ("lines %d\n", w.ws_row);
-    printf ("columns %d\n", w.ws_col);
-    
+    printRight("MAIN");
     // ExampleCredentialIssuerCommands credIssuerCommands;
     // Commands commands;
     // registerCommandsDelay(commands, &credIssuerCommands);
