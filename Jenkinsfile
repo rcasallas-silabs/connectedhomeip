@@ -322,6 +322,8 @@ def buildWiFiExample(platform, app, board, wifiRadio, args, radioName, buildCust
             def exampleType =''
             def relPath = ''
 
+            def sleepyBoard = [ "BRD4186C", "BRD4187C" ]
+
             if (buildCustom == true)
             {
                 exampleType = "silabs_examples"
@@ -353,6 +355,11 @@ def buildWiFiExample(platform, app, board, wifiRadio, args, radioName, buildCust
 
                             sh "./scripts/examples/gn_efr32_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName} ${board} ${args}"
                             sh "./scripts/examples/gn_efr32_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName}/release ${board} ${args} --release"
+
+                            // for sleepy devices
+                            if (sleepyBoard.contains(board)) {
+                                sh "./scripts/examples/gn_efr32_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName}/sleepy ${board} enable_sleepy_device=true ${args}"
+                            }
                         }
                     }
                 } catch (e) {
@@ -1200,7 +1207,6 @@ def pipeline()
         def wifiSOCApps = [ "lighting-app" , "lock-app", "light-switch-app", "window-app" ]
 
         def wifiNCPRadios = [ "rs9116", "SiWx917", "wf200" ]
-        def wifiSOCRadios = [ "SiWx917" ]
 
         // NCP Builds
         wifiNCPApps.each { appName ->
@@ -1256,18 +1262,16 @@ def pipeline()
         // SOC Builds
         wifiSOCApps.each { appName ->
             wifiSOCBoards.each { board ->
-                wifiSOCRadios.each { rcp ->
-                    // Platform = SiWx917 for all SOC mode combos
-                    def platform = "SiWx917"
+                // Platform = SiWx917 for all SOC mode combos
+                def platform = "SiWx917"
 
-                    // Name the examples as "xxx_wifi_917_soc"
-                    // SiWx917 is the only radio in use right now
-                    def radioName = "917_soc"
+                // Name the examples as "xxx_wifi_917_soc"
+                // SiWx917 is the only radio in use right now
+                def radioName = "917_soc"
 
-                    // No additional arguments for building with BLE commissioning for SiWx917 SoC
-                    def args = ""
-                    parallelNodesBuild["WiFi " + appName + " " + board + " " + rcp]      = { this.buildWiFiExample(platform, appName, board, rcp, args, radioName, false)   }
-                }
+                // No additional arguments for building with BLE commissioning for SiWx917 SoC
+                def args = ""
+                parallelNodesBuild["WiFi " + appName + " " + board]      = { this.buildWiFiExample(platform, appName, board, false, args, radioName, false)   }
             }
         }
 
@@ -1278,7 +1282,6 @@ def pipeline()
         def silabsCustomExamplesWifi = ["onoff-plug-app"]
 
         def customWifiRCP = ["rs9116", "SiWx917" ,"wf200"]
-        def customWifiSoC = ["SiWx917"]
 
         if (env.BRANCH_NAME.startsWith('RC_')) {
             boardsForCustomWifi       = ["BRD4161A", "BRD4163A", "BRD4164A", "BRD4170A", "BRD4186C", "BRD4187C"]
@@ -1339,18 +1342,16 @@ def pipeline()
         // Custom SOC Builds
         silabsCustomExamplesWifi.each { appName ->
             boardsForCustomWifiSoC.each { board ->
-                customWifiSoC.each { rcp ->
-                    // Platform = SiWx917 for all SOC mode combos
-                    def platform = "SiWx917"
+                // Platform = SiWx917 for all SOC mode combos
+                def platform = "SiWx917"
 
-                    // Name the examples as "xxx_wifi_917_soc"
-                    // SiWx917 is the only radio in use right now
-                    def radioName = "917_soc"
+                // Name the examples as "xxx_wifi_917_soc"
+                // SiWx917 is the only radio in use right now
+                def radioName = "917_soc"
 
-                    // No additional arguments for building with BLE commissioning for SiWx917 SoC
-                    def args = ""
-                    parallelNodesBuild["WiFi " + appName + " " + board + " " + rcp]      = { this.buildWiFiExample(platform, appName, board, rcp, args, radioName, true)   }
-                }
+                // No additional arguments for building with BLE commissioning for SiWx917 SoC
+                def args = ""
+                parallelNodesBuild["WiFi " + appName + " " + board]      = { this.buildWiFiExample(platform, appName, board, false, args, radioName, true)   }
             }
         }
         //---------------------------------------------------------------------
