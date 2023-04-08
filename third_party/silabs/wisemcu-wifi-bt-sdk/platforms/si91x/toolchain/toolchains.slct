@@ -26,6 +26,10 @@ schema:
       - debug
       - speed
       - size
+  c_standard:
+    type: str
+  cxx_standard:
+    type: str
   preinclude:
     type: str
   linkerfile:
@@ -45,6 +49,11 @@ schema:
     enum:
       - enabled
       - disabled
+  fp16:
+    type: str
+    enum:
+      - enabled
+      - disabled
   gcc_compiler_option:
     type: str
   gcc_c_compiler_option:
@@ -57,6 +66,28 @@ schema:
     type: str
   iar_linker_option:
     type: str
+  trustzone_library:
+    type: str
+  cmse:
+    type: str
+    enum:
+      - enabled
+      - disabled
+  no_builtin_printf:
+    type: str
+    enum:
+      - enabled
+      - disabled
+  no_builtin_sprintf:
+    type: str
+    enum:
+      - enabled
+      - disabled
+  link_time_optimization:
+    type: str
+    enum:
+      - enabled
+      - disabled
 exporter:
   - exporter_id: simplicity_studio
     setting:
@@ -135,15 +166,72 @@ exporter:
             action: append
             value: "-Wl,--gc-sections"
         disabled: []
+      cmse:
+        enabled:
+          - tool: makefile.arm.gcc.compiler
+            option: misc
+            action: append
+            value: "-mcmse"
+          - tool: com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.compiler.base
+            option: com.silabs.gnu.c.compiler.option.misc.otherlist
+            action: append
+            value: "-mcmse"
+          - tool: com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.cpp.compiler.base
+            option: com.silabs.gnu.cpp.compiler.option.misc.otherlist
+            action: append
+            value: "-mcmse"
+          - tool: iar.ewp.arm.compiler
+            option: IExtraOptions
+            action: append
+            value: "--cmse"
+          - tool: iar.arm.toolchain.compiler.v5.4.1
+            option: iar.arm.toolchain.compiler.option.additionalUserOptions
+            action: append
+            value: "--cmse"
+        disabled: []
       nano_c_libs:
         enabled:
           - tool: makefile.arm.gcc.compiler
             option: misc
             action: append
             value: "--specs=nano.specs"
+          - tool: makefile.host.gcc.compiler
+            option: misc
+            action: append
+            value: "--specs=nano.specs"
+          - tool: com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.compiler.base
+            option: com.silabs.gnu.c.compiler.option.misc.otherlist
+            action: append
+            value: "--specs=nano.specs"
+          - tool: com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.cpp.compiler.base
+            option: com.silabs.gnu.cpp.compiler.option.misc.otherlist
+            action: append
+            value: "--specs=nano.specs"
           - tool: linker
             option: nano_c_libs
             value: true
+        disabled:
+          - tool: linker
+            option: nano_c_libs
+            value: false
+      fp16:
+        enabled:
+          - tool: makefile.arm.gcc.compiler
+            option: misc
+            action: append
+            value: "-mfp16-format=ieee"
+          - tool: makefile.host.gcc.compiler
+            option: misc
+            action: append
+            value: "-mfp16-format=ieee"
+          - tool: com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.compiler.base
+            option: com.silabs.gnu.c.compiler.option.misc.otherlist
+            action: append
+            value: "-mfp16-format=ieee"
+          - tool: com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.cpp.compiler.base
+            option: com.silabs.gnu.cpp.compiler.option.misc.otherlist
+            action: append
+            value: "-mfp16-format=ieee"
         disabled: []
       device_type:
         embedded:
@@ -156,9 +244,6 @@ exporter:
             value: true
           - tool: compiler
             option: no_rtti
-            value: true
-          - tool: compiler
-            option: no_builtin
             value: true
         host: []
       cpu:
@@ -210,6 +295,14 @@ exporter:
           - tool: compiler
             option: optimization
             value: size
+      c_standard:
+        - tool: compiler
+          option: c_standard
+          value: "{{value}}"
+      cxx_standard:
+        - tool: compiler
+          option: cxx_standard
+          value: "{{value}}"
       preinclude:
         - tool: compiler
           option: preinclude
@@ -231,6 +324,10 @@ exporter:
         - tool: studio.ide.project
           option: board_id
           action: append
+          value: "{{value}}"
+      trustzone_library:
+        - tool: linker
+          option: generate_trustzone_lib
           value: "{{value}}"
       architecture: []
       gcc_compiler_option:
@@ -298,6 +395,10 @@ exporter:
           option: IExtraOptions
           action: append
           value: "{{value}}"
+        - tool: iar.arm.toolchain.compiler.v5.4.1
+          option: iar.arm.toolchain.compiler.option.additionalUserOptions
+          action: append
+          value: "{{value}}"
       iar_linker_option:
         - tool: iar.ewp.arm.linker
           option: IlinkUseExtraOptions
@@ -306,3 +407,36 @@ exporter:
           option: IlinkExtraOptions
           action: append
           value: "{{value}}"
+      no_builtin_printf:
+        enabled:
+          - tool: makefile.arm.gcc.compiler
+            option: misc
+            action: append
+            value: "-fno-builtin-printf"
+          - tool: com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.compiler.base
+            option: com.silabs.gnu.c.compiler.option.misc.otherlist
+            action: append
+            value: "-fno-builtin-printf"
+        disabled: []
+      no_builtin_sprintf:
+        enabled:
+          - tool: makefile.arm.gcc.compiler
+            option: misc
+            action: append
+            value: "-fno-builtin-sprintf"
+          - tool: com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.compiler.base
+            option: com.silabs.gnu.c.compiler.option.misc.otherlist
+            action: append
+            value: "-fno-builtin-sprintf"
+        disabled: []
+      link_time_optimization:
+        enabled:
+          - tool: makefile.arm.gcc.compiler
+            option: misc
+            action: append
+            value: "-flto"
+          - tool: com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.compiler.base
+            option: com.silabs.gnu.c.compiler.option.misc.otherlist
+            action: append
+            value: "-flto"
+        disabled: []

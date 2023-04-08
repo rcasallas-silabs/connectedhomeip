@@ -1,10 +1,10 @@
 /*
  *
- * 		Atollic TrueSTUDIO Minimal System calls file
+ *    Atollic TrueSTUDIO Minimal System calls file
  *
- * 		For more information about which c-functions
- * 		need which of these lowlevel functions
- * 		please consult the Newlib libc-manual
+ *    For more information about which c-functions
+ *    need which of these lowlevel functions
+ *    please consult the Newlib libc-manual
  *
  * */
 #include <sys/stat.h>
@@ -17,6 +17,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include <sys/times.h>
+#include "rsi_board.h"
 
 #define IO_MAXLINE 20U //maximun read length
 #undef errno
@@ -24,6 +25,8 @@ extern int errno;
 typedef int (*PUTCHAR_FUNC)(int a);
 register char *stack_ptr __asm("sp");
 extern void Serial_send(uint8_t ch);
+extern char __HeapBase[];
+extern char __HeapLimit[];
 
 char *__env[1] = { 0 };
 char **environ = __env;
@@ -53,6 +56,8 @@ int _getpid(void)
 
 int _kill(int pid, int sig)
 {
+  (void)pid;
+  (void)sig;
   errno = EINVAL;
   return -1;
 }
@@ -67,10 +72,12 @@ void _exit(int status)
 int _write(int file, char *ptr, int len)
 {
   int todo;
+  (void)file;
 
   for (todo = 0; todo < len; todo++) {
 #ifdef DEBUG_SERIAL
     Serial_send(*ptr++);
+
 #else
     Board_UARTPutChar(*ptr++);
 
@@ -80,46 +87,46 @@ int _write(int file, char *ptr, int len)
   return len;
 }
 
-caddr_t _sbrk(int incr)
+void * _sbrk(int incr)
 {
-  extern char end __asm("end");
-  static char *heap_end;
+  static char *heap_end = __HeapBase;
   char *prev_heap_end;
 
-  if (heap_end == 0)
-    heap_end = &end;
-
-  prev_heap_end = heap_end;
-  if (heap_end + incr > stack_ptr) {
-    //		write(1, "Heap and stack collision\n", 25);
-    //		abort();
-    errno = ENOMEM;
-    return (caddr_t)-1;
+  if ((heap_end + incr) > __HeapLimit) {
+    // Not enough heap
+    return (void *) -1;
   }
 
+  prev_heap_end = heap_end;
   heap_end += incr;
 
-  return (caddr_t)prev_heap_end;
+  return prev_heap_end;
 }
 
 int _close(int file)
 {
+  (void)file;
   return -1;
 }
 
 int _fstat(int file, struct stat *st)
 {
+  (void)file;
   st->st_mode = S_IFCHR;
   return 0;
 }
 
 int _isatty(int file)
 {
+  (void)file;
   return 1;
 }
 
 int _lseek(int file, int ptr, int dir)
 {
+  (void)file;
+  (void)ptr;
+  (void)dir;
   return 0;
 }
 
@@ -144,7 +151,7 @@ static int scanf_data_format(const char *line_ptr, char *format, va_list args_pt
   /* Identifier for the format string. */
   char *c = format;
   char temp;
-  char *buf;
+  char *buff;
   /* Flag telling the conversion specification. */
   uint32_t flag = 0;
   /* Filed width for the matching input streams. */
@@ -179,7 +186,7 @@ static int scanf_data_format(const char *line_ptr, char *format, va_list args_pt
         c++;
       } else {
         /* Match failure. Misalignment with C99, the unmatched characters need to be pushed back to stream.
-				 * However, it is deserted now. */
+         * However, it is deserted now. */
         break;
       }
     } else {
@@ -206,7 +213,7 @@ static int scanf_data_format(const char *line_ptr, char *format, va_list args_pt
           case '9':
             if (field_width) {
               /* Match failure. */
-              return nassigned;
+              return (int)nassigned;
             }
             do {
               field_width = field_width * 10 + *c - '0';
@@ -253,13 +260,13 @@ static int scanf_data_format(const char *line_ptr, char *format, va_list args_pt
             c++;
             break;
           default:
-            return nassigned;
+            return (int)nassigned;
         }
       }
 
       if (!(flag & kSCANF_DestMask)) {
         /* Format strings are exhausted. */
-        return nassigned;
+        return (int)nassigned;
       }
 
       if (!field_width) {
@@ -271,10 +278,10 @@ static int scanf_data_format(const char *line_ptr, char *format, va_list args_pt
       switch (flag & kSCANF_DestMask) {
         case kSCANF_DestChar:
           s   = (const char *)p;
-          buf = va_arg(args_ptr, char *);
+          buff = va_arg(args_ptr, char *);
           while ((field_width--) && (*p)) {
             if (!(flag & kSCANF_Suppress)) {
-              *buf++ = *p++;
+              *buff++ = *p++;
             } else {
               p++;
             }
@@ -288,13 +295,13 @@ static int scanf_data_format(const char *line_ptr, char *format, va_list args_pt
         case kSCANF_DestString:
           n_decode += read_exclude_space(&p);
           s   = p;
-          buf = va_arg(args_ptr, char *);
+          buff = va_arg(args_ptr, char *);
           while ((field_width--) && (*p != '\0') && (*p != ' ') && (*p != '\t') && (*p != '\n') && (*p != '\r')
                  && (*p != '\v') && (*p != '\f')) {
             if (flag & kSCANF_Suppress) {
               p++;
             } else {
-              *buf++ = *p++;
+              *buff++ = *p++;
             }
             n_decode++;
           }
@@ -380,34 +387,34 @@ static int scanf_data_format(const char *line_ptr, char *format, va_list args_pt
           break;
 
         default:
-          return nassigned;
+          return (int)nassigned;
       }
     }
   }
-  return nassigned;
+  return (int)nassigned;
 }
 int _read(char *fmt_ptr, ...)
 {
 
   char temp_buf[IO_MAXLINE + 1];
   va_list ap;
-  int32_t i;
+  uint32_t i;
   char result;
 
   va_start(ap, fmt_ptr);
   temp_buf[0] = '\0';
 
-  for (i = 0; i < IO_MAXLINE; i++) {
+  for (i = 0; i < ( uint32_t )IO_MAXLINE; i++) {
 #ifdef DEBUG_SERIAL
     temp_buf[i] = result = Serial_receive();
 #else
-    temp_buf[i] = result = Board_UARTGetChar();
+    temp_buf[i] = result = ( char ) Board_UARTGetChar();
 #endif
     if ((result == '\r') || (result == '\n')) {
       /* End of Line. */
       if (i == 0) {
         temp_buf[i] = '\0';
-        i           = -1;
+        i           = ( uint32_t )-1;
       } else {
         break;
       }
@@ -419,7 +426,7 @@ int _read(char *fmt_ptr, ...)
   } else {
     temp_buf[i + 1] = '\0';
   }
-  result = scanf_data_format(temp_buf, fmt_ptr, ap);
+  result = ( char ) scanf_data_format(temp_buf, fmt_ptr, ap);
   va_end(ap);
 
   return result;
@@ -427,35 +434,43 @@ int _read(char *fmt_ptr, ...)
 
 int _open(char *path, int flags, ...)
 {
+  (void)path;
+  (void)flags;
   /* Pretend like we always fail */
   return -1;
 }
 
 int _wait(int *status)
 {
+  (void)status;
   errno = ECHILD;
   return -1;
 }
 
 int _unlink(char *name)
 {
+  (void)name;
   errno = ENOENT;
   return -1;
 }
 
-int _times(struct tms *buf)
+int _times(struct tms *buff)
 {
+  (void)buff;
   return -1;
 }
 
 int _stat(char *file, struct stat *st)
 {
+  (void)file;
   st->st_mode = S_IFCHR;
   return 0;
 }
 
-int _link(char *old, char *new)
+int _link(char *old_link, char *new_link)
 {
+  (void)old_link;//This statement is added only to resolve compilation warning, value is unchanged
+  (void)new_link;//This statement is added only to resolve compilation warning, value is unchanged
   errno = EMLINK;
   return -1;
 }
@@ -468,6 +483,9 @@ int _fork(void)
 
 int _execve(char *name, char **argv, char **env)
 {
+  (void)name;
+  (void)argv;
+  (void)env;
   errno = ENOMEM;
   return -1;
 }

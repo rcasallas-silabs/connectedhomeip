@@ -33,8 +33,8 @@ extern "C" {
 extern uint32_t SystemCoreClock; /*!< System Clock Frequency (Core Clock)  */
 extern uint32_t npssIntrState;
 extern uint32_t __sp;
-extern uint8_t SiliconRev;
-extern uint8_t package_type;
+extern uint32_t SiliconRev;
+extern uint32_t package_type;
 
 void RSI_PS_ConfigureTaMemories(void);
 /*WiSeAOC specific VTOR values*/
@@ -153,6 +153,7 @@ error_t RSI_PS_EnterDeepSleep(SLEEP_TYPE_T sleepType, uint8_t lf_clk_mode);
 
 void RSI_PS_SaveCpuContext(void);
 void RSI_PS_RestoreCpuContext(void);
+void fpuInit(void);
 
 #ifdef __cplusplus
 }

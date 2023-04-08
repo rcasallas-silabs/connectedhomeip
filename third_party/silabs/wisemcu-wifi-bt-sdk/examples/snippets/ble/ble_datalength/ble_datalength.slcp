@@ -33,31 +33,15 @@ toolchain_settings: []
 readme:
   - path: readme.md
 other_file:
-  - path: resources/readme/creationfinal114.png
-  - path: resources/readme/ncpboarddetection112.png
-  - path: resources/readme/ftdiprints118.png
-  - path: resources/readme/creationsoc1.png
-  - path: resources/readme/imagebdlradio.png
-  - path: resources/readme/keil_with_out_os.png
-  - path: resources/readme/buildsoc1.png
-  - path: resources/readme/buildsuccesssoc1.png
-  - path: resources/readme/debugmodencp.png
-  - path: resources/readme/serial_teriminal_prints_soc1.png
-  - path: resources/readme/buildincp.png
-  - path: resources/readme/scanning1.png
-  - path: resources/readme/advertiser.png
-  - path: resources/readme/debugmodesoc.png
-  - path: resources/readme/serialteriminalprintsncp.png
-  - path: resources/readme/bledatalengthsoc.png
-  - path: resources/readme/bledatalengthncp.png
-  - path: resources/readme/device_connected1.png
-  - path: resources/readme/buildingsoc.png
-  - path: resources/readme/socboarddetection111.png
-  - path: resources/readme/with_out_os.png
-  - path: resources/readme/device_connected2.png
-  - path: resources/readme/with_out_os2.png
-  - path: resources/readme/buildsuccessncp1.png
-  - path: resources/readme/projctselection113.png
+  - path: resources/readme/bledlapplicationconfigurations.png
+  - path: resources/readme/bledlsocprints.png
+  - path: resources/readme/bledlsoc.png
+  - path: resources/readme/bledlncp.png
+  - path: resources/readme/datalengthadvertiser.png
+  - path: resources/readme/bledlncpprints.png
+  - path: resources/readme/bledlconfigurations.png
+  - path: resources/readme/bledledeviceconnected.png
+  - path: resources/readme/bledlsocscanning.png
 ui_hints:
   highlight:
     - path: readme.md

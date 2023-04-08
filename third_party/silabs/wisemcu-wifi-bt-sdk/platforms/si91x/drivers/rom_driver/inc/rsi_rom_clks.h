@@ -23,7 +23,8 @@
  */
 
 /**
- * @defgroup RSI_SPECIFIC_DRIVERS RSI SPECIFIC DRIVERS 
+ * @defgroup RSI_SPECIFIC_DRIVERS SoC Device-Specific Drivers
+ * @ingroup SOC
  * @section Description 
  * RSI specific drivers are unique to a specific device. RSI specific drivers may use an IP driver as it's base driver or a custom implementation if that 
  * peripheral or IP on the chip is unique (ie, clocking)
@@ -1437,14 +1438,14 @@ STATIC INLINE error_t RSI_CLK_SdmemClkDiv(M4CLK_Type *pCLK, boolean_t u8SwallowE
  * @return 		  returns zero \ref RSI_OK  on success ,on failure return error code.
  */
 STATIC INLINE error_t RSI_CLK_UsartClkDiv(M4CLK_Type *pCLK,
-                                          EN_USART_T EN_USART_T,
+                                          EN_USART_T EN_USART,
                                           uint8_t u8FracDivEn,
                                           uint32_t divFactor)
 {
 #if defined(ROMDRIVER_PRESENT)
-  return ROMAPI_M4SS_CLK_API->clk_usart_clk_div(pCLK, EN_USART_T, u8FracDivEn, divFactor);
+  return ROMAPI_M4SS_CLK_API->clk_usart_clk_div(pCLK, EN_USART, u8FracDivEn, divFactor);
 #else
-  return clk_usart_clk_div(pCLK, EN_USART_T, u8FracDivEn, divFactor);
+  return clk_usart_clk_div(pCLK, EN_USART, u8FracDivEn, divFactor);
 #endif
 }
 

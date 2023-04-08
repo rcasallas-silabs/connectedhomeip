@@ -716,4 +716,6 @@ const ROM_UDMA_API_T udma_api = {
 #ifdef __cplusplus
 }
 #endif
+#else
+typedef int dummy; // To remove empty translation unit warning.
 #endif //ROMDERIVER_PRESENT

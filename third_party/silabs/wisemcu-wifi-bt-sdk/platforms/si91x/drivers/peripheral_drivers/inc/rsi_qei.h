@@ -40,7 +40,7 @@ extern "C" {
  
 // Interrupt status bits
 #define QEI_POS_CNT_RST_INTR_LVL           BIT(0) // This is raised when the position counter reaches it?s extremes.
-#define QEI_IDX_CNT_MAT_INT_LVL            BIT(1) //	This is raised when index counter reaches max value loaded in to index_max_cnt register.
+#define QEI_IDX_CNT_MAT_INT_LVL            BIT(1) //  This is raised when index counter reaches max value loaded in to index_max_cnt register.
 #define QEI_POS_CNT_ERR_INTR_LVL           BIT(2) /* Whenever number of possible positions are mismatched 
                                                      with actual positions are received between two index pulses this will raised.*/
 #define QEI_VELO_LESS_THAN_INTR_LVL        BIT(3) // When velocity count is less than the value given in velocity_value_to_compare register, interrupt is raised.
@@ -97,13 +97,14 @@ extern "C" {
 /** @addtogroup SOC25
 * @{
 */
+
 /*===================================================*/
 /**
  * @fn          STATIC INLINE void RSI_QEI_SetConfiguration(volatile QEI_Type  *pstcQei, uint32_t configParms)   
- * @brief	    Sets the QEI module configurations
+ * @brief     Sets the QEI module configurations
  * @param[in]   pstcQei : Pointer to the QEI register instance
  * @param[in]   configParms : OR'ed values configurations needs to be passed to this variable
- * @return 		none
+ * @return    none
  */
 STATIC INLINE void RSI_QEI_SetConfiguration(volatile QEI_Type *pstcQei, uint32_t configParms)
 {
@@ -114,10 +115,10 @@ STATIC INLINE void RSI_QEI_SetConfiguration(volatile QEI_Type *pstcQei, uint32_t
 /*===================================================*/
 /**
  * @fn          STATIC INLINE void RSI_QEI_ClrConfiguration(volatile QEI_Type  *pstcQei, uint32_t configParms)
- * @brief	    clears the QEI module configurations
+ * @brief     clears the QEI module configurations
  * @param[in]   pstcQei : Pointer to the QEI register instance
  * @param[in]   configParms : OR'ed values configurations needs to be passed to this variable
- * @return 		none
+ * @return    none
  */
 STATIC INLINE void RSI_QEI_ClrConfiguration(volatile QEI_Type *pstcQei, uint32_t configParms)
 {
@@ -128,10 +129,10 @@ STATIC INLINE void RSI_QEI_ClrConfiguration(volatile QEI_Type *pstcQei, uint32_t
 /*===================================================*/
 /**
  * @fn          STATIC INLINE void RSI_QEI_SetControls(volatile QEI_Type  *pstcQei, uint32_t cntrlParms)
- * @brief	    Sets the QEI control configuration
+ * @brief     Sets the QEI control configuration
  * @param[in]   pstcQei : Pointer to the QEI register instance
  * @param[in]   cntrlParms : OR'ed values control field bits.
- * @return 		none
+ * @return    none
  */
 STATIC INLINE void RSI_QEI_SetControls(volatile QEI_Type *pstcQei, uint32_t cntrlParms)
 {
@@ -142,12 +143,12 @@ STATIC INLINE void RSI_QEI_SetControls(volatile QEI_Type *pstcQei, uint32_t cntr
 /*===================================================*/
 /**
  * @fn          STATIC INLINE void RSI_QEI_ClrControls(volatile QEI_Type  *pstcQei, uint32_t cntrlParms)
- * @brief		Clears the QEI control configuration
+ * @brief   Clears the QEI control configuration
  * @param[in]   pstcQei : Pointer to the QEI register instance
  * @param[in]   cntrlParms : OR'ed values control field bits.
  *              \n 
  *              \ref QEI_CNTLR_INIT_REG
- * @return 	    none
+ * @return      none
  */
 STATIC INLINE void RSI_QEI_ClrControls(volatile QEI_Type *pstcQei, uint32_t cntrlParms)
 {
@@ -167,7 +168,7 @@ STATIC INLINE void RSI_QEI_ClrControls(volatile QEI_Type *pstcQei, uint32_t cntr
  *              \ref QEI_POSITION_MAX_CNT_LSW_REG
  * @param[in]   pstcQei : Pointer to the QEI register instance
  * @param[in]   maxPosition :Max position value
- * @return 		none
+ * @return    none
  */
 STATIC INLINE void RSI_QEI_SetMaxPosCnt(volatile QEI_Type *pstcQei, uint32_t maxPosition)
 {
@@ -179,11 +180,11 @@ STATIC INLINE void RSI_QEI_SetMaxPosCnt(volatile QEI_Type *pstcQei, uint32_t max
 /*===================================================*/
 /**
  * @fn          STATIC INLINE uint32_t RSI_QEI_GetMaxPosCnt(volatile QEI_Type  *pstcQei)
- * @brief 	    Gets the maximum position count
+ * @brief       Gets the maximum position count
  * @param[in]   pstcQei : Pointer to the QEI register instance
  *             \n 
  *             \ref QEI_POSITION_MAX_CNT_LSW_REG
- * @return 	returns the maximum position count
+ * @return  returns the maximum position count
  */
 STATIC INLINE uint32_t RSI_QEI_GetMaxPosCnt(volatile QEI_Type *pstcQei)
 {
@@ -193,12 +194,12 @@ STATIC INLINE uint32_t RSI_QEI_GetMaxPosCnt(volatile QEI_Type *pstcQei)
 /*===================================================*/
 /**
  * @fn          STATIC INLINE void RSI_QEI_SetPosMatch(volatile QEI_Type  *pstcQei, uint32_t matchPosition)    
- * @brief	    Sets the position match value to compare the position counter. When it is matched with position
+ * @brief     Sets the position match value to compare the position counter. When it is matched with position
  *              counter, interrupt is raised.
  * @param[in]   pstcQei : Pointer to the QEI register instance
  * @param[in]   matchPosition : position match value.
  *              \ref QEI_POSITION_MATCH_REG
- * @return 		none
+ * @return    none
  */
 STATIC INLINE void RSI_QEI_SetPosMatch(volatile QEI_Type *pstcQei, uint32_t matchPosition)
 {
@@ -209,10 +210,10 @@ STATIC INLINE void RSI_QEI_SetPosMatch(volatile QEI_Type *pstcQei, uint32_t matc
 /*===================================================*/
 /**
  * @fn          STATIC INLINE uint32_t RSI_QEI_GetPosMatch(volatile QEI_Type  *pstcQei)
- * @brief	    Gets the position match value.
+ * @brief     Gets the position match value.
  * @param[in]   pstcQei : Pointer to the QEI register instance
  *              \ref STATIC INLINE uint32_t RSI_QEI_GetPosMatch(volatile QEI_Type  *pstcQei)
- * @return 	    returns the position match value
+ * @return      returns the position match value
  */
 STATIC INLINE uint32_t RSI_QEI_GetPosMatch(volatile QEI_Type *pstcQei)
 {
@@ -225,7 +226,7 @@ STATIC INLINE uint32_t RSI_QEI_GetPosMatch(volatile QEI_Type *pstcQei)
  * @fn          STATIC INLINE uint32_t RSI_QEI_GetPosition(volatile QEI_Type  *pstcQei)
  * @brief       Gets the current position increment counter value to know the position of the motor.
  * @param[in]   pstcQei : Pointer to the QEI register instance
- * @return 	    position current position counter value
+ * @return      position current position counter value
  *              \n
  *              \ref QEI_POSITION_CNT_REG 
  */
@@ -238,9 +239,9 @@ STATIC INLINE uint32_t RSI_QEI_GetPosition(volatile QEI_Type *pstcQei)
 /*===================================================*/
 /**
  * @fn          STATIC INLINE uint32_t RSI_QEI_GetIndex(volatile QEI_Type  *pstcQei)   
- * @brief	    Gets the current index increment counter value to know the index count of the motor.
+ * @brief     Gets the current index increment counter value to know the index count of the motor.
  * @param[in]   pstcQei : Pointer to the QEI register instance
- * @return 	    index current counter value
+ * @return      index current counter value
  *              \n
  *              \ref QEI_INDEX_CNT_REG
  */
@@ -253,12 +254,12 @@ STATIC INLINE uint32_t RSI_QEI_GetIndex(volatile QEI_Type *pstcQei)
 /*===================================================*/
 /**
  * @fn          STATIC INLINE void RSI_QEI_SetMaxIndex(volatile QEI_Type  *pstcQei , uint16_t maxIdxCntVal)
- * @brief	    configures the QEI index maximum count.This is a maximum count value that is allowed to increment in the index counter
+ * @brief     configures the QEI index maximum count.This is a maximum count value that is allowed to increment in the index counter
  * @param[in]   pstcQei : Pointer to the QEI register instance
  * @param[in]   maxIdxCntVal : maximum allowed index value to be programmed.
  *              \n
  *              \ref QEI_INDEX_MAX_CNT_REG
- * @return 	    none
+ * @return      none
  */
 STATIC INLINE void RSI_QEI_SetMaxIndex(volatile QEI_Type *pstcQei, uint16_t maxIdxCntVal)
 {
@@ -270,21 +271,21 @@ STATIC INLINE void RSI_QEI_SetMaxIndex(volatile QEI_Type *pstcQei, uint16_t maxI
  * @fn          STATIC INLINE uint16_t RSI_QEI_GetMaxIndex(volatile QEI_Type  *pstcQei)
  * @brief       Gets the maximum index value.
  * @param[in]   pstcQei : Pointer to the QEI register instance
- * @return 	    returns the MAX index value programmed by user.
+ * @return      returns the MAX index value programmed by user.
  *              \n
  *              \ref  QEI_INDEX_MAX_CNT_REG 
  */
 STATIC INLINE uint16_t RSI_QEI_GetMaxIndex(volatile QEI_Type *pstcQei)
 {
-  return pstcQei->QEI_INDEX_MAX_CNT_REG;
+  return ( uint16_t )(pstcQei->QEI_INDEX_MAX_CNT_REG);
 }
 
 /*===================================================*/
 /**
  * @fn          STATIC INLINE boolean_t RSI_QEI_GetDirection(volatile QEI_Type  *pstcQei) 
- * @brief	    Gets the direction of the QEI interfaced motor
+ * @brief     Gets the direction of the QEI interfaced motor
  * @param[in]   pstcQei : Pointer to the QEI register instance
- * @return 	    returns 1: (+) Positive direction \ref QEI_STATUS_REG_b 
+ * @return      returns 1: (+) Positive direction \ref QEI_STATUS_REG_b 
  *                      0: (-) Negative direction \ref QEI_STATUS_REG_b
  */
 STATIC INLINE boolean_t RSI_QEI_GetDirection(volatile QEI_Type *pstcQei)
@@ -296,13 +297,13 @@ STATIC INLINE boolean_t RSI_QEI_GetDirection(volatile QEI_Type *pstcQei)
 /*===================================================*/
 /**
  * @fn          STATIC INLINE int32_t RSI_QEI_GetStatus(volatile QEI_Type  *pstcQei)
- * @brief	    Gets the status of the QEI module
+ * @brief     Gets the status of the QEI module
  * @param[in]   pstcQei : Pointer to the QEI register instance
- * @return 	    returns the status of the QEI. \ref QEI_STATUS_REG
+ * @return      returns the status of the QEI. \ref QEI_STATUS_REG
  */
 STATIC INLINE int32_t RSI_QEI_GetStatus(volatile QEI_Type *pstcQei)
 {
-  return pstcQei->QEI_STATUS_REG;
+  return ( int32_t )(pstcQei->QEI_STATUS_REG);
 }
 
 /*===================================================*/
@@ -310,7 +311,7 @@ STATIC INLINE int32_t RSI_QEI_GetStatus(volatile QEI_Type *pstcQei)
  * @fn          STATIC INLINE void RSI_QEI_StartVelocityCounter(volatile QEI_Type  *pstcQei)
  * @brief       Starts the velocity counter.
  * @param[in]   pstcQei : Pointer to the QEI register instance.\ref QEI_CTRL_REG_SET 
- * @return 	    none
+ * @return      none
  */
 STATIC INLINE void RSI_QEI_StartVelocityCounter(volatile QEI_Type *pstcQei)
 {
@@ -323,7 +324,7 @@ STATIC INLINE void RSI_QEI_StartVelocityCounter(volatile QEI_Type *pstcQei)
  * @fn          STATIC INLINE void RSI_QEI_StopVelocityCounter(volatile QEI_Type  *pstcQei)
  * @brief       stops the velocity counter.
  * @param[in]   pstcQei : Pointer to the QEI register instance
- * @return 	    none
+ * @return      none
  */
 STATIC INLINE void RSI_QEI_StopVelocityCounter(volatile QEI_Type *pstcQei)
 {
@@ -337,19 +338,19 @@ STATIC INLINE void RSI_QEI_StopVelocityCounter(volatile QEI_Type *pstcQei)
  * @brief       Configures the digital filter clock division selects
  * @param[in]   pstcQei : Pointer to the QEI register instance
  * @param[in]   div     : Digital filter clock division selects
- * @return 	    none
+ * @return      none
  */
 STATIC INLINE void RSI_QEI_SetDigitalFilterClkDiv(volatile QEI_Type *pstcQei, uint32_t div)
 {
-  pstcQei->QEI_CNTLR_INIT_REG_b.DF_CLK_DIVIDE_SLT = div;
+  pstcQei->QEI_CNTLR_INIT_REG_b.DF_CLK_DIVIDE_SLT = (unsigned int)(div & 0x0F);
 }
 
 /*===================================================*/
 /**
  * @fn          STATIC INLINE uint32_t RSI_QEI_GetDigitalFilterClkDiv(volatile QEI_Type  *pstcQei) 
- * @brief	    Gets the digital filter clock division selects
+ * @brief     Gets the digital filter clock division selects
  * @param[in]   pstcQei : Pointer to the QEI register instance
- * @return 		returns the digital filter clock division bits
+ * @return    returns the digital filter clock division bits
  */
 STATIC INLINE uint32_t RSI_QEI_GetDigitalFilterClkDiv(volatile QEI_Type *pstcQei)
 {
@@ -363,7 +364,7 @@ STATIC INLINE uint32_t RSI_QEI_GetDigitalFilterClkDiv(volatile QEI_Type *pstcQei
  * @param[in]   pstcQei : Pointer to the QEI register instance
  * @param[in]   freq    : QEI module input frequency(typically soc clock) in hertz.
  * @param[in]   PeriodInUs    : Velocity measurement time in micro seconds (ex: for sec program 1000000)
- * @return 	    none
+ * @return      none
  */
 STATIC INLINE void RSI_QEI_ConfigureDeltaTimeAndFreq(volatile QEI_Type *pstcQei, uint32_t freq, uint32_t PeriodInUs)
 {
@@ -380,7 +381,7 @@ STATIC INLINE void RSI_QEI_ConfigureDeltaTimeAndFreq(volatile QEI_Type *pstcQei,
  * @param[in]   pstcQei : Pointer to the QEI register instance
  * @param[in]   freq    : QEI module input frequency(typically soc clock) in hertz.
  *              \ref  QEI_CLK_FREQ_REG
- * @return 	    none
+ * @return      none
  */
 STATIC INLINE void RSI_QEI_SetModuleFreq(volatile QEI_Type *pstcQei, uint32_t freq)
 {
@@ -390,9 +391,9 @@ STATIC INLINE void RSI_QEI_SetModuleFreq(volatile QEI_Type *pstcQei, uint32_t fr
 
 /**
  * @fn          STATIC INLINE uint32_t  RSI_QEI_GetModuleFreq(volatile QEI_Type  *pstcQei)
- * @brief	Gets the QEI module frequency for velocity measurements computations.
+ * @brief Gets the QEI module frequency for velocity measurements computations.
  * @param[in]   pstcQei : Pointer to the QEI register instance
- * @return 	returns the module frequency in hertz
+ * @return  returns the module frequency in hertz
  *              \ref QEI_CLK_FREQ_REG
  */
 STATIC INLINE uint32_t RSI_QEI_GetModuleFreq(volatile QEI_Type *pstcQei)
@@ -404,7 +405,7 @@ STATIC INLINE uint32_t RSI_QEI_GetModuleFreq(volatile QEI_Type *pstcQei)
 /*===================================================*/
 /**
  * @fn          STATIC INLINE void  RSI_QEI_SetDeltaTime(volatile QEI_Type  *pstcQei, uint32_t PeriodInUs)
- * @brief	    Gets the QEI module delta time for velocity computation
+ * @brief     Gets the QEI module delta time for velocity computation
  * @param[in]   pstcQei : Pointer to the QEI register instance.\ref QEI_DELTA_TIME_REG 
  * @param[in]   PeriodInUs    : Velocity measurement time in micro seconds (ex: for sec program 1000000)
  * @return      none
@@ -420,7 +421,7 @@ STATIC INLINE void RSI_QEI_SetDeltaTime(volatile QEI_Type *pstcQei, uint32_t Per
  * @fn          STATIC INLINE uint32_t  RSI_QEI_GetDeltaTime(volatile QEI_Type  *pstcQei)
  * @brief       Gets the QEI module delta time configured for velocity computation
  * @param[in]   pstcQei : Pointer to the QEI register instance.\ref  QEI_DELTA_TIME_REG
- * @return 	    returns the configured delta time.
+ * @return      returns the configured delta time.
  */
 STATIC INLINE uint32_t RSI_QEI_GetDeltaTime(volatile QEI_Type *pstcQei)
 {
@@ -433,7 +434,7 @@ STATIC INLINE uint32_t RSI_QEI_GetDeltaTime(volatile QEI_Type *pstcQei)
  * @fn          STATIC INLINE uint32_t RSI_QEI_GetVelocity(volatile QEI_Type  *pstcQei)
  * @brief       Get the velocity of QEI module for programmed delta time
  * @param[in]   pstcQei : Pointer to the QEI register instance.\ref QEI_VELOCITY_REG
- * @return 	    number of position counts for configured delta time from start of velocity trigger.
+ * @return      number of position counts for configured delta time from start of velocity trigger.
  */
 STATIC INLINE uint32_t RSI_QEI_GetVelocity(volatile QEI_Type *pstcQei)
 {
@@ -446,7 +447,7 @@ STATIC INLINE uint32_t RSI_QEI_GetVelocity(volatile QEI_Type *pstcQei)
  * @brief       Un masks the QEI interrupts
  * @param[in]   pstcQei : Pointer to the QEI register instance
  * @param[in]   intrMask : OR'ed values of interrupt mask bits to be un masked
- * @return 	none
+ * @return  none
  */
 STATIC INLINE void RSI_QEI_IntrUnMask(volatile QEI_Type *pstcQei, uint32_t intrMask)
 {
@@ -456,10 +457,10 @@ STATIC INLINE void RSI_QEI_IntrUnMask(volatile QEI_Type *pstcQei, uint32_t intrM
 /*===================================================*/
 /**
  * @fn          STATIC INLINE void RSI_QEI_IntrMask(volatile QEI_Type  *pstcQei, uint32_t intrMask)
- * @brief	    Masks the QEI interrupts
+ * @brief     Masks the QEI interrupts
  * @param[in]   pstcQei : Pointer to the QEI register instance
  * @param[in]   intrMask : OR'ed values of interrupt mask bits to be masked
- * @return 	    none
+ * @return      none
  */
 STATIC INLINE void RSI_QEI_IntrMask(volatile QEI_Type *pstcQei, uint32_t intrMask)
 {
@@ -471,7 +472,7 @@ STATIC INLINE void RSI_QEI_IntrMask(volatile QEI_Type *pstcQei, uint32_t intrMas
  * @fn          STATIC INLINE uint32_t RSI_QEI_GetIntrStatus(volatile QEI_Type  *pstcQei)
  * @brief       Get the interrupt status of QEI module
  * @param[in]   pstcQei : Pointer to the QEI register instance
- * @return 	    returns the interrupt status bits
+ * @return      returns the interrupt status bits
  */
 STATIC INLINE uint32_t RSI_QEI_GetIntrStatus(volatile QEI_Type *pstcQei)
 {
@@ -481,10 +482,10 @@ STATIC INLINE uint32_t RSI_QEI_GetIntrStatus(volatile QEI_Type *pstcQei)
 /*===================================================*/
 /**
  * @fn          STATIC INLINE void RSI_QEI_ClrIntrStatus(volatile QEI_Type  *pstcQei, uint32_t intrMask) 
- * @brief	    Clears the QEI interrupt status
+ * @brief     Clears the QEI interrupt status
  * @param[in]   pstcQei : Pointer to the QEI register instance
  * @param[in]   intrMask : OR'ed values of interrupt mask bits to be cleared
- * @return 	    none
+ * @return      none
  */
 STATIC INLINE void RSI_QEI_ClrIntrStatus(volatile QEI_Type *pstcQei, uint32_t intrMask)
 {
@@ -497,11 +498,11 @@ STATIC INLINE void RSI_QEI_ClrIntrStatus(volatile QEI_Type *pstcQei, uint32_t in
  * @brief       Sets the QEI encoding modes (eg:1X , 2X , 4X)
  * @param[in]   pstcQei : Pointer to the QEI register instance.\ref QEI_CNTLR_INIT_REG_b
  * @param[in]   encMode : Encoding mode
- * @return 	    none
+ * @return      none
  */
 STATIC INLINE void RSI_QEI_SetMode(volatile QEI_Type *pstcQei, uint8_t encMode)
 {
-  pstcQei->QEI_CNTLR_INIT_REG_b.QEI_ENCODING_MODE = encMode;
+  pstcQei->QEI_CNTLR_INIT_REG_b.QEI_ENCODING_MODE = (unsigned int)(encMode & 0x03);
 }
 
 /*===================================================*/
@@ -509,7 +510,7 @@ STATIC INLINE void RSI_QEI_SetMode(volatile QEI_Type *pstcQei, uint8_t encMode)
  * @fn          STATIC INLINE uint32_t RSI_QEI_GetMode(volatile QEI_Type  *pstcQei)
  * @brief       Gets the QEI encoding modes (eg:1X , 2X , 4X)
  * @param[in]   pstcQei : Pointer to the QEI register instance
- * @return 	    Returns the Encoding mode
+ * @return      Returns the Encoding mode
  */
 STATIC INLINE uint32_t RSI_QEI_GetMode(volatile QEI_Type *pstcQei)
 {

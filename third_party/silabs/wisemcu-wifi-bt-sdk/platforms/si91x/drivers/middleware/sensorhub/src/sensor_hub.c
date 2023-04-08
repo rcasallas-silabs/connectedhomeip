@@ -1,9 +1,19 @@
-/*
- * sensor_hub.c
- *
- *  Created on: Mar 4, 2023
- *      Author: kokuncha
- */
+/*******************************************************************************
+* @file  sensor_hub.c
+* @brief 
+*******************************************************************************
+* # License
+* <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+*******************************************************************************
+*
+* The licensor of this software is Silicon Laboratories Inc. Your use of this
+* software is governed by the terms of Silicon Labs Master Software License
+* Agreement (MSLA) available at
+* www.silabs.com/about-us/legal/master-software-license-agreement. This
+* software is distributed to you in Source Code format and is governed by the
+* sections of the MSLA applicable to Source Code.
+*
+******************************************************************************/
 
 
 #include <string.h>
@@ -49,7 +59,17 @@ sensor_list_t sensor_list;
 /*Map table for interrupt vs sensor*/
 intr_list_map_t int_list_map;
 
+/** @addtogroup SOC26
+* @{
+*/
 
+/*==============================================*/
+/**
+ *  @fn          static sl_sensor_impl_type* sl_get_sensor_impl(int32_t sensor_id)
+ *  @brief       To get the appropriate sensor driver implementation.
+ *  @param[in]   sensor_id     ID of the target sensor
+ *  @return      Reference to the sensor driver
+ */
 static sl_sensor_impl_type* sl_get_sensor_impl(int32_t sensor_id)
 {
   int count = get_impl_size();
@@ -62,6 +82,12 @@ static sl_sensor_impl_type* sl_get_sensor_impl(int32_t sensor_id)
   return NULL;
 }
 
+/*==============================================*/
+/**
+ *  @fn          static int32_t create_sensor_list_index()
+ *  @brief       To create a sensor index in the list.
+ *  @return      sensor index in the list.
+ */
 static int32_t create_sensor_list_index()
 {
   uint8_t sensor_index;
@@ -74,6 +100,13 @@ static int32_t create_sensor_list_index()
   return sensor_index;
 }
 
+/*==============================================*/
+/**
+ *  @fn          static int32_t get_sensor_index(sl_sensor_id_en sensor_id)
+ *  @brief       To get the index of the sensor present in the list
+ *  @param[in]   sensor_id     id of the target sensor
+ *  @return      index of the sensor
+ */
 static int32_t get_sensor_index(sl_sensor_id_en sensor_id)
 {
   uint8_t i;
@@ -85,6 +118,13 @@ static int32_t get_sensor_index(sl_sensor_id_en sensor_id)
   return 0xff;
 }
 
+/*==============================================*/
+/**
+ *  @fn          static int32_t delete_sensor_list_index(sl_sensor_id_en sensor_id)
+ *  @brief       To delete the sensor index from the list
+ *  @param[in]   sensor_id     id of the target sensor
+ *  @return      index of the sensor
+ */
 static int32_t delete_sensor_list_index(sl_sensor_id_en sensor_id)
 {
   uint8_t i;
@@ -96,7 +136,13 @@ static int32_t delete_sensor_list_index(sl_sensor_id_en sensor_id)
   }
   return 0xff;
 }
-
+/*==============================================*/
+/**
+ *  @fn          static sl_sensor_info_t* get_sensor_info(sl_sensor_id_en sensor_id)
+ *  @brief       To get the info on the configured sensor
+ *  @param[in]   sensor_id     id of the target sensor
+ *  @return      reference to the sensor info
+ */
 static sl_sensor_info_t* get_sensor_info(sl_sensor_id_en sensor_id)
 {
   uint8_t sens_index=0;
@@ -109,6 +155,13 @@ static sl_sensor_info_t* get_sensor_info(sl_sensor_id_en sensor_id)
 }
 
 
+/*==============================================*/
+/**
+ *  @fn          void sl_sensorhub_notify_cb_register(sl_sensor_signalEvent_t cb_event, sl_sensor_id_en *cb_ack)
+ *  @brief       To register the application callback handler
+ *  @param[in]   cb_event     pointer to the event
+ *  @param[in]   cb_ack       Pointer to the application handler
+ */
 void sl_sensorhub_notify_cb_register(sl_sensor_signalEvent_t cb_event, sl_sensor_id_en *cb_ack)
 {
   //!register call back handler for application
@@ -116,14 +169,23 @@ void sl_sensorhub_notify_cb_register(sl_sensor_signalEvent_t cb_event, sl_sensor
   cb_info.cb_event_ack = cb_ack;
 }
 
+/*==============================================*/
+/**
+ *  @fn          static void sl_sensors_timer_cb(TimerHandle_t xTimer)
+ *  @brief       software timer callback
+ *  @param[in]   xTimer     handle to the timer
+ */
 static void sl_sensors_timer_cb(TimerHandle_t xTimer)
 {
   uint32_t event_bit = (uint32_t) pvTimerGetTimerID(xTimer);
   xEventGroupSetBits(sl_event_group, (0x01 << event_bit));
 }
 
-
-/*NPSS GPIO IRQ handler */
+/*==============================================*/
+/**
+ *  @fn          void NPSS_GPIO_IRQHandler(void)
+ *  @brief       NPSS GPIO IRQ handler
+ */
 void NPSS_GPIO_IRQHandler(void)
 {
   volatile uint32_t intrStatus = 0;
@@ -137,6 +199,13 @@ void NPSS_GPIO_IRQHandler(void)
   }
 }
 
+/*==============================================*/
+/**
+ *  @fn          static void Interrupt_config(uint16_t gpio_pin,sl_gpio_intr_type intr_type)
+ *  @brief       Configuring the different types of GPIO interrupts.
+ *  @param[in]   gpio_pin     GPIO pin number
+ *  @param[in]   intr_type    type of interrupt.
+ */
 static void Interrupt_config(uint16_t gpio_pin,sl_gpio_intr_type intr_type)
 {
   /* Enable NPSS GPIO input buffer */
@@ -163,21 +232,32 @@ static void Interrupt_config(uint16_t gpio_pin,sl_gpio_intr_type intr_type)
       RSI_NPSSGPIO_SetIntLevelHighEnable(BIT(gpio_pin));
       break;
   }
-
 }
 
+/*==============================================*/
+/**
+ *  @fn          static void Interrupt_Start(uint16_t gpio_pin)
+ *  @brief       Enable and set the priority of GPIO interrupt.
+ *  @param[in]   gpio_pin     GPIO pin number
+ */
 static void Interrupt_Start(uint16_t gpio_pin)
 {
   /* unmask the NPSS GPIO interrupt */
   RSI_NPSSGPIO_IntrUnMask(BIT(gpio_pin));
 
-  /* Set nvic priporty less than syscall priority */
+  /* Set NVIC priority less than syscall priority */
   NVIC_SetPriority(NPSS_TO_MCU_GPIO_INTR_IRQn,configMAX_SYSCALL_INTERRUPT_PRIORITY-1);
 
   /*  NVIC Enable */
   NVIC_EnableIRQ(NPSS_TO_MCU_GPIO_INTR_IRQn);
 }
 
+/*==============================================*/
+/**
+ *  @fn          static void Interrupt_Stop(uint16_t gpio_pin)
+ *  @brief       Mask and Disable the GPIO interrupt.
+ *  @param[in]   gpio_pin     GPIO pin number
+ */
 static void Interrupt_Stop(uint16_t gpio_pin)
 {
   /*mask the NPSS GPIO interrupt */
@@ -187,31 +267,56 @@ static void Interrupt_Stop(uint16_t gpio_pin)
   NVIC_DisableIRQ(NPSS_TO_MCU_GPIO_INTR_IRQn);
 }
 
+/*==============================================*/
+/**
+ *  @fn          static void Interrupt_Delete(void)
+ *  @brief       Dissable the GPIO interrupt.
+ */
 static void Interrupt_Delete(void)
 {
     /*  NVIC Disable */
     NVIC_DisableIRQ(NPSS_TO_MCU_GPIO_INTR_IRQn);
 }
 
-
+/*==============================================*/
+/**
+ *  @fn          static uint8_t sl_spi_Init(void)
+ *  @brief       Initialize the SPI Interface based on the configuration.
+ */
 static uint8_t sl_spi_Init(void)
 {
-  //!TODO:This API needs to be implemented 
+  //!TODO: This API needs to be implemented 
   return 0;
 }
 
+/*==============================================*/
+/**
+ *  @fn          static uint8_t sl_uart_Init(void)
+ *  @brief       Initialize the UART Interface based on the configuration.
+ */
 static uint8_t sl_uart_Init(void)
 {
-  //!TODO:This API needs to be implemented 
+  //!TODO: This API needs to be implemented 
   return 0;
 }
 
+/*==============================================*/
+/**
+ *  @fn          static uint8_t sl_adc_Init(void)
+ *  @brief       Initialize the ADC Interface based on the configuration.
+ */
 static uint8_t sl_adc_Init(void)
 {
- //!TODO:This API needs to be implemented 
+ //!TODO: This API needs to be implemented
   return 0;
 }
 
+/*==============================================*/
+/**
+ *  @fn          uint8_t sl_sensorhub_init()
+ *  @brief       To initialize the sensor hub
+ *  @return      execution status
+ */
 uint8_t sl_sensorhub_init()
 {
   uint32_t status=0;
@@ -221,7 +326,7 @@ uint8_t sl_sensorhub_init()
       return RSI_FAIL;
   }
 
-  /*TODO:SPI ,ADC,UART initializations should be handled */
+  /*TODO: SPI, ADC, and UART initializations should be handled */
   status = sl_spi_Init();
   if(status != RSI_OK){
       return RSI_FAIL;
@@ -240,7 +345,12 @@ uint8_t sl_sensorhub_init()
   return RSI_OK;
 }
 
-
+/*==============================================*/
+/**
+ *  @fn          int32_t sensor_hub_start()
+ *  @brief       Start the sensor hub operations
+ *  @return      execution status
+ */
 int32_t sensor_hub_start()
 {
   int8_t status = 0;
@@ -270,13 +380,20 @@ int32_t sensor_hub_start()
 
 }
 
+/*==============================================*/
+/**
+ *  @fn          uint8_t sl_detect_sensors(sl_sensor_id_en sensor_id_info[],uint8_t num_of_sensors)
+ *  @brief       To Scan the available sensors in the system.
+ *  @param[in]   sensor_id_info    reference to the detected sensors info
+ *  @param[in]   num_of_sensors    number of sensors to be scanned
+ *  @return      execution status
+ */
 uint8_t sl_detect_sensors(sl_sensor_id_en sensor_id_info[],uint8_t num_of_sensors)
 {
   uint8_t cnt,status=0,sensors_detected=0 ;
   for(cnt=0;cnt<num_of_sensors;cnt++) {
       switch(sensor_info[cnt].bus) {
         case I2C:
-          /*TODO:Pass address as parameter */
           status  = i2c_sensors_scan(BH1750_I2C_ADDRESS_DEFAULT);
           if(status != RSI_OK){
               return RSI_FAIL;
@@ -303,6 +420,13 @@ uint8_t sl_detect_sensors(sl_sensor_id_en sensor_id_info[],uint8_t num_of_sensor
   return sensors_detected;
 }
 
+/*==============================================*/
+/**
+ *  @fn          int32_t sl_sensorhub_create_sensor(sl_sensor_id_en sensor_id)
+ *  @brief       To Create a sensor instance in the sensor hub.
+ *  @param[in]   sensor_id     ID of the sensor
+ *  @return      execution status
+ */
 int32_t sl_sensorhub_create_sensor(sl_sensor_id_en sensor_id)
 {
   sl_sensor_info_t *local_info;
@@ -313,11 +437,11 @@ int32_t sl_sensorhub_create_sensor(sl_sensor_id_en sensor_id)
 
   local_info = get_sensor_info(sensor_id);
   if(NULL == local_info){
-      /*If there is no config found for given sensor then return an error*/
+      /*If there is no config found for the given sensor then return an error*/
       return RSI_FAIL;
   }
 
-  /*Add the sensor to sensor list*/
+  /*Add the sensor to the sensor list*/
   sensor_index = create_sensor_list_index();
   if(sensor_index == MAX_NUM_SENSORS){
       /* Invalid sensor index */
@@ -413,13 +537,20 @@ int32_t sl_sensorhub_create_sensor(sl_sensor_id_en sensor_id)
   return RSI_OK;
 }
 
+/*==============================================*/
+/**
+ *  @fn          int32_t sl_sensorhub_delete_sensor(sl_sensor_id_en sensor_id)
+ *  @brief       To delete a sensor from the sensor hub.
+ *  @param[in]   sensor_id     ID of the sensor
+ *  @return      execution status
+ */
 int32_t sl_sensorhub_delete_sensor(sl_sensor_id_en sensor_id)
 {
 
   uint8_t sensor_index;
   uint8_t status=0;
 
-  /*Delete the sensor to sensor list*/
+  /*Delete the sensor to the sensor list*/
   sensor_index = delete_sensor_list_index(sensor_id);
   if(sensor_index == MAX_NUM_SENSORS){
       /* Invalid sensor index */
@@ -431,7 +562,7 @@ int32_t sl_sensorhub_delete_sensor(sl_sensor_id_en sensor_id)
     case POLLING_MODE:
       status = xTimerDelete(sensor_list.sensors[sensor_index].timer_handle,portMAX_DELAY);
       if(status != pdPASS){
-          /* Post event as SL_SENSOR_START_FAILED */
+          /* Post-event as SL_SENSOR_START_FAILED */
           EM_post_event(sensor_id ,SL_SENSOR_DELETE_FAILED,NULL, 50);
           return RSI_FAIL;
       }
@@ -466,7 +597,13 @@ int32_t sl_sensorhub_delete_sensor(sl_sensor_id_en sensor_id)
 
 }
 
-
+/*==============================================*/
+/**
+ *  @fn          int32_t sl_sensorhub_start_sensor(sl_sensor_id_en sensor_id)
+ *  @brief       To start the sensor operation for the given sensor
+ *  @param[in]   sensor_id     ID of the sensor
+ *  @return      execution status
+ */
 int32_t sl_sensorhub_start_sensor(sl_sensor_id_en sensor_id)
 {
   uint8_t sensor_index,status=0;
@@ -491,7 +628,7 @@ int32_t sl_sensorhub_start_sensor(sl_sensor_id_en sensor_id)
 
       break;
     default:
-      //!Post event to application as sensor config invalid
+      //!Post-event to the application as sensor config invalid
       EM_post_event(sensor_id ,SL_SENSOR_CNFG_INVALID,NULL,50);
       return RSI_FAIL;
   }
@@ -512,7 +649,13 @@ int32_t sl_sensorhub_start_sensor(sl_sensor_id_en sensor_id)
   return RSI_OK;
 }
 
-
+/*==============================================*/
+/**
+ *  @fn          int32_t sl_sensorhub_stop_sensor(sl_sensor_id_en sensor_id)
+ *  @brief       To stop the sensor operation for the given sensor
+ *  @param[in]   sensor_id     ID of the sensor
+ *  @return      execution status
+ */
 int32_t sl_sensorhub_stop_sensor(sl_sensor_id_en sensor_id)
 {
   uint8_t sensor_index,status=0;
@@ -536,7 +679,7 @@ int32_t sl_sensorhub_stop_sensor(sl_sensor_id_en sensor_id)
 
       break;
     default:
-      //!Post event to application as sensor config invalid
+      //!Post-event to the application as sensor config invalid
       EM_post_event(sensor_id ,SL_SENSOR_CNFG_INVALID,NULL,50);
       return RSI_FAIL;
   }
@@ -555,7 +698,15 @@ int32_t sl_sensorhub_stop_sensor(sl_sensor_id_en sensor_id)
   return RSI_OK;
 }
 
-
+/*==============================================*/
+/**
+ *  @fn          void EM_post_event(sl_sensor_id_en sensor_id,sl_sensorhub_event_en event, void* dataPtr, TickType_t ticks_to_wait)
+ *  @brief       To post the events/notifications to event manager(EM) to be notified to the application
+ *  @param[in]   sensor_id      id of the  sensor
+ *  @param[in]   event          event/notifications
+ *  @param[in]   dataPtr        pointer to the data
+ *  @param[in]   ticks_to_wait  max time to wait for the post
+ */
 void EM_post_event(sl_sensor_id_en sensor_id,sl_sensorhub_event_en event, void* dataPtr, TickType_t ticks_to_wait)
 {
   sl_em_event_st em_event;
@@ -572,7 +723,11 @@ void EM_post_event(sl_sensor_id_en sensor_id,sl_sensorhub_event_en event, void* 
   }
 }
 
-
+/*==============================================*/
+/**
+ *  @fn          void EM_Task(void)
+ *  @brief       Task to handle the operations of the Event Manager(EM)
+ */
 void EM_Task(void)
 {
 
@@ -585,7 +740,7 @@ void EM_Task(void)
       while(1);
   }
 
-  /*Create a recursive Mutex to safe gaurd Event Queue*/
+  /*Create a recursive Mutex to safe guard Event Queue*/
   event_queue_mutex = xSemaphoreCreateRecursiveMutex();
   if (event_queue_mutex == NULL) {
       printf("create event mutex failed");
@@ -629,6 +784,11 @@ void EM_Task(void)
 
 }
 
+/*==============================================*/
+/**
+ *  @fn          void Sensor_Task(void)
+ *  @brief       Task to handle the sensor operations.
+ */
 void Sensor_Task(void)
 {
   sl_event_group = xEventGroupCreate();
@@ -715,10 +875,10 @@ void Sensor_Task(void)
 
 /*==============================================*/
 /**
- * @fn     void ARM_I2C_SignalEvent(uint32_t event)
- * @brief  I2C event handler
- * @param  event I2C transmit and receive events
- * @return None
+ * @fn         void ARM_I2C_SignalEvent(uint32_t event)
+ * @brief      I2C event handler
+ * @param[in]  event I2C transmit and receive events
+ * @return     None
  */
 void ARM_I2C_SignalEvent(uint32_t event)
 {
@@ -745,7 +905,12 @@ void ARM_I2C_SignalEvent(uint32_t event)
   return;
 }
 
-
+/*==============================================*/
+/**
+ *  @fn          uint8_t sl_i2c_Init()
+ *  @brief       Initialize I2C Interface based on configuration
+ *  @return      execution status
+ */
 uint8_t sl_i2c_Init()
 {
   int32_t status = ARM_DRIVER_OK;
@@ -776,6 +941,13 @@ uint8_t sl_i2c_Init()
   return status;
 }
 
+/*==============================================*/
+/**
+ *  @fn          uint8_t i2c_sensors_scan(uint16_t address)
+ *  @brief       Scan the i2c sensors based on the address
+ *  @param[in]   address Sensor address
+ *  @return      execution status
+ */
 uint8_t i2c_sensors_scan(uint16_t address)
 {
   uint8_t a[2]="\0",len=0;
@@ -786,12 +958,6 @@ uint8_t i2c_sensors_scan(uint16_t address)
   I2Cdrv->MasterTransmit(address, a, 1, false);
   while (I2Cdrv->GetStatus().busy)
     ;
-
-  /*TODO:Handle below */
-  //  I2Cdrv->MasterReceive(address, rd_buf, len, false);
-  //  while (I2Cdrv->GetStatus().busy)
-  //    ;
   return RSI_OK;
 }
-
-
+/** @} */

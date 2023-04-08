@@ -88,7 +88,7 @@ extern "C" {
  * */
 STATIC INLINE void RSI_NPSSGPIO_SetPinMux(uint8_t pin, uint8_t mux)
 {
-  MCU_RET->NPSS_GPIO_CNTRL[pin].NPSS_GPIO_CTRLS_b.NPSS_GPIO_MODE = mux;
+  MCU_RET->NPSS_GPIO_CNTRL[pin].NPSS_GPIO_CTRLS_b.NPSS_GPIO_MODE = (unsigned int)(mux & 0x07);
 }
 
 /**
@@ -102,7 +102,7 @@ STATIC INLINE void RSI_NPSSGPIO_SetPinMux(uint8_t pin, uint8_t mux)
  * */
 STATIC INLINE void RSI_NPSSGPIO_InputBufferEn(uint8_t pin, boolean_t enable)
 {
-  MCU_RET->NPSS_GPIO_CNTRL[pin].NPSS_GPIO_CTRLS_b.NPSS_GPIO_REN = enable;
+  MCU_RET->NPSS_GPIO_CNTRL[pin].NPSS_GPIO_CTRLS_b.NPSS_GPIO_REN = (unsigned int)(enable & 0x01);
 }
 
 /**
@@ -115,7 +115,7 @@ STATIC INLINE void RSI_NPSSGPIO_InputBufferEn(uint8_t pin, boolean_t enable)
  * */
 STATIC INLINE void RSI_NPSSGPIO_SetDir(uint8_t pin, boolean_t dir)
 {
-  MCU_RET->NPSS_GPIO_CNTRL[pin].NPSS_GPIO_CTRLS_b.NPSS_GPIO_OEN = dir;
+  MCU_RET->NPSS_GPIO_CNTRL[pin].NPSS_GPIO_CTRLS_b.NPSS_GPIO_OEN = (unsigned int)(dir & 0x01);
 }
 
 /**
@@ -136,7 +136,7 @@ STATIC INLINE boolean_t RSI_NPSSGPIO_GetDir(uint8_t pin)
  */
 STATIC INLINE void RSI_NPSSGPIO_SetPin(uint8_t pin, boolean_t val)
 {
-  MCU_RET->NPSS_GPIO_CNTRL[pin].NPSS_GPIO_CTRLS_b.NPSS_GPIO_OUT = val;
+  MCU_RET->NPSS_GPIO_CNTRL[pin].NPSS_GPIO_CTRLS_b.NPSS_GPIO_OUT = (unsigned int)(val & 0x01);
 }
 
 /**
@@ -159,7 +159,7 @@ STATIC INLINE boolean_t RSI_NPSSGPIO_GetPin(uint8_t pin)
  * */
 STATIC INLINE void RSI_NPSSGPIO_SetPolarity(uint8_t pin, boolean_t level)
 {
-  MCU_RET->NPSS_GPIO_CNTRL[pin].NPSS_GPIO_CTRLS_b.NPSS_GPIO_POLARITY = level;
+  MCU_RET->NPSS_GPIO_CNTRL[pin].NPSS_GPIO_CTRLS_b.NPSS_GPIO_POLARITY = (unsigned int)(level & 0x01);
 }
 
 /**
@@ -219,7 +219,7 @@ STATIC INLINE void RSI_NPSSGPIO_SetIntFallEdgeEnable(uint8_t npssGpioPinIntr)
  */
 STATIC INLINE void RSI_NPSSGPIO_ClrIntFallEdgeEnable(uint8_t npssGpioPinIntr)
 {
-  NPSS_GPIO_CONFIG_REG &= ~(npssGpioPinIntr << 8);
+  NPSS_GPIO_CONFIG_REG &= (uint32_t) (~(npssGpioPinIntr << 8));
 }
 
 /**
@@ -239,7 +239,7 @@ STATIC INLINE void RSI_NPSSGPIO_SetIntRiseEdgeEnable(uint8_t npssGpioPinIntr)
  */
 STATIC INLINE void RSI_NPSSGPIO_ClrIntRiseEdgeEnable(uint8_t npssGpioPinIntr)
 {
-  NPSS_GPIO_CONFIG_REG &= ~(npssGpioPinIntr << 0);
+  NPSS_GPIO_CONFIG_REG &= (uint32_t) (~(npssGpioPinIntr << 0));
 }
 
 /**
@@ -259,7 +259,7 @@ STATIC INLINE void RSI_NPSSGPIO_SetIntLevelHighEnable(uint8_t npssGpioPinIntr)
  */
 STATIC INLINE void RSI_NPSSGPIO_ClrIntLevelHighEnable(uint8_t npssGpioPinIntr)
 {
-  NPSS_GPIO_CONFIG_REG &= ~(npssGpioPinIntr << 24);
+  NPSS_GPIO_CONFIG_REG &= (uint32_t) (~(npssGpioPinIntr << 24));
 }
 
 /**
@@ -279,7 +279,7 @@ STATIC INLINE void RSI_NPSSGPIO_SetIntLevelLowEnable(uint8_t npssGpioPinIntr)
  */
 STATIC INLINE void RSI_NPSSGPIO_ClrIntLevelLowEnable(uint8_t npssGpioPinIntr)
 {
-  NPSS_GPIO_CONFIG_REG &= ~(npssGpioPinIntr << 16);
+  NPSS_GPIO_CONFIG_REG &= (uint32_t) (~(npssGpioPinIntr << 16));
 }
 
 /**

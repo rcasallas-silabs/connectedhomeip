@@ -263,10 +263,10 @@ typedef void *RSI_CT_HANDLE_T;
 /*===================================================*/
 /**
  * @fn            void RSI_CT_Config(RSI_CT_T *pCT, boolean_t cfg)
- * @brief		  This API is used to set the 32bit/ 16bit coutners 
- * @param[in]	  pCT  : Pointer to the CT instance register area
- * @param[in]	  cfg  : if cfg = 0 32bit Counter, cfg = 1 16bit counter
- * @return 		  none
+ * @brief     This API is used to set the 32bit/ 16bit coutners 
+ * @param[in]   pCT  : Pointer to the CT instance register area
+ * @param[in]   cfg  : if cfg = 0 32bit Counter, cfg = 1 16bit counter
+ * @return      none
  */
 STATIC INLINE void RSI_CT_Config(RSI_CT_T *pCT, boolean_t cfg)
 {
@@ -281,23 +281,23 @@ STATIC INLINE void RSI_CT_Config(RSI_CT_T *pCT, boolean_t cfg)
 /*===================================================*/
 /**
  * @fn            void RSI_CT_SetControl(RSI_CT_T *pCT, uint32_t value)
- * @brief		  Programs General control register bit fields
- * @param[in]	  pCT   :  Pointer to the CT instance register area
- * @param[in]	  value :  This parameter can be the logical OR of the below parameters
-						   - \ref COUNTER32_BITMODE    : sets 32bit mode 
-						   - \ref SOFTRESET_COUNTER_0  : Resets coutner 0
-						   - \ref PERIODIC_ENCOUNTER_0 : sets periodic mode
-						   - \ref COUNTER0_TRIG        : starts counter 0
-						   - \ref COUNTER0_UP_DOWN     : Counter 0 direction (0,1,2,3)
-					       - \ref COUNTER0_SYNC_TRIG   : This enables the counter 0 to run/active when sync is found.
-						   - \ref BUF_REG0EN		   : Buffer will be enabled and in path for Counter 0
-						   - \ref SOFTRESET_COUNTER_1  : Resets Counter 1
-						   - \ref PERIODIC_ENCOUNTER_1 : sets periodic mode
-					       - \ref COUNTER1_TRIG        : starts counter 1
-						   - \ref COUNTER1_UP_DOWN     : Counter 1 direction (0,1,2,3)
-						   - \ref COUNTER1_SYNC_TRIG   : This enables the counter 1 to run/active when sync is found.
-						   - \ref BUF_REG1EN		   : Buffer will be enabled and in path for counter 1.										
- * @return 		  none
+ * @brief     Programs General control register bit fields
+ * @param[in]   pCT   :  Pointer to the CT instance register area
+ * @param[in]   value :  This parameter can be the logical OR of the below parameters
+               - \ref COUNTER32_BITMODE    : sets 32bit mode 
+               - \ref SOFTRESET_COUNTER_0  : Resets coutner 0
+               - \ref PERIODIC_ENCOUNTER_0 : sets periodic mode
+               - \ref COUNTER0_TRIG        : starts counter 0
+               - \ref COUNTER0_UP_DOWN     : Counter 0 direction (0,1,2,3)
+                 - \ref COUNTER0_SYNC_TRIG   : This enables the counter 0 to run/active when sync is found.
+               - \ref BUF_REG0EN       : Buffer will be enabled and in path for Counter 0
+               - \ref SOFTRESET_COUNTER_1  : Resets Counter 1
+               - \ref PERIODIC_ENCOUNTER_1 : sets periodic mode
+                 - \ref COUNTER1_TRIG        : starts counter 1
+               - \ref COUNTER1_UP_DOWN     : Counter 1 direction (0,1,2,3)
+               - \ref COUNTER1_SYNC_TRIG   : This enables the counter 1 to run/active when sync is found.
+               - \ref BUF_REG1EN       : Buffer will be enabled and in path for counter 1.                    
+ * @return      none
 */
 STATIC INLINE void RSI_CT_SetControl(RSI_CT_T *pCT, uint32_t value)
 {
@@ -308,17 +308,17 @@ STATIC INLINE void RSI_CT_SetControl(RSI_CT_T *pCT, uint32_t value)
 /*===================================================*/
 /**
  * @fn            void RSI_CT_ClearControl(RSI_CT_T *pCT, uint32_t value)
- * @brief		  This API is used to Reset the required control bits in general control set register
- * @param[in]	  pCT    : Pointer to the CT instance register area
- * @param[in]	  value  : This parameter can be the logical OR of the required bit ,fields in CT Reset Control register as below.
-						 - \ref COUNTER32_BITMODE 	 : Sets 16bit mode 
-						 - \ref PERIODIC_ENCOUNTER_0 : Sets Counter_0 will be in single count mode.
-						 - \ref COUNTER0_UP_DOWN     : counter 0 to run in up/down/up-down/down-up directions (0,1,2,3)
-						 - \ref BUF_REG0EN			 : Buffer will be disabled and in path and in path for Counter 0
-						 - \ref PERIODIC_ENCOUNTER_1 : sets Counter 1 will be in single count mode
-						 - \ref COUNTER1_UP_DOWN     : Counter 1 to run in up/down/up-down/down-up directions(0,1,2,3)
-						 - \ref BUF_REG1EN			 : Buffer will be disabled and in path for counter 1.		
- * @return 		  none 
+ * @brief     This API is used to Reset the required control bits in general control set register
+ * @param[in]   pCT    : Pointer to the CT instance register area
+ * @param[in]   value  : This parameter can be the logical OR of the required bit ,fields in CT Reset Control register as below.
+             - \ref COUNTER32_BITMODE    : Sets 16bit mode 
+             - \ref PERIODIC_ENCOUNTER_0 : Sets Counter_0 will be in single count mode.
+             - \ref COUNTER0_UP_DOWN     : counter 0 to run in up/down/up-down/down-up directions (0,1,2,3)
+             - \ref BUF_REG0EN       : Buffer will be disabled and in path and in path for Counter 0
+             - \ref PERIODIC_ENCOUNTER_1 : sets Counter 1 will be in single count mode
+             - \ref COUNTER1_UP_DOWN     : Counter 1 to run in up/down/up-down/down-up directions(0,1,2,3)
+             - \ref BUF_REG1EN       : Buffer will be disabled and in path for counter 1.   
+ * @return      none 
  */
 STATIC INLINE void RSI_CT_ClearControl(RSI_CT_T *pCT, uint32_t value)
 {
@@ -329,12 +329,12 @@ STATIC INLINE void RSI_CT_ClearControl(RSI_CT_T *pCT, uint32_t value)
 /*===================================================*/
 /**
  * @fn            void RSI_CT_StartEventSelect(RSI_CT_T *pCT,uint32_t value)
- * @brief		  This API is used to select the input event to start any counter
- * @param[in]	  pCT    : Pointer to the CT instance register area
- * @param[in]	  value  : ORed value of Events for counter0 and counter1
-						 \n This parameter can be the logical OR of the event number for counter 0 and counter 1
-						 \n possible event numbers are 1 to 38 if 0 : No event is selected
- * @return 		  none
+ * @brief     This API is used to select the input event to start any counter
+ * @param[in]   pCT    : Pointer to the CT instance register area
+ * @param[in]   value  : ORed value of Events for counter0 and counter1
+             \n This parameter can be the logical OR of the event number for counter 0 and counter 1
+             \n possible event numbers are 1 to 38 if 0 : No event is selected
+ * @return      none
  */
 STATIC INLINE void RSI_CT_StartEventSelect(RSI_CT_T *pCT, uint32_t value)
 {
@@ -343,28 +343,28 @@ STATIC INLINE void RSI_CT_StartEventSelect(RSI_CT_T *pCT, uint32_t value)
 
 /*===================================================*/
 /**
- * @fn            void RSI_CT_StartEventConfig(RSI_CT_T *pCT,uint32_t andValue,uint32_t orValue)	
- * @brief		  This API is used to Configure AND/OR event for start counter operation
- * @param[in]	  pCT      : Pointer to the CT instance register area
- * @param[in]	  andValue : This parameter can be the logical OR of the below parameters.
-							 -  START_COUNTER_0_AND_EVENT : AND expression for AND event in start Counter_0 event, 
-															possible values are 0x0 to 0xF.
-							 -  START_COUNTER_0_AND_VLD   : Indicates which bits valid for considering AND event,
-															possible values are 0x0 to 0xF.
-							 -  START_COUNTER_1_AND_EVENT : AND expression for AND event in start Counter_1 event, 
-															possible values are 0x0 to 0xF.
-							 -  START_COUNTER_1_AND_VLD   : Indicates which bits valid for considering AND event,
-															possible values are 0x0 to 0xF. 
+ * @fn            void RSI_CT_StartEventConfig(RSI_CT_T *pCT,uint32_t andValue,uint32_t orValue)  
+ * @brief     This API is used to Configure AND/OR event for start counter operation
+ * @param[in]   pCT      : Pointer to the CT instance register area
+ * @param[in]   andValue : This parameter can be the logical OR of the below parameters.
+               -  START_COUNTER_0_AND_EVENT : AND expression for AND event in start Counter_0 event, 
+                              possible values are 0x0 to 0xF.
+               -  START_COUNTER_0_AND_VLD   : Indicates which bits valid for considering AND event,
+                              possible values are 0x0 to 0xF.
+               -  START_COUNTER_1_AND_EVENT : AND expression for AND event in start Counter_1 event, 
+                              possible values are 0x0 to 0xF.
+               -  START_COUNTER_1_AND_VLD   : Indicates which bits valid for considering AND event,
+                              possible values are 0x0 to 0xF. 
  * @param[in]   orValue  : This parameter can be the logical OR of the below parameters
-						  -  START_COUNTER_0_OR_EVENT : OR expression for OR event in start Counter_0 event, 
-													    possible values are 0x0 to 0xF.
-						  -  START_COUNTER_0_OR_VLD   : Indicates which bits valid for considering OR event,
-													    possible values are 0x0 to 0xF.	
-						  -  START_COUNTER_1_OR_EVENT : OR expression for OR event in start Counter_1 event, 
-													    possible values are 0x0 to 0xF.
-						  -  START_COUNTER_1_OR_VLD   : Indicates which bits valid for considering OR event,
-													    possible values are 0x0 to 0xF.	
- * @return 		  none
+              -  START_COUNTER_0_OR_EVENT : OR expression for OR event in start Counter_0 event, 
+                              possible values are 0x0 to 0xF.
+              -  START_COUNTER_0_OR_VLD   : Indicates which bits valid for considering OR event,
+                              possible values are 0x0 to 0xF. 
+              -  START_COUNTER_1_OR_EVENT : OR expression for OR event in start Counter_1 event, 
+                              possible values are 0x0 to 0xF.
+              -  START_COUNTER_1_OR_VLD   : Indicates which bits valid for considering OR event,
+                              possible values are 0x0 to 0xF. 
+ * @return      none
  */
 STATIC INLINE void RSI_CT_StartEventConfig(RSI_CT_T *pCT, uint32_t andValue, uint32_t orValue)
 {
@@ -377,27 +377,27 @@ STATIC INLINE void RSI_CT_StartEventConfig(RSI_CT_T *pCT, uint32_t andValue, uin
 /*===================================================*/
 /**
  * @fn            void RSI_CT_StopEventConfig(RSI_CT_T *pCT,uint32_t andValue,uint32_t orValue)
- * @brief		  This API is used to Configure AND/OR event for stop counter operation
- * @param[in]	  pCT      :  Pointer to the CT instance register area
- * @param[in]	  andValue :  Stop Counter AND Event register value, this parameter can be the logical OR of the 
-							  -  STOP_COUNTER_0_AND_EVENT : AND expression for AND event in stop Counter_0 event,
-															possible values are 0x0 to 0xF,
-							  -  STOP_COUNTER_0_AND_VLD   : Indicates which bits valid for considering AND event,
-															possible values are 0x0 to 0xF	
-							  -  STOP_COUNTER_1_AND_EVENT : AND expression for AND event in stop Counter_1 event,
-															possible values are 0x0 to 0xF,
-							  -  STOP_COUNTER_1_AND_VLD   : Indicates which bits valid for considering AND event,
-															possible values are 0x0 to 0xF
+ * @brief     This API is used to Configure AND/OR event for stop counter operation
+ * @param[in]   pCT      :  Pointer to the CT instance register area
+ * @param[in]   andValue :  Stop Counter AND Event register value, this parameter can be the logical OR of the 
+                -  STOP_COUNTER_0_AND_EVENT : AND expression for AND event in stop Counter_0 event,
+                              possible values are 0x0 to 0xF,
+                -  STOP_COUNTER_0_AND_VLD   : Indicates which bits valid for considering AND event,
+                              possible values are 0x0 to 0xF  
+                -  STOP_COUNTER_1_AND_EVENT : AND expression for AND event in stop Counter_1 event,
+                              possible values are 0x0 to 0xF,
+                -  STOP_COUNTER_1_AND_VLD   : Indicates which bits valid for considering AND event,
+                              possible values are 0x0 to 0xF
  * @param[in]   orValue  :  Stop Counter OR Event register value,this parameter can be the logical OR of the 
-							  -  STOP_COUNTER_0_OR_EVENT : OR expression for OR event in stop Counter_0 event,
-														   possible values are 0x0 to 0xF,
-							  -  STOP_COUNTER_0_OR_VLD   : Indicates which bits valid for considering OR event,
-														   possible values are 0x0 to 0xF
-							  -  STOP_COUNTER_1_OR_EVENT : OR expression for OR event in stop Counter_1 event,
-														   possible values are 0x0 to 0xF,
-							  -  STOP_COUNTER_1_OR_VLD   : Indicates which bits valid for considering OR event,
-														   possible values are 0x0 to 0xF
- * @return 		  none
+                -  STOP_COUNTER_0_OR_EVENT : OR expression for OR event in stop Counter_0 event,
+                               possible values are 0x0 to 0xF,
+                -  STOP_COUNTER_0_OR_VLD   : Indicates which bits valid for considering OR event,
+                               possible values are 0x0 to 0xF
+                -  STOP_COUNTER_1_OR_EVENT : OR expression for OR event in stop Counter_1 event,
+                               possible values are 0x0 to 0xF,
+                -  STOP_COUNTER_1_OR_VLD   : Indicates which bits valid for considering OR event,
+                               possible values are 0x0 to 0xF
+ * @return      none
  */
 STATIC INLINE void RSI_CT_StopEventConfig(RSI_CT_T *pCT, uint32_t andValue, uint32_t orValue)
 {
@@ -409,28 +409,28 @@ STATIC INLINE void RSI_CT_StopEventConfig(RSI_CT_T *pCT, uint32_t andValue, uint
 
 /*===================================================*/
 /**
- * @fn            void RSI_CT_ContinueEventConfig(RSI_CT_T *pCT,uint32_t andValue,uint32_t orValue)	
- * @brief		  This API is used to Configure AND/OR event for Continue operation
- * @param[in]	  pCT      : Pointer to the CT instance register area
- * @param[in]	  andValue : Continue Counter AND Event register value,this parameter can be the logical OR of the 
-							  -  CONTINUE_COUNTER_0_AND_EVENT : AND expression for AND event in continue Counter_0 event,
-																possible values are 0x0 to 0xF,
-							  -  CONTINUE_COUNTER_0_AND_VLD   : Indicates which bits valid for considering AND event,
-																 possible values are 0x0 to 0xF
-							  -  CONTINUE_COUNTER_1_AND_EVENT : AND expression for AND event in continue Counter_1 event,
-																possible values are 0x0 to 0xF,
-							  -  CONTINUE_COUNTER_1_AND_VLD   : Indicates which bits valid for considering AND event,
-																possible values are 0x0 to 0xF
+ * @fn            void RSI_CT_ContinueEventConfig(RSI_CT_T *pCT,uint32_t andValue,uint32_t orValue) 
+ * @brief     This API is used to Configure AND/OR event for Continue operation
+ * @param[in]   pCT      : Pointer to the CT instance register area
+ * @param[in]   andValue : Continue Counter AND Event register value,this parameter can be the logical OR of the 
+                -  CONTINUE_COUNTER_0_AND_EVENT : AND expression for AND event in continue Counter_0 event,
+                                possible values are 0x0 to 0xF,
+                -  CONTINUE_COUNTER_0_AND_VLD   : Indicates which bits valid for considering AND event,
+                                 possible values are 0x0 to 0xF
+                -  CONTINUE_COUNTER_1_AND_EVENT : AND expression for AND event in continue Counter_1 event,
+                                possible values are 0x0 to 0xF,
+                -  CONTINUE_COUNTER_1_AND_VLD   : Indicates which bits valid for considering AND event,
+                                possible values are 0x0 to 0xF
  * @param[in]   orValue  :  Continue Counter OR Event register value,this parameter can be the logical OR of the 
-						  -  CONTINUE_COUNTER_0_OR_EVENT : OR expression for OR event in continue Counter_0 event,
-														   possible values are 0x0 to 0xF,
-						  -  CONTINUE_COUNTER_0_OR_VLD   : Indicates which bits valid for considering OR event,
-														   possible values are 0x0 to 0xF
-						  -  CONTINUE_COUNTER_1_OR_EVENT : OR expression for OR event in continue Counter_1 event,
-														   possible values are 0x0 to 0xF,
-						  -  CONTINUE_COUNTER_1_OR_VLD   : Indicates which bits valid for considering OR event,
-														   possible values are 0x0 to 0xF
- * @return 		  none
+              -  CONTINUE_COUNTER_0_OR_EVENT : OR expression for OR event in continue Counter_0 event,
+                               possible values are 0x0 to 0xF,
+              -  CONTINUE_COUNTER_0_OR_VLD   : Indicates which bits valid for considering OR event,
+                               possible values are 0x0 to 0xF
+              -  CONTINUE_COUNTER_1_OR_EVENT : OR expression for OR event in continue Counter_1 event,
+                               possible values are 0x0 to 0xF,
+              -  CONTINUE_COUNTER_1_OR_VLD   : Indicates which bits valid for considering OR event,
+                               possible values are 0x0 to 0xF
+ * @return      none
  */
 STATIC INLINE void RSI_CT_ContinueEventConfig(RSI_CT_T *pCT, uint32_t andValue, uint32_t orValue)
 {
@@ -442,29 +442,29 @@ STATIC INLINE void RSI_CT_ContinueEventConfig(RSI_CT_T *pCT, uint32_t andValue, 
 
 /*===================================================*/
 /**
- * @fn            void RSI_CT_HaltEventConfig(RSI_CT_T *pCT,uint32_t andValue,uint32_t orValue)	
- * @brief		  This API is used to Configure AND/OR event for Halt operation
- * @param[in]	  pCT      : Pointer to the CT instance register area
- * @param[in]	  andValue :  Halt Counter AND Event register value,This parameter can be the logical OR of the 
-							  -  HALT_COUNTER_0_AND_EVENT : AND expression for AND event in halt Counter_0 event,
-														    possible values are 0x0 to 0xF,
-							  -  HALT_COUNTER_0_AND_VLD   : Indicates which bits valid for considering AND event,
-														    possible values are 0x0 to 0xF
-							  -  HALT_COUNTER_1_AND_EVENT : AND expression for AND event in halt Counter_1 event,
-														    possible values are 0x0 to 0xF,
-							  -  HALT_COUNTER_1_AND_VLD   : Indicates which bits valid for considering AND event,
-															possible values are 0x0 to 0xF	
+ * @fn            void RSI_CT_HaltEventConfig(RSI_CT_T *pCT,uint32_t andValue,uint32_t orValue) 
+ * @brief     This API is used to Configure AND/OR event for Halt operation
+ * @param[in]   pCT      : Pointer to the CT instance register area
+ * @param[in]   andValue :  Halt Counter AND Event register value,This parameter can be the logical OR of the 
+                -  HALT_COUNTER_0_AND_EVENT : AND expression for AND event in halt Counter_0 event,
+                                possible values are 0x0 to 0xF,
+                -  HALT_COUNTER_0_AND_VLD   : Indicates which bits valid for considering AND event,
+                                possible values are 0x0 to 0xF
+                -  HALT_COUNTER_1_AND_EVENT : AND expression for AND event in halt Counter_1 event,
+                                possible values are 0x0 to 0xF,
+                -  HALT_COUNTER_1_AND_VLD   : Indicates which bits valid for considering AND event,
+                              possible values are 0x0 to 0xF  
  * @param[in]   orValue  :  Halt Counter OR Event register value
-							 \n This parameter can be the logical OR of the 
-						  -  HALT_COUNTER_0_OR_EVENT : OR expression for OR event in halt Counter_0 event,
-													   possible values are 0x0 to 0xF,
-						  -  HALT_COUNTER_0_OR_VLD   : Indicates which bits valid for considering OR event,
-													   possible values are 0x0 to 0xF
-						  -  HALT_COUNTER_1_OR_EVENT : OR expression for OR event in halt Counter_1 event,
-													   possible values are 0x0 to 0xF,
-						  -  HALT_COUNTER_1_OR_VLD   : Indicates which bits valid for considering OR event,
-													   possible values are 0x0 to 0xF
- * @return 		  none
+               \n This parameter can be the logical OR of the 
+              -  HALT_COUNTER_0_OR_EVENT : OR expression for OR event in halt Counter_0 event,
+                             possible values are 0x0 to 0xF,
+              -  HALT_COUNTER_0_OR_VLD   : Indicates which bits valid for considering OR event,
+                             possible values are 0x0 to 0xF
+              -  HALT_COUNTER_1_OR_EVENT : OR expression for OR event in halt Counter_1 event,
+                             possible values are 0x0 to 0xF,
+              -  HALT_COUNTER_1_OR_VLD   : Indicates which bits valid for considering OR event,
+                             possible values are 0x0 to 0xF
+ * @return      none
  */
 STATIC INLINE void RSI_CT_HaltEventConfig(RSI_CT_T *pCT, uint32_t andValue, uint32_t orValue)
 {
@@ -476,28 +476,28 @@ STATIC INLINE void RSI_CT_HaltEventConfig(RSI_CT_T *pCT, uint32_t andValue, uint
 
 /*===================================================*/
 /**
- * @fn   		  void RSI_CT_IncrementEventConfig(RSI_CT_T *pCT,uint32_t andValue, uint32_t orValue)
- * @brief		  This API is used to Configure AND/OR event for increment operation
- * @param[in]	  pCT      : Pointer to the CT instance register area
- * @param[in]	  andValue : Increment Counter AND Event register value,this parameter can be the logical OR of the 
-							 -  INCREMENT_COUNTER_0_AND_EVENT : AND expression for AND event in increment Counter_0 event,
-															    possible values are 0x0 to 0xF,
-							 -  INCREMENT_COUNTER_0_AND_VLD   : Indicates which bits valid for considering AND event,
-																possible values are 0x0 to 0xF
-							 -  INCREMENT_COUNTER_1_AND_EVENT : AND expression for AND event in increment Counter_1 event,
-																possible values are 0x0 to 0xF,
-							 -  INCREMENT_COUNTER_1_AND_VLD   : Indicates which bits valid for considering AND event,
-																possible values are 0x0 to 0xF
+ * @fn        void RSI_CT_IncrementEventConfig(RSI_CT_T *pCT,uint32_t andValue, uint32_t orValue)
+ * @brief     This API is used to Configure AND/OR event for increment operation
+ * @param[in]   pCT      : Pointer to the CT instance register area
+ * @param[in]   andValue : Increment Counter AND Event register value,this parameter can be the logical OR of the 
+               -  INCREMENT_COUNTER_0_AND_EVENT : AND expression for AND event in increment Counter_0 event,
+                                  possible values are 0x0 to 0xF,
+               -  INCREMENT_COUNTER_0_AND_VLD   : Indicates which bits valid for considering AND event,
+                                possible values are 0x0 to 0xF
+               -  INCREMENT_COUNTER_1_AND_EVENT : AND expression for AND event in increment Counter_1 event,
+                                possible values are 0x0 to 0xF,
+               -  INCREMENT_COUNTER_1_AND_VLD   : Indicates which bits valid for considering AND event,
+                                possible values are 0x0 to 0xF
  * @param[in]   orValue  :  Increment Counter OR Event register value,this parameter can be the logical OR of the 
-							 -  INCREMENT_COUNTER_0_OR_EVENT :  OR expression for OR event in increment Counter_0 event,
-																possible values are 0x0 to 0xF,
-							 -  INCREMENT_COUNTER_0_OR_VLD   :  Indicates which bits valid for considering OR event,
-																possible values are 0x0 to 0xF
-							 -  INCREMENT_COUNTER_1_OR_EVENT :  OR expression for OR event in increment Counter_1 event,
-																possible values are 0x0 to 0xF,
-							 -  INCREMENT_COUNTER_1_OR_VLD   :  Indicates which bits valid for considering OR event,
-															    possible values are 0x0 to 0xF,
- * @return 		  none
+               -  INCREMENT_COUNTER_0_OR_EVENT :  OR expression for OR event in increment Counter_0 event,
+                                possible values are 0x0 to 0xF,
+               -  INCREMENT_COUNTER_0_OR_VLD   :  Indicates which bits valid for considering OR event,
+                                possible values are 0x0 to 0xF
+               -  INCREMENT_COUNTER_1_OR_EVENT :  OR expression for OR event in increment Counter_1 event,
+                                possible values are 0x0 to 0xF,
+               -  INCREMENT_COUNTER_1_OR_VLD   :  Indicates which bits valid for considering OR event,
+                                  possible values are 0x0 to 0xF,
+ * @return      none
  */
 STATIC INLINE void RSI_CT_IncrementEventConfig(RSI_CT_T *pCT, uint32_t andValue, uint32_t orValue)
 {
@@ -510,27 +510,27 @@ STATIC INLINE void RSI_CT_IncrementEventConfig(RSI_CT_T *pCT, uint32_t andValue,
 /*===================================================*/
 /**
  * @fn            void RSI_CT_CaptureEventConfig(RSI_CT_T *pCT,uint32_t andValue,uint32_t orValue)
- * @brief		  This API is used to Configure AND/OR event for capture operation
- * @param[in]	  pCT      : Pointer to the CT instance register area
- * @param[in]	  andValue : Capture Counter AND Event register value,This parameter can be the logical OR of the 
-							  -  CAPTURE_COUNTER_0_AND_EVENT : AND expression for AND event in capture Counter_0 event,
-															   possible values are 0x0 to 0xF,
-							  -  CAPTURE_COUNTER_0_AND_VLD   : Indicates which bits valid for considering AND event,
-															   possible values are 0x0 to 0xF
-							  -  CAPTURE_COUNTER_1_AND_EVENT : AND expression for AND event in capture Counter_1 event,
-															   possible values are 0x0 to 0xF,
-							  -  CAPTURE_COUNTER_1_AND_VLD   : Indicates which bits valid for considering AND event,
-															   possible values are 0x0 to 0xF
+ * @brief     This API is used to Configure AND/OR event for capture operation
+ * @param[in]   pCT      : Pointer to the CT instance register area
+ * @param[in]   andValue : Capture Counter AND Event register value,This parameter can be the logical OR of the 
+                -  CAPTURE_COUNTER_0_AND_EVENT : AND expression for AND event in capture Counter_0 event,
+                                 possible values are 0x0 to 0xF,
+                -  CAPTURE_COUNTER_0_AND_VLD   : Indicates which bits valid for considering AND event,
+                                 possible values are 0x0 to 0xF
+                -  CAPTURE_COUNTER_1_AND_EVENT : AND expression for AND event in capture Counter_1 event,
+                                 possible values are 0x0 to 0xF,
+                -  CAPTURE_COUNTER_1_AND_VLD   : Indicates which bits valid for considering AND event,
+                                 possible values are 0x0 to 0xF
  * @param[in]   orValue  :  Capture Counter OR Event register value,This parameter can be the logical OR of the 
-						  -  CAPTURE_COUNTER_0_OR_EVENT : OR expression for OR event in capture Counter_0 event,
-														  possible values are 0x0 to 0xF,
-						  -  CAPTURE_COUNTER_0_OR_VLD   : Indicates which bits valid for considering OR event,
-														  possible values are 0x0 to 0xF
-						  -  CAPTURE_COUNTER_1_OR_EVENT : OR expression for OR event in capture Counter_1 event,
-														  possible values are 0x0 to 0xF,
-						  -  CAPTURE_COUNTER_1_OR_VLD   : Indicates which bits valid for considering OR event,
-														  possible values are 0x0 to 0xF
- * @return 		  none
+              -  CAPTURE_COUNTER_0_OR_EVENT : OR expression for OR event in capture Counter_0 event,
+                              possible values are 0x0 to 0xF,
+              -  CAPTURE_COUNTER_0_OR_VLD   : Indicates which bits valid for considering OR event,
+                              possible values are 0x0 to 0xF
+              -  CAPTURE_COUNTER_1_OR_EVENT : OR expression for OR event in capture Counter_1 event,
+                              possible values are 0x0 to 0xF,
+              -  CAPTURE_COUNTER_1_OR_VLD   : Indicates which bits valid for considering OR event,
+                              possible values are 0x0 to 0xF
+ * @return      none
 */
 STATIC INLINE void RSI_CT_CaptureEventConfig(RSI_CT_T *pCT, uint32_t andValue, uint32_t orValue)
 {
@@ -544,27 +544,27 @@ STATIC INLINE void RSI_CT_CaptureEventConfig(RSI_CT_T *pCT, uint32_t andValue, u
 /*===================================================*/
 /**
  * @fn            void RSI_CT_InterruptEventConfig(RSI_CT_T *pCT,uint32_t andValue,uint32_t orValue)
- * @brief		  This API is used to Configure AND/OR event for interrupt operation.
- * @param[in]	  pCT      :  Pointer to the CT instance register area
- * @param[in]	  andValue :  Interrupt Counter AND Event register value,this parameter can be the logical OR of the 
-							  -  INTR_COUNTER_0_AND_EVENT : AND expression for AND event in interrupt Counter_0 event,
-															possible values are 0x0 to 0xF,
-							  -  INTR_COUNTER_0_AND_VLD   : Indicates which bits valid for considering AND event,
-															possible values are 0x0 to 0xF
-							  -  INTR_COUNTER_1_AND_EVENT : AND expression for AND event in capture Counter_1 event,
-															possible values are 0x0 to 0xF,
-							  -  INTR_COUNTER_1_AND_VLD   : Indicates which bits valid for considering AND event,
-															possible values are 0x0 to 0xF
+ * @brief     This API is used to Configure AND/OR event for interrupt operation.
+ * @param[in]   pCT      :  Pointer to the CT instance register area
+ * @param[in]   andValue :  Interrupt Counter AND Event register value,this parameter can be the logical OR of the 
+                -  INTR_COUNTER_0_AND_EVENT : AND expression for AND event in interrupt Counter_0 event,
+                              possible values are 0x0 to 0xF,
+                -  INTR_COUNTER_0_AND_VLD   : Indicates which bits valid for considering AND event,
+                              possible values are 0x0 to 0xF
+                -  INTR_COUNTER_1_AND_EVENT : AND expression for AND event in capture Counter_1 event,
+                              possible values are 0x0 to 0xF,
+                -  INTR_COUNTER_1_AND_VLD   : Indicates which bits valid for considering AND event,
+                              possible values are 0x0 to 0xF
  * @param[in]   orValue  :  Capture Counter OR Event register value,this parameter can be the logical OR of the 
-							  -  CAPTURE_COUNTER_0_OR_EVENT : OR expression for OR event in interrupt Counter_0 event,
-															  possible values are 0x0 to 0xF,
-							  -  CAPTURE_COUNTER_0_OR_VLD   : Indicates which bits valid for considering OR event,
-															  possible values are 0x0 to 0xF
-							  -  CAPTURE_COUNTER_1_OR_EVENT : OR expression for OR event in interrupt Counter_1 event,
-															  possible values are 0x0 to 0xF,
-							  -  CAPTURE_COUNTER_1_OR_VLD   : Indicates which bits valid for considering OR event,
-															  possible values are 0x0 to 0xF
- * @return 		  none
+                -  CAPTURE_COUNTER_0_OR_EVENT : OR expression for OR event in interrupt Counter_0 event,
+                                possible values are 0x0 to 0xF,
+                -  CAPTURE_COUNTER_0_OR_VLD   : Indicates which bits valid for considering OR event,
+                                possible values are 0x0 to 0xF
+                -  CAPTURE_COUNTER_1_OR_EVENT : OR expression for OR event in interrupt Counter_1 event,
+                                possible values are 0x0 to 0xF,
+                -  CAPTURE_COUNTER_1_OR_VLD   : Indicates which bits valid for considering OR event,
+                                possible values are 0x0 to 0xF
+ * @return      none
  */
 STATIC INLINE void RSI_CT_InterruptEventConfig(RSI_CT_T *pCT, uint32_t andValue, uint32_t orValue)
 {
@@ -577,27 +577,27 @@ STATIC INLINE void RSI_CT_InterruptEventConfig(RSI_CT_T *pCT, uint32_t andValue,
 /*===================================================*/
 /**
  * @fn            void RSI_CT_OutputEventConfig( RSI_CT_T *pCT,uint32_t andValue,uint32_t orValue)
- * @brief		  This API is used to Configure AND/OR event for output operation.
+ * @brief     This API is used to Configure AND/OR event for output operation.
  * @param[in]     pCT   Pointer to the CT instance register area
- * @param[in]	  andValue : Output Counter AND Event register value,this parameter can be the logical OR of the 
-							 -  OUTPUT_COUNTER_0_AND_EVENT : AND expression for AND event in output Counter_0 event,
-															 possible values are 0x0 to 0xF,
-							 -  OUTPUT_COUNTER_0_AND_VLD   : Indicates which bits valid for considering AND event,
-															 possible values are 0x0 to 0xF
-							 -  OUTPUT_COUNTER_1_AND_EVENT : AND expression for AND event in output Counter_1 event,
-															 possible values are 0x0 to 0xF,
-							 -  OUTPUT_COUNTER_1_AND_VLD   : Indicates which bits valid for considering AND event,
-														     possible values are 0x0 to 0xF
+ * @param[in]   andValue : Output Counter AND Event register value,this parameter can be the logical OR of the 
+               -  OUTPUT_COUNTER_0_AND_EVENT : AND expression for AND event in output Counter_0 event,
+                               possible values are 0x0 to 0xF,
+               -  OUTPUT_COUNTER_0_AND_VLD   : Indicates which bits valid for considering AND event,
+                               possible values are 0x0 to 0xF
+               -  OUTPUT_COUNTER_1_AND_EVENT : AND expression for AND event in output Counter_1 event,
+                               possible values are 0x0 to 0xF,
+               -  OUTPUT_COUNTER_1_AND_VLD   : Indicates which bits valid for considering AND event,
+                                 possible values are 0x0 to 0xF
  * @param[in]   orValue  : Output Counter OR Event register value,this parameter can be the logical OR of the 
-							 -  OUTPUT_COUNTER_0_OR_EVENT : OR expression for OR event in output Counter_0 event,
-															possible values are 0x0 to 0xF,
-							 -  OUTPUT_COUNTER_0_OR_VLD   : Indicates which bits valid for considering OR event,
-														    possible values are 0x0 to 0xF
-							 -  OUTPUT_COUNTER_1_OR_EVENT : OR expression for OR event in output Counter_1 event,
-														    possible values are 0x0 to 0xF,
-							 -  OUTPUT_COUNTER_1_OR_VLD   : Indicates which bits valid for considering OR event,
-														    possible values are 0x0 to 0xF
- * @return 		  none
+               -  OUTPUT_COUNTER_0_OR_EVENT : OR expression for OR event in output Counter_0 event,
+                              possible values are 0x0 to 0xF,
+               -  OUTPUT_COUNTER_0_OR_VLD   : Indicates which bits valid for considering OR event,
+                                possible values are 0x0 to 0xF
+               -  OUTPUT_COUNTER_1_OR_EVENT : OR expression for OR event in output Counter_1 event,
+                                possible values are 0x0 to 0xF,
+               -  OUTPUT_COUNTER_1_OR_VLD   : Indicates which bits valid for considering OR event,
+                                possible values are 0x0 to 0xF
+ * @return      none
  */
 STATIC INLINE void RSI_CT_OutputEventConfig(RSI_CT_T *pCT, uint32_t andValue, uint32_t orValue)
 {
@@ -608,14 +608,14 @@ STATIC INLINE void RSI_CT_OutputEventConfig(RSI_CT_T *pCT, uint32_t andValue, ui
 }
 /*===================================================*/
 /**
- * @fn			  void RSI_CT_StopEventSelect(RSI_CT_T *pCT,uint32_t value)
- * @brief		  This API is used to select the input event to stop counter
- * @param[in]	  pCT   :  Pointer to the CT instance register area
- * @param[in]	  value :  Stop Event select register value,this parameter can be the logical OR of the 
-						  -  STOP_EVENT_SEL_0 :event number for counter 0 
-						  -  STOP_EVENT_SEL_1 :event number for counter 1
-						  -  possible event numbers are 1 to 38 if 0 : No event is selected
- * @return 		  none
+ * @fn        void RSI_CT_StopEventSelect(RSI_CT_T *pCT,uint32_t value)
+ * @brief     This API is used to select the input event to stop counter
+ * @param[in]   pCT   :  Pointer to the CT instance register area
+ * @param[in]   value :  Stop Event select register value,this parameter can be the logical OR of the 
+              -  STOP_EVENT_SEL_0 :event number for counter 0 
+              -  STOP_EVENT_SEL_1 :event number for counter 1
+              -  possible event numbers are 1 to 38 if 0 : No event is selected
+ * @return      none
  */
 STATIC INLINE void RSI_CT_StopEventSelect(RSI_CT_T *pCT, uint32_t value)
 {
@@ -625,14 +625,14 @@ STATIC INLINE void RSI_CT_StopEventSelect(RSI_CT_T *pCT, uint32_t value)
 
 /*===================================================*/
 /**
- * @fn            void RSI_CT_ContinueEventSelect(RSI_CT_T *pCT,uint32_t value)	
- * @brief		  Configures event for Continue operation of Counter
- * @param[in]	  pCT    : Pointer to the CT instance register area
- * @param[in]	  value  : Continue Event select register value,this parameter can be the logical OR of the 
-						  -  CONTINUE_EVENT_SEL_0 :event number for counter 0 
-						  -  CONTINUE_EVENT_SEL_1 :event number for counter 1
-						  -  possible event numbers are 1 to 38 if 0 : No event is selected
- * @return 		  none
+ * @fn            void RSI_CT_ContinueEventSelect(RSI_CT_T *pCT,uint32_t value) 
+ * @brief     Configures event for Continue operation of Counter
+ * @param[in]   pCT    : Pointer to the CT instance register area
+ * @param[in]   value  : Continue Event select register value,this parameter can be the logical OR of the 
+              -  CONTINUE_EVENT_SEL_0 :event number for counter 0 
+              -  CONTINUE_EVENT_SEL_1 :event number for counter 1
+              -  possible event numbers are 1 to 38 if 0 : No event is selected
+ * @return      none
  */
 STATIC INLINE void RSI_CT_ContinueEventSelect(RSI_CT_T *pCT, uint32_t value)
 {
@@ -642,14 +642,14 @@ STATIC INLINE void RSI_CT_ContinueEventSelect(RSI_CT_T *pCT, uint32_t value)
 
 /*===================================================*/
 /**
- * @fn            void RSI_CT_HaltEventSelect(RSI_CT_T *pCT,uint32_t value)	
- * @brief		  Configures event for HALT operation of Counter
- * @param[in]	  pCT    :  Pointer to the CT instance register area
- * @param[in]	  value  :  Halt Event select register value,this parameter can be the logical OR of the 
-						  -  HALT_EVENT_SEL_0 :event number for counter 0 
-						  -  HALT_EVENT_SEL_1 :event number for counter 1
-						  -  possible event numbers are 1 to 38 if 0 : No event is selected
- * @return 		  none
+ * @fn            void RSI_CT_HaltEventSelect(RSI_CT_T *pCT,uint32_t value) 
+ * @brief     Configures event for HALT operation of Counter
+ * @param[in]   pCT    :  Pointer to the CT instance register area
+ * @param[in]   value  :  Halt Event select register value,this parameter can be the logical OR of the 
+              -  HALT_EVENT_SEL_0 :event number for counter 0 
+              -  HALT_EVENT_SEL_1 :event number for counter 1
+              -  possible event numbers are 1 to 38 if 0 : No event is selected
+ * @return      none
  */
 STATIC INLINE void RSI_CT_HaltEventSelect(RSI_CT_T *pCT, uint32_t value)
 {
@@ -660,13 +660,13 @@ STATIC INLINE void RSI_CT_HaltEventSelect(RSI_CT_T *pCT, uint32_t value)
 /*===================================================*/
 /**
  * @fn            void RSI_CT_IncrementEventSelect(RSI_CT_T *pCT,uint32_t value)
- * @brief		  Configures event for Increment operation of Counter
- * @param[in]	  pCT    : Pointer to the CT instance register area
- * @param[in]	  value  : Increment Event select register value,this parameter can be the logical OR of the 
-						  -  INCREMENT_EVENT_SEL_0 :event number for counter 0 
-						  -  INCREMENT_EVENT_SEL_1 :event number for counter 1
-						  -  possible event numbers are 1 to 38 if 0 : No event is selected
- * @return 		  none 
+ * @brief     Configures event for Increment operation of Counter
+ * @param[in]   pCT    : Pointer to the CT instance register area
+ * @param[in]   value  : Increment Event select register value,this parameter can be the logical OR of the 
+              -  INCREMENT_EVENT_SEL_0 :event number for counter 0 
+              -  INCREMENT_EVENT_SEL_1 :event number for counter 1
+              -  possible event numbers are 1 to 38 if 0 : No event is selected
+ * @return      none 
  */
 STATIC INLINE void RSI_CT_IncrementEventSelect(RSI_CT_T *pCT, uint32_t value)
 {
@@ -677,13 +677,13 @@ STATIC INLINE void RSI_CT_IncrementEventSelect(RSI_CT_T *pCT, uint32_t value)
 /*===================================================*/
 /**
  * @fn            void RSI_CT_CaptureEventSelect(RSI_CT_T *pCT,uint32_t value)
- * @brief		  This API is used to select the input event to capture counter value
- * @param[in]	  pCT    : Pointer to the CT instance register area
- * @param[in]	  value  : Capture Event select register value,this parameter can be the logical OR of the 
-					       -  CAPTURE_EVENT_SEL_0 :event number for counter 0 
-						   -  CAPTURE_EVENT_SEL_1 :event number for counter 1
-						   -  possible event numbers are 1 to 38 if 0 : No event is selected
- * @return 		  none
+ * @brief     This API is used to select the input event to capture counter value
+ * @param[in]   pCT    : Pointer to the CT instance register area
+ * @param[in]   value  : Capture Event select register value,this parameter can be the logical OR of the 
+                 -  CAPTURE_EVENT_SEL_0 :event number for counter 0 
+               -  CAPTURE_EVENT_SEL_1 :event number for counter 1
+               -  possible event numbers are 1 to 38 if 0 : No event is selected
+ * @return      none
  */
 STATIC INLINE void RSI_CT_CaptureEventSelect(RSI_CT_T *pCT, uint32_t value)
 {
@@ -694,13 +694,13 @@ STATIC INLINE void RSI_CT_CaptureEventSelect(RSI_CT_T *pCT, uint32_t value)
 /*===================================================*/
 /**
  * @fn            void RSI_CT_OutputEventSelect(RSI_CT_T *pCT,uint32_t value)
- * @brief		  This API is used to select the input event to output counter value
- * @param[in]	  pCT    :  Pointer to the CT instance register area
- * @param[in]	  value  :  Output Event select register value,this parameter can be the logical OR of the 
-						    -  OUTPUT_EVENT_SEL_0 :event number for counter 0 
-						    -  OUTPUT_EVENT_SEL_1 :event number for counter 1
-						    -  possible event numbers are 1 to 38 if 0 : No event is selected
- * @return 		  none 
+ * @brief     This API is used to select the input event to output counter value
+ * @param[in]   pCT    :  Pointer to the CT instance register area
+ * @param[in]   value  :  Output Event select register value,this parameter can be the logical OR of the 
+                -  OUTPUT_EVENT_SEL_0 :event number for counter 0 
+                -  OUTPUT_EVENT_SEL_1 :event number for counter 1
+                -  possible event numbers are 1 to 38 if 0 : No event is selected
+ * @return      none 
  */
 STATIC INLINE void RSI_CT_OutputEventSelect(RSI_CT_T *pCT, uint32_t value)
 {
@@ -710,14 +710,14 @@ STATIC INLINE void RSI_CT_OutputEventSelect(RSI_CT_T *pCT, uint32_t value)
 
 /*===================================================*/
 /**
- * @fn 			  void RSI_CT_InterruptEventSelect(RSI_CT_T *pCT,uint32_t value)	
- * @brief		  This API is used to select the input event for interrupt
- * @param[in]	  pCT     :  Pointer to the CT instance register area
- * @param[in]	  value   :  Output Event select register value,this parameter can be the logical OR of the 
-					       -  INTR_EVENT_SEL_0 :event number for counter 0 
-						   -  INTR_EVENT_SEL_1 :event number for counter 1
-						   -  possible event numbers are 1 to 38 if 0 : No event is selected
- * @return 		  none 
+ * @fn        void RSI_CT_InterruptEventSelect(RSI_CT_T *pCT,uint32_t value)  
+ * @brief     This API is used to select the input event for interrupt
+ * @param[in]   pCT     :  Pointer to the CT instance register area
+ * @param[in]   value   :  Output Event select register value,this parameter can be the logical OR of the 
+                 -  INTR_EVENT_SEL_0 :event number for counter 0 
+               -  INTR_EVENT_SEL_1 :event number for counter 1
+               -  possible event numbers are 1 to 38 if 0 : No event is selected
+ * @return      none 
  */
 STATIC INLINE void RSI_CT_InterruptEventSelect(RSI_CT_T *pCT, uint32_t value)
 {
@@ -728,30 +728,30 @@ STATIC INLINE void RSI_CT_InterruptEventSelect(RSI_CT_T *pCT, uint32_t value)
 /*===================================================*/
 /**
  * @fn            void RSI_CT_OutputEventADCTrigger(RSI_CT_MUX_REG_T *pCTmux,uint8_t output1,uint8_t output2)
- * @brief		  This API is used to select one of the ADC trigger output
- * @param[in]	  pCTmux  :  Pointer to the CT instance register area
- * @param[in]	  output1 :  output event for ADC trigger (0 to 31)
+ * @brief     This API is used to select one of the ADC trigger output
+ * @param[in]   pCTmux  :  Pointer to the CT instance register area
+ * @param[in]   output1 :  output event for ADC trigger (0 to 31)
  * @param[in]     output2 :  output event for ADC trigger (0 to 31)
- * @return 		  none
+ * @return      none
  */
 STATIC INLINE void RSI_CT_OutputEventADCTrigger(RSI_CT_MUX_REG_T *pCTmux, uint8_t output1, uint8_t output2)
 {
   // Sets the output pin number for ADC  
-  pCTmux->CT_OUTPUT_EVENT1_ADC_SEL_b.OUTPUT_EVENT_ADC_SEL = output1;
+  pCTmux->CT_OUTPUT_EVENT1_ADC_SEL_b.OUTPUT_EVENT_ADC_SEL = ( unsigned int)(output1 & 0x0F);
   // Sets the output pin number for ADC  
-  pCTmux->CT_OUTPUT_EVENT2_ADC_SEL_b.OUTPUT_EVENT_ADC_SEL = output2;
+  pCTmux->CT_OUTPUT_EVENT2_ADC_SEL_b.OUTPUT_EVENT_ADC_SEL = ( unsigned int)(output2 & 0x0F);
 }
 
 /*===================================================*/
 /**
  * @fn            void RSI_CT_SetCount(RSI_CT_T *pCT, uint32_t count)
- * @brief		  Sets the Counter Initial value.
- * @param[in]	  pCT   : Pointer to the CT instance register area
- * @param[in]	  count : 32 bit Counter initial value,this parameter can be the logical OR of the 
-						  - \ref COUNTER_0 : Counter 0 load value ( 0x0 to 0xFFFF)
-						  - \ref COUNTER_1 : Counter 1 load value ( 0x0 to 0xFFFF)
-												  -  possible values are 0x0 to 0xFFFFFFFF
- * @return 		  none
+ * @brief     Sets the Counter Initial value.
+ * @param[in]   pCT   : Pointer to the CT instance register area
+ * @param[in]   count : 32 bit Counter initial value,this parameter can be the logical OR of the 
+              - \ref COUNTER_0 : Counter 0 load value ( 0x0 to 0xFFFF)
+              - \ref COUNTER_1 : Counter 1 load value ( 0x0 to 0xFFFF)
+                          -  possible values are 0x0 to 0xFFFFFFFF
+ * @return      none
  */
 STATIC INLINE void RSI_CT_SetCount(RSI_CT_T *pCT, uint32_t count)
 {
@@ -762,18 +762,18 @@ STATIC INLINE void RSI_CT_SetCount(RSI_CT_T *pCT, uint32_t count)
 /*===================================================*/
 /** 
  * @fn            void RSI_CT_OCUConfigSet(RSI_CT_T *pCT, uint32_t value)
- * @brief		  This API is used to set OCU control parameters
- * @param[in]	  pCT   :    Pointer to the CT instance register area 
- * @param[in]	  value	:	 OCU control register value,this parameter can be the logical OR of the below parameters
-							  -  OUTPUT_IS_OCU_0 : sets Counter 0 output in OCU mode
-							  -  SYNC_WITH_0	 : Indicates whether the other channel is in sync with this counter(0,1,2,3)
-							  -  OCU_DMA_MODE_0	 : OCU DMA mode is active or not for counter-0
-							  -  OCU_8_16_MODE_0 : 16 bits or only 8-bits of the counter-0 are used in OCU mode
-							  -  OUTPUT_IS_OCU_1 : sets Counter 1 output in OCU mode
-							  -  SYNC_WITH_1	 : Indicates whether the other channel is in sync with this counter(0,1,2,3)
-							  -  OCU_DMA_MODE_1	 : OCU DMA mode is active or not for counter-1
-							  -  OCU_8_16_MODE_1 : 16 bits or only 8-bits of the counter-1 are used in OCU mode
- * @return 		  none
+ * @brief     This API is used to set OCU control parameters
+ * @param[in]   pCT   :    Pointer to the CT instance register area 
+ * @param[in]   value :  OCU control register value,this parameter can be the logical OR of the below parameters
+                -  OUTPUT_IS_OCU_0 : sets Counter 0 output in OCU mode
+                -  SYNC_WITH_0   : Indicates whether the other channel is in sync with this counter(0,1,2,3)
+                -  OCU_DMA_MODE_0  : OCU DMA mode is active or not for counter-0
+                -  OCU_8_16_MODE_0 : 16 bits or only 8-bits of the counter-0 are used in OCU mode
+                -  OUTPUT_IS_OCU_1 : sets Counter 1 output in OCU mode
+                -  SYNC_WITH_1   : Indicates whether the other channel is in sync with this counter(0,1,2,3)
+                -  OCU_DMA_MODE_1  : OCU DMA mode is active or not for counter-1
+                -  OCU_8_16_MODE_1 : 16 bits or only 8-bits of the counter-1 are used in OCU mode
+ * @return      none
  */
 STATIC INLINE void RSI_CT_OCUConfigSet(RSI_CT_T *pCT, uint32_t value)
 {
@@ -784,10 +784,10 @@ STATIC INLINE void RSI_CT_OCUConfigSet(RSI_CT_T *pCT, uint32_t value)
 /*===================================================*/
 /** 
  * @fn            void RSI_CT_OCUConfigReset(RSI_CT_T *pCT, uint32_t value)
- * @brief		  This API is used to set OCU control parameters
- * @param[in]	  pCT   :  Pointer to the CT instance register area 
- * @param[in]	  value	:  OCU control register value,this parameter can be the logical OR required bit.
- * @return 		  none
+ * @brief     This API is used to set OCU control parameters
+ * @param[in]   pCT   :  Pointer to the CT instance register area 
+ * @param[in]   value :  OCU control register value,this parameter can be the logical OR required bit.
+ * @return      none
  */
 STATIC INLINE void RSI_CT_OCUConfigReset(RSI_CT_T *pCT, uint32_t value)
 {
@@ -798,16 +798,16 @@ STATIC INLINE void RSI_CT_OCUConfigReset(RSI_CT_T *pCT, uint32_t value)
 /*===================================================*/
 /**
  * @fn            void RSI_CT_InterruptEnable(RSI_CT_T *pCT, uint32_t unmaskFlags)   
- * @brief		  Enable the interrupts in State Configurable Timer.
- * @param[in]	  pCT         : Pointer to the CT instance register area
- * @param[in]	  unmaskFlags :	CT Interrupt unmask register value,this parameter can be the logical OR of the
-							   -  INTR_0_l 			  : interrupt event flag for counter 0
-							   -  COUNTER_0_IS_ZERO_L : counter hit zero for counter 0
-							   -  COUNTER_0_IS_PEAK_L : counter hit peak for counter 0
-							   -  INTR_1_L 			  : interrupt event flag for counter 1				
-							   -  COUNTER_0_IS_ZERO_L : counter hit zero for counter 1
-							   -  COUNTER_0_IS_PEAK_L : counter hit peak for counter 1	
- * @return 		  none 
+ * @brief     Enable the interrupts in State Configurable Timer.
+ * @param[in]   pCT         : Pointer to the CT instance register area
+ * @param[in]   unmaskFlags : CT Interrupt unmask register value,this parameter can be the logical OR of the
+                 -  INTR_0_l        : interrupt event flag for counter 0
+                 -  COUNTER_0_IS_ZERO_L : counter hit zero for counter 0
+                 -  COUNTER_0_IS_PEAK_L : counter hit peak for counter 0
+                 -  INTR_1_L        : interrupt event flag for counter 1        
+                 -  COUNTER_0_IS_ZERO_L : counter hit zero for counter 1
+                 -  COUNTER_0_IS_PEAK_L : counter hit peak for counter 1  
+ * @return      none 
  */
 STATIC INLINE void RSI_CT_InterruptEnable(RSI_CT_T *pCT, uint32_t unmaskFlags)
 {
@@ -821,16 +821,16 @@ STATIC INLINE void RSI_CT_InterruptEnable(RSI_CT_T *pCT, uint32_t unmaskFlags)
 /*===================================================*/
 /**
  * @fn            void RSI_CT_InterruptDisable(RSI_CT_T *pCT, uint32_t maskFlags)
- * @brief		  Disable the interrupts in State Configurable Timer
- * @param[in]	  pCT        :  Pointer to the CT instance register area
- * @param[in]	  maskFlags  : 	CT Interrupt mask register value,this parameter can be the logical OR of the
-								 -  INTR_0_l 		    : interrupt event flag for counter 0
-								 -  COUNTER_0_IS_ZERO_L : counter hit zero for counter 0
-							     -  COUNTER_0_IS_PEAK_L : counter hit peak for counter 0
-							     -  INTR_1_L 			: interrupt event flag for counter 1				
-								 -  COUNTER_0_IS_ZERO_L : counter hit zero for counter 1
-								 -  COUNTER_0_IS_PEAK_L : counter hit peak for counter 1			
- * @return 		  none    
+ * @brief     Disable the interrupts in State Configurable Timer
+ * @param[in]   pCT        :  Pointer to the CT instance register area
+ * @param[in]   maskFlags  :  CT Interrupt mask register value,this parameter can be the logical OR of the
+                 -  INTR_0_l        : interrupt event flag for counter 0
+                 -  COUNTER_0_IS_ZERO_L : counter hit zero for counter 0
+                   -  COUNTER_0_IS_PEAK_L : counter hit peak for counter 0
+                   -  INTR_1_L      : interrupt event flag for counter 1        
+                 -  COUNTER_0_IS_ZERO_L : counter hit zero for counter 1
+                 -  COUNTER_0_IS_PEAK_L : counter hit peak for counter 1      
+ * @return      none    
  */
 STATIC INLINE void RSI_CT_InterruptDisable(RSI_CT_T *pCT, uint32_t maskFlags)
 {
@@ -841,16 +841,16 @@ STATIC INLINE void RSI_CT_InterruptDisable(RSI_CT_T *pCT, uint32_t maskFlags)
 /*===================================================*/
 /**
  * @fn            void RSI_CT_InterruptClear(RSI_CT_T *pCT,uint32_t clr_flags)
- * @brief		  Clear the specified interrupt flag in State Configurable Timer
- * @param[in]	  pCT        :  Pointer to the CT instance register area
- * @param[in]	  clr_flags  :  CT Interrupt Ack register value,this parameter can be the logical OR of the
-							  -  INTR_0_l 			 : interrupt event flag for counter 0
-							  -  COUNTER_0_IS_ZERO_L : counter hit zero for counter 0
-							  -  COUNTER_0_IS_PEAK_L : counter hit peak for counter 0
-							  -  INTR_1_L 			 : interrupt event flag for counter 1				
-							  -  COUNTER_0_IS_ZERO_L : counter hit zero for counter 1
-							  -  COUNTER_0_IS_PEAK_L : counter hit peak for counter 1									
- * @return 		  none      
+ * @brief     Clear the specified interrupt flag in State Configurable Timer
+ * @param[in]   pCT        :  Pointer to the CT instance register area
+ * @param[in]   clr_flags  :  CT Interrupt Ack register value,this parameter can be the logical OR of the
+                -  INTR_0_l        : interrupt event flag for counter 0
+                -  COUNTER_0_IS_ZERO_L : counter hit zero for counter 0
+                -  COUNTER_0_IS_PEAK_L : counter hit peak for counter 0
+                -  INTR_1_L        : interrupt event flag for counter 1       
+                -  COUNTER_0_IS_ZERO_L : counter hit zero for counter 1
+                -  COUNTER_0_IS_PEAK_L : counter hit peak for counter 1                 
+ * @return      none      
  */
 STATIC INLINE void RSI_CT_InterruptClear(RSI_CT_T *pCT, uint32_t clrFlags)
 {
@@ -861,9 +861,9 @@ STATIC INLINE void RSI_CT_InterruptClear(RSI_CT_T *pCT, uint32_t clrFlags)
 /*===================================================*/
 /**
  * @fn           uint32_t RSI_CT_GetInterruptStatus(RSI_CT_T *pCT)
- * @brief		 Clear the specified interrupt flag in State Configurable Timer
- * @param[in]	 pCT      :   Pointer to the CT instance register area
- * @return 		 CT Interrupt  status value  
+ * @brief    Clear the specified interrupt flag in State Configurable Timer
+ * @param[in]  pCT      :   Pointer to the CT instance register area
+ * @return     CT Interrupt  status value  
  */
 STATIC INLINE uint32_t RSI_CT_GetInterruptStatus(RSI_CT_T *pCT)
 {
@@ -873,23 +873,25 @@ STATIC INLINE uint32_t RSI_CT_GetInterruptStatus(RSI_CT_T *pCT)
 /*===================================================*/
 /**
  * @fn          void RSI_CT_EdgeLevelEventControl(RSI_CT_T *pCT,uint32_t value)
- * @brief		This API is used to control the input event generation to CT
+ * @brief   This API is used to control the input event generation to CT
  * @param[in]   pSCT    :  Pointer to the SCT instance register area
- * @param[in]   value   :	 Mask value
- * @return 		none               
+ * @param[in]   value   :  Mask value
+ * @return    none               
  */
 STATIC INLINE void RSI_CT_EdgeLevelEventControl(RSI_CT_T *pCT, uint32_t value)
 {
   //pCT ->RE_FE_RFE_LEV0_LEV1_EVENT_ENABLE_REG = value;
+  (void)pCT;
+  (void)value;
 }
 
 /*===================================================*/
 /**
  * @fn          void RSI_CT_SetTimerMuxSelect( RSI_CT_MUX_REG_T *pCTMux,uint8_t timerIns )
- * @brief		To Select Timer using mux.
+ * @brief   To Select Timer using mux.
  * @param[in]   pCTMux       :  Pointer to the CT Mux instance register area
  * @param[in]   timerIns     :  If 0 - Timer0 instance,if 1 - Timer1 instance
- * @return 		none               
+ * @return    none               
  */
 STATIC INLINE void RSI_CT_SetTimerMuxSelect(RSI_CT_MUX_REG_T *pCTMux, uint8_t timerIns)
 {
@@ -900,10 +902,10 @@ STATIC INLINE void RSI_CT_SetTimerMuxSelect(RSI_CT_MUX_REG_T *pCTMux, uint8_t ti
 /*===================================================*/
 /**
  * @fn          void RSI_CT_ResumeHaltEvent(RSI_CT_T *pCT,boolean_t counterNum)
- * @brief		To Resume the HALT operation of counter with I/O events
+ * @brief   To Resume the HALT operation of counter with I/O events
  * @param[in]   pCT         :  Pointer to the CT instance register area
  * @param[in]   counterNum  :  Counter 0/1
- * @return 		none               
+ * @return    none               
  */
 STATIC INLINE void RSI_CT_ResumeHaltEvent(RSI_CT_T *pCT, boolean_t counterNum)
 {
@@ -917,10 +919,10 @@ STATIC INLINE void RSI_CT_ResumeHaltEvent(RSI_CT_T *pCT, boolean_t counterNum)
 /*===================================================*/
 /** 
  * @fn            error_t RSI_CT_PeripheralReset(RSI_CT_T *pCT,boolean_t counterNum)
- * @brief		  This API is used to Reset any counter.
- * @param[in]	  pCT         :  Pointer to the CT instance register area
+ * @brief     This API is used to Reset any counter.
+ * @param[in]   pCT         :  Pointer to the CT instance register area
  * @param[in]     counterNum  :  Counter 0/1
- * @return 		  none
+ * @return      none
  */
 STATIC INLINE void RSI_CT_PeripheralReset(RSI_CT_T *pCT, boolean_t counterNum)
 {
@@ -936,10 +938,10 @@ STATIC INLINE void RSI_CT_PeripheralReset(RSI_CT_T *pCT, boolean_t counterNum)
 /*===================================================*/
 /**
  * @fn            error_t RSI_CT_StartSoftwareTrig(RSI_CT_T *pCT,boolean_t counterNum)
- * @brief		  Starts the Counter form software register
- * @param[in]	  pCT     	  :  Pointer to the CT instance register area
- * @param[in]	  counterNum  :  Coutner 0/1
- * @return 		  none
+ * @brief     Starts the Counter form software register
+ * @param[in]   pCT         :  Pointer to the CT instance register area
+ * @param[in]   counterNum  :  Coutner 0/1
+ * @return      none
  */
 STATIC INLINE void RSI_CT_StartSoftwareTrig(RSI_CT_T *pCT, boolean_t counterNum)
 {
@@ -954,10 +956,10 @@ STATIC INLINE void RSI_CT_StartSoftwareTrig(RSI_CT_T *pCT, boolean_t counterNum)
 /*===================================================*/
 /**
  * @fn            error_t RSI_CT_OCUModeSet(RSI_CT_T *pCT, boolean_t counterNum)
- * @brief		  OCU mode configuration setting
- * @param[in]	  pCT     		:  Pointer to the CT instance register area
- * @param[in]	  counterNum    :  Coutner 0/1
- * @return 		  none
+ * @brief     OCU mode configuration setting
+ * @param[in]   pCT         :  Pointer to the CT instance register area
+ * @param[in]   counterNum    :  Coutner 0/1
+ * @return      none
  */
 STATIC INLINE void RSI_CT_OCUModeSet(RSI_CT_T *pCT, boolean_t counterNum)
 {
@@ -973,37 +975,37 @@ STATIC INLINE void RSI_CT_OCUModeSet(RSI_CT_T *pCT, boolean_t counterNum)
 /*===================================================*/
 /** 
  * @fn            void RSI_CT_SetMatchCount(RSI_CT_T *pCT, uint32_t value,boolean_t counterMode, boolean_t counterNum) 
- * @brief		  Sets the Match load value for counter 0 and counter 1
- * @param[in]	  pCT        :  Pointer to the SCT instance register area 
- * @param[in]	  value      :  Match register or match buffer register value,this parameter 
+ * @brief     Sets the Match load value for counter 0 and counter 1
+ * @param[in]   pCT        :  Pointer to the SCT instance register area 
+ * @param[in]   value      :  Match register or match buffer register value,this parameter 
                                \n can be the logical OR of the 
-							   -  COUNTER_0_MATCH : Counter 0 match value ( 0x0 to 0xFFFF)
-							   -  COUNTER_1_MATCH : Counter 1 match value ( 0x0 to 0xFFFF)
- * @param[in]	  counterMode :  counterMode 0/1 
+                 -  COUNTER_0_MATCH : Counter 0 match value ( 0x0 to 0xFFFF)
+                 -  COUNTER_1_MATCH : Counter 1 match value ( 0x0 to 0xFFFF)
+ * @param[in]   counterMode :  counterMode 0/1 
  * @param[in]     counterNum  :  Counter 0/1
- * @return 		  none
+ * @return      none
  */
 STATIC INLINE void RSI_CT_SetMatchCount(RSI_CT_T *pCT, uint32_t value, boolean_t counterMode, boolean_t counterNum)
 {
   if (counterMode == 0) {
     if (counterNum) {
 
-      pCT->CT_MATCH_REG_b.COUNTER_1_MATCH = value;
+      pCT->CT_MATCH_REG_b.COUNTER_1_MATCH = ( uint16_t )value;
     } else {
-      pCT->CT_MATCH_REG_b.COUNTER_0_MATCH = value;
+      pCT->CT_MATCH_REG_b.COUNTER_0_MATCH = ( uint16_t )value;
     }
   } else {
-    pCT->CT_MATCH_REG = value;
+    pCT->CT_MATCH_REG = (uint16_t)value;
   }
 }
 
 /*===================================================*/
 /**
  * @fn          uint16_t RSI_CT_CaptureRead(RSI_CT_T *pCT, boolean_t counterNum)
- * @brief		Gets the captured counter value 
+ * @brief   Gets the captured counter value 
  * @param[in]   pCT         :  Pointer to the CT instance register area
  * @param[in]   counterNum  :  Counter 0/1
- * @return 		Return counter value at the time of capture event occurs
+ * @return    Return counter value at the time of capture event occurs
  */
 STATIC INLINE uint16_t RSI_CT_CaptureRead(RSI_CT_T *pCT, boolean_t counterNum)
 {
@@ -1017,11 +1019,11 @@ STATIC INLINE uint16_t RSI_CT_CaptureRead(RSI_CT_T *pCT, boolean_t counterNum)
 /*===================================================*/
 /**
  * @fn          uint32_t RSI_CT_GetCounter( RSI_CT_T *pCT,boolean_t counterNum,boolean_t mode )
- * @brief		Gets the captured counter value 
+ * @brief   Gets the captured counter value 
  * @param[in]   pCT         : Pointer to the CT instance register area
  * @param[in]   counterNum  : Counter 0/1
  * @param[in]   mode        : mode 0/1
- * @return 		Return the counter value
+ * @return    Return the counter value
  */
 STATIC INLINE uint32_t RSI_CT_GetCounter(RSI_CT_T *pCT, boolean_t counterNum, boolean_t mode)
 {
@@ -1039,18 +1041,18 @@ STATIC INLINE uint32_t RSI_CT_GetCounter(RSI_CT_T *pCT, boolean_t counterNum, bo
 /*===================================================*/
 /**
  * @fn          void RSI_CT_SetCounerSync( RSI_CT_T *pCT, uint8_t syncCounter,boolean_t counterNum)
- * @brief		Sets the captured counter value. 
+ * @brief   Sets the captured counter value. 
  * @param[in]   pCT          : Pointer to the CT instance register area
  * @param[in]   syncCounter  : set the counter number to be in sync
  * @param[in]   counterNum   : Counter 0/1
- * @return 		none 
+ * @return    none 
  */
 STATIC INLINE void RSI_CT_SetCounerSync(RSI_CT_T *pCT, uint8_t syncCounter, boolean_t counterNum)
 {
   if (counterNum) {
-    pCT->CT_OCU_CTRL_REG_b.SYNC_WITH_1 = syncCounter;
+    pCT->CT_OCU_CTRL_REG_b.SYNC_WITH_1 = ( unsigned int)(syncCounter & 0x07);
   } else {
-    pCT->CT_OCU_CTRL_REG_b.SYNC_WITH_0 = syncCounter;
+    pCT->CT_OCU_CTRL_REG_b.SYNC_WITH_0 = ( unsigned int)(syncCounter & 0x07);
   }
 }
 

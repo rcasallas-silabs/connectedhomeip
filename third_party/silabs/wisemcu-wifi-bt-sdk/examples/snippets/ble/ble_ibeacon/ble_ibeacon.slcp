@@ -33,29 +33,14 @@ toolchain_settings: []
 readme:
   - path: readme.md
 other_file:
-  - path: resources/readme/creationfinal114.png
-  - path: resources/readme/imageib3.png
-  - path: resources/readme/ncpboarddetection112.png
-  - path: resources/readme/ftdiprints118.png
-  - path: resources/readme/ibeaconncp.png
-  - path: resources/readme/keil_with_out_os.png
-  - path: resources/readme/buildncp1.png
-  - path: resources/readme/buildsuccesssoc1.png
-  - path: resources/readme/imageib2.png
-  - path: resources/readme/buildsoc2.png
-  - path: resources/readme/debugmodencp.png
-  - path: resources/readme/buildsoc3.png
-  - path: resources/readme/ibeaconsoc.png
-  - path: resources/readme/debugmodesoc.png
-  - path: resources/readme/with_out_os3.png
-  - path: resources/readme/serial_teriminal_ncp_prints1.png
-  - path: resources/readme/image_ib2.png
-  - path: resources/readme/socboarddetection111.png
-  - path: resources/readme/with_out_os1.png
-  - path: resources/readme/serial_teriminal_client_prints_soc1.png
-  - path: resources/readme/buildsuccessncp1.png
-  - path: resources/readme/projctselection113.png
-  - path: resources/readme/image_ib3.png
+  - path: resources/readme/bleibeaconsocprints.png
+  - path: resources/readme/bleibeaconncp.png
+  - path: resources/readme/bleibeaconncpprints.png
+  - path: resources/readme/bleibeaconmobilephone1.png
+  - path: resources/readme/bleibeaconapplicationconfigurations.png
+  - path: resources/readme/bleibeaconsoc.png
+  - path: resources/readme/bleibeaconmobilephone.png
+  - path: resources/readme/bleibeaconcondigurations.png
 ui_hints:
   highlight:
     - path: readme.md

@@ -34,6 +34,11 @@ toolchain_settings: []
 readme:
   - path: readme.md
 other_file:
+  - path: resources/readme/stationpingv6applicationconfiguration.png
+  - path: resources/readme/stationpingv6setupncp.png
+  - path: resources/readme/stationpingv6applicationprintssoc.png
+  - path: resources/readme/stationpingv6setupsoc.png
+  - path: resources/readme/stationpingv6applicationprintsncp.png
 ui_hints:
   highlight:
     - path: readme.md

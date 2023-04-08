@@ -35,8 +35,7 @@
 #include "rsi_usart.h"
 
 #if defined(A11_ROM)
-#include "rsi_rom_table_rs9116.h" 
-extern const ROM_USART_API_T usart_api;
+#include "rsi_rom_table_rs9116.h"
 #endif
 
 #define ARM_USART_DRV_VERSION    ARM_DRIVER_VERSION_MAJOR_MINOR(2,10) /* driver version */
@@ -175,6 +174,7 @@ static  USART_RESOURCES USART0_Resources = {
 		NULL,
 #endif
 		&USART0_Info ,
+		{
 		//pins
 		&usart0_clock,
 		&usart0_tx,
@@ -183,6 +183,7 @@ static  USART_RESOURCES USART0_Resources = {
 		&usart0_cts,
 		&usart0_ir_tx,
 		&usart0_ir_rx ,
+		},
 		{  //clocks
 				RTE_USART0_CLK_SRC,
 				ULP_UART_REF_CLK,
@@ -287,6 +288,7 @@ static  USART_RESOURCES UART1_Resources = {
 		NULL,
 #endif
 		&UART1_Info,
+		{
 		NULL,
 		&uart1_tx,
 		&uart1_rx,
@@ -294,6 +296,7 @@ static  USART_RESOURCES UART1_Resources = {
 		&uart1_rts,
 		NULL,
 		NULL,
+		},
 
 		{  //clocks
 				RTE_UART1_CLK_SRC,
@@ -389,24 +392,26 @@ static  USART_RESOURCES ULP_UART_Resources = {
 		ULP_UART,           // ADDRESS
 		ULPSS_UART_IRQn,    // IRQn
 #if (RTE_ULPUART_CHNL_UDMA_TX_EN == 1)
-		&ULPUART_UDMA_TX_CHNL,
+		{&ULPUART_UDMA_TX_CHNL},
 #else
 		NULL,
 #endif
 #if (RTE_ULPUART_CHNL_UDMA_RX_EN == 1)
-		&ULPUART_UDMA_RX_CHNL,
+		{&ULPUART_UDMA_RX_CHNL},
 #else
 		NULL,
 #endif
 		&ULP_UART_Info,
-
+		
+		{
 		NULL ,//pins
 		&ulp_uart_tx,
 		&ulp_uart_rx,
 		&ulp_uart_cts,
 		&ulp_uart_rts ,
 		NULL,
-		NULL,    
+		NULL,
+		},
 		{  //clocks
 				USART_ULPREFCLK ,
 				RTE_ULP_UART_CLK_SRC,
@@ -476,6 +481,13 @@ static int32_t ARM_USART0_PowerControl (ARM_POWER_STATE state)
 
 static int32_t ARM_USART0_Send (const void *data, uint32_t num)
 {
+  if(num < RTE_USART0_DMA_TX_LEN_PER_DES) {
+      USART0_Resources.dma_tx->control.totalNumOfDMATrans=(unsigned int)((num-1) & 0x03FF);
+  }
+  else
+    {
+      USART0_Resources.dma_tx->control.totalNumOfDMATrans=RTE_USART0_DMA_TX_LEN_PER_DES-1;
+    }
 #if defined(A11_ROM) && defined(ROMDRIVER_PRESENT)
 	return ROMAPI_USART_API->USART_Send_Data (data, num, &USART0_Resources ,&UDMA0_Resources,udma0_chnl_info,udmaHandle0);
 #else
@@ -485,6 +497,13 @@ static int32_t ARM_USART0_Send (const void *data, uint32_t num)
 }
 static int32_t ARM_USART0_Receive (void *data, uint32_t num)
 {
+  if(num < RTE_USART0_DMA_RX_LEN_PER_DES) {
+      USART0_Resources.dma_rx->control.totalNumOfDMATrans=(unsigned int)((num-1) & 0x03FF);
+  }
+  else
+    {
+      USART0_Resources.dma_rx->control.totalNumOfDMATrans=RTE_USART0_DMA_RX_LEN_PER_DES-1;
+    }
 #if defined(A11_ROM) && defined(ROMDRIVER_PRESENT)
 	return ROMAPI_USART_API->USART_Receive_Data ( data, num,&USART0_Resources,&UDMA0_Resources,udma0_chnl_info,udmaHandle0);
 #else
@@ -494,6 +513,16 @@ static int32_t ARM_USART0_Receive (void *data, uint32_t num)
 
 static int32_t ARM_USART0_Transfer (const void *data_out, void *data_in, uint32_t num)
 {
+  if((num < RTE_USART0_DMA_TX_LEN_PER_DES) && (num < RTE_USART0_DMA_RX_LEN_PER_DES)) {
+
+      USART0_Resources.dma_tx->control.totalNumOfDMATrans=(unsigned int)((num-1) & 0x03FF);
+      USART0_Resources.dma_rx->control.totalNumOfDMATrans=(unsigned int)((num-1) & 0x03FF);
+  }
+  else
+    {
+      USART0_Resources.dma_tx->control.totalNumOfDMATrans=RTE_USART0_DMA_TX_LEN_PER_DES-1;
+      USART0_Resources.dma_rx->control.totalNumOfDMATrans=RTE_USART0_DMA_RX_LEN_PER_DES-1;
+    }
 #if defined(A11_ROM) && defined(ROMDRIVER_PRESENT)
 	return ROMAPI_USART_API->USART_Transfer (data_out, data_in, num, &USART0_Resources,&UDMA0_Resources,udma0_chnl_info,udmaHandle0);
 #else
@@ -660,6 +689,13 @@ static int32_t ARM_UART1_PowerControl (ARM_POWER_STATE state)
 
 static int32_t ARM_UART1_Send (const void *data, uint32_t num)
 {
+  if(num < RTE_UART1_DMA_TX_LEN_PER_DES) {
+      UART1_Resources.dma_tx->control.totalNumOfDMATrans = (unsigned int)((num-1) & 0x03FF);
+  }
+  else
+    {
+      UART1_Resources.dma_tx->control.totalNumOfDMATrans = RTE_UART1_DMA_TX_LEN_PER_DES-1;
+    }
 #if defined(A11_ROM) && defined(ROMDRIVER_PRESENT)
 	return ROMAPI_USART_API->USART_Send_Data (data, num, &UART1_Resources ,&UDMA0_Resources,udma0_chnl_info,udmaHandle0);	
 #else
@@ -669,6 +705,13 @@ static int32_t ARM_UART1_Send (const void *data, uint32_t num)
 
 static int32_t ARM_UART1_Receive (void *data, uint32_t num)
 {
+  if(num < RTE_UART1_DMA_RX_LEN_PER_DES) {
+      UART1_Resources.dma_rx->control.totalNumOfDMATrans = (unsigned int)((num-1) & 0x03FF);
+  }
+  else
+    {
+      UART1_Resources.dma_rx->control.totalNumOfDMATrans = RTE_UART1_DMA_RX_LEN_PER_DES-1;
+    }
 #if defined(A11_ROM) && defined(ROMDRIVER_PRESENT)
 	return ROMAPI_USART_API->USART_Receive_Data ( data, num,&UART1_Resources,&UDMA0_Resources,udma0_chnl_info,udmaHandle0);
 #else
@@ -678,6 +721,15 @@ static int32_t ARM_UART1_Receive (void *data, uint32_t num)
 
 static int32_t ARM_UART1_Transfer (const void *data_out,void *data_in,uint32_t num)
 {
+  if((num < RTE_UART1_DMA_TX_LEN_PER_DES) && (num < RTE_UART1_DMA_RX_LEN_PER_DES)) {
+      UART1_Resources.dma_tx->control.totalNumOfDMATrans = (unsigned int)((num-1) & 0x03FF);
+      UART1_Resources.dma_rx->control.totalNumOfDMATrans = (unsigned int)((num-1) & 0x03FF);
+  }
+  else
+    {
+      UART1_Resources.dma_tx->control.totalNumOfDMATrans = RTE_UART1_DMA_TX_LEN_PER_DES-1;
+      UART1_Resources.dma_rx->control.totalNumOfDMATrans = RTE_UART1_DMA_RX_LEN_PER_DES-1;
+    }
 #if defined(A11_ROM) && defined(ROMDRIVER_PRESENT)
 	return ROMAPI_USART_API->USART_Transfer (data_out, data_in, num, &UART1_Resources,&UDMA0_Resources,udma0_chnl_info,udmaHandle0);	
 #else
@@ -836,6 +888,13 @@ static int32_t ARM_ULP_UART_PowerControl (ARM_POWER_STATE state)
 
 static int32_t ARM_ULP_UART_Send (const void *data, uint32_t num)
 {
+  if(num < RTE_ULP_UART_DMA_TX_LEN_PER_DES) {
+      ULP_UART_Resources.dma_tx->control.totalNumOfDMATrans = (unsigned int)((num-1) & 0x03FF);
+  }
+  else
+    {
+      ULP_UART_Resources.dma_tx->control.totalNumOfDMATrans = RTE_ULP_UART_DMA_TX_LEN_PER_DES-1;
+    }
 #if defined(A11_ROM) && defined(ROMDRIVER_PRESENT)
 	return ROMAPI_USART_API->USART_Send_Data (data, num, &ULP_UART_Resources ,&UDMA1_Resources,udma1_chnl_info,udmaHandle1);	
 #else
@@ -845,6 +904,13 @@ static int32_t ARM_ULP_UART_Send (const void *data, uint32_t num)
 
 static int32_t ARM_ULP_UART_Receive (void *data, uint32_t num)
 {
+  if(num < RTE_ULP_UART_DMA_RX_LEN_PER_DES) {
+      ULP_UART_Resources.dma_rx->control.totalNumOfDMATrans = (unsigned int)((num-1) & 0x03FF);
+  }
+  else
+    {
+      ULP_UART_Resources.dma_rx->control.totalNumOfDMATrans = RTE_ULP_UART_DMA_RX_LEN_PER_DES-1;
+    }
 #if defined(A11_ROM) && defined(ROMDRIVER_PRESENT)
 	return ROMAPI_USART_API->USART_Receive_Data ( data, num,&ULP_UART_Resources,&UDMA1_Resources,udma1_chnl_info,udmaHandle1);
 #else
@@ -854,6 +920,15 @@ static int32_t ARM_ULP_UART_Receive (void *data, uint32_t num)
 
 static int32_t ARM_ULP_UART_Transfer (const void *data_out,void *data_in,uint32_t num)
 {
+  if((num < RTE_ULP_UART_DMA_TX_LEN_PER_DES) && (num < RTE_ULP_UART_DMA_TX_LEN_PER_DES)) {
+      ULP_UART_Resources.dma_tx->control.totalNumOfDMATrans = (unsigned int)((num-1) & 0x03FF);
+      ULP_UART_Resources.dma_rx->control.totalNumOfDMATrans = (unsigned int)((num-1) & 0x03FF);
+  }
+  else
+    {
+      ULP_UART_Resources.dma_tx->control.totalNumOfDMATrans = RTE_ULP_UART_DMA_TX_LEN_PER_DES-1;
+      ULP_UART_Resources.dma_rx->control.totalNumOfDMATrans = RTE_ULP_UART_DMA_RX_LEN_PER_DES-1;
+    }
 #if defined(A11_ROM) && defined(ROMDRIVER_PRESENT)
 	return ROMAPI_USART_API->USART_Transfer (data_out, data_in, num, &ULP_UART_Resources ,&UDMA1_Resources,udma1_chnl_info,udmaHandle1);	
 #else

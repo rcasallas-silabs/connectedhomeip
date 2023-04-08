@@ -48,6 +48,13 @@
 #define  SPI_SLAVE_MODE												2U
 #define  SPI_ULP_MASTER_MODE									3U
 
+ARM_DRIVER_VERSION SPI_GetVersion(void);
+ARM_SPI_CAPABILITIES SPI_GetCapabilities(void);
+void IRQ047_Handler(void) ;
+void IRQ044_Handler(void);
+void IRQ016_Handler(void);
+void mySPI_callback(uint32_t event);
+
 #if ((defined(RTE_Drivers_SSI_MASTER)     	  || \
 		defined(RTE_Drivers_SSI_SLAVE)        		|| \
 		defined(RTE_Drivers_SSI_ULP_MASTER))     		 \
@@ -58,7 +65,7 @@
 #endif
 
 
-#if (RTE_SSI_MASTER == 1)
+#if defined(RTE_SSI_MASTER) && (RTE_SSI_MASTER == 1)
 #define  SSI_MASTER						 1U
 
 #if (RTE_SSI_MASTER_RX_DMA == 1)
@@ -66,12 +73,12 @@
 #define SSI_MASTER_RX_DMA_Channel  	 RTE_SSI_MASTER_UDMA_RX_CH
 #endif
 
-#if (RTE_SSI_MASTER_TX_DMA == 1)
+#if defined(RTE_SSI_MASTER_TX_DMA) && (RTE_SSI_MASTER_TX_DMA == 1)
 #define SSI_MASTER_TX_DMA_Instance 	 1U
 #define SSI_MASTER_TX_DMA_Channel  	 RTE_SSI_MASTER_UDMA_TX_CH
 #endif
 
-#if (RTE_SSI_MASTER_MISO == 1)
+#if defined(RTE_SSI_MASTER_MISO) && (RTE_SSI_MASTER_MISO == 1)
 #define  SSI_MASTER_MISO_SEL             1U
 #define  SSI_MASTER_MISO_PORT            RTE_SSI_MASTER_MISO_PORT
 #define  SSI_MASTER_MISO_PIN             RTE_SSI_MASTER_MISO_PIN
@@ -79,7 +86,7 @@
 #define  SSI_MASTER_MISO_PADSEL          RTE_SSI_MASTER_MISO_PADSEL
 #endif
 
-#if (RTE_SSI_MASTER_MOSI == 1)
+#if defined(RTE_SSI_MASTER_MOSI) && (RTE_SSI_MASTER_MOSI == 1)
 #define  SSI_MASTER_MOSI_SEL             1U
 #define  SSI_MASTER_MOSI_PORT            RTE_SSI_MASTER_MOSI_PORT
 #define  SSI_MASTER_MOSI_PIN             RTE_SSI_MASTER_MOSI_PIN
@@ -87,7 +94,7 @@
 #define  SSI_MASTER_MOSI_PADSEL          RTE_SSI_MASTER_MOSI_PADSEL
 #endif
 
-#if (RTE_SSI_MASTER_SCK == 1)
+#if defined(RTE_SSI_MASTER_SCK) && (RTE_SSI_MASTER_SCK == 1)
 #define  SSI_MASTER_SCK_SEL              1U
 #define  SSI_MASTER_SCK_PORT             RTE_SSI_MASTER_SCK_PORT
 #define  SSI_MASTER_SCK_PIN              RTE_SSI_MASTER_SCK_PIN
@@ -95,7 +102,7 @@
 #define  SSI_MASTER_SCK_PADSEL           RTE_SSI_MASTER_SCK_PADSEL
 #endif
 
-#if (RTE_SSI_MASTER_CS0 == 1)
+#if defined(RTE_SSI_MASTER_CS0) && (RTE_SSI_MASTER_CS0 == 1)
 #define  SSI_MASTER_CS0_SEL              1U
 #define  SSI_MASTER_CS0_PORT             RTE_SSI_MASTER_CS0_PORT
 #define  SSI_MASTER_CS0_PIN              RTE_SSI_MASTER_CS0_PIN
@@ -103,7 +110,7 @@
 #define  SSI_MASTER_CS0_PADSEL           RTE_SSI_MASTER_CS0_PADSEL
 #endif
 
-#if (RTE_SSI_MASTER_CS1 == 1)
+#if defined(RTE_SSI_MASTER_CS1) && (RTE_SSI_MASTER_CS1 == 1)
 #define  SSI_MASTER_CS1_SEL              1U
 #define  SSI_MASTER_CS1_PORT             RTE_SSI_MASTER_CS1_PORT
 #define  SSI_MASTER_CS1_PIN              RTE_SSI_MASTER_CS1_PIN
@@ -111,7 +118,7 @@
 #define  SSI_MASTER_CS1_PADSEL           RTE_SSI_MASTER_CS1_PADSEL
 #endif
 
-#if (RTE_SSI_MASTER_CS2 == 1)
+#if defined(RTE_SSI_MASTER_CS2) && (RTE_SSI_MASTER_CS2 == 1)
 #define  SSI_MASTER_CS2_SEL              1U
 #define  SSI_MASTER_CS2_PORT             RTE_SSI_MASTER_CS2_PORT
 #define  SSI_MASTER_CS2_PIN              RTE_SSI_MASTER_CS2_PIN
@@ -119,7 +126,7 @@
 #define  SSI_MASTER_CS2_PADSEL           RTE_SSI_MASTER_CS2_PADSEL
 #endif
 
-#if (RTE_SSI_MASTER_CS3 == 1)
+#if defined(RTE_SSI_MASTER_CS3) && (RTE_SSI_MASTER_CS3 == 1)
 #define  SSI_MASTER_CS3_SEL              1U
 #define  SSI_MASTER_CS3_PORT             RTE_SSI_MASTER_CS3_PORT
 #define  SSI_MASTER_CS3_PIN              RTE_SSI_MASTER_CS3_PIN
@@ -128,20 +135,20 @@
 #endif
 #endif
 
-#if (RTE_SSI_SLAVE == 1)
+#if defined(RTE_SSI_SLAVE) && (RTE_SSI_SLAVE == 1)
 #define  SSI_SLAVE						 1U
 
-#if (RTE_SSI_SLAVE_RX_DMA == 1)
+#if defined(RTE_SSI_SLAVE_RX_DMA) && (RTE_SSI_SLAVE_RX_DMA == 1)
 #define SSI_SLAVE_RX_DMA_Instance 	 1U
 #define SSI_SLAVE_RX_DMA_Channel  	 RTE_SSI_SLAVE_UDMA_RX_CH
 #endif
 
-#if (RTE_SSI_SLAVE_TX_DMA == 1)
+#if defined(RTE_SSI_SLAVE_TX_DMA) && (RTE_SSI_SLAVE_TX_DMA == 1)
 #define SSI_SLAVE_TX_DMA_Instance 	 1U
 #define SSI_SLAVE_TX_DMA_Channel  	 RTE_SSI_SLAVE_UDMA_TX_CH
 #endif
 
-#if (RTE_SSI_SLAVE_MISO == 1)
+#if defined(RTE_SSI_SLAVE_MISO) && (RTE_SSI_SLAVE_MISO == 1)
 #define  SSI_SLAVE_MISO_SEL              1U
 #define  SSI_SLAVE_MISO_PORT             RTE_SSI_SLAVE_MISO_PORT
 #define  SSI_SLAVE_MISO_PIN              RTE_SSI_SLAVE_MISO_PIN
@@ -149,7 +156,7 @@
 #define  SSI_SLAVE_MISO_PADSEL           RTE_SSI_SLAVE_MISO_PADSEL
 #endif
 
-#if (RTE_SSI_SLAVE_MOSI == 1)
+#if defined(RTE_SSI_SLAVE_MOSI) && (RTE_SSI_SLAVE_MOSI == 1)
 #define  SSI_SLAVE_MOSI_SEL              1U
 #define  SSI_SLAVE_MOSI_PORT             RTE_SSI_SLAVE_MOSI_PORT
 #define  SSI_SLAVE_MOSI_PIN              RTE_SSI_SLAVE_MOSI_PIN
@@ -157,7 +164,7 @@
 #define  SSI_SLAVE_MOSI_PADSEL           RTE_SSI_SLAVE_MOSI_PADSEL
 #endif
 
-#if (RTE_SSI_SLAVE_SCK == 1)
+#if defined(RTE_SSI_SLAVE_SCK) && (RTE_SSI_SLAVE_SCK == 1)
 #define  SSI_SLAVE_SCK_SEL               1U
 #define  SSI_SLAVE_SCK_PORT              RTE_SSI_SLAVE_SCK_PORT
 #define  SSI_SLAVE_SCK_PIN               RTE_SSI_SLAVE_SCK_PIN
@@ -165,7 +172,7 @@
 #define  SSI_SLAVE_SCK_PADSEL            RTE_SSI_SLAVE_SCK_PADSEL
 #endif
 
-#if (RTE_SSI_SLAVE_CS == 1)
+#if defined(RTE_SSI_SLAVE_CS) && (RTE_SSI_SLAVE_CS == 1)
 #define  SSI_SLAVE_CS0_SEL               1U
 #define  SSI_SLAVE_CS0_PORT              RTE_SSI_SLAVE_CS_PORT
 #define  SSI_SLAVE_CS0_PIN               RTE_SSI_SLAVE_CS_PIN
@@ -174,51 +181,53 @@
 #endif
 #endif
 
-#if (RTE_SSI_ULP_MASTER == 1)
+#if defined(RTE_SSI_ULP_MASTER) && (RTE_SSI_ULP_MASTER == 1)
 #define  SSI_ULP_MASTER					 	 1U
 
-#if (RTE_SSI_ULP_MASTER_RX_DMA == 1)
+#if defined(RTE_SSI_ULP_MASTER_RX_DMA) && (RTE_SSI_ULP_MASTER_RX_DMA == 1)
 #define SSI_ULP_MASTER_RX_DMA_Instance 	 1U
 #define SSI_ULP_MASTER_RX_DMA_Channel  	 RTE_SSI_ULP_MASTER_UDMA_RX_CH
 #endif
-#if (RTE_SSI_ULP_MASTER_TX_DMA == 1)
+
+#if defined(RTE_SSI_ULP_MASTER_TX_DMA) && (RTE_SSI_ULP_MASTER_TX_DMA == 1)
 #define SSI_ULP_MASTER_TX_DMA_Instance 	 1U
 #define SSI_ULP_MASTER_TX_DMA_Channel     RTE_SSI_ULP_MASTER_UDMA_TX_CH
 #endif
-#if (RTE_SSI_ULP_MASTER_MISO == 1)
+
+#if defined(RTE_SSI_ULP_MASTER_MISO) && (RTE_SSI_ULP_MASTER_MISO == 1)
 #define  SSI_ULP_MASTER_MISO_SEL         1U
 #define  SSI_ULP_MASTER_MISO_PORT        RTE_SSI_ULP_MASTER_MISO_PORT
 #define  SSI_ULP_MASTER_MISO_PIN         RTE_SSI_ULP_MASTER_MISO_PIN
 #define  SSI_ULP_MASTER_MISO_MODE        RTE_SSI_ULP_MASTER_MISO_MODE
 #endif
 
-#if (RTE_SSI_ULP_MASTER_MOSI == 1)
+#if defined(RTE_SSI_ULP_MASTER_MOSI) && (RTE_SSI_ULP_MASTER_MOSI == 1)
 #define  SSI_ULP_MASTER_MOSI_SEL         1U
 #define  SSI_ULP_MASTER_MOSI_PORT        RTE_SSI_ULP_MASTER_MOSI_PORT
 #define  SSI_ULP_MASTER_MOSI_PIN         RTE_SSI_ULP_MASTER_MOSI_PIN
 #define  SSI_ULP_MASTER_MOSI_MODE        RTE_SSI_ULP_MASTER_MOSI_MODE
 #endif
 
-#if (RTE_SSI_ULP_MASTER_SCK == 1)
+#if defined(RTE_SSI_ULP_MASTER_SCK) && (RTE_SSI_ULP_MASTER_SCK == 1)
 #define  SSI_ULP_MASTER_SCK_SEL          1U
 #define  SSI_ULP_MASTER_SCK_PORT         RTE_SSI_ULP_MASTER_SCK_PORT
 #define  SSI_ULP_MASTER_SCK_PIN          RTE_SSI_ULP_MASTER_SCK_PIN
 #define  SSI_ULP_MASTER_SCK_MODE         RTE_SSI_ULP_MASTER_SCK_MODE
 #endif
 
-#if (RTE_SSI_ULP_MASTER_CS0 == 1)
+#if defined(RTE_SSI_ULP_MASTER_CS0) && (RTE_SSI_ULP_MASTER_CS0 == 1)
 #define  SSI_ULP_MASTER_CS0_SEL          1U
 #define  SSI_ULP_MASTER_CS0_PORT         RTE_SSI_ULP_MASTER_CS0_PORT
 #define  SSI_ULP_MASTER_CS0_PIN          RTE_SSI_ULP_MASTER_CS0_PIN
 #define  SSI_ULP_MASTER_CS0_MODE         RTE_SSI_ULP_MASTER_CS0_MODE
 #endif
-#if (RTE_SSI_ULP_MASTER_CS1 == 1)
+#if defined(RTE_SSI_ULP_MASTER_CS1) && (RTE_SSI_ULP_MASTER_CS1 == 1)
 #define  SSI_ULP_MASTER_CS1_SEL          1U
 #define  SSI_ULP_MASTER_CS1_PORT         RTE_SSI_ULP_MASTER_CS1_PORT
 #define  SSI_ULP_MASTER_CS1_PIN          RTE_SSI_ULP_MASTER_CS1_PIN
 #define  SSI_ULP_MASTER_CS1_MODE         RTE_SSI_ULP_MASTER_CS1_MODE
 #endif
-#if (RTE_SSI_ULP_MASTER_CS2 == 1)
+#if defined(RTE_SSI_ULP_MASTER_CS2) && (RTE_SSI_ULP_MASTER_CS2 == 1)
 #define  SSI_ULP_MASTER_CS2_SEL          1U
 #define  SSI_ULP_MASTER_CS2_PORT         RTE_SSI_ULP_MASTER_CS2_PORT
 #define  SSI_ULP_MASTER_CS2_PIN          RTE_SSI_ULP_MASTER_CS2_PIN

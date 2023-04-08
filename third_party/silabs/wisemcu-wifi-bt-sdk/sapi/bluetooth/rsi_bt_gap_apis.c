@@ -474,6 +474,8 @@ int32_t rsi_bt_cancel_inquiry(void)
 {
   return rsi_bt_driver_send_cmd(RSI_BT_REQ_INQUIRY_CANCEL, NULL, NULL);
 }
+
+/*! \cond RS9116 */
 /** @} */
 /** @addtogroup BT-CLASSIC5
 * @{
@@ -1087,6 +1089,7 @@ int32_t rsi_bt_per_tx(uint32_t *bt_pertx)
   return rsi_bt_driver_send_cmd(RSI_BT_REQ_PER_CMD, bt_pertx, NULL);
 }
 /** @} */
+/*! \endcond */
 
 /*==============================================*/
 /**

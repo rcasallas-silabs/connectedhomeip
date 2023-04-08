@@ -21,7 +21,7 @@
 #include "rsi_wisemcu_hardware_setup.h"
 #include "rsi_common.h"
 #include "rsi_m4.h"
-
+/*! \cond PRIVATE */
 /** @addtogroup MISC
 * @{
 */
@@ -62,12 +62,12 @@ void RSI_WISEMCU_HardwareSetup(void)
     SLPSS_PWRGATE_ULP_MCUWDT | SLPSS_PWRGATE_ULP_MCUPS | SLPSS_PWRGATE_ULP_MCUTS | SLPSS_PWRGATE_ULP_MCUSTORE2
     | SLPSS_PWRGATE_ULP_MCUSTORE3 | SLPSS_PWRGATE_ULP_MCURTC);
 
-  #ifndef DS_BASED_WKP
+#ifndef DS_BASED_WKP
   RSI_PS_NpssPeriPowerDown(SLPSS_PWRGATE_ULP_TIMEPERIOD);
   RSI_PS_PowerSupplyDisable(POWER_ENABLE_DEEPSLEEP_TIMER);
-  #endif
+#endif
   /* Power-Down unused NPSS Domain peripherals*/
-  RSI_PS_PowerSupplyDisable(POWER_ENABLE_TIMESTAMPING );
+  RSI_PS_PowerSupplyDisable(POWER_ENABLE_TIMESTAMPING);
 
 #ifdef CHIP_9118
   /* Power-Down Unused M4SS Domain peripherals  */
@@ -129,9 +129,10 @@ void RSI_WISEMCU_HardwareSetup(void)
   RSI_PS_XtalGoodTimeDurationConfig(XTAL_GOOD_TIME);
   /*Enable first boot up*/
   RSI_PS_EnableFirstBootUp(1);
+#ifdef COMMON_FLASH_EN
   /* Skip XTAL wait time because RC_32MHZ Clock is used for Processor on Wake-up*/
   RSI_PS_SkipXtalWaitTime(1);
-
+#endif
   return;
 }
 
@@ -369,3 +370,4 @@ void RSI_WISEMCU_ConfigRamRetention(uint32_t rams_in_use, uint32_t rams_retentio
 
 /*End of file not truncated*/
 /** @} */
+/*! \endcond */

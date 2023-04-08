@@ -18,9 +18,9 @@
  *
  */
 
-
-// Includes
-
+/**
+ * Includes
+ */
 
 #include "rsi_ccp_user_config.h"
 
@@ -28,6 +28,7 @@
 #include "rsi_rom_egpio.h"
 #include "rsi_rom_udma_wrapper.h"
 #include "SPI.h"
+#include "rsi_spi.h"
 
 /** @addtogroup SOC15
 * @{
@@ -39,6 +40,7 @@
  * @param[in]    spi       : Pointer to the spi resources
  * @return 		   excecution status 
  */
+
 int32_t SPI_Initialize(ARM_SPI_SignalEvent_t cb_event,
                        const SPI_RESOURCES *spi,
                        UDMA_RESOURCES *udma,
@@ -259,7 +261,7 @@ int32_t SPI_PowerControl(ARM_POWER_STATE state, const SPI_RESOURCES *spi)
       // Clear transfer information
       memset(spi->xfer, 0, sizeof(SPI_TRANSFER_INFO));
 
-      spi->info->state &= ~SPI_POWERED; // SPI is not powered
+      spi->info->state &= (uint8_t)(~SPI_POWERED); // SPI is not powered
 
       break;
 
@@ -307,6 +309,7 @@ int32_t SPI_PowerControl(ARM_POWER_STATE state, const SPI_RESOURCES *spi)
  * @param[in]    spi       : Pointer to the spi resources
  * @return 		   excecution status 
  */
+
 int32_t SPI_Send(const void *data,
                  uint32_t num,
                  const SPI_RESOURCES *spi,
@@ -355,7 +358,7 @@ int32_t SPI_Send(const void *data,
       control.transferType = UDMA_MODE_BASIC;
       control.nextBurst    = 0;
       if (num < 1024) {
-        control.totalNumOfDMATrans = (num - 1);
+        control.totalNumOfDMATrans = (unsigned int)((num - 1) & 0x03FF);
       } else {
         control.totalNumOfDMATrans = 0x3FF;
       }
@@ -402,7 +405,7 @@ int32_t SPI_Send(const void *data,
       control.transferType = UDMA_MODE_BASIC;
       control.nextBurst    = 0;
       if (num < 1024) {
-        control.totalNumOfDMATrans = (num - 1);
+        control.totalNumOfDMATrans = (unsigned int)((num - 1) & 0x03FF);
       } else {
         control.totalNumOfDMATrans = 0x3FF;
       }
@@ -507,7 +510,7 @@ int32_t SPI_Receive(void *data,
       control.transferType = UDMA_MODE_BASIC;
       control.nextBurst    = 0;
       if (num < 1024) {
-        control.totalNumOfDMATrans = (num - 1);
+        control.totalNumOfDMATrans = (unsigned int)((num - 1) & 0x03FF);
       } else {
         control.totalNumOfDMATrans = 0x3FF;
       }
@@ -554,7 +557,7 @@ int32_t SPI_Receive(void *data,
       control.transferType = UDMA_MODE_BASIC;
       control.nextBurst    = 0;
       if (num < 1024) {
-        control.totalNumOfDMATrans = (num - 1);
+        control.totalNumOfDMATrans = (unsigned int)((num - 1) & 0x03FF);
       } else {
         control.totalNumOfDMATrans = 0x3FF;
       }
@@ -667,7 +670,7 @@ int32_t SPI_Transfer(const void *data_out,
       control.transferType = UDMA_MODE_BASIC;
       control.nextBurst    = 0;
       if (num < 1024) {
-        control.totalNumOfDMATrans = (num - 1);
+        control.totalNumOfDMATrans = (unsigned int)((num - 1) & 0x03FF);
       } else {
         control.totalNumOfDMATrans = 0x3FF;
       }
@@ -715,7 +718,7 @@ int32_t SPI_Transfer(const void *data_out,
       control.transferType = UDMA_MODE_BASIC;
       control.nextBurst    = 0;
       if (num < 1024) {
-        control.totalNumOfDMATrans = (num - 1);
+        control.totalNumOfDMATrans = (unsigned int)((num - 1) & 0x03FF);
       } else {
         control.totalNumOfDMATrans = 0x3FF;
       }
@@ -808,7 +811,8 @@ int32_t SPI_Control(uint32_t control, uint32_t arg, const SPI_RESOURCES *spi, ui
     return ARM_DRIVER_ERROR_UNSUPPORTED;
   }
   if ((control & ARM_SPI_CONTROL_Msk) == ARM_SPI_ABORT_TRANSFER) {
-    icr = spi->reg->ICR; // Disable SPI interrupts
+    icr = spi->reg->ICR;// Disable SPI interrupts
+    (void)icr;
     memset(spi->xfer, 0, sizeof(SPI_TRANSFER_INFO));
     spi->info->status.busy = 0U;
     return ARM_DRIVER_OK;
@@ -823,7 +827,7 @@ int32_t SPI_Control(uint32_t control, uint32_t arg, const SPI_RESOURCES *spi, ui
     case ARM_SPI_MODE_INACTIVE:
       spi->info->mode &= ~ARM_SPI_CONTROL_Msk;
       spi->info->mode |= ARM_SPI_MODE_INACTIVE;
-      spi->info->state &= ~SPI_CONFIGURED;
+      spi->info->state &= (uint8_t)(~SPI_CONFIGURED);
       return ARM_DRIVER_OK;
 
     case ARM_SPI_MODE_MASTER:
@@ -847,11 +851,11 @@ int32_t SPI_Control(uint32_t control, uint32_t arg, const SPI_RESOURCES *spi, ui
     case ARM_SPI_SET_BUS_SPEED:
 set_speed:
       sck_divisor             = (base_clock / arg);
-      spi->reg->BAUDR_b.SCKDV = sck_divisor;
+      spi->reg->BAUDR_b.SCKDV = (uint8_t)sck_divisor;
       break;
 
     case ARM_SPI_GET_BUS_SPEED:
-      return (base_clock / spi->reg->BAUDR_b.SCKDV);
+      return (int32_t)(base_clock / spi->reg->BAUDR_b.SCKDV);
     case ARM_SPI_SET_DEFAULT_TX_VALUE: // Set default Transmit value; arg = value
       spi->xfer->def_val = (uint16_t)(arg & 0xFFFF);
       return ARM_DRIVER_OK;
@@ -1099,7 +1103,7 @@ set_speed:
             || (spi->io.cs3->pin != NULL)) {
           spi->info->mode |= ARM_SPI_SS_MASTER_HW_OUTPUT;
     #else
-           if (spi->io.cs->pin != NULL) {
+           if (spi->io.cs->pin != (uint32_t)NULL) {
           if (spi->io.cs->pin > 64) {
             RSI_EGPIO_SetPinMux(EGPIO1, 0, (spi->io.cs->pin - 64), EGPIO_PIN_MUX_MODE6);
           }
@@ -1116,7 +1120,7 @@ set_speed:
 
       case ARM_SPI_SS_MASTER_HW_OUTPUT: // SPI Slave Select when Master: Hardware controlled Output
         spi->info->mode &= ~ARM_SPI_SS_MASTER_MODE_Msk;
-        if (spi->io.cs->pin != NULL) {
+        if (spi->io.cs->pin != (uint32_t)NULL) {
           spi->reg->SER = 1 << 0;
           spi->info->mode |= ARM_SPI_SS_MASTER_HW_OUTPUT;
   #endif
@@ -1135,7 +1139,7 @@ set_speed:
 #ifdef SSI_MULTI_SLAVE
       if (spi->io.cs0->pin != NULL) {
 #else
-      if (spi->io.cs->pin != NULL) {
+      if (spi->io.cs->pin != (uint32_t)NULL) {
 #endif
           spi->info->mode |= ARM_SPI_SS_SLAVE_HW;
         } else {
@@ -1189,13 +1193,13 @@ set_speed:
   data_bits = ((control & ARM_SPI_DATA_BITS_Msk) >> ARM_SPI_DATA_BITS_Pos);
   if ((spi->instance_mode == 1) || (spi->instance_mode == 3)) {
     if ((data_bits >= 4U) && (data_bits <= 32U)) {
-      spi->reg->CTRLR0_b.DFS_32 = (data_bits - 1U);
+      spi->reg->CTRLR0_b.DFS_32 = (unsigned int)((data_bits - 1U) & 0x1F);
     } else {
       return ARM_SPI_ERROR_DATA_BITS;
     }
   } else {
     if ((data_bits >= 4U) && (data_bits <= 16U)) {
-      spi->reg->CTRLR0_b.DFS = (data_bits - 1U);
+      spi->reg->CTRLR0_b.DFS = (unsigned int)((data_bits - 1U) & 0x0F);
     } else {
       return ARM_SPI_ERROR_DATA_BITS;
     }
@@ -1212,9 +1216,9 @@ set_speed:
   spi->reg->RXFTLR_b.RFT     = 0;
 
   if ((spi->instance_mode == 1U) || (spi->instance_mode == 3U))
-    spi->reg->IMR &= ~(0x3F); // Disable SPI interrupts
+    spi->reg->IMR &= (uint32_t)(~(0x3F)); // Disable SPI interrupts
   else
-    spi->reg->IMR &= ~(0x1F); // Disable SPI interrupts
+    spi->reg->IMR &= (uint32_t)(~(0x1F)); // Disable SPI interrupts
 
   return ARM_DRIVER_OK;
 }
@@ -1229,15 +1233,16 @@ ARM_SPI_STATUS SPI_GetStatus(const SPI_RESOURCES *spi)
 {
   ARM_SPI_STATUS status;
 
-  status.busy       = spi->info->status.busy;
-  status.data_lost  = spi->info->status.data_lost;
-  status.mode_fault = spi->info->status.mode_fault;
+  status.busy       = (unsigned int)(spi->info->status.busy & 0x01);
+  status.data_lost  = (unsigned int)(spi->info->status.data_lost & 0x01);
+  status.mode_fault = (unsigned int)(spi->info->status.mode_fault & 0x01);
 
   return status;
 }
 
 void SPI_UDMA_Tx_Event(uint32_t event, uint8_t dmaCh, SPI_RESOURCES *spi)
 {
+  (void)dmaCh;
   switch (event) {
     case UDMA_EVENT_XFER_DONE:
       // Update TX buffer info
@@ -1255,6 +1260,7 @@ void SPI_UDMA_Tx_Event(uint32_t event, uint8_t dmaCh, SPI_RESOURCES *spi)
 
 void SPI_UDMA_Rx_Event(uint32_t event, uint8_t dmaCh, SPI_RESOURCES *spi)
 {
+  (void)dmaCh;
   switch (event) {
     case UDMA_EVENT_XFER_DONE:
       //spi->xfer->rx_cnt    = spi->xfer->num;
@@ -1277,7 +1283,7 @@ void SPI_UDMA_Rx_Event(uint32_t event, uint8_t dmaCh, SPI_RESOURCES *spi)
 void SPI_IRQHandler(const SPI_RESOURCES *spi)
 {
   uint8_t data_8bit, i;
-  uint16_t data_16bit;
+  uint32_t data_16bit;
   uint32_t data_32bit;
   uint32_t event;
   uint16_t data_width;
@@ -1290,6 +1296,7 @@ void SPI_IRQHandler(const SPI_RESOURCES *spi)
   isr = spi->reg->ISR;
   sr  = spi->reg->SR;
   icr = spi->reg->ICR;
+  (void)icr;
 
   if ((spi->instance_mode == SPI_MASTER_MODE) || (spi->instance_mode == SPI_ULP_MASTER_MODE)) {
     data_width = spi->reg->CTRLR0_b.DFS_32;
@@ -1301,6 +1308,7 @@ void SPI_IRQHandler(const SPI_RESOURCES *spi)
     // Clear Overrun flag
     ovrrunclr                   = spi->reg->TXOICR;
     ovrrunclr                   = spi->reg->RXOICR;
+    (void)ovrrunclr;
     spi->info->status.data_lost = 1U;
     event |= ARM_SPI_EVENT_DATA_LOST;
   }
@@ -1314,7 +1322,7 @@ void SPI_IRQHandler(const SPI_RESOURCES *spi)
           *(spi->xfer->rx_buf++) = data_8bit;
         } else if (data_width <= (16U - 1U)) {
           // 16-bit data frame
-          data_16bit             = *(volatile uint16_t *)(&spi->reg->DR);
+          data_16bit             = *(volatile uint32_t *)(&spi->reg->DR);
           *(spi->xfer->rx_buf++) = (uint8_t)data_16bit;
           *(spi->xfer->rx_buf++) = (uint8_t)(data_16bit >> 8U);
         } else {
@@ -1329,7 +1337,7 @@ void SPI_IRQHandler(const SPI_RESOURCES *spi)
       spi->xfer->rx_cnt++;
       if (spi->xfer->rx_cnt == spi->xfer->num) {
         // Disable RX Buffer Not Empty Interrupt
-        spi->reg->IMR &= ~RXFIM;
+        spi->reg->IMR &= (uint32_t)(~RXFIM);
 
         // Clear busy flag
         spi->info->status.busy = 0U;
@@ -1354,10 +1362,10 @@ void SPI_IRQHandler(const SPI_RESOURCES *spi)
       } else if (data_width <= (16U - 1U)) {
         if (spi->xfer->tx_buf != NULL) {
           data_16bit = *(spi->xfer->tx_buf++);
-          data_16bit |= *(spi->xfer->tx_buf++) << 8U;
-          *(volatile uint16_t *)(&spi->reg->DR) = data_16bit;
+          data_16bit |= (uint16_t)(*(spi->xfer->tx_buf++) << 8U);
+          *(volatile uint32_t *)(&spi->reg->DR) = data_16bit;
         } else {
-          *(volatile uint16_t *)(&spi->reg->DR) = 0x0; //dummy data
+          *(volatile uint32_t *)(&spi->reg->DR) = 0x0; //dummy data
         }
       } else {
         if (spi->xfer->tx_buf != NULL) {
@@ -1379,7 +1387,7 @@ void SPI_IRQHandler(const SPI_RESOURCES *spi)
       spi->xfer->tx_cnt++;
       if (spi->xfer->tx_cnt == spi->xfer->num) {
         // All data sent, disable TX Buffer Empty Interrupt
-        spi->reg->IMR &= ~TXEIM;
+        spi->reg->IMR &= (uint32_t)(~TXEIM);
       }
     } else {
       // Unexpected transfer, data lost

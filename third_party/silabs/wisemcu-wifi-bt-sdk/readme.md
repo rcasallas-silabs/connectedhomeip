@@ -10,7 +10,8 @@ The SiWx917 SDK contains the following files and folders.
   |  +--si91x_soc        > Examples to demonstrate SoC Peripherals
   |-   
   +--connectivity_firmware                         > Si91x firmware image(s)
-  |  +--SiWG917-A.x.x.x.x.x.rps            
+  |  +--SiWG917-A.x.x.x.0.x.rps                    > Full-featured firmware image
+  |  +--SiWG917-A.x.x.x.2.x.rps                    > Size-optimized firmware image(unsupported for SoC mode in the current release)
   |-   
   +--platforms            
   |  +--efx32            > Board Support for EFR32 Hosts in NCP Mode

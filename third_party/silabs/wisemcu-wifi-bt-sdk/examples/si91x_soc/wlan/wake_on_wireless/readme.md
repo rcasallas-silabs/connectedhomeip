@@ -1,68 +1,72 @@
-# Wake on Wireless
+# **Wake on Wireless**
 
-## Introduction
+## **1 Introduction**
 
-This application demonstrates the process for configuring the SiWx91x in connected sleep power save functionality of Silicon Labs device having TCP server socket in open state, it wakes up in periodic intervals based on DTIM or Listen Interval.
+This application demonstrates the process for configuring SiWx91x module in connected sleep power save, having a TCP server socket in open state, SiWx91x module wakes up in periodic intervals based on DTIM or Listen Interval.
 
-The application creates the trigger NWP to sleep with power mode 2 with ram retention followed by trigger M4 to sleep with ram retention. NWP wakes up with wireless packet and M4 wakes up with NWP packet.
+The application creates the trigger NWP to sleep with power mode 2 with ram retention followed by trigger M4 to sleep with ram retention. NWP wakes up with wireless packet and M4 wakes up with packet from NWP.
 
 The application also enables the M4 will be in retention mode sleep and wakes up whenever there is a packet from NWP (Wireless Processor).
 
-## Setting Up 
-To use this application, the following hardware, software and project setup is required.
+## **2 Prerequisites**
+For running the application, you will need the following:
+### **2.1 Hardware Requirements**
+- A Windows PC
+- A wireless access point
+- Silicon Labs SiWx917 PK6030A SoC Kit which includes
+  - BRD4001A/BRD4002A Wireless Starter Kit Mainboard
+  - BRD4325A Radio Board
+- USB TO UART converter or TTL cable
+### **2.2 Software Requirements**
+- Simplicity Studio IDE
+   - To download and install the Simplicity Studio IDE, refer to the [Simplicity Studio IDE Set up]() section in ***Getting started with SiWx91x SoC*** guide.
+- SiWx917_WiSeConnect_SDK.x.x.x.x
+- [TCP/UDP peer application - Hercules](https://www.hw-group.com/software/hercules-setup-utility)
+- Tera Term software or any other serial terminal software - for viewing application prints
+- Energy Profiler tool (Integrated in Simplicity Studio IDE)
 
-### Hardware Requirements  
-  - Windows PC.
-  - Wi-Fi Access point with a connection to the internet
-  - PC2 (Remote PC) with TCP server application (Hercules Setup)
-  - Power analyzer
-  - SiWx91x Wi-Fi Evaluation Kit
-  - **SoC Mode**: 
-      - Silicon Labs [BRD4325A](https://www.silabs.com/)
-  
-#### SoC Mode : 
+## **3 Set up diagram**
 
-![Figure: Setup Diagram for SoC mode Wake on Wireless Example](resources/readme/setup_soc.png)
-  
+![Figure: Setup Diagram for Periodic Tx Deepsleep Example: SoC](resources/readme/image184socwithenergyprofiler.png)
 
-### Software Requirements
-  - [Hercules Application](https://www.hw-group.com/files/download/sw/version/hercules_3-2-8.exe)
+## **4 Set up** 
+- Follow the [Hardware connections and Simplicity Studio IDE Set up]()  section in the ***Getting Started with SiWx91x SoC*** guide to make the hardware connections and add the Gecko and SiWx91x COMBO SDK to Simplicity Studio IDE.
+- Ensure that SiWx91x module is loaded with the latest firmware following the [SiWx91x Firmware Update]() section in the ***Getting started with SiWx91x SoC*** guide.
+
+## **5 Creation of Project**
+To create the project in the Simplicity Studio IDE, follow the [Creation of Project]() section in the ***Getting started with SiWx91x SoC*** guide, choose the **Wi-Fi - SoC Wake on Wireless** example.
    
-### Project Setup
-- **SoC Mode**
-  - **Silicon Labs SiWx91x SoC**. Follow the [Getting Started with SiWx91x SoC](https://docs.silabs.com/) to setup the example to work with SiWx91x SoC and Simplicity Studio.
-- **NCP Mode**
-  - **Silicon Labs EFx32 Host**. Follow the [Getting Started with EFx32](https://docs.silabs.com/SiWx91x-wiseconnect/latest/wifibt-wc-getting-started-with-efx32/) to setup the example to work with EFx32 and Simplicity Studio.
-
-## Configuring the Application
-The application can be configured to suit your requirements and development environment.
+## **6 Application configuration**
 Read through the following sections and make any changes needed. 
+  
+In the Project explorer pane of the IDE, expand the **wake_on_wireless_soc** folder and open the **rsi_wake_on_wireless.c** file. Configure the following parameters based on your requirements.
 
-### Wi-Fi Configuration
-Configure the following parameters in **rsi_wake_on_wireless.c** to enable your Silicon Labs Wi-Fi device to connect to your Wi-Fi network.
+   ![Application configuration](resources/readme/wakeonwirelessapplicationconfiguration.png)
 
-```c
-#define SSID           "SILABS_AP"      // Wi-Fi Network Name
-#define PSK            "1234567890"     // Wi-Fi Password
-#define SECURITY_TYPE  RSI_WPA2         // Wi-Fi Security Type: RSI_OPEN / RSI_WPA / RSI_WPA2
-```
+- ### **Wi-Fi Configuration**
 
-### Hercules Setup Configuration
-- `SERVER_PORT` is the remote TCP server port number on the PC running Hercules Setup.
-- `SERVER_IP_ADDRESS` is the remote TCP server IP address on the PC running Hercules Setup. 
+    ```c
+    //! Wi-Fi Network Name
+    #define SSID                         "SILABS_AP"      
 
-```c
-  #define SERVER_PORT        <remote port>
-  #define SERVER_IP_ADDRESS  "192.168.10.100"
-```
-### Memory & Throughput
-  - `GLOBAL_BUFF_LEN` sets the application memory size (in bytes) used by the driver.
+    //! Wi-Fi Password
+    #define PSK                          "1234567890"     
 
-```c
-  #define GLOBAL_BUFF_LEN    15000
-```
+    //! Wi-Fi Security Type: RSI_OPEN / RSI_WPA / RSI_WPA2
+    #define SECURITY_TYPE                RSI_WPA2         
+    ```
 
-### Major Powersave Options
+- ### **Hercules Setup Configuration**
+
+    ```c
+      //! The remote TCP server port number on the PC running Hercules Setup
+      #define SERVER_PORT                <remote port>
+      
+      //! The remote TCP server IP address on the PC running Hercules Setup  
+      #define SERVER_IP_ADDRESS          "192.168.10.100"
+    ```
+
+- ### **Major Powersave Options**
 The primary powersave settings are configured with `PSP_MODE` and `PSP_TYPE`. The default power save mode is set to low power mode 2 (`RSI_SLEEP_MODE_2`) with maximum power save (`RSI_MAX_PSP`) and with M4 based handshake as follows.
 
 ```c
@@ -88,18 +92,15 @@ The primary powersave settings are configured with `PSP_MODE` and `PSP_TYPE`. Th
 `PSP_TYPE` refers to power save profile type. SiWx91x EVK supports following power save profile types:
   - `RSI_MAX_PSP` : In this mode, SiWx91x EVK will be in Maximum power save mode. i.e device will wake up for every DTIM beacon and do data Tx and Rx.
   - `RSI_FAST_PSP` : In this mode, SiWx91x EVK will disable power save for any Tx/Rx packet for monitor interval of time (monitor interval can be set through macro in `rsi_wlan_config.h` file, default value is 50 ms). If there is no data for monitor interval of time, then SiWx91x EVK will again enable power save.
-  - `RSI_UAPSD` : This `PSP_TYPE` is used to enable WMM power save.
-
+ 
 ----
 
 **Note!**
-  1. `PSP_TYPE` is valid only when `PSP_MODE` is set to `RSI_SLEEP_MODE_1` or `RSI_SLEEP_MODE_2` mode.
-  2. `RSI_UAPSD` power profile type in `PSP_TYPE` is valid only when `RSI_WMM_PS_ENABLE` is enabled in `rsi_wlan_config.h` file.
-
+- `PSP_TYPE` is valid only when `PSP_MODE` is set to `RSI_SLEEP_MODE_1` or `RSI_SLEEP_MODE_2` mode.
+ 
 ----
 
-
-### Additional Powersave Options
+- ### **Additional Powersave Options**
 Additional powersave options may be configured in **rsi_wlan_config.h**.
  
 ```c
@@ -119,10 +120,6 @@ Additional powersave options may be configured in **rsi_wlan_config.h**.
   #define RSI_DTIM_ALIGNED_TYPE               0
   #define RSI_MONITOR_INTERVAL                50
   #define RSI_NUM_OF_DTIM_SKIP                0
-  #define RSI_WMM_PS_ENABLE                   RSI_DISABLE
-  #define RSI_WMM_PS_TYPE                     0
-  #define RSI_WMM_PS_WAKE_INTERVAL            20
-  #define RSI_WMM_PS_UAPSD_BITMAP             15
 ```
 
 The application defaults to the `RSI_SLEEP_MODE_2` configuration. 
@@ -135,100 +132,36 @@ The application defaults to the `RSI_SLEEP_MODE_2` configuration.
   - `RSI_DTIM_ALIGNED_TYPE = 1` - SiWx91x will wake up at DTIM beacon which is just before listen interval.
 - `RSI_MONITOR_INTERVAL` refers to the amount of time (in ms) to wait for Tx or Rx before giving power save indication to the connected Access Point. This macro is applicable only when `PSP_TYPE` selected as `RSI_FAST_PSP`
 - `RSI_NUM_OF_DTIM_SKIP`  is used the number of DTIMs to skip during powersave.
-- `RSI_WMM_PS_ENABLE` is used to enable or disable WMM power save.
-- `RSI_WMM_PS_TYPE` is used to set Tx-based or Periodic-based WMM power save. Set `RSI_WMM_PS_TYPE = 0` for Tx based or `=1` for periodic based WMM power save.
-- `RSI_WMM_PS_WAKE_INTERVAL` refers to the periodic time (in ms) in which the module has to wake up when `RSI_WMM_PS_TYPE` is selected as Periodic.
-- `RSI_WMM_PS_UAPSD_BITMAP` refers to the UAPSD bitmap. If `RSI_WMM_PS_ENABLE` is enabled, then `PSP_TYPE` must be set to `RSI_UAPSD` in order to WMM power save to work.
 
+## **7 Setup for Serial Prints**
 
-# Build and execute the Application
-
-### Board detection
-In the Simplicity Studio IDE, 
-  - The 917 SoC board will be detected under **Debug Adapters** pane as shown below.
-
-    **![Soc Board detection](resources/readme/soc_board_detection.png)**
-
-### Creation of project
-
-Ensure the latest Gecko SDK along with the extension Si917 COMBO SDK is added to Simplicity Studio.
-
-1. Click on the board detected and go to **EXAMPLE PROJECTS & DEMOS** section.
-
-   **![Examples and Demos](resources/readme/examples_demos.png)**
-
-2. Search for wake_on_wireless and choose Wi-Fi - SoC Wake on Wireless example and click on **Create**.  
-   
-   **![project](resources/readme/project_creation_soc.png)**
-
-3. Give the desired name to your project and cick on **Finish**.
-
-   **![Create project](resources/readme/create_project.png)** 
-
-4. Once the project is created, right click on project and go to properties → C/C++ Build → Settings → Build Steps.
-
-5. Add **post_build_script_SimplicityStudio.bat** file path present at SI917_COMBO_SDK.X.X.X.XX → utilities → isp_scripts_common_flash in build steps settings as shown in below image.
-  ![postbuild_script](resources/readme/post_build_script.png)
-
-6. Click on the build icon (hammer) or right click on project name and choose **Build Project** to build the project.
-  
-    ![building_pjt](resources/readme/build_project_soc.png)
-
-### Set up for application prints
-
-Before setting up Tera Term, do the following:
-
-You can use either of the below USB to UART converters for application prints.
-1. Set up using USB to UART converter board.
-
-  - Connect Tx (Pin-6) to P27 on WSTK
-  - Connect GND (Pin 8 or 10) to GND on WSTK
-
-    ![FTDI_prints](resources/readme/usb_to_uart_1.png)
-
-2. Set up using USB to UART converter cable.
-
-  - Connect RX (Pin 5) of TTL convertor to P27 on WSTK
-  - Connect GND (Pin1) of TTL convertor to GND on WSTK
-
-    ![FTDI_prints](resources/readme/usb_to_uart_2.png)
-
-**Tera term set up**
-
-1. Open the Tera Term tool.Choose the serial port to which USB to UART converter is connected and click on **OK**. 
-
-    **![](resources/readme/port_selection_soc.png)**
-
-2. Navigate to the Setup → Serial port and update the baud rate to **115200** and click on **OK**.
-
-    **![](resources/readme/serial_port_setup.png)**
-
-    **![](resources/readme/serial_port.png)**
-
-The serial port is now connected. 
-
-### Execute the application
-
-1. Once the build was successful, right click on project and select Debug As → Silicon Labs ARM Program to program the device as shown in below image or Run As → Silicon Labs ARM Program can also be used to directly flash the application binary and execute the program.
-
-   **![debug_mode](resources/readme/debugmodesoc117.png)**
-
-2. As soon as the debug process is completed, the application control branches to the main().
-
-3. Click on the **Resume** icon in the Simplicity Studio IDE toolbar to run the application.
-
-   **![Run](resources/readme/run.png)**
-# Testing Application 
-
-After successful connection with access point, module starts TCP Server connects to TCP Client on remote PC enter SERVER PORT and IP address then click on Connect on Hercules application .
-
-![Figure: Hercules Setup Utilities on the remote PC](resources/readme/image185.png)
-
-> If the TCP Server connected to TCP Client its shows connected to the IP address in Receive/Sent data then send the message.
+To Setup the serial prints, follow the [Setup for Serial Prints]() section in the ***Getting started with SiWx91x SoC*** guide.
  
-![Figure: TCP packets to the remote peer](resources/readme/image187.png)
+## **8 Build, Flash, and Run the Application**
 
-As the wake on wireless, SiWx91x scans and connects to the Wi-Fi access point and obtains an IP address. After a successful connection, If any packet is pending from NWP, NWP wakes up M4, posts the packet to M4 and goes back to sleep.
+To build, flash, and run the application project refer to the [Build and Flash the Project]() section in the ***Getting Started with SiWx91x SoC*** guide.
 
-### Application Prints
-![Figure: Application Prints](resources/readme/application_prints.png)
+## **9 Execution Flow**
+
+- After running the application on SiWx91x,Open a TCP Client on remote PC
+ - Open TCP client tab in Hercules application.
+ - Enter the server port value as configured in SERVER_PORT in the application and the module IP address as seen in the application prints, then click on Connect.
+
+    ![Figure: Hercules Setup Utilities on the remote PC](resources/readme/image185.png)
+
+    > If the TCP Server connected to TCP Client its shows connected to the IP address in Receive/Sent data then send the message.
+ 
+    ![Figure: TCP packets to the remote peer](resources/readme/image187.png)
+
+- Application prints can observed as follows
+
+  ![Figure: Application Prints](resources/readme/wakeonwirelessapplicationprints.png)
+
+
+## **10 Application flow**
+As the wake on wireless application runs, SiWx91x scans and connects to the Wi-Fi access point and obtains an IP address. After a successful connection, If any packet is pending from NWP, NWP wakes up M4, posts the packet to M4 and goes back to sleep.
+
+
+## **Appendix**
+Refer [AEM measurement]() section in ***Getting Started with SiWx91x SoC*** guide for measuring current consumption of SiWx91x module. 
+

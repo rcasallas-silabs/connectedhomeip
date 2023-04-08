@@ -34,6 +34,14 @@ toolchain_settings: []
 readme:
   - path: readme.md
 other_file:
+  - path: resources/readme/apv6setupsoc.png
+  - path: resources/readme/applicationprintsncp.png
+  - path: resources/readme/apv6setupncp.png
+  - path: resources/readme/apv6applicationprintssoc.png
+  - path: resources/readme/apv6applicationprintsncp.png
+  - path: resources/readme/apv6wlanconfig.png
+  - path: resources/readme/apv6applicationconfiguration.png
+  - path: resources/readme/applicationprintssoc.png
 ui_hints:
   highlight:
     - path: readme.md

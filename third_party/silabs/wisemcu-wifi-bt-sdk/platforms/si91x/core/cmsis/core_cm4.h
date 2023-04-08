@@ -38,7 +38,7 @@
      Function definitions in header files are used to allow 'inlining'.
 
    \li Requi   
-	 red Rule 18.4, declaration of union type or object of union type: '{...}'.<br>
+   red Rule 18.4, declaration of union type or object of union type: '{...}'.<br>
      Unions are used for effective representation of core registers.
 
    \li Advisory Rule 19.7, Function-like macro defined.<br>
@@ -128,7 +128,7 @@
 
 #elif defined ( __GNUC__ )
   #if defined (__VFP_FP__) && !defined(__SOFTFP__)
-    #if (__FPU_PRESENT == 1)
+    #if defined (__FPU_PRESENT) && (__FPU_PRESENT == 1)
       #define __FPU_USED       1
     #else
       #warning "Compiler generates FPU instructions for a device without an FPU (check __FPU_PRESENT)"
@@ -140,7 +140,7 @@
 
 #elif defined ( __TASKING__ )
   #if defined __FPU_VFP__
-    #if (__FPU_PRESENT == 1)
+    #if defined (__FPU_PRESENT) && (__FPU_PRESENT == 1)
       #define __FPU_USED       1
     #else
       #error "Compiler generates FPU instructions for a device without an FPU (check __FPU_PRESENT)"
@@ -1046,8 +1046,7 @@ typedef struct
 
 /*@}*/ /* end of group CMSIS_TPI */
 
-
-#if (__MPU_PRESENT == 1)
+#if defined (__MPU_PRESENT) && (__MPU_PRESENT == 1)
 /** \ingroup  CMSIS_core_register
     \defgroup CMSIS_MPU     Memory Protection Unit (MPU)
     \brief      Type definitions for the Memory Protection Unit (MPU)
@@ -1140,7 +1139,7 @@ typedef struct
 #endif
 
 
-#if (__FPU_PRESENT == 1)
+#if defined (__FPU_PRESENT) && (__FPU_PRESENT == 1)
 /** \ingroup  CMSIS_core_register
     \defgroup CMSIS_FPU     Floating Point Unit (FPU)
     \brief      Type definitions for the Floating Point Unit (FPU)
@@ -1585,8 +1584,8 @@ __STATIC_INLINE uint32_t NVIC_EncodePriority (uint32_t PriorityGroup, uint32_t P
   SubPriorityBits     = ((PriorityGroupTmp + __NVIC_PRIO_BITS) < 7) ? 0 : PriorityGroupTmp - 7 + __NVIC_PRIO_BITS;
 
   return (
-           ((PreemptPriority & ((1 << (PreemptPriorityBits)) - 1)) << SubPriorityBits) |
-           ((SubPriority     & ((1 << (SubPriorityBits    )) - 1)))
+      ((PreemptPriority & ((1 << (PreemptPriorityBits)) - 1)) << SubPriorityBits) |
+      ((SubPriority     & ((1 << (SubPriorityBits    )) - 1)))
          );
 }
 
@@ -1612,8 +1611,8 @@ __STATIC_INLINE void NVIC_DecodePriority (uint32_t Priority, uint32_t PriorityGr
   PreemptPriorityBits = ((7 - PriorityGroupTmp) > __NVIC_PRIO_BITS) ? __NVIC_PRIO_BITS : 7 - PriorityGroupTmp;
   SubPriorityBits     = ((PriorityGroupTmp + __NVIC_PRIO_BITS) < 7) ? 0 : PriorityGroupTmp - 7 + __NVIC_PRIO_BITS;
 
-  *pPreemptPriority = (Priority >> SubPriorityBits) & ((1 << (PreemptPriorityBits)) - 1);
-  *pSubPriority     = (Priority                   ) & ((1 << (SubPriorityBits    )) - 1);
+  *pPreemptPriority = (Priority >> SubPriorityBits) & (uint32_t)((1 << (PreemptPriorityBits)) - 1UL);
+  *pSubPriority     = (Priority                   ) & (uint32_t)((1 << (SubPriorityBits    )) - 1UL);
 }
 
 

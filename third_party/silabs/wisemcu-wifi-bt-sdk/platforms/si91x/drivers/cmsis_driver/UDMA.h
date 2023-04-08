@@ -12,6 +12,9 @@ extern "C" {
 #define UDMA_EVENT_XFER_DONE              (1)
 #define UDMA_EVENT_ERROR                  (2)
 
+void IRQ033_Handler (void);
+void IRQ010_Handler (void);
+
 #if defined(DAC_FIFO_MODE_EN) || defined(ADC_MULTICHANNEL_ENABLE) 
 #define DAC_UDMA_CHANNEL            10 
 #define ADC_UDMA_CHANNEL            11

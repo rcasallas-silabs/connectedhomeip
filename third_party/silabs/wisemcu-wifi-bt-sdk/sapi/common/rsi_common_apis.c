@@ -366,7 +366,7 @@ int32_t rsi_driver_init(uint8_t *buffer, uint32_t length)
                   rsi_timer_expiry_interrupt_handler);
 #endif
 
-#if (defined(RSI_SPI_INTERFACE) || defined(RSI_SDIO_INTERFACE))
+#if (defined(RSI_SPI_INTERFACE) || defined(RSI_SDIO_INTERFACE) || defined(RSI_UART_INTERFACE))
   // Configure power save GPIOs
   rsi_powersave_gpio_init();
 #endif
