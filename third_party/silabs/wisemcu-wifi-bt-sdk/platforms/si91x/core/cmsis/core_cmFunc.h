@@ -572,7 +572,7 @@ __attribute__( ( always_inline ) ) __STATIC_INLINE void __set_FAULTMASK(uint32_t
  */
 __attribute__( ( always_inline ) ) __STATIC_INLINE uint32_t __get_FPSCR(void)
 {
-#if (__FPU_PRESENT == 1) && (__FPU_USED == 1)
+#if (defined (__FPU_PRESENT) && (__FPU_PRESENT == 1)) && (defined (__FPU_USED) && (__FPU_USED == 1))
   uint32_t result;
 
   __ASM volatile ("VMRS %0, fpscr" : "=r" (result) );
@@ -590,8 +590,8 @@ __attribute__( ( always_inline ) ) __STATIC_INLINE uint32_t __get_FPSCR(void)
     \param [in]    fpscr  Floating Point Status/Control value to set
  */
 __attribute__( ( always_inline ) ) __STATIC_INLINE void __set_FPSCR(uint32_t fpscr)
-{
-#if (__FPU_PRESENT == 1) && (__FPU_USED == 1)
+{ (void)fpscr;
+#if (defined (__FPU_PRESENT) && (__FPU_PRESENT == 1)) && (defined (__FPU_USED) && (__FPU_USED == 1))
   __ASM volatile ("VMSR fpscr, %0" : : "r" (fpscr) );
 #endif
 }

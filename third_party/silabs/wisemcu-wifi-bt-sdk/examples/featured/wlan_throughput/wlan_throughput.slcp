@@ -42,24 +42,38 @@ readme:
 other_file:
   - path: resources/readme/creationfinal114.png
   - path: resources/readme/debugmodesoc117.png
+  - path: resources/readme/throughputudprxprints.png
+  - path: resources/readme/throughputudptxprints.png
   - path: resources/readme/image217c.png
   - path: resources/readme/image215.png
   - path: resources/readme/buildingpjt115.png
+  - path: resources/readme/throughputtcptxprints.png
   - path: resources/readme/ncpboarddetection112.png
+  - path: resources/readme/throughputudptx.png
   - path: resources/readme/ftdiprints118.png
+  - path: resources/readme/throughputssltx.png
+  - path: resources/readme/throughputssltxprints.png
+  - path: resources/readme/throughputsslrx.png
   - path: resources/readme/image216b.png
   - path: resources/readme/image211.png
+  - path: resources/readme/throughputtcprxprints.png
   - path: resources/readme/usb_to_uart_2.png
   - path: resources/readme/image210ncp.png
   - path: resources/readme/outputprintsncp119.png
+  - path: resources/readme/throughputapplicationconfiguration.png
+  - path: resources/readme/throughputtcprx.png
   - path: resources/readme/image217b.png
+  - path: resources/readme/throughputsetupsoc.png
   - path: resources/readme/image217d.png
   - path: resources/readme/serial_port.png
   - path: resources/readme/image213.png
+  - path: resources/readme/throughputapplicationprintssoc.png
   - path: resources/readme/image216d.png
   - path: resources/readme/image216a.png
+  - path: resources/readme/throughputapplicationprintsncp.png
   - path: resources/readme/build_project_ncp.png
   - path: resources/readme/image217f.png
+  - path: resources/readme/throughputudprx.png
   - path: resources/readme/projctselectionncp113.png
   - path: resources/readme/usb_to_uart_1.png
   - path: resources/readme/efm32.png
@@ -79,13 +93,17 @@ other_file:
   - path: resources/readme/image216g.png
   - path: resources/readme/soc_macros.png
   - path: resources/readme/image217e.png
+  - path: resources/readme/throughputconfigurationfile.png
   - path: resources/readme/build_project_soc.png
   - path: resources/readme/setup_ncp.png
   - path: resources/readme/port_selection.png
   - path: resources/readme/image216.png
+  - path: resources/readme/throughputsetupncp.png
   - path: resources/readme/port_selection_soc.png
+  - path: resources/readme/throughputsslrxprints.png
   - path: resources/readme/image216e.png
   - path: resources/readme/serial_port_setup.png
+  - path: resources/readme/throughputtcptx.png
   - path: resources/readme/image216f.png
   - path: resources/readme/buildsuccessncp116.png
   - path: resources/readme/projctselection113.png

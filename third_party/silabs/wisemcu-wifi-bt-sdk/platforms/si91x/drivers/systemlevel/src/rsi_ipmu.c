@@ -20,6 +20,7 @@
  */
 #include "rsi_chip.h"
 #include "rsi_system_config.h"
+#include "rsi_ipmu.h"
 
 /**
  * @fn          void RSI_IPMU_UpdateIpmuCalibData_efuse(efuse_ipmu_t *ipmu_calib_data)
@@ -27,8 +28,7 @@
  * @param[in]   ipmu_calib_data : pointer of calibrate data
  * @return      none
  */
-
-void RSI_IPMU_UpdateIpmuCalibData_efuse(efuse_ipmu_t *ipmu_calib_data)
+void RSI_IPMU_UpdateIpmuCalibData_efuse( efuse_ipmu_t *ipmu_calib_data)
 {
   uint32_t data = 0, value = 0;
   uint32_t mask = 0;
@@ -117,7 +117,7 @@ void RSI_IPMU_UpdateIpmuCalibData_efuse(efuse_ipmu_t *ipmu_calib_data)
   ro_32khz_trim_efuse[2] = value;
 
   /* rc_16khz_trim_efuse */
-  data  = (ipmu_calib_data->coarse_trim_16k | ipmu_calib_data->fine_trim_16k << 2);
+  data  = (uint32_t)(ipmu_calib_data->coarse_trim_16k | ipmu_calib_data->fine_trim_16k << 2);
   mask  = MASK_BITS(22, 0);
   value = rc_16khz_trim_efuse[2];
   value &= ~mask;
@@ -125,7 +125,7 @@ void RSI_IPMU_UpdateIpmuCalibData_efuse(efuse_ipmu_t *ipmu_calib_data)
   rc_16khz_trim_efuse[2] = value;
 
   /*  rc_64khz_trim_efuse */
-  data  = (ipmu_calib_data->coarse_trim_64k | ipmu_calib_data->fine_trim_64k << 2);
+  data  = (uint32_t)(ipmu_calib_data->coarse_trim_64k | ipmu_calib_data->fine_trim_64k << 2);
   mask  = MASK_BITS(22, 0);
   value = rc_64khz_trim_efuse[2];
   value &= ~mask;
@@ -253,7 +253,7 @@ void RSI_IPMU_UpdateIpmuCalibData_efuse(efuse_ipmu_t *ipmu_calib_data)
   auxadc_gain_se_efuse[2] = value;
 
   /* rc_32khz_trim_efuse  */
-  data  = (ipmu_calib_data->coarse_trim_32k | ipmu_calib_data->fine_trim_32k << 2);
+  data  = (uint32_t)(ipmu_calib_data->coarse_trim_32k | ipmu_calib_data->fine_trim_32k << 2);
   mask  = MASK_BITS(22, 0);
   value = rc_32khz_trim_efuse[2];
   value &= ~mask;
@@ -402,12 +402,12 @@ void RSI_IPMU_InitCalibData(void)
 #endif
 
   //Dummy read
-  PMU_SPI_DIRECT_ACCESS(PMU_PFM_REG_OFFSET);
+  (void)PMU_SPI_DIRECT_ACCESS(PMU_PFM_REG_OFFSET);
 
   RSI_IPMU_UpdateIpmuCalibData_efuse(&global_ipmu_calib_data);
 
   //Dummy read
-  PMU_SPI_DIRECT_ACCESS(PMU_PFM_REG_OFFSET);
+  (void)PMU_SPI_DIRECT_ACCESS(PMU_PFM_REG_OFFSET);
 }
 
 /*==============================================*/
@@ -436,7 +436,7 @@ void update_efuse_system_configs(int data, uint32_t config_ptr[])
   mask  = MASK_BITS(22, 0);
   value = config_ptr[2];
   value &= ~mask;
-  value |= data;
+  value |= (uint32_t)data;
   config_ptr[2] = value;
 }
 /**
@@ -451,7 +451,7 @@ void RSI_Configure_DCDC_LowerVoltage(void)
   bypass_curr_ctrl_data = PMU_SPI_DIRECT_ACCESS(PMU_1P3_CTRL_REG_OFFSET);
   pmu_1p2_ctrl_word     = ((bypass_curr_ctrl_data >> 17) & 0xF) - 2;
   bypass_curr_ctrl_data = PMU_SPI_DIRECT_ACCESS(BYPASS_CURR_CTRL_REG_OFFSET);
-  bypass_curr_ctrl_data &= ~(0xF << 5);
+  bypass_curr_ctrl_data &= (uint32_t)(~(0xF << 5));
   PMU_SPI_DIRECT_ACCESS(BYPASS_CURR_CTRL_REG_OFFSET) = (bypass_curr_ctrl_data | (pmu_1p2_ctrl_word << 5));
 }
 
@@ -584,16 +584,16 @@ uint32_t RSI_IPMU_32MHzClkClib(void)
     ;
   do {
     /*wait for calibration done indication*/
-  } while (!(ULP_SPI_MEM_MAP(0x30C)) & BIT(20));
+  } while ((!(ULP_SPI_MEM_MAP(0x30C))) & BIT(20));
   /*Calibrated trim value*/
-  trim_value = ULP_SPI_MEM_MAP(0x30C);
+  trim_value = ( int )ULP_SPI_MEM_MAP(0x30C);
   trim_value = (trim_value >> 11);
   trim_value = (trim_value & 0x7F);
   /*Programming the calibrated trim to SPI register.*/
-  ULP_SPI_MEM_MAP(0x104) |= (trim_value << 14);
+  ULP_SPI_MEM_MAP(0x104) |= (uint32_t)(trim_value << 14);
   /*pointing the trim select to SPI*/
   ULP_SPI_MEM_MAP(0x107) = (0x3FFFFF & 0x41C05A14);
-  return trim_value;
+  return (uint32_t)trim_value;
 }
 
 /*==============================================*/
@@ -665,6 +665,7 @@ uint32_t RSI_APB_ProgramConfigData(uint32_t *config)
   volatile uint32_t clear_cnt = 0, cnt = 0;
   volatile uint32_t reg_write_data = 0, reg_read_data = 0, write_mask = 0, write_bit_pos = 0;
   volatile uint8_t msb = 0, lsb = 0;
+  (void)reg_addr;
 
   if (config == NULL) {
     return INVALID_PARAMETERS;
@@ -1289,7 +1290,7 @@ void RSI_IPMU_32KHzROClkClib(void)
     /* Read calibrated trim value after low frequency calibration done */
     ro32k_trim = ((ULP_SPI_MEM_MAP(ULPCLKS_CALIB_DONE_REG_ADDR) & RO_TRIM_VALUE_LF) >> 4);
     /*Mask the bits where the trim value need to write */
-    ULP_SPI_MEM_MAP(ULPCLKS_32KRO_CLK_REG_OFFSET) &= ~(MASK32KRO_TRIM_VALUE_WRITE_BITS);
+    ULP_SPI_MEM_MAP(ULPCLKS_32KRO_CLK_REG_OFFSET) &= (uint32_t)(~(MASK32KRO_TRIM_VALUE_WRITE_BITS));
     ;
     /* Programming the calibrated trim to SPI register. */
     ULP_SPI_MEM_MAP(ULPCLKS_32KRO_CLK_REG_OFFSET) |= (ro32k_trim << 16);
@@ -1342,7 +1343,7 @@ void RSI_IPMU_32KHzRCClkClib(void)
     /* Read calibrated trim value after low frequency calibration done */
     rc32k_trim = ((ULP_SPI_MEM_MAP(ULPCLKS_CALIB_DONE_REG_ADDR) & RC_TRIM_VALUE_LF) >> 4);
     /*Mask the bits where the trim value need to write */
-    ULP_SPI_MEM_MAP(ULPCLKS_32KRC_CLK_REG_OFFSET) &= ~(MASK32KRC_TRIM_VALUE_WRITE_BITS);
+    ULP_SPI_MEM_MAP(ULPCLKS_32KRC_CLK_REG_OFFSET) &= (uint32_t)(~(MASK32KRC_TRIM_VALUE_WRITE_BITS));
     ;
     /* Programming the calibrated trim to SPI register. */
     ULP_SPI_MEM_MAP(ULPCLKS_32KRC_CLK_REG_OFFSET) |= (rc32k_trim << 14);
@@ -1395,7 +1396,7 @@ uint32_t RSI_Clks_Trim32MHzRC(uint32_t freq)
   if (!(no_oftst_clk == (freq))) {
     reg_read = ULP_SPI_MEM_MAP(ULPCLKS_32MRC_CLK_REG_OFFSET);
     /* Clears Trim bits(14-20) for RC 32MHz clock */
-    reg_read &= ~(0x7F << TRIM_LSB_32MHZ);
+    reg_read &= (uint32_t)(~(0x7F << TRIM_LSB_32MHZ));
     ULP_SPI_MEM_MAP(ULPCLKS_32MRC_CLK_REG_OFFSET) = (reg_read);
     /* check's from 20 bit to 14 bit  */
     for (i = TRIM_MSB_32MHZ; i >= TRIM_LSB_32MHZ; i--) {
@@ -1465,7 +1466,7 @@ void RSI_IPMU_20M_ROClktrim(uint8_t clkfreq)
   /*  powergate enable for calibration domain   */
   ULP_SPI_MEM_MAP(ULPCLKS_TRIM_SEL_REG_ADDR) = ENABLE_CALIB_DOMAIN;
   /* Mask the bits to write required frequency for High frequency RO clock */
-  ULP_SPI_MEM_MAP(ULPCLKS_TRIM_SEL_REG_ADDR) &= ~(0x3F);
+  ULP_SPI_MEM_MAP(ULPCLKS_TRIM_SEL_REG_ADDR) &= (uint32_t)(~(0x3F));
   /*It writes that at what frequency the ROMhz need to be trim    */
   ULP_SPI_MEM_MAP(ULPCLKS_TRIM_SEL_REG_ADDR) |= clkfreq;
   /* Select the RO50M clock to calibrate */
@@ -1477,7 +1478,7 @@ void RSI_IPMU_20M_ROClktrim(uint8_t clkfreq)
   ro50m_trim = ((ULP_SPI_MEM_MAP(ULPCLKS_CALIB_DONE_REG_ADDR) & TRIM_VALUE_BITS) >> 11);
   //  ro50m_trim = (ro50m_trim >> 11);
   /*Mask the bits where the trim value need to write */
-  ULP_SPI_MEM_MAP(ULPCLKS_HF_RO_CLK_REG_OFFSET) &= ~(MASK_TRIM_VALUE_WRITE_BITS);
+  ULP_SPI_MEM_MAP(ULPCLKS_HF_RO_CLK_REG_OFFSET) &= (uint32_t)(~(MASK_TRIM_VALUE_WRITE_BITS));
   /* Programming the calibrated trim to SPI register. */
   ULP_SPI_MEM_MAP(ULPCLKS_HF_RO_CLK_REG_OFFSET) |= (ro50m_trim << 14);
   /* pointing the trim select to SPI i.e write default values to that register */

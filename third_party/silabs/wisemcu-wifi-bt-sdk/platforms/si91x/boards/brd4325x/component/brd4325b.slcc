@@ -6,7 +6,7 @@
 - category: Platform|Board|Starter Kit
 - quality: alpha
 - requires:
-  - name: SI917
+  - name: SI917_Dual_Flash
 - provides:
   - name: brd4325b
   - name: hardware_board

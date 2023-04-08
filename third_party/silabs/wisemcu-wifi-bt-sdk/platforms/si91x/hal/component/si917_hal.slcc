@@ -24,4 +24,3 @@ provides:
 requires:
   - name: rsilib_egpio
   - name: rsilib_clock_update
-  - name: SI917

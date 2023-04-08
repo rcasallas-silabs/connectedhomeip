@@ -38,36 +38,16 @@ toolchain_settings: []
 readme:
   - path: readme.md
 other_file:
-  - path: resources/readme/creationfinal1.png
-  - path: resources/readme/ncpboarddetection112.png
-  - path: resources/readme/ftdiprints118.png
-  - path: resources/readme/multi_gatt_master1.png
-  - path: resources/readme/image79b.png
-  - path: resources/readme/buildncp.png
-  - path: resources/readme/multigattslave2.png
-  - path: resources/readme/keil_with_out_os.png
-  - path: resources/readme/gatt_server.png
-  - path: resources/readme/device_advertising.png
-  - path: resources/readme/multigattslave1.png
-  - path: resources/readme/debugmodencp.png
-  - path: resources/readme/multi_gatt_slave1.png
-  - path: resources/readme/buildsoc3.png
-  - path: resources/readme/advertiser.png
-  - path: resources/readme/debugmodesoc.png
-  - path: resources/readme/projctselection1.png
-  - path: resources/readme/image79blemulticonngatt.png
-  - path: resources/readme/socboarddetection111.png
-  - path: resources/readme/with_out_os.png
-  - path: resources/readme/multi_gatt_master2.png
-  - path: resources/readme/multigattmaster2.png
-  - path: resources/readme/multi_gatt_slave2.png
-  - path: resources/readme/buildsoc4.png
-  - path: resources/readme/multigattmaster1.png
-  - path: resources/readme/image79blemulticonngattncp.png
-  - path: resources/readme/with_out_os1.png
-  - path: resources/readme/image1.png
-  - path: resources/readme/buildsoc5.png
-  - path: resources/readme/buildsuccessncp1.png
+  - path: resources/readme/blecentralncp.png
+  - path: resources/readme/blemultigattncp.png
+  - path: resources/readme/blemultigattsoc.png
+  - path: resources/readme/blemultigattmain1.png
+  - path: resources/readme/blemultigattsecondary1.png
+  - path: resources/readme/blemultigattconfigurations.png
+  - path: resources/readme/blemultigattsecondary2.png
+  - path: resources/readme/blemultigattmain2.png
+  - path: resources/readme/blecentralsoc.png
+  - path: resources/readme/blemultigattadvertiser.png
 ui_hints:
   highlight:
     - path: readme.md

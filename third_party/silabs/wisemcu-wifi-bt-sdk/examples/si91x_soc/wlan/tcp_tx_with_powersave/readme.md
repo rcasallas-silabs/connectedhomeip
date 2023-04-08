@@ -1,78 +1,87 @@
-# TCP Tx with Powersave
+# **TCP Tx with Powersave**
 
-## Introduction
+## **1 Introduction**
 
 This application demonstrates the process for configuring the SiWx91x powersave on periodic wakeup test application power consumption of Silicon device in Connected sleep mode having TCP server socket in open state.
 
 The application creates TCP client socket and then connects to a remote server. After establishing socket connection, TA/NWP is configured in powersave mode, the module Send 512Kb data to TCP Server every 50msec. In this application, TA/NWP is in powersave when data transfer occurs. After completion of data transfer, M4 goes to sleep with configurable alarm time. When the alarm times out, M4 wakes up and in turn NWP/TA is woken up by packet from M4 and flow repeats.
 
-## Setting Up 
-To use this application, the following hardware, software and project setup is required.
+## **2 Prerequisites**
+For running the application, you will need the following:
+### **2.1 Hardware Requirements**
+- A Windows PC
+- A wireless Access Point
+- Silicon Labs SiWx917 PK6030A SoC Kit which includes
+  - BRD4001A/BRD4002A Wireless Starter Kit Mainboard
+  - BRD4325A Radio Board
+- USB TO UART converter or TTL cable
+### **2.2 Software Requirements**
+- Simplicity Studio IDE
+   - To download and install the Simplicity Studio IDE, refer to the [Simplicity Studio IDE Set up]() section in ***Getting started with SiWx91x SoC*** guide.
+- SiWx917_WiSeConnect_SDK.x.x.x.x
+- [TCP/UDP peer application - Hercules](https://www.hw-group.com/software/hercules-setup-utility)
+- Tera Term software or any other serial terminal software - for viewing application prints
+- Energy Profiler tool (Integrated in Simplicity Studio IDE)
 
-### Hardware Requirements  
-  - Windows PC.
-  - Wi-Fi Access point with a connection to the internet
-  - PC2 (Remote PC) with TCP server application (Hercules Setup)
-  - Power analyzer
-  - SiWx91x Wi-Fi Evaluation Kit
-  - **SoC Mode**: 
-      - Silicon Labs [BRD4325A](https://www.silabs.com/)
-  
-#### SoC Mode : 
+## **3 Set up diagram**
 
-![Figure: Setup Diagram for SoC mode TCP Tx with Powersave Example](resources/readme/image184soc.png)
+![Figure: Setup Diagram for TCP Tx with Powersave Example: SoC](resources/readme/image184socwithenergyprofiler.png)
+
+## **4 Set up** 
+- Follow the [Hardware connections and Simplicity Studio IDE Set up]()  section in the ***Getting Started with SiWx91x SoC*** guide to make the hardware connections and add the Gecko and SiWx91x COMBO SDK to Simplicity Studio IDE.
+
+- Ensure that SiWx91x module is loaded with the latest firmware following the [SiWx91x Firmware Update](https://docs.silabs.com/rs9116/latest/wiseconnect-getting-started) section in the ***Getting started with SiWx91x SoC*** guide.
+
+
+## **5 Creation of Project**
   
-### Software Requirements
-  - [Hercules Application](https://www.hw-group.com/files/download/sw/version/hercules_3-2-8.exe)
+To create the project in the Simplicity Studio IDE, follow the [Creation of Project]() section in the ***Getting started with SiWx91x SoC*** guide, choose the **Wi-Fi - SoC TCP Tx with Powersave** example.
    
-### Project Setup
-- **SoC Mode**
-  - **Silicon Labs SiWx91x SoC**. Follow the [Getting Started with SiWx91x SoC](https://docs.silabs.com/) to setup the example to work with SiWx91x SoC and Simplicity Studio.
 
-## Configuring the Application
-The application can be configured to suit your requirements and development environment.
+## **6 Application configuration**
 Read through the following sections and make any changes needed. 
+  
+In the Project explorer pane of the IDE, expand the **tcp_tx_with_powersave_soc** folder and open the **rsi_tcp_tx_with_powersave_on.c** file. Configure the following parameters based on your requirements.
 
-### Wi-Fi Configuration
-Configure the following parameters in **rsi_tcp_tx_with_powersave_on.c** to enable your Silicon Labs Wi-Fi device to connect to your Wi-Fi network.
+   ![Application configuration](resources/readme/tcptxwithpowersaveapplicationconfiguration.png)
 
-```c
-#define SSID           "SILABS_AP"      // Wi-Fi Network Name
-#define PSK            "1234567890"     // Wi-Fi Password
-#define SECURITY_TYPE  RSI_WPA2         // Wi-Fi Security Type: RSI_OPEN / RSI_WPA / RSI_WPA2
-```
+- ### **Wi-Fi Configuration**
 
-### Hercules Setup Configuration
-- `SERVER_PORT` is the remote TCP server port number on the PC running Hercules Setup.
-- `SERVER_IP_ADDRESS` is the remote TCP server IP address on the PC running Hercules Setup. 
+    ```c
+    //! Wi-Fi Network Name
+    #define SSID                       "SILABS_AP"      
 
-```c
-  #define SERVER_PORT        <remote port>
-  #define SERVER_IP_ADDRESS  "192.168.10.100"
-```
-### Memory & Throughput
-  - `GLOBAL_BUFF_LEN` sets the application memory size (in bytes) used by the driver.
+    //! Wi-Fi Password
+    #define PSK                        "1234567890"     
 
-```c
-  #define GLOBAL_BUFF_LEN    15000
-```
-Number of packets to be transmitted can also be configured
+    //! Wi-Fi Security Type: RSI_OPEN / RSI_WPA / RSI_WPA2
+    #define SECURITY_TYPE              RSI_WPA2         
+    ```
 
-```c
-#define NUMBER_OF_PACKETS 44
-```
+- ### **Hercules Setup Configuration**
 
-### M4 Alarm time configuration
-```c
-#define ALARM_PERIODIC_TIME 300
-```
+    ```c
+      //! The remote TCP server port number on the PC running Hercules Setup
+      #define SERVER_PORT              5001              
+      
+      //! The remote TCP server IP address on the PC running Hercules Setup
+      #define SERVER_IP_ADDRESS        "192.168.10.100"  
 
-### Major Powersave Options
+      //! Number of packets to be transmitted can also be configured
+      #define NUMBER_OF_PACKETS        44
+    ```
+
+- ### **M4 Alarm time configuration**
+    ```c
+    #define ALARM_PERIODIC_TIME        300
+    ```
+
+- ### **Major Powersave Options**
 The primary powersave settings are configured with `PSP_MODE` and `PSP_TYPE`. The default power save mode is set to low power mode 2 (`RSI_SLEEP_MODE_2`) with maximum power save (`RSI_MAX_PSP`) and with M4 based handshake as follows.
 
 ```c
-  #define PSP_MODE  RSI_SLEEP_MODE_2
-  #define PSP_TYPE  RSI_MAX_PSP
+  #define PSP_MODE                     RSI_SLEEP_MODE_2
+  #define PSP_TYPE                     RSI_MAX_PSP
 ```
 
 `PSP_MODE` refers to the power save profile mode. SiWx91x EVK supports the following power modes:
@@ -93,16 +102,12 @@ The primary powersave settings are configured with `PSP_MODE` and `PSP_TYPE`. Th
 `PSP_TYPE` refers to power save profile type. SiWx91x EVK supports following power save profile types:
   - `RSI_MAX_PSP` : In this mode, SiWx91x EVK will be in Maximum power save mode. i.e device will wake up for every DTIM beacon and do data Tx and Rx.
   - `RSI_FAST_PSP` : In this mode, SiWx91x EVK will disable power save for any Tx/Rx packet for monitor interval of time (monitor interval can be set through macro in `rsi_wlan_config.h` file, default value is 50 ms). If there is no data for monitor interval of time, then SiWx91x EVK will again enable power save.
-  - `RSI_UAPSD` : This `PSP_TYPE` is used to enable WMM power save.
-
 ----
 
 **Note!**
   1. `PSP_TYPE` is valid only when `PSP_MODE` is set to `RSI_SLEEP_MODE_1` or `RSI_SLEEP_MODE_2` mode.
-  2. `RSI_UAPSD` power profile type in `PSP_TYPE` is valid only when `RSI_WMM_PS_ENABLE` is enabled in `rsi_wlan_config.h` file.
 
 ----
-
 
 ### Additional Powersave Options
 Additional powersave options may be configured in **rsi_wlan_config.h**.
@@ -129,19 +134,37 @@ Additional powersave options may be configured in **rsi_wlan_config.h**.
   #define BUFFER_FULL_HANDLING                0 
 ```
 
-# Build Application
+## **7 Setup for Serial Prints**
 
-After making any custom configuration changes required, build, download and run the application as described in the [SoC Getting Started](https://docs.silabs.com/). 
+To Setup the serial prints, follow the [Setup for Serial Prints]() section in the ***Getting started with SiWx91x SoC*** guide.
+  
+## **8 Build, Flash, and Run the Application**
 
-# Testing Application 
+To build, flash, and run the application project refer to the [Build and Flash the Project]() section in the ***Getting Started with SiWx91x SoC*** guide.
 
-After successful connection with access point, module starts TCP client connects to TCP Server on remote PC enter SERVER PORT and click on listen on Hercules application .
+## **9 Execution Flow**
 
-![Figure: Hercules Setup Utilities on the remote PC](resources/readme/image185.png)
+- Before running the application on SiWx91x, set up the TCP server on remote PC
+  - Open a command prompt on the remote PC connected to the Wi-Fi access point.
+  - Start a TCP server using the below command in command prompt.
+  > `C:\ iperf.exe –s -p <SERVER_PORT> -i 1` 
 
-> If the TCP client connected to TCP server its shows Client connected in Client connection status.
- 
-![Figure: TCP packets to the remote peer](resources/readme/image187.png)
+    ![Figure: command prompt on the remote PC](resources/readme/image185.png)
+  > If the Iperf server does not start and gives an error in the form of "Access Denied", the user can resolve this error by running the command prompt as an administrator.
+- Data transfer can be observed as follows:
+    
+    ![Figure: TCP packets to the remote peer](resources/readme/image187.png)
 
+- Application prints can be observed as follows
+
+  ![Figure: TCP packets to the remote peer](resources/readme/tcptxwithpowersaveapplicationprints1.png)
+
+  ![Figure: TCP packets to the remote peer](resources/readme/tcptxwithpowersaveapplicationprints2.png)
+
+
+## **10 Application flow**
 As the application runs, SiWx91x scans and connects to the Wi-Fi access point and obtains an IP address, socket creation and connection takes place. 
 NWP/TA is triggered to sleep with power mode 2 with ram retention, NWP/TA proceeds to transmit packets, for each packet TA is woken up by M4. In this application, NWP/TA is in powersave when data transmission occurs. After transmitting all packets, M4 goes to sleep with configurable alarm time. When the alarm times out, M4 wakes up and in turn NWP/TA is woken up by packet from M4 and flow repeats from socket creation and connection steps.
+
+## **Appendix**
+Refer [AEM measurement]() section in ***Getting Started with SiWx91x SoC*** guide for measuring current consumption of SiWx91x module. 

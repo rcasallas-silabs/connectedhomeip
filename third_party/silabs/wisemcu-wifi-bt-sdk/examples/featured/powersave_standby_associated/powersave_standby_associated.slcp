@@ -35,53 +35,18 @@ toolchain_settings: []
 readme:
   - path: readme.md
 other_file:
-  - path: resources/readme/energy_profiler_step_1.png
-  - path: resources/readme/creationfinal114.png
-  - path: resources/readme/energy_profiler_step_5.png
-  - path: resources/readme/debugmodesoc117.png
-  - path: resources/readme/power_meter_avg_current_consumption.png
-  - path: resources/readme/buildingpjt115.png
-  - path: resources/readme/image184soc.png
+  - path: resources/readme/psassociateddebugprintswithdatatransferncp.png
+  - path: resources/readme/powersavestandbyassociatedapplicationconfiguration.png
   - path: resources/readme/image187.png
-  - path: resources/readme/usb_to_uart_2.png
-  - path: resources/readme/power_save_current_measurement_pins.png
-  - path: resources/readme/energy_profiler_step_4.png
-  - path: resources/readme/serial_port.png
-  - path: resources/readme/debug_prints_without_data_transfer_ncp.png
-  - path: resources/readme/image184ncp.png
-  - path: resources/readme/debug_prints_without_data_transfer_soc.png
-  - path: resources/readme/build_project_ncp.png
-  - path: resources/readme/projctselectionncp113.png
-  - path: resources/readme/usb_to_uart_1.png
-  - path: resources/readme/efm32.png
-  - path: resources/readme/image359.png
-  - path: resources/readme/image184c.png
-  - path: resources/readme/efr32.png
-  - path: resources/readme/exp-board-preprocessor.png
-  - path: resources/readme/energy_profiler_step_7.png
-  - path: resources/readme/ncp_macros.png
-  - path: resources/readme/buildsuccesssoc116.png
-  - path: resources/readme/soc_board_detection.png
-  - path: resources/readme/energy_profiler_step_3.png
-  - path: resources/readme/debugmodencp120.png
-  - path: resources/readme/creationfinalncp114.png
+  - path: resources/readme/psassociateddebugprintswithdatatransfersoc.png
+  - path: resources/readme/powersavestandbyassociatedsetupncp.png
+  - path: resources/readme/psassociateddebugprintswithoutdatatransfersoc.png
+  - path: resources/readme/powermeteravgcurrentconsumption.png
+  - path: resources/readme/psassociateddebugprintswithoutdatatransferncp.png
+  - path: resources/readme/powersavecurrentmeasurementpins.png
   - path: resources/readme/image185.png
-  - path: resources/readme/socboarddetection111.png
-  - path: resources/readme/setup_soc.png
-  - path: resources/readme/debug_prints_with_data_transfer_ncp.png
-  - path: resources/readme/energy_profiler_step_2.png
-  - path: resources/readme/soc_macros.png
-  - path: resources/readme/build_project_soc.png
-  - path: resources/readme/setup_ncp.png
-  - path: resources/readme/port_selection.png
-  - path: resources/readme/port_selection_soc.png
-  - path: resources/readme/image184b.png
-  - path: resources/readme/debug_prints_with_data_transfer_soc.png
-  - path: resources/readme/energy_profiler_step_6.png
-  - path: resources/readme/serial_port_setup.png
-  - path: resources/readme/buildsuccessncp116.png
-  - path: resources/readme/projctselection113.png
-  - path: resources/readme/energy_profiler_step_8.png
+  - path: resources/readme/enerygyprofilerpowersavestandbyassociated.png
+  - path: resources/readme/powersavestandbyassociatedsetupsoc.png
 ui_hints:
   highlight:
     - path: readme.md

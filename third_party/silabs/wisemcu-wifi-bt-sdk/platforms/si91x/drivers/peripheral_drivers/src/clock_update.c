@@ -144,13 +144,13 @@ uint32_t RSI_CLK_GetBaseClock(PERI_CLKS_T peri_src)
         if (div_fac == 0) {
           break; // Clock is gated
         } else {
-          src_clk = src_clk / (div_fac + 0.5);
+          src_clk = (uint32_t)(src_clk / (div_fac + 0.5));
         }
       } else {
         if (div_fac == 0) {
           return src_clk; //divider bypassed
         } else {
-          src_clk = src_clk / div_fac;
+          src_clk = (uint32_t)(src_clk / div_fac);
         }
       }
       break;
@@ -199,13 +199,13 @@ uint32_t RSI_CLK_GetBaseClock(PERI_CLKS_T peri_src)
         if (div_fac == 0) {
           break; // Clock is gated
         } else {
-          src_clk = src_clk / (div_fac + 0.5);
+          src_clk = (uint32_t)(src_clk /(div_fac + 0.5));
         }
       } else {
         if (div_fac == 0) {
           return src_clk; //divider bypassed
         } else {
-          src_clk = (src_clk / div_fac);
+          src_clk = (uint32_t)(src_clk / div_fac);
         }
       }
       break;

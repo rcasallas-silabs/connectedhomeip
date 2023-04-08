@@ -254,6 +254,9 @@
 #define TRANSMITTER            0
 #define RECEIVER               1
 
+void I2C0_IRQHandler (void);
+void I2C1_IRQHandler (void);
+void I2C2_IRQHandler (void);
 /* I2C Control Information */
 typedef struct 
 {

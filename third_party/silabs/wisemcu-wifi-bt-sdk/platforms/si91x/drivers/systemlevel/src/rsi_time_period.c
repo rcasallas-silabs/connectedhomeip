@@ -20,6 +20,7 @@
  */
 
 #include "rsi_chip.h"
+#include "rsi_time_period.h"
 
 /**
  * \ingroup   RSI_SPECIFIC_DRIVERS
@@ -77,24 +78,24 @@ error_t RSI_TIMEPERIOD_RCCalibration(TIME_PERIOD_Type *pstcTimePeriod,
     return ERROR_TIME_PERIOD_PARAMETERS;
   }
   /*Refernce clock time period*/
-  pstcTimePeriod->MCU_CAL_REF_CLK_TIEMPERIOD_REG_b.TIMEPERIOD_REF_CLK = u32TimePeriodRefClk;
+  pstcTimePeriod->MCU_CAL_REF_CLK_TIEMPERIOD_REG_b.TIMEPERIOD_REF_CLK = (unsigned int)(u32TimePeriodRefClk & 0x0FFFFFF);
   /*Clock settling time configuration */
-  pstcTimePeriod->MCU_CAL_REF_CLK_SETTLE_REG_b.XTAL_SETTLE = u32XtalSettle;
+  pstcTimePeriod->MCU_CAL_REF_CLK_SETTLE_REG_b.XTAL_SETTLE = (unsigned int)(u32XtalSettle & 0x07);
   /*RC Calib MUX select*/
   pstcTimePeriod->MCU_CAL_START_REG_b.RC_XTAL_MUX_SEL = 0;
   /*Enable the RC calib*/
   pstcTimePeriod->MCU_CAL_START_REG_b.START_CALIB_RC = 1;
   /*average factor */
-  pstcTimePeriod->MCU_CAL_START_REG_b.ALPHA_RC = u8AverageFactor;
+  pstcTimePeriod->MCU_CAL_START_REG_b.ALPHA_RC = (unsigned int)(u8AverageFactor & 0x03);
   /*Number of clock required for calibration */
-  pstcTimePeriod->MCU_CAL_START_REG_b.NO_OF_RC_CLKS = u16RcClkCnt;
+  pstcTimePeriod->MCU_CAL_START_REG_b.NO_OF_RC_CLKS = (unsigned int)(u16RcClkCnt & 0x03);
 
   /*Periodic calibration is selected */
   if (bPeriodicCalibEn) {
     /*Periodic calibration enable*/
     pstcTimePeriod->MCU_CAL_START_REG_b.PERIODIC_RC_CALIB_EN = 1;
     /*Update periodic rate at which calibration has to happen */
-    pstcTimePeriod->MCU_CAL_START_REG_b.RC_TRIGGER_TIME_SEL = u8PeriodicCalibRate;
+    pstcTimePeriod->MCU_CAL_START_REG_b.RC_TRIGGER_TIME_SEL = (unsigned int)(u8PeriodicCalibRate & 0x03);
   }
 
   /*Periodic calibration is selected */
@@ -102,7 +103,7 @@ error_t RSI_TIMEPERIOD_RCCalibration(TIME_PERIOD_Type *pstcTimePeriod,
     /*Enable tempearature based calibrarion */
     pstcTimePeriod->MCU_CAL_TEMP_PROG_REG_b.PERIODIC_TEMP_CALIB_EN = 1;
     /*Update at which temperature calibration has to happen*/
-    pstcTimePeriod->MCU_CAL_TEMP_PROG_REG_b.MAX_TEMP_CHANGE = u8TemperatureVal;
+    pstcTimePeriod->MCU_CAL_TEMP_PROG_REG_b.MAX_TEMP_CHANGE = (unsigned int)(u8TemperatureVal & 0x03);
   }
   return RSI_OK;
 }
@@ -114,7 +115,6 @@ error_t RSI_TIMEPERIOD_RCCalibration(TIME_PERIOD_Type *pstcTimePeriod,
  * @param[in] pstcTimePeriod is pointer to the timperiod calibration registration instance
  * @return    Returns the time period on success
  */
-
 uint32_t RSI_TIMEPERIOD_RCCalibTimePeriodRead(TIME_PERIOD_Type *pstcTimePeriod)
 {
   if (pstcTimePeriod == NULL) {
@@ -134,7 +134,6 @@ uint32_t RSI_TIMEPERIOD_RCCalibTimePeriodRead(TIME_PERIOD_Type *pstcTimePeriod)
  * @param[in] pstcTimePeriod : pointer to the timperiod calibration registration instance
  * @return    Returns the time period on success
  */
-
 uint32_t RSI_TIMEPERIOD_ROCalibTimePeriodRead(TIME_PERIOD_Type *pstcTimePeriod)
 {
   if (pstcTimePeriod == NULL) {
@@ -191,12 +190,13 @@ error_t RSI_TIMEPERIOD_XTAL32KHzCalibration(TIME_PERIOD_Type *pstcTimePeriod,
                                             uint8_t u8AverageFactor)
 
 {
+  (void)u32XtalSettle;
   if (pstcTimePeriod == NULL) {
     return ERROR_TIME_PERIOD_PARAMETERS;
   }
-  pstcTimePeriod->MCU_CAL_REF_CLK_TIEMPERIOD_REG_b.TIMEPERIOD_REF_CLK = u32TimePeriodRefClk;
-  pstcTimePeriod->MCU_CAL_START_REG_b.ALPHA_RC                        = u8AverageFactor;
-  pstcTimePeriod->MCU_CAL_START_REG_b.NO_OF_RC_CLKS                   = u16RcClkCnt;
+  pstcTimePeriod->MCU_CAL_REF_CLK_TIEMPERIOD_REG_b.TIMEPERIOD_REF_CLK = (unsigned int)(u32TimePeriodRefClk & 0x0FFFFFF);
+  pstcTimePeriod->MCU_CAL_START_REG_b.ALPHA_RC                        = (unsigned int)(u8AverageFactor & 0x07);
+  pstcTimePeriod->MCU_CAL_START_REG_b.NO_OF_RC_CLKS                   = (unsigned int)(u16RcClkCnt & 0x07);
   pstcTimePeriod->MCU_CAL_START_REG_b.RC_XTAL_MUX_SEL                 = 1;
   pstcTimePeriod->MCU_CAL_START_REG_b.START_CALIB_RC                  = 1;
 
@@ -205,14 +205,14 @@ error_t RSI_TIMEPERIOD_XTAL32KHzCalibration(TIME_PERIOD_Type *pstcTimePeriod,
     /*Periodic calibration enable*/
     pstcTimePeriod->MCU_CAL_START_REG_b.PERIODIC_RC_CALIB_EN = 1;
     /*Update periodic rate at which calibration has to happen */
-    pstcTimePeriod->MCU_CAL_START_REG_b.RC_TRIGGER_TIME_SEL = u8PeriodicCalibRate;
+    pstcTimePeriod->MCU_CAL_START_REG_b.RC_TRIGGER_TIME_SEL = (unsigned int)(u8PeriodicCalibRate & 0x07);
   }
   /*Periodic calibration is selected */
   if (bTemperatureCalibEn) {
     /*Enable tempearature based calibrarion */
     pstcTimePeriod->MCU_CAL_TEMP_PROG_REG_b.PERIODIC_TEMP_CALIB_EN = 1;
     /*Update at which temperature calibration has to happen*/
-    pstcTimePeriod->MCU_CAL_TEMP_PROG_REG_b.MAX_TEMP_CHANGE = u8TemperatureVal;
+    pstcTimePeriod->MCU_CAL_TEMP_PROG_REG_b.MAX_TEMP_CHANGE = (unsigned int)(u8TemperatureVal & 0x1F);
   }
   return RSI_OK;
 }
@@ -279,16 +279,16 @@ error_t RSI_TIMEPERIOD_ROCalibration(TIME_PERIOD_Type *pstcTimePeriod,
   else {
     pstcTimePeriod->MCU_CAL_START_REG_b.RC_XTAL_MUX_SEL = 0;
   }
-  pstcTimePeriod->MCU_CAL_START_REG_b.NO_OF_RO_CLKS  = u16RoClkCnt;
+  pstcTimePeriod->MCU_CAL_START_REG_b.NO_OF_RO_CLKS  = (unsigned int)(u16RoClkCnt & 0x0F);
   pstcTimePeriod->MCU_CAL_START_REG_b.START_CALIB_RO = 1;
-  pstcTimePeriod->MCU_CAL_START_REG_b.ALPHA_RO       = u8AverageFactor;
-  pstcTimePeriod->MCU_CAL_START_REG_b.RC_SETTLE_TIME = u32XtalSettle;
+  pstcTimePeriod->MCU_CAL_START_REG_b.ALPHA_RO       = (unsigned int)(u8AverageFactor & 0x07);
+  pstcTimePeriod->MCU_CAL_START_REG_b.RC_SETTLE_TIME = (unsigned int)(u32XtalSettle & 0x07);
   /*Periodic calibration is selected */
   if (bPeriodicCalibEn) {
     /*Periodic calibration enable*/
     pstcTimePeriod->MCU_CAL_START_REG_b.PERIODIC_RO_CALIB_EN = 1;
     /*Update periodic rate at which calibration has to happen */
-    pstcTimePeriod->MCU_CAL_START_REG_b.RO_TRIGGER_TIME_SEL = u8PeriodicCalibRate;
+    pstcTimePeriod->MCU_CAL_START_REG_b.RO_TRIGGER_TIME_SEL = (unsigned int)(u8PeriodicCalibRate & 0x03);
   } else {
     /*Periodic calibration enable*/
     pstcTimePeriod->MCU_CAL_START_REG_b.PERIODIC_RO_CALIB_EN = 0;
@@ -316,7 +316,7 @@ error_t RSI_TIMEPERIOD_TimerClkSel(TIME_PERIOD_Type *pstcTimePeriod, uint32_t u3
     return ERROR_TIME_PERIOD_PARAMETERS;
   }
   /*Update the timer period */
-  pstcTimePeriod->MCU_CAL_TIMER_CLOCK_PERIOD_b.RTC_TIMER_CLK_PERIOD = u32TimePeriod;
+  pstcTimePeriod->MCU_CAL_TIMER_CLOCK_PERIOD_b.RTC_TIMER_CLK_PERIOD = (unsigned int)(u32TimePeriod & 0x01FFFFFF);
 
   /*Indicated SOC programmed rtc_timer clock period is applied at KHz clock domain*/
   while (!pstcTimePeriod->MCU_CAL_TIMER_CLOCK_PERIOD_b.SPI_RTC_TIMER_CLK_PERIOD_APPLIED_b)
@@ -341,7 +341,7 @@ error_t RSI_TIMEPERIOD_LowPwrTrigSelEn(TIME_PERIOD_Type *pstcTimePeriod, boolean
   if (pstcTimePeriod == NULL) {
     return ERROR_TIME_PERIOD_PARAMETERS;
   }
-  pstcTimePeriod->MCU_CAL_START_REG_b.LOW_POWER_TRIGGER_SEL = bEn;
+  pstcTimePeriod->MCU_CAL_START_REG_b.LOW_POWER_TRIGGER_SEL = (unsigned int)(bEn & 0x01);
   return RSI_OK;
 }
 
@@ -366,7 +366,7 @@ error_t RSI_TIMEPERIOD_VbatTrigSel(TIME_PERIOD_Type *pstcTimePeriod, uint8_t u8T
   if (pstcTimePeriod == NULL) {
     return ERROR_TIME_PERIOD_PARAMETERS;
   }
-  pstcTimePeriod->MCU_CAL_START_REG_b.VBATT_TRIGGER_TIME_SEL = u8Time;
+  pstcTimePeriod->MCU_CAL_START_REG_b.VBATT_TRIGGER_TIME_SEL = (unsigned int)(u8Time & 0x07);
   return RSI_OK;
 }
 

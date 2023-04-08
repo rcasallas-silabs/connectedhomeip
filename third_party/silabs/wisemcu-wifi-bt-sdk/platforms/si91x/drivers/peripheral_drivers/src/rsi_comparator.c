@@ -20,7 +20,6 @@
 /** @addtogroup SOC20
 * @{
 */
-/*==============================================*/
 /**
  * @fn           error_t RSI_COMP_Config(COMP_Type* comp, uint8_t comp_number,uint8_t sel_p_mux,
  *                                       uint8_t sel_n_mux,uint8_t hyst_en,uint8_t filter_en)
@@ -81,18 +80,18 @@ error_t RSI_COMP_Config(AUX_ADC_DAC_COMP_Type *comp,
   if (comp_number == COMP1) {
     /* Disable the comparator */
     comp->COMPARATOR1_b.CMP1_EN        = DISABLE;
-    comp->COMPARATOR1_b.CMP1_MUX_SEL_P = sel_p_mux;
-    comp->COMPARATOR1_b.CMP1_MUX_SEL_N = sel_n_mux;
-    comp->COMPARATOR1_b.CMP1_HYST      = hyst_en;
-    comp->COMPARATOR1_b.CMP1_EN_FILTER = filter_en;
+    comp->COMPARATOR1_b.CMP1_MUX_SEL_P = (unsigned int)(sel_p_mux & 0x0F);
+    comp->COMPARATOR1_b.CMP1_MUX_SEL_N = (unsigned int)(sel_n_mux & 0x0F);
+    comp->COMPARATOR1_b.CMP1_HYST      = (unsigned int)(hyst_en & 0x03);
+    comp->COMPARATOR1_b.CMP1_EN_FILTER = (unsigned int)(filter_en & 0x01);
   } else {
     /*Configure the comparator2 parameter*/
     /* Disable the comparator */
     comp->COMPARATOR1_b.CMP2_EN        = DISABLE;
-    comp->COMPARATOR1_b.CMP2_MUX_SEL_P = sel_p_mux;
-    comp->COMPARATOR1_b.CMP2_MUX_SEL_N = sel_n_mux;
-    comp->COMPARATOR1_b.CMP2_HYST      = hyst_en;
-    comp->COMPARATOR1_b.CMP2_EN_FILTER = filter_en;
+    comp->COMPARATOR1_b.CMP2_MUX_SEL_P = (unsigned int)(sel_p_mux & 0x0F);
+    comp->COMPARATOR1_b.CMP2_MUX_SEL_N = (unsigned int)(sel_n_mux & 0x0F);
+    comp->COMPARATOR1_b.CMP2_HYST      = (unsigned int)(hyst_en & 0x03);
+    comp->COMPARATOR1_b.CMP2_EN_FILTER = (unsigned int)(filter_en & 0x01);
   }
 
   /* Reference buffer enable */
@@ -110,6 +109,7 @@ error_t RSI_COMP_Config(AUX_ADC_DAC_COMP_Type *comp,
   return RSI_OK;
 }
 
+/*==============================================*/
 /**
  * @fn           error_t RSI_COMP_Enable(AUX_ADC_DAC_COMP_Type* comp,uint8_t comp_number , 
  *                       uint8_t enable)
@@ -202,7 +202,7 @@ error_t RSI_COMP_Enable(AUX_ADC_DAC_COMP_Type *comp, uint8_t comp_number, uint8_
   if (comp_number == COMP1) {
     RSI_COMP_IntrEnableDisable(comp_number, DISABLE);
 
-    comp->COMPARATOR1_b.CMP1_EN = enable;
+    comp->COMPARATOR1_b.CMP1_EN = (unsigned int)(enable & 0x01);
 
     if (enable) {
       for (i = 0; i < 300; i++) {
@@ -218,7 +218,7 @@ error_t RSI_COMP_Enable(AUX_ADC_DAC_COMP_Type *comp, uint8_t comp_number, uint8_
   else {
     RSI_COMP_IntrEnableDisable(comp_number, DISABLE);
 
-    comp->COMPARATOR1_b.CMP2_EN = enable;
+    comp->COMPARATOR1_b.CMP2_EN = (unsigned int)(enable & 0x01);
 
     if (enable) {
       for (i = 0; i < 300; i++) {
@@ -234,6 +234,7 @@ error_t RSI_COMP_Enable(AUX_ADC_DAC_COMP_Type *comp, uint8_t comp_number, uint8_
   return RSI_OK;
 }
 
+/*==============================================*/
 /**
  * @fn           error_t RSI_COMP_ResBank(AUX_ADC_DAC_COMP_Type* comp,uint16_t value_thrsh)
  * @brief        This API is used to set register bank threshold value.
@@ -273,7 +274,7 @@ error_t RSI_COMP_ResBank(AUX_ADC_DAC_COMP_Type *comp, uint16_t value_thrsh)
 #ifdef CHIP_9117
     RSI_COMP_IntrEnableDisable(COMP1, DISABLE);
 
-    comp->BOD_b.BOD_THRSH = value_thrsh;
+    comp->BOD_b.BOD_THRSH = (unsigned int)(value_thrsh & 0x1F);
 
     RSI_COMP_IntrEnableDisable(COMP1, ENABLE);
 #endif
@@ -303,7 +304,7 @@ error_t RSI_COMP_ResBank(AUX_ADC_DAC_COMP_Type *comp, uint16_t value_thrsh)
 #ifdef CHIP_9117
     RSI_COMP_IntrEnableDisable(COMP2, DISABLE);
 
-    comp->BOD_b.BOD_THRSH = value_thrsh;
+    comp->BOD_b.BOD_THRSH = (unsigned int)(value_thrsh & 0x1F);
 
     RSI_COMP_IntrEnableDisable(COMP2, ENABLE);
 #endif
@@ -311,6 +312,7 @@ error_t RSI_COMP_ResBank(AUX_ADC_DAC_COMP_Type *comp, uint16_t value_thrsh)
   return RSI_OK;
 }
 
+/*==============================================*/
 /**
  * @fn           error_t RSI_COMP_ReferenceScaler(AUX_ADC_DAC_COMP_Type* comp,uint16_t scalar_factor_value)
  * @brief        This API is used to set the scalar output value.
@@ -353,7 +355,7 @@ error_t RSI_COMP_ReferenceScaler(AUX_ADC_DAC_COMP_Type *comp, uint16_t scalar_fa
 #ifdef CHIP_9117
     RSI_COMP_IntrEnableDisable(COMP1, DISABLE);
 
-    comp->BOD_b.REFBUF_VOLT_SEL = scalar_factor_value;
+    comp->BOD_b.REFBUF_VOLT_SEL = (unsigned int)(scalar_factor_value & 0x0F);
 
     RSI_COMP_IntrEnableDisable(COMP1, ENABLE);
 #endif
@@ -383,7 +385,7 @@ error_t RSI_COMP_ReferenceScaler(AUX_ADC_DAC_COMP_Type *comp, uint16_t scalar_fa
 #ifdef CHIP_9117
     RSI_COMP_IntrEnableDisable(COMP2, DISABLE);
 
-    comp->BOD_b.REFBUF_VOLT_SEL = scalar_factor_value;
+    comp->BOD_b.REFBUF_VOLT_SEL = (unsigned int)(scalar_factor_value & 0x0F);
 
     RSI_COMP_IntrEnableDisable(COMP2, ENABLE);
 #endif
@@ -391,6 +393,7 @@ error_t RSI_COMP_ReferenceScaler(AUX_ADC_DAC_COMP_Type *comp, uint16_t scalar_fa
   return RSI_OK;
 }
 
+/*==============================================*/
 /**
  * @fn           error_t RSI_COMP_OutputMaskConfig(uint8_t comp_number,uint8_t MaskConfig)
  * @brief        This API is used for masking or unmasking the comparator interrupt.     
@@ -482,6 +485,7 @@ error_t RSI_COMP_OutputMaskConfig(uint8_t comp_number, uint8_t MaskConfig)
   return RSI_OK;
 }
 
+/*==============================================*/
 /**
  * @fn           error_t RSI_COMP_IntrEnableDisable(uint8_t comp_number,uint8_t enable)
  * @brief        This API is used to disable or enable comparator interrupt
@@ -526,6 +530,7 @@ error_t RSI_COMP_IntrEnableDisable(uint8_t comp_number, uint8_t enable)
   return RSI_OK;
 }
 
+/*==============================================*/
 /**
  * @fn           error_t RSI_COMP_PinMux(uint8_t comp_number,uint8_t pos_pin,uint8_t neg_pin)
  * @brief        This API configure the required pin in analog for comparator operation.  

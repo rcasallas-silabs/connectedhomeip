@@ -124,6 +124,9 @@ int main(void)
   // Configures the system default clock and power configurations
   SystemCoreClockUpdate();
 
+  // Enable DEBUG UART port for prints
+  DEBUGINIT();
+
   // Fill some data into input buffer
   for (i = 0; i < BUFFER_SIZE; i++) {
     tx_buffer[i] = i + 1;
@@ -133,10 +136,6 @@ int main(void)
 
   // Initialize UART(Enable Clock)
   status = USARTdrv->Initialize(ARM_USART_SignalEvent);
-
-  // Initialized board UART
-  DEBUGINIT();
-
   if (status != ARM_DRIVER_OK) {
     DEBUGOUT("\r\n UART Initialization Failed, Error Code : %d\r\n", status);
     return status;

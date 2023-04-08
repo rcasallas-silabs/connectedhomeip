@@ -701,4 +701,6 @@ void mcpwm_interrupt_handler(RSI_MCPWM_T *pMCPWM, RSI_MCPWM_CALLBACK_T *pCallBac
 #ifdef __cplusplus
 }
 #endif
+#else
+typedef int dummy; // To remove empty translation unit warning.
 #endif 

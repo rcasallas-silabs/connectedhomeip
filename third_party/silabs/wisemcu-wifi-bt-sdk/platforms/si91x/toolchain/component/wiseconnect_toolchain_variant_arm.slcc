@@ -14,3 +14,5 @@ toolchain_settings:
     value: enabled
   - option: device_type
     value: embedded
+  - option: gcc_linker_option
+    value: "-u _printf_float"

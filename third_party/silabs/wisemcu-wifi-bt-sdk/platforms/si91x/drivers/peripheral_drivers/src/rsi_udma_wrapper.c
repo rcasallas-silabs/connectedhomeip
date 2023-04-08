@@ -439,4 +439,6 @@ const ROM_UDMA_WRAPPER_API_T udma_wrapper_api = {
 }
 #endif
 
+#else
+typedef int dummy; // To remove empty translation unit warning.
 #endif //  A11_ROM ||  ROMDRIVER_PRESENT

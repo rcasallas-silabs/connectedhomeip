@@ -38,7 +38,9 @@ other_file:
   - path: resources/readme/efm32_detection.png
   - path: resources/readme/application_prints_soc.png
   - path: resources/readme/run_keil.png
+  - path: resources/readme/ap_application_prints_soc.png
   - path: resources/readme/bare_metal.png
+  - path: resources/readme/ap_applcation_prints_ncp.png
   - path: resources/readme/baud_rate.png
   - path: resources/readme/usb_to_uart_2.png
   - path: resources/readme/ap_example.png
@@ -56,14 +58,19 @@ other_file:
   - path: resources/readme/debug_project_keil.png
   - path: resources/readme/soc_board_detection.png
   - path: resources/readme/chip_9117_macro.png
+  - path: resources/readme/ap_setup_ncp.png
+  - path: resources/readme/ap_setup_soc.png
   - path: resources/readme/application_file_keil.png
   - path: resources/readme/setup2.png
+  - path: resources/readme/ap_configuration_file.png
   - path: resources/readme/build_project_soc.png
   - path: resources/readme/port_selection.png
+  - path: resources/readme/ap_application_prints_ncp.png
   - path: resources/readme/import_project_keil.png
   - path: resources/readme/ap_example_soc.png
   - path: resources/readme/port_selection_soc.png
   - path: resources/readme/serial_port_setup.png
+  - path: resources/readme/ap_application_configuration.png
   - path: resources/readme/program_device.png
   - path: resources/readme/application_configuration.png
   - path: resources/readme/examples_demos.png

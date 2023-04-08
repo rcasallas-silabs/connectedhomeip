@@ -36,6 +36,11 @@ toolchain_settings: []
 readme:
   - path: readme.md
 other_file:
+  - path: resources/readme/throughputdualipv4v6setupsoc.png
+  - path: resources/readme/throughputdualipv4v6setupncp.png
+  - path: resources/readme/throughputdualipv4v6applicationprintsncp.png
+  - path: resources/readme/throughputdualipv4v6applicationprintssoc.png
+  - path: resources/readme/throughputdualipv4v6applicationconfiguration.png
 ui_hints:
   highlight:
     - path: readme.md

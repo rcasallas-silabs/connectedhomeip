@@ -1,6 +1,6 @@
-# M4 Firmware Update
+# **M4 Firmware Update**
 
-## Introduction
+## **1 Introduction**
 
 This application demonstrates how to update the SiWx91x M4 image via Wi-Fi by downloading an image from a remote TCP server. The TCP server may be hosted on a local PC (as demonstrated in this example), or alternately on a cloud service such as Amazon AWS or Microsoft Azure. The update process works as follows:
   - The SiWx91x connects via Wi-Fi as a TCP client to a TCP update server
@@ -8,143 +8,153 @@ This application demonstrates how to update the SiWx91x M4 image via Wi-Fi by do
   - The server responds with the firmware file
   - The OTA application programs the m4 firmware into the SiWx91x flash memory and reboots
 
-## Setting Up 
-To use this application, the following hardware, software and project setup is required.
+## **2 Prerequisites**
 
-### Hardware Requirements	
-  - Windows PC.
-  - Wi-Fi Access point with a connection to the internet
-  - Linux PC or Cygwin on Windows (to build and run the TCP server source provided)
-  - SiWx91x Wi-Fi Evaluation Kit. The SiWx91x supports multiple operating modes. See [Operating Modes]() for details.
-  - **SoC Mode**: 
-      - Silicon Labs [WSTK + BRD4325A](https://www.silabs.com/development-tools/wireless/wi-fi/rs9116x-sb-evk-development-kit)
- 
- 
-#### SoC Mode : 
+For this application, you will need the following:
 
-![Figure: TCP Firmware Update SoC mode Block Diagram](resources/readme/setup_soc.png)
+### **2.1 Hardware Requirements**
+
+- A Windows PC
+
+- A Wireless Access Point
+
+#### **2.1.1 SoC** 
+
+   - Silicon Labs SiWx917 PK6030A SoC Kit which includes
+      - BRD4001A/BRD4002A Wireless Starter Kit Mainboard
+      - BRD4325A Radio Board
+   - USB TO UART converter or TTL cable
+
+
+### **2.2 Software Requirements**
+
+- Simplicity Studio IDE
+   - To download and install the Simplicity Studio IDE, refer to the [Simplicity Studio IDE Set up](https://docs.silabs.com/) section in ***Getting started with SiWx91x*** guides.
+
+- SiWx917_WiSeConnect_SDK.x.x.x.x
   
-### Project Setup
-- **SoC Mode**
-  - **Silicon Labs SiWx91x SoC**. Follow the [Getting Started with SiWx91x SoC](https://docs.silabs.com/) to setup the example to work with SiWx91x SoC and Simplicity Studio.
+- Tera Term software or any other serial terminal software - for viewing application prints
 
-## Configuring the Application
-The application can be configured to suit your requirements and development environment.
-Read through the following sections and make any changes needed. 
-	 
-### Bare Metal/RTOS Support
-To select a bare metal configuration, see [Selecting bare metal](#selecting-bare-metal).
+- A Linux PC - to run the TCP server
 
-### Wi-Fi Configuration
-Configure the following parameters in **rsi_firmware_update_app.c** to enable your Silicon Labs Wi-Fi device to connect to your Wi-Fi network.
+## **3 Setup diagram**
 
-```c
-#define SSID           "SILABS_AP"      // Wi-Fi Network Name
-#define PSK            "1234567890"     // Wi-Fi Password
-#define SECURITY_TYPE  RSI_WPA2         // Wi-Fi Security Type: RSI_OPEN / RSI_WPA / RSI_WPA2
-```
+### **3.1 SoC**
 
-### TCP Configuration
-
-```c
-#define DEVICE_PORT        5001        // TCP client port of the local SiWx91x TCP client
-#define SERVER_PORT        5001        // TCP server port of the remote TCP server
-#define SERVER_IP_ADDRESS  0x6400A8C0  // Server IP address in little endian byte order: 
-                                       //   192.168.0.100 -> 0x64=100, 0x00=0, 0xA8=168, 0xC0=192
-```
-
-# Testing Firmware Udpates
-Before a test of the firwmare update application can be performed, the TCP server first needs to be setup and started.
-
-## Build and run the TCP Server
-  1. Copy the TCP server application **firmware_update_tcp_server_9117.c** provided with the application source to a Linux PC connected to the Wi-Fi access point. 
-  2. Compile the application
-> `user@linux:~$ gcc firmware_update_tcp_server_9117.c` -o ota_server.bin
-  3. Run the application providing the TCP port number (specified in the application) together with the firmware file and path
-> `user@linux:~$ ./ota_server.bin 5001 firmware.bin`
-
-... where **firmware.bin** is the m4 firmware image to be sent to SiWx91x.
-
-### Project Creation - SoC Mode : 
-
-- Connect your board. The Si917 compatible SoC board is **BRD4325A**.
-- Studio should detect your board. Your board will be shown here.
-
- **![Soc Board detection](resources/readme/soc_board_detection.png)**
-
-### Selecting an example application and generate project
-
- SoC
-- Go to the 'EXAMPLE PROJECT & DEMOS' tab and select the Wi-Fi - SoC Firmware Update via TCP Server application
-
-  ![projct_selection](resources/readme/projctselection113.png)
-- Click 'Create'. The "New Project Wizard" window appears. Click 'Finish'
-
-  ![creation_final](resources/readme/creationfinal114.png)
-
-#### Build Project - SoC Mode
-
-- Once the project is created, right click on project and go to properties ? C/C++ Build ? Settings ? Build Steps
-- Add post_build_script_SimplicityStudio.bat file path (SI917_COMBO_SDK.X.X.X.XX\utilities\isp_scripts_common_flash) in build steps settings as shown in below image.
-
-  ![postbuild_script](resources/readme/image359.png)
-- Go to properties → C/C++ Build → Settings → Tool Settings → GNU ARM C Compiler → Preprocessor → Defined symbols (-D) and check for M4 projects macro (RSI_M4_INTERFACE=1) and 9117 macro (CHIP_9117=1). If not present, add the macros and click **Apply and Close**.
+![Setup diagram for Firmware Update Example: SoC](resources/readme/fwupdatesetupsoc.png)
   
-  ![Build Project for SoC mode](resources/readme/soc_macros.png)
-- Click on the build icon (hammer) or right click on project name and choose **Build Project** to build the project.
 
-  ![building_pjt](resources/readme/buildingpjt115.png)
-- Successful build output will show as below.
+## **4 Set up**
 
-  ![build_success_soc](resources/readme/buildsuccesssoc116.png)
+### **4.1 SoC** 
 
-## Program the device
+- Follow the [Hardware connections and Simplicity Studio IDE Set up](https://docs.silabs.com/) section in the respective ***Getting Started with SiWx91x*** guides to make the hardware connections and add the Gecko and SiWx91x COMBO SDKs to the Simplicity Studio IDE.
 
-Once the build was successful, right click on project and click on Debug As->Silicon Labs ARM Program as shown in below image.
-SoC
+### **4.2 SiWx91x module's Firmware Update**
 
-![debug_mode_soc](resources/readme/debugmodesoc117.png)
+- Ensure the SiWx91x module is loaded with the latest firmware following the [SiWx91x Firmware Update](https://docs.silabs.com/rs9116/latest/wiseconnect-getting-started) section in the respective ***Getting started with SiWx91x*** guides.
 
-When the application runs and connects to the TCP server, the m4 firmware image transfer occurs in chunks. The app requests a firmware chunk, the server sends the chunk, the app requests the next chunk, the server sends the chunk, and so forth until the entire transfer completes. As the transfer proceeds, progress is printed to the serial console. On completion, the console prints 'reach end of file'.
+### **TCP Server**
 
-![Figure: Log of firmware transfer](resources/readme/image157.png)
+- The TCP Server should be set up before executing the application. In this example, the TCP Server application **firmware_update_tcp_server_9117.c** present at ***SiWx91x SDK → examples → si91x_soc → wlan → m4_firmware_update*** is used for running the TCP Server. 
+  1. Copy the TCP server application **firmware_update_tcp_server_9117.c** to a Linux PC connected to the Wi-Fi access point.
+  2. Copy the desired SiWx91x firmware **firmware.bin** to the same path where **firmware_update_tcp_server_9117.c** file is present. 
+  3. Compile the application using the following command:
 
-When the firmware update completes, the SiWx91x MCU should be rebooted after which it may take a few minutes to overwrite the old m4 firmware with the new m4 firmware in flash memory.
+     > `user@linux:~$ gcc firmware_update_tcp_server_9117.c -o ota_server.bin`
 
-Application prints
-SoC
+  4. Run the TCP Server on desired port number (in this example, 5001) with the firmware file name specified.
+     
+     > `user@linux:~$ ./ota_server.bin 5001 firmware.bin
+     
+## **5 Project Creation**
 
-  ![Application_Prints_SoC](resources/readme/outputprints119.png)
+- To create the Firmware Update example project in the Simplicity Studio IDE, follow the [Creation of Project](https://docs.silabs.com/) section in the respective ***Getting started with SiWx91x*** guides. 
+   - For SoC, choose the **Wi-Fi - SoC Wi-Fi - Firmware Update via TCP Server** example.
 
-## Observing the output prints on serial terminal
+## **6 Application Configuration**
 
-**SoC mode**: 
-You can use either of the below USB to UART converters for application prints.
-1. Set up using USB to UART converter board.
+1. In the Project explorer pane of the IDE, expand the **firmware_update** folder and open the **rsi_m4_firmware_update_app.c** file. Configure the following parameters based on your requirements.
 
-  - Connect Tx (Pin-6) to P27 on WSTK
-  - Connect GND (Pin 8 or 10) to GND on WSTK
 
-    ![FTDI_prints](resources/readme/usb_to_uart_1.png)
+### **WLAN connection parameters**
 
-**Docklight set up - for SoC mode**
+  - Configure the following parameters in **rsi_m4_firmware_update_app.c** to connect the SiWx91x module to the Access Point network.
 
-1. Open the Docklight tool. 
-   - For SoC mode, choose the serial port to which USB to UART converter is connected and click on **OK**. 
+    ```c
+    //! SSID of the Wi-Fi Access Point
+    #define SSID                                 "SILABS_AP" 
 
-2. Navigate to the Setup → Serial port and update the baud rate to **115200** and click on **OK**.
+    //! SECURITY_TYPE refers to the security mode of the Access Point to which the SiWx91x module has to connect.
+    #define PSK                                  "1234567890" 
 
-The serial port is now connected. 
+    //! PSK refers to the secret key if the Access point is configured in WPA-PSK/WPA2-PSK security modes.
+    #define SECURITY_TYPE                          RSI_WPA2         
+    ```
 
-# Selecting Bare Metal
-The application has been designed to work with FreeRTOS and Bare Metal configurations. By default, the application project files (Keil and Simplicity studio) are configured with FreeRTOS enabled. The following steps demonstrate how to configure Simplicity Studio and Keil to test the application in a Bare Metal environment.
+### **TCP Server Configuration**
 
-## Bare Metal with Simplicity Studio
-> - Open the project in Simplicity Studio
-> - Right click on the project and choose 'Properties'
-> - Go to 'C/C++ Build' | 'Settings' | 'GNU ARM C Compiler' | 'Preprocessor' and remove macro 'RSI_WITH_OS=1'
-> - Select 'Apply' and 'OK' to save the settings
+  - Configure the below TCP Server related parameters
 
-![Figure: project settings in Simplicity Studio](resources/readme/image156b.png) 
+    ```c
+    //! TCP Client port of the local SiWx91x TCP client
+    #define DEVICE_PORT                               5001  
 
-![Figure: project settings in Simplicity Studio](resources/readme/image156c.png)
+    //! TCP Server port of the remote TCP server
+    #define SERVER_PORT                               5001 
+
+    //! TCP Server IP address       
+    #define SERVER_IP_ADDRESS                      "192.168.10.100"   
+    ```
+
+## **7 Setup for Serial Prints**
+
+### **7.1 SoC** 
+
+1. The USB to UART converter/TTL cable is required for getting application prints in case of SoC. To connect USB TO UART converter/TTL cable to EFx32, refer to the [application prints set up for SoC](https://docs.silabs.com/) in Getting Started with SiWx91x SoC guide.
+
+2. Once done with the connections, refer to the [Tera Term Set up](https://docs.silabs.com/) section in the ***Getting Started with SiWx91x SoC*** guide.
+
+### **7.2 NCP**
+
+To view the application prints, refer to the [Tera Term Set up](https://docs.silabs.com/) section in the ***Getting Started with SiWx91x NCP*** guide.
+
+## **8 Build, Flash, and Run the Application**
+
+### **8.1 SoC**
+
+To build, flash, and run the application project refer to the [Build and Flash the Project](https://docs.silabs.com/) section in the ***Getting Started with SiWx91x SoC*** guide.
+
+### **8.2 NCP**
+
+Build, flash, and run the application project. Refer to the [Build and Flash the Project](https://docs.silabs.com/) section in the ***Getting Started with SiWx91x NCP*** guide.
+
+## **9 Application Execution Flow**
+
+1. After the application gets executed, the SiWx91x module connects to the Access Point and gets an IP address. 
+
+   **NOTE!**
+    Ensure the SiWx91x module and the TCP Server are connected to the same network.
+
+2. Subsequently, the SiWx91x module (TCP Client) gets connected to a TCP Server and requests the TCP Server for firmware file in chuncks.
+
+3. The application requests a firmware chunk, the Server sends the chunk, the application then flashes the chunk to the SiWx91x module. The application requests the next chunk, the Server sends the chunk, and so forth until the entire transfer completes.
+
+4. Once the TCP Server is done with transferring all the chunks, the TCP Server prints 'reach end of file'. On the other end, the application completes the firmware flashing on to the SiWx91x module.
+
+    ![Figure: Log of firmware transfer](resources/readme/fwupdatetcpserverprints.png)
+
+5. The SiWx91x module takes a few seconds to overwrite the old m4 firmware with the new m4 firmware in its flash memory.
+
+6. After the successful firmware update, the application reboots the SiWx91x module runs the new m4 firmware.
+
+  - **SoC**:
+
+      ![Application_Prints_SoC](resources/readme/fwupdateprintssoc.png)
+ 
+
+## **Appendix**
+
+### **Bare Metal configurations**
+
+1. By default, the application runs over FreeRTOS. To run the application with Bare metal configurations, follow the Bare Metal configuration section in the ***Getting Started with SiWx91x*** guides.

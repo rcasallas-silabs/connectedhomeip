@@ -435,8 +435,8 @@ typedef PRE_PACK struct POST_PACK {
 STATIC INLINE void RSI_GPDMA_FIFOConfig(RSI_GPDMA_HANDLE_T pHandle, uint8_t dmaCh, uint32_t startAdr, uint32_t size)
 {
   GPDMA_DATACONTEXT_T *pDrv                                            = (GPDMA_DATACONTEXT_T *)pHandle;
-  pDrv->baseC->CHANNEL_CONFIG[dmaCh].FIFO_CONFIG_REGS_b.FIFO_STRT_ADDR = startAdr;
-  pDrv->baseC->CHANNEL_CONFIG[dmaCh].FIFO_CONFIG_REGS_b.FIFO_SIZE      = size;
+  pDrv->baseC->CHANNEL_CONFIG[dmaCh].FIFO_CONFIG_REGS_b.FIFO_STRT_ADDR = (unsigned int)(startAdr & 0x3F);
+  pDrv->baseC->CHANNEL_CONFIG[dmaCh].FIFO_CONFIG_REGS_b.FIFO_SIZE      = (unsigned int)(size & 0x3F);
 }
 
 // FUNCTION PROTOTYPES	

@@ -29,6 +29,11 @@ requires:
   - name: wiseconnect_sapi_bluetooth
   - name: wiseconnect_sapi_freertos
   - name: wiseconnect_third_party_freertos
+define:
+  - name: EXECUTION_FROM_RAM
+template_contribution:
+  - name: EXECUTION_FROM_RAM
+    value: 1
 toolchain_settings: []
 readme:
   - path: readme.md

@@ -254,6 +254,7 @@ typedef PRE_PACK struct POST_PACK {
 /** @addtogroup SOC18
 * @{
 */
+
 /*===================================================*/
 /**
  * @fn          uint32_t RSI_UDMA_GetMemSize(void)
@@ -277,7 +278,7 @@ STATIC INLINE void RSI_UDMA_RegisterCallback(RSI_UDMA_HANDLE_T pHandle, void *pC
 {
   RSI_UDMA_DATACONTEXT_T *pDrv = (RSI_UDMA_DATACONTEXT_T *)pHandle;
 
-  pDrv->udmaCompCB = (udmaTransferCompleteCB)pCB;
+  *(void **)(&pDrv->udmaCompCB) = pCB;
 }
 
 /*===================================================*/

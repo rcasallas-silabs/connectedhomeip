@@ -22,7 +22,6 @@
  * Includes
  */
 #include "rsi_ccp_user_config.h"
-
 #include "rsi_rom_power_save.h"
 
 #ifdef COMMON_FLASH_EN
@@ -252,7 +251,7 @@ void ps_wireless_shutdown(void)
   NWP_FSM_CLOCKS_SELECT |= (ENABLE_RO_32KHz_N_RO_20MHz);
 
   /* Disable ULP clocks  */
-  NWP_FSM_CLK_EN_AND_FIRST_BOOTUP &= ~(DISABLE_ULP_CLKS);
+  NWP_FSM_CLK_EN_AND_FIRST_BOOTUP &= (uint32_t)(~(DISABLE_ULP_CLKS));
 
   /* Power down NWP Keyholder,NWPSTORE,NWPRTC,NWPFSM,CONENECTBFFS domains   */
   NWPAON_NPSS_PWRCTRL_CLEAR_REG = PWRGATE_EN_N_ULP_NWPDOMAINS;
@@ -289,7 +288,7 @@ void ps_wireless_shutdown(void)
   NWP_RTC_TIMER_CLOCK_PERIOD_SOC = RTC_TIMER_CLK_PERIOD_VALUE;
 
   /* wait untill  Programmed period applied */
-  while (!(NWP_RTC_TIMER_CLOCK_PERIOD_SOC) & (SPI_RTC_TIMER_CLK_PERIOD_APPLIED))
+  while ((!(NWP_RTC_TIMER_CLOCK_PERIOD_SOC)) & (SPI_RTC_TIMER_CLK_PERIOD_APPLIED))
     ;
 
   /* Shutdown TA */

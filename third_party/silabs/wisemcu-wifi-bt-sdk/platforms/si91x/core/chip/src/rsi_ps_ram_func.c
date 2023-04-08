@@ -37,7 +37,7 @@
 #define FLASH_VECTOR_OFFSET 0x8012000
 
 /*QSPI configuration structure*/
-spi_config_t spi_configs_giga = { { 0 } };
+spi_config_t spi_configs_giga ;
 
 #ifdef WiSe_MCU_MODE
 #define PadSelectionEnable 15

@@ -44,15 +44,19 @@ other_file:
   - path: resources/readme/image157.png
   - path: resources/readme/buildingpjt115.png
   - path: resources/readme/ncpboarddetection112.png
+  - path: resources/readme/fwupdateprintsncp.png
   - path: resources/readme/usb_to_uart_2.png
+  - path: resources/readme/fwupdatesetupncp.png
   - path: resources/readme/outputprintsncp119.png
   - path: resources/readme/serial_port.png
+  - path: resources/readme/fwupdateconfigurationfile.png
   - path: resources/readme/build_project_ncp.png
   - path: resources/readme/projctselectionncp113.png
   - path: resources/readme/image156soc.png
   - path: resources/readme/usb_to_uart_1.png
   - path: resources/readme/efm32.png
   - path: resources/readme/image359.png
+  - path: resources/readme/fwupdateprintssoc.png
   - path: resources/readme/image156.png
   - path: resources/readme/efr32.png
   - path: resources/readme/ncp_macros.png
@@ -62,7 +66,9 @@ other_file:
   - path: resources/readme/debugmodencp120.png
   - path: resources/readme/creationfinalncp114.png
   - path: resources/readme/socboarddetection111.png
+  - path: resources/readme/fwupdateapplicationconfiguration.png
   - path: resources/readme/setup_soc.png
+  - path: resources/readme/fwupdatesetupsoc.png
   - path: resources/readme/image156c.png
   - path: resources/readme/soc_macros.png
   - path: resources/readme/setup_ncp.png
@@ -71,6 +77,7 @@ other_file:
   - path: resources/readme/port_selection_soc.png
   - path: resources/readme/serial_port_setup.png
   - path: resources/readme/buildsuccessncp116.png
+  - path: resources/readme/fwupdatetcpserverprints.png
   - path: resources/readme/projctselection113.png
   - path: resources/readme/outputprints119.png
 ui_hints:
