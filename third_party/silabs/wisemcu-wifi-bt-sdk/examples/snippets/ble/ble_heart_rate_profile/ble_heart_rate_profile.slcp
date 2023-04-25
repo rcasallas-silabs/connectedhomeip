@@ -33,24 +33,37 @@ toolchain_settings: []
 readme:
   - path: readme.md
 other_file:
-  - path: resources/readme/gattconfigurator1.png
-  - path: resources/readme/bleheartratedevicegattserverserialprintsncp.png
-  - path: resources/readme/bleheartratedevicegattservernotificationsenabled.png
-  - path: resources/readme/bleheartratedeviceadvertising.png
-  - path: resources/readme/blehrconfigurations.png
-  - path: resources/readme/blehrsoc.png
-  - path: resources/readme/gattconfigurator3.png
-  - path: resources/readme/bleheartratedevicegattserverserialprintssoc.png
-  - path: resources/readme/bleheartratedeviceconnected.png
-  - path: resources/readme/blehrncp.png
-  - path: resources/readme/bleheartratedevicegattclientserialprintsncp.png
-  - path: resources/readme/bleheartratedevicegattserverreceiveddata.png
-  - path: resources/readme/bleheartrateadvertiser.png
-  - path: resources/readme/bleheartratedevicegattserverconnection.png
-  - path: resources/readme/bleheartrateapplicationconfigurations.png
-  - path: resources/readme/gattconfigurator2.png
-  - path: resources/readme/bleheartrateconfigurations.png
-  - path: resources/readme/bleheartratedevicegattclientserialprintssoc.png
+  - path: resources/readme/received_data.png
+  - path: resources/readme/ncpboarddetection112.png
+  - path: resources/readme/device_connection.png
+  - path: resources/readme/ftdiprints118.png
+  - path: resources/readme/buildncp.png
+  - path: resources/readme/bleheartratesoc.png
+  - path: resources/readme/keil_with_out_os.png
+  - path: resources/readme/creationfinalncp1.png
+  - path: resources/readme/buildsoc.png
+  - path: resources/readme/buildsuccesssoc1.png
+  - path: resources/readme/gatt_configurator.png
+  - path: resources/readme/device_advertising.png
+  - path: resources/readme/bleheartratencp.png
+  - path: resources/readme/debugmodencp.png
+  - path: resources/readme/serial_teriminal_prints_soc1.png
+  - path: resources/readme/serial_teriminal_prints_ncp1.png
+  - path: resources/readme/image359.png
+  - path: resources/readme/serial_teriminal_client_prints_ncp1.png
+  - path: resources/readme/advertiser.png
+  - path: resources/readme/debugmodesoc.png
+  - path: resources/readme/gatt_configurator9.png
+  - path: resources/readme/with_out_os3.png
+  - path: resources/readme/projctselectionncp.png
+  - path: resources/readme/enable_notifications.png
+  - path: resources/readme/socboarddetection111.png
+  - path: resources/readme/with_out_os1.png
+  - path: resources/readme/serial_teriminal_client_prints_soc1.png
+  - path: resources/readme/gatt_configurator6.png
+  - path: resources/readme/gatt_configurator10.png
+  - path: resources/readme/buildsuccessncp1.png
+  - path: resources/readme/gatt_configurator5.png
 ui_hints:
   highlight:
     - path: readme.md

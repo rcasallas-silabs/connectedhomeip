@@ -33,14 +33,30 @@ toolchain_settings: []
 readme:
   - path: readme.md
 other_file:
+  - path: resources/readme/creationfinal114.png
   - path: resources/readme/blecentralncp.png
-  - path: resources/readme/centraladvertiser.png
-  - path: resources/readme/blecentralserialteriminalprintssoc.png
-  - path: resources/readme/blecentralapplicationconfiguration.png
-  - path: resources/readme/deviceconnected.png
-  - path: resources/readme/blecentralconfigurations.png
-  - path: resources/readme/blecentralserialteriminalprintsncp.png
-  - path: resources/readme/blecentralsoc.png
+  - path: resources/readme/blecentralsoc1.png
+  - path: resources/readme/serial_teriminal_prints_soc.png
+  - path: resources/readme/buildingpjt115.png
+  - path: resources/readme/ncpboarddetection112.png
+  - path: resources/readme/ftdiprints118.png
+  - path: resources/readme/buildncp.png
+  - path: resources/readme/image216b.png
+  - path: resources/readme/keil_with_out_os.png
+  - path: resources/readme/device_connected.png
+  - path: resources/readme/advertiser.png
+  - path: resources/readme/debugmodesoc.png
+  - path: resources/readme/image23a.png
+  - path: resources/readme/image216c.png
+  - path: resources/readme/buildingpjncp.png
+  - path: resources/readme/buildsuccesssoc116.png
+  - path: resources/readme/debugmodencp120.png
+  - path: resources/readme/images23_log.png
+  - path: resources/readme/socboarddetection111.png
+  - path: resources/readme/images23log.png
+  - path: resources/readme/buildsuccesssoc.png
+  - path: resources/readme/buildsuccessncp1.png
+  - path: resources/readme/projctselection113.png
 ui_hints:
   highlight:
     - path: readme.md

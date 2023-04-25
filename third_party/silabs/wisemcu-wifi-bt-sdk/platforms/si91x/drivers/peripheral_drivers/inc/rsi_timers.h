@@ -191,7 +191,7 @@ STATIC INLINE error_t RSI_TIMERS_SetMatch(RSI_TIMERS_T *pTIMER, uint8_t timerNum
 STATIC INLINE uint8_t RSI_TIMERS_InterruptStatus(RSI_TIMERS_T *pTIMER, uint8_t timerNum)
 {
   if (timerNum <= TIMER_3) {
-    return (uint8_t)(pTIMER->MCUULP_TMR_INTR_STAT & (1 << timerNum));
+    return (pTIMER->MCUULP_TMR_INTR_STAT & (1 << timerNum));
   } else {
     return 0;
   }
@@ -213,7 +213,7 @@ STATIC INLINE error_t RSI_TIMERS_SetTimerType(RSI_TIMERS_T *pTIMER, uint8_t time
 {
   if (timerNum <= TIMER_3) {
     if ((timerType == MICRO_SEC_MODE) || (timerType == _256_MICRO_SEC_MODE) || (timerType == COUNTER_DOWN_MODE)) {
-      pTIMER->MATCH_CTRL[timerNum].MCUULP_TMR_CNTRL_b.TMR_TYPE = (unsigned int)(timerType & 0x03);
+      pTIMER->MATCH_CTRL[timerNum].MCUULP_TMR_CNTRL_b.TMR_TYPE = timerType;
     } else {
       return ERROR_INVAL_TIMERTYPE;
     }
@@ -238,7 +238,7 @@ STATIC INLINE error_t RSI_TIMERS_SetTimerMode(RSI_TIMERS_T *pTIMER, boolean_t mo
 {
   if (timerNum <= TIMER_3) {
     if ((mode == PERIODIC_TIMER) || (mode == ONESHOT_TIMER)) {
-      pTIMER->MATCH_CTRL[timerNum].MCUULP_TMR_CNTRL_b.TMR_MODE = (unsigned int)(mode & 0x01);
+      pTIMER->MATCH_CTRL[timerNum].MCUULP_TMR_CNTRL_b.TMR_MODE = mode;
     } else {
       return ERROR_INVAL_TIMER_MODE;
     }

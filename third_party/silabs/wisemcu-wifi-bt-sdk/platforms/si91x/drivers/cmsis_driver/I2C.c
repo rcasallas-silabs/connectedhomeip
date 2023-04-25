@@ -22,6 +22,7 @@
 
 #if defined(A11_ROM)
 #include "rsi_rom_table_rs9116.h" 
+extern const ROM_I2C_API_T i2c_api;
 #endif
 
 #define ARM_I2C_DRV_VERSION    ARM_DRIVER_VERSION_MAJOR_MINOR(2, 0) /* driver version */
@@ -55,11 +56,10 @@ static I2C_CTRL I2C0_Ctrl = { 0 };
 /* I2C0 Resources */
 static I2C_RESOURCES I2C0_Resources = {
 		(I2C0_Type *)I2C0,
-		I2C0_IRQn,
+		I2C0_IRQn,  
 		&I2C0_Ctrl,
-		{
 		&i2c0_scl, //pins
-		&i2c0_sda  },
+		&i2c0_sda  ,
 };
 #endif
 
@@ -75,9 +75,8 @@ static I2C_RESOURCES I2C1_Resources = {
 		(I2C0_Type *)I2C1,
 		I2C1_IRQn,
 		&I2C1_Ctrl ,
-		{
 		&i2c1_scl,
-		&i2c1_sda },
+		&i2c1_sda ,
 };
 #endif /* RTE_I2C1 */
 
@@ -93,9 +92,8 @@ static I2C_RESOURCES I2C2_Resources = {
 		(I2C0_Type *)I2C2,
 		I2C2_IRQn,
 		&I2C2_Ctrl ,
-		{
 		&i2c2_scl,
-		&i2c2_sda},
+		&i2c2_sda,
 };
 #endif /* RTE_I2C2 */
 
@@ -116,7 +114,6 @@ static ARM_I2C_CAPABILITIES I2C_GetCapabilities(void)
 
 uint32_t GetI2CClockFreq (I2C_RESOURCES *i2c) 
 {
-  (void)i2c;
 	return(SystemCoreClock);
 } 
 // End I2C Interface
@@ -446,7 +443,6 @@ static ARM_I2C_STATUS I2C2_GetStatus (void)
 	return (I2Cx_GetStatus (&I2C2_Resources)); 
 #endif	
 }
-
 void I2C2_IRQHandler (void) 
 {
 #if defined(A11_ROM) && defined(ROMDRIVER_PRESENT)

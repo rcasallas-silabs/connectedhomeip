@@ -18,9 +18,9 @@
  *
  */
 
-/**
- * Includes
- */
+
+// Includes
+
 #include "rsi_ccp_user_config.h"
 #if !defined(A11_ROM) || !defined(ROMDRIVER_PRESENT)
 #include "rsi_rom_clks.h"
@@ -1651,7 +1651,5 @@ const ROM_USART_API_T usart_api = {
 };
 
 */
-#else
-typedef int dummy; // To remove empty translation unit warning.
 #endif //A11_ROM || ROMDRIVER_PRESENT
 /*End of file not truncated */

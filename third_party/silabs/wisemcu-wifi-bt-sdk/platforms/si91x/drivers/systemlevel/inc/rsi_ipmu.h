@@ -133,8 +133,8 @@ extern "C" {
 #endif
 
 #ifdef CHIP_9117
-#define PACKAGE_TYPE_VALUES_OFFSET_COMMON_FLASH 0x082001DE
-#define SILICON_REV_VALUES_OFFSET_COMMON_FLASH  0x082001DF
+#define PACKAGE_TYPE_VALUES_OFFSET_COMMON_FLASH 0x82001DE
+#define SILICON_REV_VALUES_OFFSET_COMMON_FLASH  0x82001DF
 #define COMMON_FLASH_IPMU_VALUES_OFFSET         0x82001A4
 
 #define PACKAGE_TYPE_VALUES_OFFSET_DUAL_FLASH 0x80004E0
@@ -752,6 +752,7 @@ void RSI_IPMU_UpdateIpmuCalibData_efuse(efuse_ipmu_t *ipmu_calib_data);
 uint32_t RSI_APB_ProgramConfigData(uint32_t *config);
 uint32_t RSI_IPMU_RO_TsConfig(void);
 void RSI_Configure_DCDC_LowerVoltage(void);
+
 void RSI_IPMU_32KHzRCClkClib(void);
 void RSI_IPMU_32KHzROClkClib(void);
 error_t RSI_IPMU_PocbiasCurrent11(void);
@@ -772,16 +773,6 @@ void RSI_Ipmu_Init(void);
 void RSI_Configure_Ipmu_Mode(void);
 void ipmu_init(void);
 void configure_ipmu_mode(uint32_t mode);
-uint32_t init_ipmu_calib_data(uint32_t m4_present);
-void update_ipmu_data(uint32_t reg_addr, uint32_t reg_type, uint32_t data, uint32_t mask);
-void update_efuse_system_configs(int data, uint32_t config_ptr[]);
-error_t RSI_IPMU_BOD_ClksCommonconfig1(void);
-error_t RSI_IPMU_BOD_ClksCommonconfig2(void);
-error_t RSI_IPMU_Hpldo_volt_trim_efuse(void);
-error_t RSI_IPMU_Scdc_volt_trim_efuse(void);
-void RSI_IPMU_Reconfig_to_SCDCDC(void);
-error_t RSI_IPMU_Lp_scdc_extcapmode(void);
-error_t RSI_IPMU_BOD_Cmphyst(void);
 /**
    * @} end of RSI_IPMU_DRIVERS
    */

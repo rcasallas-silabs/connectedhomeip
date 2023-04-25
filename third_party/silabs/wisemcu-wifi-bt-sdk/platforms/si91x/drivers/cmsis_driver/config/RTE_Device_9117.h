@@ -60,7 +60,7 @@
 #define RTE_USART0_CHNL_UDMA_RX_CH         24
 
 
-//     <o> USART0_CLK <0=>P0_8  <1=>P0_25 <2=>P0_52 <3=>P0_64
+//     <o> USART0_CLK <0=>P0_8  <1=>P0_25 <2=>P0_52 <3=>P0_64 
 //     <i> CLK of USART0
 #define RTE_USART0_CLK_PORT_ID                  0
 #if(RTE_USART0_CLK_PORT_ID == 0)
@@ -80,14 +80,14 @@
 #define RTE_USART0_CLK_PAD                      16
 #elif(RTE_USART0_CLK_PORT_ID ==3)
 #define RTE_USART0_CLK_PORT                     0
-#define RTE_USART0_CLK_PIN                      64
+#define RTE_USART0_CLK_PIN                      64	
 #define RTE_USART0_CLK_MUX                      2
 #define RTE_USART0_CLK_PAD                      22
 #else
   #error "Invalid USART0 RTE_USART0_CLK_PIN Pin Configuration!"
 #endif
 
-//     <o> USART0_TX <0=>P0_15 <1=>P0_30  <2=>P0_54  <3=>P0_68 <4=>P0_71
+//     <o> USART0_TX <0=>P0_15 <1=>P0_30  <2=>P0_54  <3=>P0_68 <4=>P0_71 
 //     <i> TX for USART0
 #ifdef BRD4325A
 #define RTE_USART0_TX_PORT_ID                   1
@@ -98,27 +98,27 @@
 #define RTE_USART0_TX_PORT                      0
 #define RTE_USART0_TX_PIN                       15
 #define RTE_USART0_TX_MUX                       2
-#define RTE_USART0_TX_PAD                       8
+#define RTE_USART0_TX_PAD                       8	 
 #elif(RTE_USART0_TX_PORT_ID == 1)
 #define RTE_USART0_TX_PORT                      0
-#define RTE_USART0_TX_PIN                       30
+#define RTE_USART0_TX_PIN                       30 
 #define RTE_USART0_TX_MUX                       2
 #define RTE_USART0_TX_PAD                       0 //NO PAD
 #elif(RTE_USART0_TX_PORT_ID ==2)
 #define RTE_USART0_TX_PORT                      0
 #define RTE_USART0_TX_PIN                       54
 #define RTE_USART0_TX_MUX                       2
-#define RTE_USART0_TX_PAD                       18
+#define RTE_USART0_TX_PAD                       18 
 #elif(RTE_USART0_TX_PORT_ID ==3)
 #define RTE_USART0_TX_PORT                      0
 #define RTE_USART0_TX_PIN                       68
 #define RTE_USART0_TX_MUX                       2
-#define RTE_USART0_TX_PAD                       26
+#define RTE_USART0_TX_PAD                       26  
 #elif(RTE_USART0_TX_PORT_ID ==4)
 #define RTE_USART0_TX_PORT                      0
 #define RTE_USART0_TX_PIN                       71
 #define RTE_USART0_TX_MUX                       4
-#define RTE_USART0_TX_PAD                       29
+#define RTE_USART0_TX_PAD                       29 
 #else
   #error "Invalid USART0 RTE_USART0_TX_PIN Pin Configuration!"
 #endif
@@ -154,12 +154,12 @@
 #define RTE_USART0_RX_PORT                      0
 #define RTE_USART0_RX_PIN                       70
 #define RTE_USART0_RX_MUX                       4
-#define RTE_USART0_RX_PAD                       28
+#define RTE_USART0_RX_PAD                       28 
 #else
   #error "Invalid USART0 RTE_USART0_RX_PIN Pin Configuration!"
 #endif
 
-//     <o> USART0_CTS <0=>P0_6 <1=>P0_26 <2=>P0_56 <3=>P0_70
+//     <o> USART0_CTS <0=>P0_6 <1=>P0_26 <2=>P0_56 <3=>P0_70 
 //     <i> CTS for USART0
 #define RTE_USART0_CTS_PORT_ID              0
 #if(RTE_USART0_CTS_PORT_ID ==0)
@@ -176,18 +176,18 @@
 #define RTE_USART0_CTS_PORT                     0
 #define RTE_USART0_CTS_PIN                      56
 #define RTE_USART0_CTS_MUX                      2
-#define RTE_USART0_CTS_PAD                      20
+#define RTE_USART0_CTS_PAD                      20 
 #elif(RTE_USART0_CTS_PORT_ID ==3)
 #define RTE_USART0_CTS_PORT                     0
 #define RTE_USART0_CTS_PIN                      70
 #define RTE_USART0_CTS_MUX                      2
-#define RTE_USART0_CTS_PAD                      28
+#define RTE_USART0_CTS_PAD                      28 
 #else
   #error "Invalid USART0 RTE_USART0_CTS_PIN Pin Configuration!"
 #endif
 
 
-//     <o> USART0_RTS <0=>P0_9  <1=>P0_28 <2=>P0_53 <3=>P0_69
+//     <o> USART0_RTS <0=>P0_9  <1=>P0_28 <2=>P0_53 <3=>P0_69  
 //     <i> RTS for USART0
 #define RTE_USART0_RTS_PORT_ID                  0
 #if(RTE_USART0_RTS_PORT_ID   ==0)
@@ -214,7 +214,7 @@
   #error "Invalid USART0 RTE_USART0_RTS_PIN Pin Configuration!"
 #endif
 
-//     <o> USART0_IR_TX <0=>P0_48 <1=>P0_72
+//     <o> USART0_IR_TX <0=>P0_48 <1=>P0_72  
 //     <i> IR TX for USART0
 #define RTE_IR_TX_PORT_ID                       0
 #if(RTE_IR_TX_PORT_ID    ==0)
@@ -231,7 +231,7 @@
   #error "Invalid USART0 RTE_USART0_IR_TX_PIN Pin Configuration!"
 #endif
 
-//     <o> USART0_IR_RX <0=>P0_47 <1=>P0_71
+//     <o> USART0_IR_RX <0=>P0_47 <1=>P0_71  
 //     <i> IR RX for USART0
 #define RTE_IR_RX_PORT_ID                       0
 #if(RTE_IR_RX_PORT_ID ==0)
@@ -249,7 +249,7 @@
   #error "Invalid USART0 RTE_USART0_IR_RX_PIN Pin Configuration!"
 #endif
 
-//     <o> USART0_RI <0=>P0_27  <1=>P0_46
+//     <o> USART0_RI <0=>P0_27  <1=>P0_46 
 //     <i> RI for USART0
 #define RTE_RI_PORT_ID 0
 #if(RTE_RI_PORT_ID ==0)
@@ -282,7 +282,7 @@
 #else
   #error "Invalid USART0 RTE_USART0_RI_PIN Pin Configuration!"
 #endif
-//     <o> USART0_DCD <0=>P0_12
+//     <o> USART0_DCD <0=>P0_12  
 //     <i> DCD for USART0
 #define RTE_USART0_DCD_PORT                     0
 #define RTE_USART0_DCD_PIN                      12
@@ -290,7 +290,7 @@
 #define RTE_USART0_DCD_PAD                      7
 
 
-//     <o> USART0_DTR <0=>P0_7
+//     <o> USART0_DTR <0=>P0_7  
 //     <i> DTR for USART0
 #define RTE_USART0_DTR_PORT                     0
 #define RTE_USART0_DTR_PIN                      7
@@ -322,7 +322,7 @@
 #define RTE_UART1_CHNL_UDMA_RX_CH          26
 
 /*UART1 PINS*/
-//     <o> UART1_TX <0=>P0_7 <1=>P0_30 <2=>P0_67 <3=>P0_69 <4=>P0_73 <5=>P0_75
+//     <o> UART1_TX <0=>P0_7 <1=>P0_30 <2=>P0_67 <3=>P0_69 <4=>P0_73 <5=>P0_75 
 //     <i> TX of UART1
 #ifdef BRD4325A
 #define RTE_UART1_TX_PORT_ID                    4
@@ -343,7 +343,7 @@
 #define RTE_UART1_TX_PORT                       0
 #define RTE_UART1_TX_PIN                        67
 #define RTE_UART1_TX_MUX                        9
-#define RTE_UART1_TX_PAD                        25
+#define RTE_UART1_TX_PAD                        25 
 #elif(RTE_UART1_TX_PORT_ID ==3)
 #define RTE_UART1_TX_PORT                       0
 #define RTE_UART1_TX_PIN                        69
@@ -363,7 +363,7 @@
   #error "Invalid UART1 RTE_UART1_TX_PIN Pin Configuration!"
 #endif
 
-//     <o> UART1_RX <0=>P0_6 <1=>P0_29 <2=>P0_66 <3=>P0_68 <4=>P0_72 <5=>P0_74
+//     <o> UART1_RX <0=>P0_6 <1=>P0_29 <2=>P0_66 <3=>P0_68 <4=>P0_72 <5=>P0_74    
 //     <i> RX of UART1
 #define RTE_UART1_RX_PORT_ID                0
 #if(RTE_UART1_RX_PORT_ID  ==0)
@@ -380,7 +380,7 @@
 #define RTE_UART1_RX_PORT                       0
 #define RTE_UART1_RX_PIN                        66
 #define RTE_UART1_RX_MUX                        9
-#define RTE_UART1_RX_PAD                        24
+#define RTE_UART1_RX_PAD                        24 
 #elif(RTE_UART1_RX_PORT_ID ==3)
 #define RTE_UART1_RX_PORT                       0
 #define RTE_UART1_RX_PIN                        68
@@ -400,7 +400,7 @@
   #error "Invalid UART1 RTE_UART1_RX_PIN Pin Configuration!"
 #endif
 
-//     <o> UART1_CTS <0=>P0_11 <1=>P0_28 <2=>P0_51 <3=>P0_65 <4=>P0_71 <5=>P0_73
+//     <o> UART1_CTS <0=>P0_11 <1=>P0_28 <2=>P0_51 <3=>P0_65 <4=>P0_71 <5=>P0_73  
 //     <i> CTS of UART1
 #define RTE_UART1_CTS_PORT_ID                   0
 #if(RTE_UART1_CTS_PORT_ID ==0)
@@ -437,7 +437,7 @@
   #error "Invalid UART1 RTE_UART1_CTS_PIN Pin Configuration!"
 #endif
 
-//     <o> UART1_RTS  <0=>P0_10 <1=>P0_27 <2=>P0_50 <3=>P0_64  <4=>P0_70 <5=>P0_72
+//     <o> UART1_RTS  <0=>P0_10 <1=>P0_27 <2=>P0_50 <3=>P0_64  <4=>P0_70 <5=>P0_72  
 //     <i> RTS of UART1
 #ifdef BRD4325A
 #define RTE_UART1_RTS_PORT_ID   1
@@ -578,7 +578,7 @@
 #else
   #error "Invalid ULPSS UART RTE_ULP_UART_RTS_PIN Pin Configuration!"
 #endif
-//   </e>
+//	 </e>
 
 
 
@@ -589,7 +589,7 @@
 
 #define RTE_SSI_MASTER_INPUT_CLOCK      SSI_SOCPLLCLK
 
-// <o> SSI_MASTER_MISO Pin <0=>GPIO_12 <1=>GPIO_27 <2=>GPIO_57
+// <o> SSI_MASTER_MISO Pin <0=>GPIO_12 <1=>GPIO_27 <2=>GPIO_57  
 #ifdef BRD4325A
 #define RTE_SSI_MASTER_MISO_PORT_ID          1
 #else
@@ -636,7 +636,7 @@
 #define  RTE_SSI_MASTER_MOSI_PORT            0
 #define  RTE_SSI_MASTER_MOSI_PIN             56
 #define  RTE_SSI_MASTER_MOSI_MODE            EGPIO_PIN_MUX_MODE3
-#define  RTE_SSI_MASTER_MOSI_PADSEL          20
+#define  RTE_SSI_MASTER_MOSI_PADSEL          20 
 #else
 #error "Invalid SSI_MASTER_MOSI Pin Configuration!"
 #endif
@@ -660,7 +660,7 @@
 #define  RTE_SSI_MASTER_SCK_PORT            0
 #define  RTE_SSI_MASTER_SCK_PIN             52
 #define  RTE_SSI_MASTER_SCK_MODE            EGPIO_PIN_MUX_MODE3
-#define  RTE_SSI_MASTER_SCK_PADSEL          16
+#define  RTE_SSI_MASTER_SCK_PADSEL          16  
 #else
 #error "Invalid SSI_MASTER_SCK Pin Configuration!"
 #endif
@@ -689,7 +689,7 @@
 #define  RTE_SSI_MASTER_CS0_PORT            0
 #define  RTE_SSI_MASTER_CS0_PIN             53
 #define  RTE_SSI_MASTER_CS0_MODE            EGPIO_PIN_MUX_MODE3
-#define  RTE_SSI_MASTER_CS0_PADSEL          17
+#define  RTE_SSI_MASTER_CS0_PADSEL          17  
 #else
 #error "Invalid SSI_MASTER_CS0 Pin Configuration!"
 #endif
@@ -701,7 +701,7 @@
 #define  RTE_SSI_MASTER_CS1_PORT            0
 #define  RTE_SSI_MASTER_CS1_PIN             10
 #define  RTE_SSI_MASTER_CS1_MODE            EGPIO_PIN_MUX_MODE3
-#define  RTE_SSI_MASTER_CS1_PADSEL          5
+#define  RTE_SSI_MASTER_CS1_PADSEL          5 
 #else
 #error "Invalid SSI_MASTER_CS1 Pin Configuration!"
 #endif
@@ -713,13 +713,13 @@
 #define  RTE_SSI_MASTER_CS2_PORT            0
 #define  RTE_SSI_MASTER_CS2_PIN             15
 #define  RTE_SSI_MASTER_CS2_MODE            EGPIO_PIN_MUX_MODE3
-#define  RTE_SSI_MASTER_CS2_PADSEL          8
+#define  RTE_SSI_MASTER_CS2_PADSEL          8 
 #elif   (RTE_SSI_MASTER_CS2_PORT_ID == 1)
 #define  RTE_SSI_MASTER_CS2                 M4_SSI_CS2
 #define  RTE_SSI_MASTER_CS2_PORT            0
 #define  RTE_SSI_MASTER_CS2_PIN             50
 #define  RTE_SSI_MASTER_CS2_MODE            EGPIO_PIN_MUX_MODE3
-#define  RTE_SSI_MASTER_CS2_PADSEL          14
+#define  RTE_SSI_MASTER_CS2_PADSEL          14  
 #else
 #error "Invalid SSI_MASTER_CS2 Pin Configuration!"
 #endif
@@ -731,24 +731,24 @@
 #define  RTE_SSI_MASTER_CS3_PORT            0
 #define  RTE_SSI_MASTER_CS3_PIN             51
 #define  RTE_SSI_MASTER_CS3_MODE            EGPIO_PIN_MUX_MODE3
-#define  RTE_SSI_MASTER_CS3_PADSEL          15
+#define  RTE_SSI_MASTER_CS3_PADSEL          15  
 #else
 #error "Invalid SSI_MASTER_CS3 Pin Configuration!"
 #endif
-
+	
 //   <e> DMA Rx
 //     <o3> Channel <28=>28
 //     <i>  Selects DMA Channel (only Channel 28 can be used)
 //   </e>
 #define RTE_SSI_MASTER_RX_DMA                0
-#define RTE_SSI_MASTER_UDMA_RX_CH          28
+#define RTE_SSI_MASTER_UDMA_RX_CH	         28
 
 //   <e> DMA Tx
 //     <o3> Channel <29=>29
 //     <i>  Selects DMA Channel (only Channel 29 can be used)
 //   </e>
 #define RTE_SSI_MASTER_TX_DMA                0
-#define RTE_SSI_MASTER_UDMA_TX_CH          29
+#define RTE_SSI_MASTER_UDMA_TX_CH      		 29
 // </e>
 
 // <e> SSI_SLAVE (Serial Peripheral Interface 2) [Driver_SSI_SLAVE]
@@ -879,7 +879,7 @@
 #define  RTE_SSI_SLAVE_CS_PORT            0
 #define  RTE_SSI_SLAVE_CS_PIN             46
 #define  RTE_SSI_SLAVE_CS_MODE            EGPIO_PIN_MUX_MODE8
-#define  RTE_SSI_SLAVE_CS_PADSEL          10
+#define  RTE_SSI_SLAVE_CS_PADSEL          10  
 #elif    (RTE_SSI_SLAVE_CS_PORT_ID == 4)
 #define RTE_SSI_SLAVE_CS                   1
 #define  RTE_SSI_SLAVE_CS_PORT            0
@@ -895,16 +895,16 @@
 //     <i>  Selects DMA Channel (only Channel 22 can be used)
 //   </e>
 #define RTE_SSI_SLAVE_RX_DMA                0
-#define RTE_SSI_SLAVE_UDMA_RX_CH           22
-#define RTE_SSI_SLAVE_DMA_RX_LEN_PER_DES   1024
+#define RTE_SSI_SLAVE_UDMA_RX_CH	         22
+#define RTE_SSI_SLAVE_DMA_RX_LEN_PER_DES	 1024
 
 //   <e> DMA Tx
 //     <o3> Channel <23=>23
 //     <i>  Selects DMA Channel (only Channel 23 can be used)
 //   </e>
 #define RTE_SSI_SLAVE_TX_DMA                0
-#define RTE_SSI_SLAVE_UDMA_TX_CH           23
-#define RTE_SSI_SLAVE_DMA_TX_LEN_PER_DES   1024
+#define RTE_SSI_SLAVE_UDMA_TX_CH      		 23
+#define RTE_SSI_SLAVE_DMA_TX_LEN_PER_DES	 1024
 
 // </e>
 
@@ -918,7 +918,7 @@
 #define ULP_SSI_CS0     1
 #define ULP_SSI_CS1     0
 #define ULP_SSI_CS2     0
-
+ 
 // <o> SSI_ULP_MASTER_MISO Pin <0=>Not Used <1=>ULP_GPIO_2 <2=>ULP_GPIO_9
 #define RTE_SSI_ULP_MASTER_MISO_PORT_ID           2
 #if    (RTE_SSI_ULP_MASTER_MISO_PORT_ID == 0)
@@ -1019,16 +1019,16 @@
 //     <i>  Selects DMA Channel (only Channel 2 can be used)
 //   </e>
 #define RTE_SSI_ULP_MASTER_RX_DMA                1
-#define RTE_SSI_ULP_MASTER_UDMA_RX_CH            2
-#define RTE_SSI_ULP_MASTER_DMA_RX_LEN_PER_DES    96
+#define RTE_SSI_ULP_MASTER_UDMA_RX_CH	           2
+#define RTE_SSI_ULP_MASTER_DMA_RX_LEN_PER_DES	   96
 
 //   <e> DMA Tx
 //     <o3> Channel <3=>3
 //     <i>  Selects DMA Channel (only Channel 3 can be used)
 //   </e>
 #define RTE_SSI_ULP_MASTER_TX_DMA                1
-#define RTE_SSI_ULP_MASTER_UDMA_TX_CH            3
-#define RTE_SSI_ULP_MASTER_DMA_TX_LEN_PER_DES    96
+#define RTE_SSI_ULP_MASTER_UDMA_TX_CH      		   3
+#define RTE_SSI_ULP_MASTER_DMA_TX_LEN_PER_DES	   96
 
 // </e>
 /*===================================================================
@@ -1072,17 +1072,17 @@
 #define I2S0_IRQHandler                 IRQ064_Handler 
 /*I2S0 PINS*/
 
-//     <o> I2S0_SCLK <0=>P0_8 <1=>P0_25 <2=>P0_46 <3=>P0_52
+//     <o> I2S0_SCLK <0=>P0_8 <1=>P0_25 <2=>P0_46 <3=>P0_52  
 //     <i> SCLK of I2S0
 #define RTE_I2S0_SCLK_PORT_ID                  1
 #if(RTE_I2S0_SCLK_PORT_ID == 0)
 #define RTE_I2S0_SCLK_PORT                     0
 #define RTE_I2S0_SCLK_PIN                      8
 #define RTE_I2S0_SCLK_MUX                      7
-#define RTE_I2S0_SCLK_PAD                      3
+#define RTE_I2S0_SCLK_PAD                      3                 
 #elif(RTE_I2S0_SCLK_PORT_ID ==1)
 #define RTE_I2S0_SCLK_PORT                     0
-#define RTE_I2S0_SCLK_PIN                      25
+#define RTE_I2S0_SCLK_PIN                      25 
 #define RTE_I2S0_SCLK_MUX                      7
 #define RTE_I2S0_SCLK_PAD                      0//no pad
 #elif(RTE_I2S0_SCLK_PORT_ID ==2)
@@ -1099,7 +1099,7 @@
   #error "Invalid I2S0 RTE_I2S0_SCLK Pin Configuration!"
 #endif
 
-//     <o> I2S0_WSCLK <0=>P0_9 <1=>P0_26  <2=>P0_47  <3=>P0_53
+//     <o> I2S0_WSCLK <0=>P0_9 <1=>P0_26  <2=>P0_47  <3=>P0_53  
 //     <i> WSCLK for I2S0
 #define RTE_I2S0_WSCLK_PORT_ID                 1
 #if(RTE_I2S0_WSCLK_PORT_ID == 0)
@@ -1109,7 +1109,7 @@
 #define RTE_I2S0_WSCLK_PAD                     4
 #elif(RTE_I2S0_WSCLK_PORT_ID == 1)
 #define RTE_I2S0_WSCLK_PORT                    0
-#define RTE_I2S0_WSCLK_PIN                     26
+#define RTE_I2S0_WSCLK_PIN                     26 
 #define RTE_I2S0_WSCLK_MUX                     7
 #define RTE_I2S0_WSCLK_PAD                     0//no pad
 #elif(RTE_I2S0_WSCLK_PORT_ID ==2)
@@ -1136,7 +1136,7 @@
 #define RTE_I2S0_DOUT0_PAD                       6
 #elif(RTE_I2S0_DOUT0_PORT_ID ==1)
 #define RTE_I2S0_DOUT0_PORT                      0
-#define RTE_I2S0_DOUT0_PIN                       28
+#define RTE_I2S0_DOUT0_PIN                       28 
 #define RTE_I2S0_DOUT0_MUX                       7
 #define RTE_I2S0_DOUT0_PAD                       0// no pad
 #elif(RTE_I2S0_DOUT0_PORT_ID ==2)
@@ -1160,7 +1160,7 @@
 #define RTE_I2S0_DIN0_PORT                      0
 #define RTE_I2S0_DIN0_PIN                       10
 #define RTE_I2S0_DIN0_MUX                       7
-#define RTE_I2S0_DIN0_PAD                       5
+#define RTE_I2S0_DIN0_PAD                       5                                                    
 #elif(RTE_I2S0_DIN0_PORT_ID ==1)
 #define RTE_I2S0_DIN0_PORT                      0
 #define RTE_I2S0_DIN0_PIN                       27
@@ -1180,7 +1180,7 @@
   #error "Invalid I2S0 RTE_I2S0_DIN0 Pin Configuration!"
 #endif
 
-//     <o> I2S0_DOUT1 <0=>P0_7 <1=>P0_30 <2=>P0_51 <3=>P0_55
+//     <o> I2S0_DOUT1 <0=>P0_7 <1=>P0_30 <2=>P0_51 <3=>P0_55 
 //     <i> DOUT1 for I2S0
 #ifdef BRD4325A
 #define RTE_I2S0_DOUT1_PORT_ID                   1
@@ -1211,7 +1211,7 @@
   #error "Invalid I2S0 RTE_I2S0_DOUT1 Pin Configuration!"
 #endif
 
-//     <o> I2S0_DIN1 <0=>P0_6 <1=>P0_29 <2=>P0_50 <3=>P0_54
+//     <o> I2S0_DIN1 <0=>P0_6 <1=>P0_29 <2=>P0_50 <3=>P0_54 
 //     <i> DIN1 for I2S0
 #define RTE_I2S0_DIN1_PORT_ID                   0
 #if(RTE_I2S0_DIN1_PORT_ID ==0)
@@ -1336,7 +1336,7 @@
   #error "Invalid I2S1 RTE_I2S1_WSCLK Pin Configuration!"
 #endif
 
-//   <o> I2S1_DOUT0 Pin <0=>P0_1 <1=>P0_5 <2=>P0_11
+//   <o> I2S1_DOUT0 Pin <0=>P0_1 <1=>P0_5 <2=>P0_11 
 #define RTE_I2S1_DOUT0_PORT_ID                 1
 #if(RTE_I2S1_DOUT0_PORT_ID ==0)
 #define RTE_I2S1_DOUT0_PORT                    0
@@ -1359,11 +1359,11 @@
 #if(RTE_I2S1_DIN0_PORT_ID ==0)
 #define RTE_I2S1_DIN0_PORT                      0
 #define RTE_I2S1_DIN0_PIN                       0
-#define RTE_I2S1_DIN0_MUX                       2
+#define RTE_I2S1_DIN0_MUX                       2  
 #elif(RTE_I2S1_DIN0_PORT_ID ==1)
 #define RTE_I2S1_DIN0_PORT                      0
 #define RTE_I2S1_DIN0_PIN                       6
-#define RTE_I2S1_DIN0_MUX                       2
+#define RTE_I2S1_DIN0_MUX                       2 
 #elif(RTE_I2S1_DIN0_PORT_ID ==2)
 #define RTE_I2S1_DIN0_PORT                      0
 #define RTE_I2S1_DIN0_PIN                       9
@@ -1460,8 +1460,8 @@
 #define RTE_I2C0                        1
 #define I2C0_IRQHandler                 IRQ042_Handler
 
-//   <o> I2C0_SCL Pin <0=>P0_7 <1=>P0_65 <2=>P0_66 <3=>P0_75
-#define RTE_I2C0_SCL_PORT_ID            3
+//   <o> I2C0_SCL Pin <0=>P0_7 <1=>P0_65 <2=>P0_66 <3=>P0_75  
+#define RTE_I2C0_SCL_PORT_ID            3                              
 #if    (RTE_I2C0_SCL_PORT_ID == 0)
 #define RTE_I2C0_SCL_PORT               0
 #define RTE_I2C0_SCL_PIN                7
@@ -1490,7 +1490,7 @@
   #error "Invalid I2C0 RTE_I2C0_SCL Pin Configuration!"
 #endif
 
-//   <o> I2C0_SCL Pin <0=>P0_6 <1=>P0_64 <2=>P0_67 <3=>P0_74
+//   <o> I2C0_SCL Pin <0=>P0_6 <1=>P0_64 <2=>P0_67 <3=>P0_74 
 #ifdef BRD4325A
 #define RTE_I2C0_SDA_PORT_ID            3
 #else
@@ -1560,19 +1560,19 @@
 #define RTE_I2C1_SCL_PAD                14
 #define RTE_I2C1_SCL_REN                50
 #elif(RTE_I2C1_SCL_PORT_ID == 3)
-#define RTE_I2C1_SCL_PORT               0
+#define RTE_I2C1_SCL_PORT               0     
 #define RTE_I2C1_SCL_PIN                54
 #define RTE_I2C1_SCL_MUX                5
 #define RTE_I2C1_SCL_PAD                18
 #define RTE_I2C1_SCL_REN                54
 #elif(RTE_I2C1_SCL_PORT_ID == 4)
-#define RTE_I2C1_SCL_PORT               0
+#define RTE_I2C1_SCL_PORT               0     
 #define RTE_I2C1_SCL_PIN                64
 #define RTE_I2C1_SCL_MUX                5
 #define RTE_I2C1_SCL_PAD                22
 #define RTE_I2C1_SCL_REN                0
 #elif(RTE_I2C1_SCL_PORT_ID == 5)
-#define RTE_I2C1_SCL_PORT               0
+#define RTE_I2C1_SCL_PORT               0     
 #define RTE_I2C1_SCL_PIN                66
 #define RTE_I2C1_SCL_MUX                5
 #define RTE_I2C1_SCL_PAD                24
@@ -1587,7 +1587,7 @@
 #error "Invalid I2C1_SCL Pin Configuration!"
 #endif
 
-// <o> I2C1_SCL Pin <0=>P0_7 <1=>P0_30 <2=>P0_51 <3=>P0_55  <4=>P0_65 <4=>P0_67 <4=>P0_71
+// <o> I2C1_SCL Pin <0=>P0_7 <1=>P0_30 <2=>P0_51 <3=>P0_55  <4=>P0_65 <4=>P0_67 <4=>P0_71  
 #define RTE_I2C1_SDA_PORT_ID            2
 #if    (RTE_I2C1_SDA_PORT_ID == 0)
 #define RTE_I2C1_SDA_PORT               0
@@ -1608,19 +1608,19 @@
 #define RTE_I2C1_SDA_PAD                15
 #define RTE_I2C1_SDA_REN                51
 #elif(RTE_I2C1_SDA_PORT_ID == 3)
-#define RTE_I2C1_SDA_PORT               0
+#define RTE_I2C1_SDA_PORT               0     
 #define RTE_I2C1_SDA_PIN                55
 #define RTE_I2C1_SDA_MUX                5
 #define RTE_I2C1_SDA_PAD                19
 #define RTE_I2C1_SDA_REN                55
 #elif(RTE_I2C1_SDA_PORT_ID == 4)
-#define RTE_I2C1_SDA_PORT               0
+#define RTE_I2C1_SDA_PORT               0     
 #define RTE_I2C1_SDA_PIN                65
 #define RTE_I2C1_SDA_MUX                5
 #define RTE_I2C1_SDA_PAD                23
 #define RTE_I2C1_SDA_REN                1
 #elif(RTE_I2C1_SDA_PORT_ID == 5)
-#define RTE_I2C1_SDA_PORT               0
+#define RTE_I2C1_SDA_PORT               0     
 #define RTE_I2C1_SDA_PIN                67
 #define RTE_I2C1_SDA_MUX                5
 #define RTE_I2C1_SDA_PAD                25
@@ -1728,7 +1728,7 @@
 // <i> Configuration settings for Driver_GSPI_MASTER in component ::Drivers:GSPI
 #define RTE_GSPI_MASTER       1
 
-//     <o> GSPI_MASTER_CLK <0=>P0_8 <1=>P0_25 <2=>P0_46 <3=>P0_52
+//     <o> GSPI_MASTER_CLK <0=>P0_8 <1=>P0_25 <2=>P0_46 <3=>P0_52 
 //     <i> CLK of GSPI0
 #define RTE_GSPI_MASTER_CLK_PORT_ID                  1
 #if(RTE_GSPI_MASTER_CLK_PORT_ID == 0)
@@ -1755,7 +1755,7 @@
   #error "Invalid GSPI0 RTE_GSPI_MASTER_CLK_PIN Pin Configuration!"
 #endif
 
-//     <o> GSPI_MASTER_CS0 <0=>P0_9 <1=>P0_28 <2=>P0_49 <3=>P0_53
+//     <o> GSPI_MASTER_CS0 <0=>P0_9 <1=>P0_28 <2=>P0_49 <3=>P0_53   
 //     <i> CS0 of GSPI0
 #define RTE_GSPI_MASTER_CS0_PORT_ID                  1
 #if(RTE_GSPI_MASTER_CS0_PORT_ID == 0)
@@ -1809,7 +1809,7 @@
   #error "Invalid GSPI0 RTE_GSPI_MASTER_MOSI_PIN Pin Configuration!"
 #endif
 
-//     <o> GSPI_MASTER_MISO <0=>P0_11 <1=>P0_26 <2=>P0_47 <3=>P0_56
+//     <o> GSPI_MASTER_MISO <0=>P0_11 <1=>P0_26 <2=>P0_47 <3=>P0_56     
 //     <i> MISO of GSPI0
 #define RTE_GSPI_MASTER_MISO_PORT_ID                  1
 #if(RTE_GSPI_MASTER_MISO_PORT_ID == 0)
@@ -1835,7 +1835,8 @@
 #else
   #error "Invalid GSPI0 RTE_GSPI_MASTER_MISO_PIN Pin Configuration!"
 #endif
-#if defined(HIGH_THROUGHPUT_EN) && (HIGH_THROUGHPUT_EN == 1)
+
+#if HIGH_THROUGHPUT_EN
 #define RTE_GSPI_MASTER_CHNL_UDMA_TX_EN  1
 #define RTE_GSPI_MASTER_CHNL_UDMA_TX_CH  11
 
@@ -1873,122 +1874,122 @@
 #define SCT_CLOCK_SOURCE        M4_SOCCLKFOROTHERCLKSCT
 #define SCT_CLOCK_DIV_FACT      1
 
-//SCT_IN_0  <0=>GPIO_25  <1=>GPIO_64 <2=>GPIO_68
+//SCT_IN_0	<0=>GPIO_25	 <1=>GPIO_64 <2=>GPIO_68
 #define RTE_SCT_IN_0_PORT_ID                  1        
 
 #if(RTE_SCT_IN_0_PORT_ID == 0)
 #define RTE_SCT_IN_0_PORT                     0
-#define RTE_SCT_IN_0_PIN                      25
+#define RTE_SCT_IN_0_PIN                      25	      
 #define RTE_SCT_IN_0_MUX                      9
 #define RTE_SCT_IN_0_PAD                      0//no pad
 #elif(RTE_SCT_IN_0_PORT_ID == 1)
 #define RTE_SCT_IN_0_PORT                     0
-#define RTE_SCT_IN_0_PIN                      64
+#define RTE_SCT_IN_0_PIN                      64  
 #define RTE_SCT_IN_0_MUX                      7
 #define RTE_SCT_IN_0_PAD                      22
 #elif(RTE_SCT_IN_0_PORT_ID == 2)
 #define RTE_SCT_IN_0_PORT                     0
-#define RTE_SCT_IN_0_PIN                      68
+#define RTE_SCT_IN_0_PIN                      68  
 #define RTE_SCT_IN_0_MUX                      9
 #define RTE_SCT_IN_0_PAD                      26
 #else
   #error "Invalid  RTE_SCT_IN_0_PIN Pin Configuration!"
 #endif
 
-//SCT_IN_1  <0=>GPIO_26  <1=>GPIO_65 <2=>GPIO_69
-#define RTE_SCT_IN_1_PORT_ID                  1
+//SCT_IN_1	<0=>GPIO_26	 <1=>GPIO_65 <2=>GPIO_69
+#define RTE_SCT_IN_1_PORT_ID                  1        
 #if(RTE_SCT_IN_1_PORT_ID == 0)
 #define RTE_SCT_IN_1_PORT                     0
-#define RTE_SCT_IN_1_PIN                      26
+#define RTE_SCT_IN_1_PIN                      26   
 #define RTE_SCT_IN_1_MUX                      9
 #define RTE_SCT_IN_1_PAD                      0//no pad
 #elif(RTE_SCT_IN_1_PORT_ID == 1)
 #define RTE_SCT_IN_1_PORT                     0
-#define RTE_SCT_IN_1_PIN                      65
+#define RTE_SCT_IN_1_PIN                      65    
 #define RTE_SCT_IN_1_MUX                      7
 #define RTE_SCT_IN_1_PAD                      23
 #elif(RTE_SCT_IN_1_PORT_ID == 2)
 #define RTE_SCT_IN_1_PORT                     0
-#define RTE_SCT_IN_1_PIN                      69
+#define RTE_SCT_IN_1_PIN                      69    
 #define RTE_SCT_IN_1_MUX                      9
 #define RTE_SCT_IN_1_PAD                      27
 #else
   #error "Invalid  RTE_SCT_IN_0_PIN Pin Configuration!"
 #endif
 
-//SCT_IN_2  <0=>GPIO_27  <1=>GPIO_66 <2=>GPIO_70
+//SCT_IN_2	<0=>GPIO_27	 <1=>GPIO_66 <2=>GPIO_70
 #ifdef BRD4325A
 #define RTE_SCT_IN_2_PORT_ID                  0
 #else
-#define RTE_SCT_IN_2_PORT_ID                  1
+#define RTE_SCT_IN_2_PORT_ID                  1    
 #endif
 #if(RTE_SCT_IN_2_PORT_ID == 0)
 #define RTE_SCT_IN_2_PORT                     0
-#define RTE_SCT_IN_2_PIN                      27
+#define RTE_SCT_IN_2_PIN                      27   
 #define RTE_SCT_IN_2_MUX                      9
 #define RTE_SCT_IN_2_PAD                      0//no pad
 #elif(RTE_SCT_IN_2_PORT_ID == 1)
 #define RTE_SCT_IN_2_PORT                     0
-#define RTE_SCT_IN_2_PIN                      66
+#define RTE_SCT_IN_2_PIN                      66    
 #define RTE_SCT_IN_2_MUX                      7
 #define RTE_SCT_IN_2_PAD                      24
 #elif(RTE_SCT_IN_2_PORT_ID == 2)
 #define RTE_SCT_IN_2_PORT                     0
-#define RTE_SCT_IN_2_PIN                      70
+#define RTE_SCT_IN_2_PIN                      70    
 #define RTE_SCT_IN_2_MUX                      9
 #define RTE_SCT_IN_2_PAD                      28
 #else
   #error "Invalid  RTE_SCT_IN_0_PIN Pin Configuration!"
 #endif
 
-//SCT_IN_3  <0=>GPIO_28  <1=>GPIO_67 <2=>GPIO_71
+//SCT_IN_3	<0=>GPIO_28	 <1=>GPIO_67 <2=>GPIO_71
 #ifdef BRD4325A
 #define RTE_SCT_IN_3_PORT_ID                  0
 #else
-#define RTE_SCT_IN_3_PORT_ID                  1
+#define RTE_SCT_IN_3_PORT_ID                  1        
 #endif
 #if(RTE_SCT_IN_3_PORT_ID == 0)
 #define RTE_SCT_IN_3_PORT                     0
-#define RTE_SCT_IN_3_PIN                      28
+#define RTE_SCT_IN_3_PIN                      28   
 #define RTE_SCT_IN_3_MUX                      9
 #define RTE_SCT_IN_3_PAD                      0//no pad
 #elif(RTE_SCT_IN_3_PORT_ID == 1)
 #define RTE_SCT_IN_3_PORT                     0
-#define RTE_SCT_IN_3_PIN                      67
+#define RTE_SCT_IN_3_PIN                      67   
 #define RTE_SCT_IN_3_MUX                      7
 #define RTE_SCT_IN_3_PAD                      25
 #elif(RTE_SCT_IN_3_PORT_ID == 2)
 #define RTE_SCT_IN_3_PORT                     0
-#define RTE_SCT_IN_3_PIN                      71
+#define RTE_SCT_IN_3_PIN                      71    
 #define RTE_SCT_IN_3_MUX                      9
 #define RTE_SCT_IN_3_PAD                      29
 #else
   #error "Invalid  RTE_SCT_IN_0_PIN Pin Configuration!"
 #endif
 
-//     SCT_OUT_0 <0=>GPIO_29 <1=>GPIO_68
+//     SCT_OUT_0 <0=>GPIO_29 <1=>GPIO_68   
 #define RTE_SCT_OUT_0_PORT_ID                 0
 #if(RTE_SCT_OUT_0_PORT_ID == 0)
 #define RTE_SCT_OUT_0_PORT                    0
-#define RTE_SCT_OUT_0_PIN                     29
-#define RTE_SCT_OUT_0_MUX                     9
-#define RTE_SCT_OUT_0_PAD                     0//no pad
+#define RTE_SCT_OUT_0_PIN                     29 
+#define RTE_SCT_OUT_0_MUX                     9 
+#define RTE_SCT_OUT_0_PAD                     0//no pad  
 #elif(RTE_SCT_OUT_0_PORT_ID ==1)
-#define RTE_SCT_OUT_0_PORT                    0
-#define RTE_SCT_OUT_0_PIN                     68
+#define RTE_SCT_OUT_0_PORT                    0 	
+#define RTE_SCT_OUT_0_PIN                     68 
 #define RTE_SCT_OUT_0_MUX                     7
 #define RTE_SCT_OUT_0_PAD                     26
 #else
   #error "Invalid  RTE_SCT_OUT_0_PIN Pin Configuration!"
 #endif
 
-//  SCT_OUT_1 <0=>GPIO_30  <1=>GPIO_69
+//  SCT_OUT_1 <0=>GPIO_30  <1=>GPIO_69   
 #define RTE_SCT_OUT_1_PORT_ID                 0
 #if(RTE_SCT_OUT_1_PORT_ID == 0)
 #define RTE_SCT_OUT_1_PORT                    0
 #define RTE_SCT_OUT_1_PIN                     30
-#define RTE_SCT_OUT_1_MUX                     9
-#define RTE_SCT_OUT_1_PAD                     0//no pad
+#define RTE_SCT_OUT_1_MUX                     9 
+#define RTE_SCT_OUT_1_PAD                     0//no pad 
 #elif(RTE_SCT_OUT_1_PORT_ID == 1)
 #define RTE_SCT_OUT_1_PORT                    0
 #define RTE_SCT_OUT_1_PIN                     69
@@ -1999,49 +2000,49 @@
 #endif
 
 
-/// SCT_OUT_2 <0=>GPIO_70
+/// SCT_OUT_2 <0=>GPIO_70  
 #define RTE_SCT_OUT_2_PORT                    0
 #define RTE_SCT_OUT_2_PIN                     70
 #define RTE_SCT_OUT_2_MUX                     7 
 #define RTE_SCT_OUT_2_PAD                     28
 
 
-//SCT_OUT_3 <0=>GPIO_71
+//SCT_OUT_3	<0=>GPIO_71   
 #define RTE_SCT_OUT_3_PORT                    0
 #define RTE_SCT_OUT_3_PIN                     71
 #define RTE_SCT_OUT_3_MUX                     7
 #define RTE_SCT_OUT_3_PAD                     29
 
 
-//SCT_OUT_4 <0=>GPIO_72
+//SCT_OUT_4	<0=>GPIO_72 
 #define RTE_SCT_OUT_4_PORT                    0
-#define RTE_SCT_OUT_4_PIN                     72
+#define RTE_SCT_OUT_4_PIN                     72 
 #define RTE_SCT_OUT_4_MUX                     7 
 #define RTE_SCT_OUT_4_PAD                     30
 
 
-//SCT_OUT_5 <0=>GPIO_73
+//SCT_OUT_5	<0=>GPIO_73  
 #define RTE_SCT_OUT_5_PORT                     2
-#define RTE_SCT_OUT_5_PIN                      73
+#define RTE_SCT_OUT_5_PIN                      73        
 #define RTE_SCT_OUT_5_MUX                      7
 #define RTE_SCT_OUT_5_PAD                      31
 
-//SCT_OUT_6 <0=>GPIO_74
+//SCT_OUT_6	<0=>GPIO_74	 
 #define RTE_SCT_OUT_6_PORT                    0
-#define RTE_SCT_OUT_6_PIN                     74
-#define RTE_SCT_OUT_6_MUX                     7
+#define RTE_SCT_OUT_6_PIN                     74      
+#define RTE_SCT_OUT_6_MUX                     7 
 #define RTE_SCT_OUT_6_PAD                     32
 
 
-// SCT_OUT_7  <0=>GPIO_75
+// SCT_OUT_7	<0=>GPIO_75	 
 #define RTE_SCT_OUT_7_PORT                    0
-#define RTE_SCT_OUT_7_PIN                     75
-#define RTE_SCT_OUT_7_MUX                     7
+#define RTE_SCT_OUT_7_PIN                     75      
+#define RTE_SCT_OUT_7_MUX                     7 
 #define RTE_SCT_OUT_7_PAD                     33
 
 //  SIO //
 //<>  Serial Input Output
-//SIO_0 <0=>GPIO_6 <1=>GPIO_25  <2=>GPIO_64 <3=>GPIO_72
+//SIO_0	<0=>GPIO_6 <1=>GPIO_25	<2=>GPIO_64 <3=>GPIO_72
 #define RTE_SIO_0_PORT_ID                 0         
 #if(RTE_SIO_0_PORT_ID == 0)
 #define RTE_SIO_0_PORT                    0
@@ -2050,14 +2051,14 @@
 #define RTE_SIO_0_PAD                     1 
 #elif(RTE_SIO_0_PORT_ID == 1)
 #define RTE_SIO_0_PORT                    0
-#define RTE_SIO_0_PIN                     25
+#define RTE_SIO_0_PIN                     25      
 #define RTE_SIO_0_MUX                     1
 #define RTE_SIO_0_PAD                     0//no pad
 #elif(RTE_SIO_0_PORT_ID == 2)
 #define RTE_SIO_0_PORT                    0
-#define RTE_SIO_0_PIN                     64
+#define RTE_SIO_0_PIN                     64   
 #define RTE_SIO_0_MUX                     1
-#define RTE_SIO_0_PAD                     22
+#define RTE_SIO_0_PAD                     22 
 #elif(RTE_SIO_0_PORT_ID == 3)
 #define RTE_SIO_0_PORT                    0
 #define RTE_SIO_0_PIN                     72
@@ -2067,30 +2068,30 @@
   #error "Invalid  RTE_SIO_0_PIN Pin Configuration!"
 #endif               
 
-//SIO_1 <0=>GPIO_7 <1=>GPIO_26  <2=>GPIO_65 <3=>GPIO_73
+//SIO_1	<0=>GPIO_7 <1=>GPIO_26	<2=>GPIO_65 <3=>GPIO_73
 #ifdef BRD4325A
-#define RTE_SIO_1_PORT_ID                 1
+#define RTE_SIO_1_PORT_ID                 1  
 #else
-#define RTE_SIO_1_PORT_ID                 0
+#define RTE_SIO_1_PORT_ID                 0  
 #endif
 #if(RTE_SIO_1_PORT_ID == 0)
 #define RTE_SIO_1_PORT                    0
 #define RTE_SIO_1_PIN                     7      
 #define RTE_SIO_1_MUX                     1
-#define RTE_SIO_1_PAD                     2
+#define RTE_SIO_1_PAD                     2 
 #elif(RTE_SIO_1_PORT_ID == 1)
 #define RTE_SIO_1_PORT                    0
-#define RTE_SIO_1_PIN                     26
+#define RTE_SIO_1_PIN                     26      
 #define RTE_SIO_1_MUX                     1
-#define RTE_SIO_1_PAD                     0// no pad
+#define RTE_SIO_1_PAD                     0// no pad	 
 #elif(RTE_SIO_1_PORT_ID == 2)
 #define RTE_SIO_1_PORT                    0
-#define RTE_SIO_1_PIN                     65
+#define RTE_SIO_1_PIN                     65   
 #define RTE_SIO_1_MUX                     1
-#define RTE_SIO_1_PAD                     23
+#define RTE_SIO_1_PAD                     23 
 #elif(RTE_SIO_1_PORT_ID == 3)
 #define RTE_SIO_1_PORT                    0
-#define RTE_SIO_1_PIN                     73
+#define RTE_SIO_1_PIN                     73  
 #define RTE_SIO_1_MUX                     1
 #define RTE_SIO_1_PAD                     31
 #else
@@ -2098,34 +2099,34 @@
 #endif 
 
 
-// SIO_2  <0=>GPIO_8 <1=>GPIO_27  <2=>GPIO_66 <3=>GPIO_74
-#define RTE_SIO_2_PORT_ID                 1
+// SIO_2	<0=>GPIO_8 <1=>GPIO_27	<2=>GPIO_66 <3=>GPIO_74
+#define RTE_SIO_2_PORT_ID                 1         
 #if(RTE_SIO_2_PORT_ID == 0)
 #define RTE_SIO_2_PORT                    0
 #define RTE_SIO_2_PIN                     8      
 #define RTE_SIO_2_MUX                     1
-#define RTE_SIO_2_PAD                     3
+#define RTE_SIO_2_PAD                     3 
 #elif(RTE_SIO_2_PORT_ID == 1)
 #define RTE_SIO_2_PORT                    0
-#define RTE_SIO_2_PIN                     27
+#define RTE_SIO_2_PIN                     27      
 #define RTE_SIO_2_MUX                     1
 #define RTE_SIO_2_PAD                     0//no pad
 #elif(RTE_SIO_2_PORT_ID == 2)
 #define RTE_SIO_2_PORT                    0
-#define RTE_SIO_2_PIN                     66
+#define RTE_SIO_2_PIN                     66 
 #define RTE_SIO_2_MUX                     1
-#define RTE_SIO_2_PAD                     24
+#define RTE_SIO_2_PAD                     24 
 #elif(RTE_SIO_2_PORT_ID == 3)
 #define RTE_SIO_2_PORT                    0
-#define RTE_SIO_2_PIN                     74
+#define RTE_SIO_2_PIN                     74 
 #define RTE_SIO_2_MUX                     1
 #define RTE_SIO_2_PAD                     32
 #else
   #error "Invalid  RTE_SIO_2_PIN Pin Configuration!"
 #endif 
 
-//SIO_3 <0=>GPIO_9 <1=>GPIO_28  <2=>GPIO_67 <3=>GPIO_75
-#define RTE_SIO_3_PORT_ID                 1
+//SIO_3	<0=>GPIO_9 <1=>GPIO_28	<2=>GPIO_67 <3=>GPIO_75
+#define RTE_SIO_3_PORT_ID                 1         
 #if(RTE_SIO_3_PORT_ID == 0)
 #define RTE_SIO_3_PORT                    0
 #define RTE_SIO_3_PIN                     9      
@@ -2133,77 +2134,77 @@
 #define RTE_SIO_3_PAD                     4
 #elif(RTE_SIO_3_PORT_ID == 1)
 #define RTE_SIO_3_PORT                    0
-#define RTE_SIO_3_PIN                     28
+#define RTE_SIO_3_PIN                     28      
 #define RTE_SIO_3_MUX                     1
 #define RTE_SIO_3_PAD                     0//no pad
 #elif(RTE_SIO_3_PORT_ID == 2)
 #define RTE_SIO_3_PORT                    0
-#define RTE_SIO_3_PIN                     67
+#define RTE_SIO_3_PIN                     67      
 #define RTE_SIO_3_MUX                     1
-#define RTE_SIO_3_PAD                     25
+#define RTE_SIO_3_PAD                     25  
 #elif(RTE_SIO_3_PORT_ID == 3)
 #define RTE_SIO_3_PORT                    0
-#define RTE_SIO_3_PIN                     75
+#define RTE_SIO_3_PIN                     75      
 #define RTE_SIO_3_MUX                     1
-#define RTE_SIO_3_PAD                     33
+#define RTE_SIO_3_PAD                     33 
 #else
   #error "Invalid  RTE_SIO_3_PIN Pin Configuration!"
 #endif 
 
 
-//SIO_4 <0=>GPIO_10 <1=>GPIO_29 <2=>GPIO_68
+//SIO_4	<0=>GPIO_10 <1=>GPIO_29	<2=>GPIO_68
 #ifdef BRD4325A
 #define RTE_SIO_4_PORT_ID                 1
 #else
-#define RTE_SIO_4_PORT_ID                 0
+#define RTE_SIO_4_PORT_ID                 0   
 #endif
 #if(RTE_SIO_4_PORT_ID == 0)
 #define RTE_SIO_4_PORT                    0
-#define RTE_SIO_4_PIN                     10
+#define RTE_SIO_4_PIN                     10      
 #define RTE_SIO_4_MUX                     1
 #define RTE_SIO_4_PAD                     5
 #elif(RTE_SIO_4_PORT_ID == 1)
 #define RTE_SIO_4_PORT                    0
-#define RTE_SIO_4_PIN                     29
+#define RTE_SIO_4_PIN                     29      
 #define RTE_SIO_4_MUX                     1
 #define RTE_SIO_4_PAD                     0//NO PAD
 #elif(RTE_SIO_4_PORT_ID == 2)
 #define RTE_SIO_4_PORT                    0
-#define RTE_SIO_4_PIN                     68
+#define RTE_SIO_4_PIN                     68      
 #define RTE_SIO_4_MUX                     1
 #define RTE_SIO_4_PAD                     26
 #else
   #error "Invalid  RTE_SIO_3_PIN Pin Configuration!"
-#endif
+#endif 
 
-// SIO_5  <0=>GPIO_11 <1=>GPIO_30 <2=>GPIO_69
+// SIO_5	<0=>GPIO_11 <1=>GPIO_30 <2=>GPIO_69
 #define RTE_SIO_5_PORT_ID                 0         
 #if(RTE_SIO_5_PORT_ID == 0)
 #define RTE_SIO_5_PORT                    0
 #define RTE_SIO_5_PIN                     11      
 #define RTE_SIO_5_MUX                     1
-#define RTE_SIO_5_PAD                     6
+#define RTE_SIO_5_PAD                     6 
 #elif(RTE_SIO_5_PORT_ID == 1)
 #define RTE_SIO_5_PORT                    0
-#define RTE_SIO_5_PIN                     30
+#define RTE_SIO_5_PIN                     30      
 #define RTE_SIO_5_MUX                     1
 #define RTE_SIO_5_PAD                     0//no pad
 #elif(RTE_SIO_5_PORT_ID == 2)
 #define RTE_SIO_5_PORT                    0
-#define RTE_SIO_5_PIN                     69
+#define RTE_SIO_5_PIN                     69      
 #define RTE_SIO_5_MUX                     1
-#define RTE_SIO_5_PAD                     27
+#define RTE_SIO_5_PAD                     27    
 #else
   #error "Invalid  RTE_SIO_5_PIN Pin Configuration!"
 #endif 
 
-// SIO_6  GPIO_70
+// SIO_6	GPIO_70
 #define RTE_SIO_6_PORT                    0
-#define RTE_SIO_6_PIN                     70
+#define RTE_SIO_6_PIN                     70      
 #define RTE_SIO_6_MUX                     1
 #define RTE_SIO_6_PAD                     28
 
-// SIO_7  <0=>GPIO_15 <1=>GPIO_71
+// SIO_7	<0=>GPIO_15 <1=>GPIO_71  
 #ifdef BRD4325A
 #define RTE_SIO_7_PORT_ID                 1
 #else
@@ -2211,17 +2212,17 @@
 #endif
 #if(RTE_SIO_7_PORT_ID == 0)
 #define RTE_SIO_7_PORT                    0
-#define RTE_SIO_7_PIN                     15
+#define RTE_SIO_7_PIN                     15      
 #define RTE_SIO_7_MUX                     1
 #define RTE_SIO_7_PAD                     8
 #elif(RTE_SIO_7_PORT_ID == 1)
 #define RTE_SIO_7_PORT                    0
-#define RTE_SIO_7_PIN                     71
+#define RTE_SIO_7_PIN                     71      
 #define RTE_SIO_7_MUX                     1
 #define RTE_SIO_7_PAD                     29
 #else
   #error "Invalid  RTE_SIO_7_PIN Pin Configuration!"
-#endif
+#endif 
 
 
 //<> Pulse Width Modulation
@@ -2229,73 +2230,73 @@
 #define RTE_PWM_1H_PORT_ID                 0
 #if(RTE_PWM_1H_PORT_ID == 0)
 #define RTE_PWM_1H_PORT                    0
-#define RTE_PWM_1H_PIN                     7
+#define RTE_PWM_1H_PIN                     7	      
 #define RTE_PWM_1H_MUX                     10
 #define RTE_PWM_1H_PAD                     2
 #elif(RTE_PWM_1H_PORT_ID == 1)
 #define RTE_PWM_1H_PORT                    0
-#define RTE_PWM_1H_PIN                     65
+#define RTE_PWM_1H_PIN                     65   
 #define RTE_PWM_1H_MUX                     8
-#define RTE_PWM_1H_PAD                     22
+#define RTE_PWM_1H_PAD                     22                   
 #else
   #error "Invalid  RTE_PWM_1H_PIN Pin Configuration!"
 #endif 
 
 
-// PWM_1L <0=>GPIO_6  <1=>GPIO_64
+// PWM_1L	<0=>GPIO_6	<1=>GPIO_64
 #define RTE_PWM_1L_PORT_ID                 1
 #if(RTE_PWM_1L_PORT_ID == 0)
 #define RTE_PWM_1L_PORT                    0
-#define RTE_PWM_1L_PIN                     6
+#define RTE_PWM_1L_PIN                     6      
 #define RTE_PWM_1L_MUX                     10
 #define RTE_PWM_1L_PAD                     1 
 #elif(RTE_PWM_1L_PORT_ID == 1)
 #define RTE_PWM_1L_PORT                    0
-#define RTE_PWM_1L_PIN                     64
+#define RTE_PWM_1L_PIN                     64     
 #define RTE_PWM_1L_MUX                     8
-#define RTE_PWM_1L_PAD                     22
+#define RTE_PWM_1L_PAD                     22                   
 #else
   #error "Invalid  RTE_PWM_1L_PIN Pin Configuration!"
 #endif 
 
-//PWM_2H  <0=>GPIO_9  <1=>GPIO_67
+//PWM_2H  <0=>GPIO_9	<1=>GPIO_67
 #define RTE_PWM_2H_PORT_ID                 0
 #if(RTE_PWM_2H_PORT_ID == 0)
 #define RTE_PWM_2H_PORT                    0
-#define RTE_PWM_2H_PIN                     9
+#define RTE_PWM_2H_PIN                     9    
 #define RTE_PWM_2H_MUX                     10
-#define RTE_PWM_2H_PAD                     4
+#define RTE_PWM_2H_PAD                     4 
 #elif(RTE_PWM_2H_PORT_ID == 1)
 #define RTE_PWM_2H_PORT                    0
 #define RTE_PWM_2H_PIN                     67
 #define RTE_PWM_2H_MUX                     8
-#define RTE_PWM_2H_PAD                     25
+#define RTE_PWM_2H_PAD                     25                   
 #else
   #error "Invalid  RTE_PWM_2H_PIN Pin Configuration!"
 #endif 
 
 
-// PWM_2L <0=>GPIO_8  <1=>GPIO_66
+// PWM_2L <0=>GPIO_8 	<1=>GPIO_66
 #define RTE_PWM_2L_PORT_ID                 0
 #if(RTE_PWM_2L_PORT_ID == 0)
 #define RTE_PWM_2L_PORT                    0
-#define RTE_PWM_2L_PIN                     8
-#define RTE_PWM_2L_MUX                     10
-#define RTE_PWM_2L_PAD                     3
+#define RTE_PWM_2L_PIN                     8     
+#define RTE_PWM_2L_MUX                     10 
+#define RTE_PWM_2L_PAD                     3                 
 #elif(RTE_PWM_2L_PORT_ID == 1)
 #define RTE_PWM_2L_PORT                    0
-#define RTE_PWM_2L_PIN                     66
+#define RTE_PWM_2L_PIN                     66    
 #define RTE_PWM_2L_MUX                     8
-#define RTE_PWM_2L_PAD                     24
+#define RTE_PWM_2L_PAD                     24                  
 #else
   #error "Invalid  RTE_PWM_2L_PIN Pin Configuration!"
 #endif 
 
-// PWM_3H <0=>GPIO_11   <1=>GPIO_69
+// PWM_3H <0=>GPIO_11 	<1=>GPIO_69
 #define RTE_PWM_3H_PORT_ID                 0
 #if(RTE_PWM_3H_PORT_ID == 0)
 #define RTE_PWM_3H_PORT                    0
-#define RTE_PWM_3H_PIN                     11
+#define RTE_PWM_3H_PIN                     11 
 #define RTE_PWM_3H_MUX                     10
 #define RTE_PWM_3H_PAD                     6
 #elif(RTE_PWM_3H_PORT_ID == 1)
@@ -2305,7 +2306,7 @@
 #define RTE_PWM_3H_PAD                     27
 #else
   #error "Invalid  RTE_PWM_3H_PIN Pin Configuration!"
-#endif
+#endif 
 
 // PWM_3L <0=>GPIO_10 <1=>GPIO_68
 #ifdef BRD4325A
@@ -2315,7 +2316,7 @@
 #endif
 #if(RTE_PWM_3L_PORT_ID == 0)
 #define RTE_PWM_3L_PORT                    0
-#define RTE_PWM_3L_PIN                     10
+#define RTE_PWM_3L_PIN                     10     
 #define RTE_PWM_3L_MUX                     10
 #define RTE_PWM_3L_PAD                     5
 #elif(RTE_PWM_3L_PORT_ID == 1)
@@ -2325,7 +2326,7 @@
 #define RTE_PWM_3L_PAD                     26
 #else
   #error "Invalid  RTE_PWM_3L_PIN Pin Configuration!"
-#endif
+#endif 
 
 
 // PWM_4H <0=>GPIO_15 <1=>GPIO_71
@@ -2346,7 +2347,7 @@
 #define RTE_PWM_4H_PAD                     29
 #else
   #error "Invalid  RTE_PWM_4H_PIN Pin Configuration!"
-#endif
+#endif 
 
 
 // PWM_4H <0=>GPIO_12 <1=>GPIO_70
@@ -2357,88 +2358,88 @@
 #endif
 #if(RTE_PWM_4L_PORT_ID == 0)
 #define RTE_PWM_4L_PORT                    0
-#define RTE_PWM_4L_PIN                     12
+#define RTE_PWM_4L_PIN                     12  
 #define RTE_PWM_4L_MUX                     10
 #define RTE_PWM_4L_PAD                     7
 #elif(RTE_PWM_4L_PORT_ID == 1)
 #define RTE_PWM_4L_PORT                    0
-#define RTE_PWM_4L_PIN                     70
+#define RTE_PWM_4L_PIN                     70    
 #define RTE_PWM_4L_MUX                     8
 #define RTE_PWM_4L_PAD                     28
 #else
   #error "Invalid  RTE_PWM_4L_PIN Pin Configuration!"
-#endif
+#endif 
 
 
 // PWM_FAULTA <0=>GPIO_25 <1=>GPIO_68 <1=>GPIO_73
 #define RTE_PWM_FAULTA_PORT_ID   0
 #if(RTE_PWM_FAULTA_PORT_ID == 0)
 #define RTE_PWM_FAULTA_PORT                0
-#define RTE_PWM_FAULTA_PIN                 25
-#define RTE_PWM_FAULTA_MUX                 10
-#define RTE_PWM_FAULTA_PAD                 0//no pad
+#define RTE_PWM_FAULTA_PIN                 25       
+#define RTE_PWM_FAULTA_MUX                 10   
+#define RTE_PWM_FAULTA_PAD                 0//no pad   
 #elif(RTE_PWM_FAULTA_PORT_ID == 1)
 #define RTE_PWM_FAULTA_PORT                0
-#define RTE_PWM_FAULTA_PIN                 68
-#define RTE_PWM_FAULTA_MUX                 10
-#define RTE_PWM_FAULTA_PAD                 26
+#define RTE_PWM_FAULTA_PIN                 68        
+#define RTE_PWM_FAULTA_MUX                 10   
+#define RTE_PWM_FAULTA_PAD                 26   
 #elif(RTE_PWM_FAULTA_PORT_ID == 2)
 #define RTE_PWM_FAULTA_PORT                0
-#define RTE_PWM_FAULTA_PIN                 73
-#define RTE_PWM_FAULTA_MUX                 8
-#define RTE_PWM_FAULTA_PAD                 31
+#define RTE_PWM_FAULTA_PIN                 73        
+#define RTE_PWM_FAULTA_MUX                 8   
+#define RTE_PWM_FAULTA_PAD                 31   
 #else
   #error "Invalid  RTE_PWM_FAULTA_PIN Pin Configuration!"
-#endif
+#endif 
 
 // PWM_FAULTB <0=>GPIO_26 <1=>GPIO_69 <1=>GPIO_74
 #define RTE_PWM_FAULTB_PORT_ID   0
 #if(RTE_PWM_FAULTB_PORT_ID == 0)
 #define RTE_PWM_FAULTB_PORT                0
-#define RTE_PWM_FAULTB_PIN                 26
-#define RTE_PWM_FAULTB_MUX                 10
-#define RTE_PWM_FAULTB_PAD                 0//no pad
+#define RTE_PWM_FAULTB_PIN                 26       
+#define RTE_PWM_FAULTB_MUX                 10    
+#define RTE_PWM_FAULTB_PAD                 0//no pad    
 #elif(RTE_PWM_FAULTB_PORT_ID == 1)
 #define RTE_PWM_FAULTB_PORT                0
-#define RTE_PWM_FAULTB_PIN                 69
-#define RTE_PWM_FAULTB_MUX                 10
-#define RTE_PWM_FAULTB_PAD                 27
+#define RTE_PWM_FAULTB_PIN                 69       
+#define RTE_PWM_FAULTB_MUX                 10    
+#define RTE_PWM_FAULTB_PAD                 27  
 #elif(RTE_PWM_FAULTB_PORT_ID == 2)
 #define RTE_PWM_FAULTB_PORT                0
-#define RTE_PWM_FAULTB_PIN                 74
-#define RTE_PWM_FAULTB_MUX                 8
+#define RTE_PWM_FAULTB_PIN                 74       
+#define RTE_PWM_FAULTB_MUX                 8    
 #define RTE_PWM_FAULTB_PAD                 32
 #else
   #error "Invalid  RTE_PWM_FAULTB_PIN Pin Configuration!"
-#endif
-//PWM_SLP_EVENT_TRIG   GPIO_72
+#endif 
+//PWM_SLP_EVENT_TRIG	 GPIO_72
 #define RTE_PWM_SLP_EVENT_TRIG_PORT           0
-#define RTE_PWM_SLP_EVENT_TRIG_PIN            72
-#define RTE_PWM_SLP_EVENT_TRIG_MUX            8
-#define RTE_PWM_SLP_EVENT_TRIG_PAD            30
+#define RTE_PWM_SLP_EVENT_TRIG_PIN            72               
+#define RTE_PWM_SLP_EVENT_TRIG_MUX            8          
+#define RTE_PWM_SLP_EVENT_TRIG_PAD            30       
 
-//PWM_TMR_EXT_TRIG_1 <0=>GPIO_27 <1=>GPIO_51 <2=>GPIO_70 <3=>GPIO_75
+//PWM_TMR_EXT_TRIG_1 <0=>GPIO_27 <1=>GPIO_51 <2=>GPIO_70 <3=>GPIO_75 
 #define RTE_PWM_TMR_EXT_TRIG_1_PORT_ID                 0
 #if(RTE_PWM_TMR_EXT_TRIG_1_PORT_ID == 0)
 #define RTE_PWM_TMR_EXT_TRIG_1_PORT                    0
-#define RTE_PWM_TMR_EXT_TRIG_1_PIN                     27
+#define RTE_PWM_TMR_EXT_TRIG_1_PIN                     27    
 #define RTE_PWM_TMR_EXT_TRIG_1_MUX                     10
-#define RTE_PWM_TMR_EXT_TRIG_1_PAD                     0//no pad
+#define RTE_PWM_TMR_EXT_TRIG_1_PAD                     0//no pad                   
 #elif(RTE_PWM_TMR_EXT_TRIG_1_PORT_ID == 1)
 #define RTE_PWM_TMR_EXT_TRIG_1_PORT                    0
-#define RTE_PWM_TMR_EXT_TRIG_1_PIN                     51
+#define RTE_PWM_TMR_EXT_TRIG_1_PIN                     51     
 #define RTE_PWM_TMR_EXT_TRIG_1_MUX                     8
 #define RTE_PWM_TMR_EXT_TRIG_1_PAD                     15
 #elif(RTE_PWM_TMR_EXT_TRIG_1_PORT_ID == 2)
 #define RTE_PWM_TMR_EXT_TRIG_1_PORT                    0
-#define RTE_PWM_TMR_EXT_TRIG_1_PIN                     70
+#define RTE_PWM_TMR_EXT_TRIG_1_PIN                     70     
 #define RTE_PWM_TMR_EXT_TRIG_1_MUX                     10
-#define RTE_PWM_TMR_EXT_TRIG_1_PAD                     28
+#define RTE_PWM_TMR_EXT_TRIG_1_PAD                     28  
 #elif(RTE_PWM_TMR_EXT_TRIG_1_PORT_ID == 3)
 #define RTE_PWM_TMR_EXT_TRIG_1_PORT                    0
-#define RTE_PWM_TMR_EXT_TRIG_1_PIN                     75
-#define RTE_PWM_TMR_EXT_TRIG_1_MUX                     8
-#define RTE_PWM_TMR_EXT_TRIG_1_PAD                     33
+#define RTE_PWM_TMR_EXT_TRIG_1_PIN                     75    
+#define RTE_PWM_TMR_EXT_TRIG_1_MUX                     8 	  	
+#define RTE_PWM_TMR_EXT_TRIG_1_PAD                     33  
 #else
   #error "Invalid  RTE_PWM_TMR_EXT_TRIG_1_PIN Pin Configuration!"
 #endif 
@@ -2448,17 +2449,17 @@
 #define RTE_PWM_TMR_EXT_TRIG_2_PORT_ID                 0
 #if(RTE_PWM_TMR_EXT_TRIG_2_PORT_ID == 0)
 #define RTE_PWM_TMR_EXT_TRIG_2_PORT                    0
-#define RTE_PWM_TMR_EXT_TRIG_2_PIN                     28
+#define RTE_PWM_TMR_EXT_TRIG_2_PIN                     28     
 #define RTE_PWM_TMR_EXT_TRIG_2_MUX                     10
-#define RTE_PWM_TMR_EXT_TRIG_2_PAD                     0//no pad
+#define RTE_PWM_TMR_EXT_TRIG_2_PAD                     0//no pad                  
 #elif(RTE_PWM_TMR_EXT_TRIG_2_PORT_ID == 1)
 #define RTE_PWM_TMR_EXT_TRIG_2_PORT                    0
-#define RTE_PWM_TMR_EXT_TRIG_2_PIN                     54
+#define RTE_PWM_TMR_EXT_TRIG_2_PIN                     54	  
 #define RTE_PWM_TMR_EXT_TRIG_2_MUX                     8
 #define RTE_PWM_TMR_EXT_TRIG_2_PAD                     18
 #elif(RTE_PWM_TMR_EXT_TRIG_2_PORT_ID == 2)
 #define RTE_PWM_TMR_EXT_TRIG_2_PORT                    0
-#define RTE_PWM_TMR_EXT_TRIG_2_PIN                     71
+#define RTE_PWM_TMR_EXT_TRIG_2_PIN                     71	  
 #define RTE_PWM_TMR_EXT_TRIG_2_MUX                     10
 #define RTE_PWM_TMR_EXT_TRIG_2_PAD                     29
 #else
@@ -2468,36 +2469,36 @@
 
 //<> QEI (Quadrature Encode Interface)
 
-//QEI_DIR <0=>GPIO_28 <1=>GPIO_49 <2=>GPIO_57 <3=>GPIO_67 <4=>GPIO_71 <5=>GPIO_73
+//QEI_DIR	<0=>GPIO_28 <1=>GPIO_49 <2=>GPIO_57 <3=>GPIO_67 <4=>GPIO_71 <5=>GPIO_73
 #define RTE_QEI_DIR_PORT_ID                 4
 #if(RTE_QEI_DIR_PORT_ID == 0)
 #define RTE_QEI_DIR_PORT                    0
-#define RTE_QEI_DIR_PIN                     28
+#define RTE_QEI_DIR_PIN                     28     
 #define RTE_QEI_DIR_MUX                     5
-#define RTE_QEI_DIR_PAD                     0//no pad
+#define RTE_QEI_DIR_PAD                     0//no pad                  
 #elif(RTE_QEI_DIR_PORT_ID == 1)
 #define RTE_QEI_DIR_PORT                    0
-#define RTE_QEI_DIR_PIN                     49
+#define RTE_QEI_DIR_PIN                     49	      
 #define RTE_QEI_DIR_MUX                     3
-#define RTE_QEI_DIR_PAD                     13
+#define RTE_QEI_DIR_PAD                     13  
 #elif(RTE_QEI_DIR_PORT_ID == 2)
 #define RTE_QEI_DIR_PORT                    0
-#define RTE_QEI_DIR_PIN                     57
+#define RTE_QEI_DIR_PIN                     57	      
 #define RTE_QEI_DIR_MUX                     5
-#define RTE_QEI_DIR_PAD                     21
+#define RTE_QEI_DIR_PAD                     21  
 #elif(RTE_QEI_DIR_PORT_ID == 3)
 #define RTE_QEI_DIR_PORT                    0
-#define RTE_QEI_DIR_PIN                     67
+#define RTE_QEI_DIR_PIN                     67	      
 #define RTE_QEI_DIR_MUX                     3
-#define RTE_QEI_DIR_PAD                     25
+#define RTE_QEI_DIR_PAD                     25  
 #elif(RTE_QEI_DIR_PORT_ID == 4)
 #define RTE_QEI_DIR_PORT                    0
-#define RTE_QEI_DIR_PIN                     71
+#define RTE_QEI_DIR_PIN                     71	      
 #define RTE_QEI_DIR_MUX                     3
 #define RTE_QEI_DIR_PAD                     29
 #elif(RTE_QEI_DIR_PORT_ID == 5)
 #define RTE_QEI_DIR_PORT                    0
-#define RTE_QEI_DIR_PIN                     73
+#define RTE_QEI_DIR_PIN                     73	      
 #define RTE_QEI_DIR_MUX                     3
 #define RTE_QEI_DIR_PAD                     31
 #else
@@ -2505,84 +2506,84 @@
 #endif 
 
 
-//QEI_IDX <0=>GPIO_25 <1=>GPIO_46 <2=>GPIO_52 <3=>GPIO_64 <4=>GPIO_68 <5=>GPIO_72
-#define RTE_QEI_IDX_PORT_ID                 4
+//QEI_IDX	<0=>GPIO_25 <1=>GPIO_46	<2=>GPIO_52 <3=>GPIO_64 <4=>GPIO_68 <5=>GPIO_72
+#define RTE_QEI_IDX_PORT_ID                 4         
 #if(RTE_QEI_IDX_PORT_ID == 0)
 #define RTE_QEI_IDX_PORT                    0
-#define RTE_QEI_IDX_PIN                     25
+#define RTE_QEI_IDX_PIN                     25     
 #define RTE_QEI_IDX_MUX                     5
 #define RTE_QEI_IDX_PAD                     0//no pad
 #elif(RTE_QEI_IDX_PORT_ID == 1)
 #define RTE_QEI_IDX_PORT                    0
-#define RTE_QEI_IDX_PIN                     46
+#define RTE_QEI_IDX_PIN                     46	      
 #define RTE_QEI_IDX_MUX                     3
-#define RTE_QEI_IDX_PAD                     10
+#define RTE_QEI_IDX_PAD                     10	 
 #elif(RTE_QEI_IDX_PORT_ID == 2)
 #define RTE_QEI_IDX_PORT                    0
-#define RTE_QEI_IDX_PIN                     52
+#define RTE_QEI_IDX_PIN                     52    
 #define RTE_QEI_IDX_MUX                     5
-#define RTE_QEI_IDX_PAD                     16
+#define RTE_QEI_IDX_PAD                     16     
 #elif(RTE_QEI_IDX_PORT_ID == 3)
 #define RTE_QEI_IDX_PORT                    0
-#define RTE_QEI_IDX_PIN                     64
+#define RTE_QEI_IDX_PIN                     64     
 #define RTE_QEI_IDX_MUX                     3
 #define RTE_QEI_IDX_PAD                     22
 #elif(RTE_QEI_IDX_PORT_ID == 4)
 #define RTE_QEI_IDX_PORT                    0
-#define RTE_QEI_IDX_PIN                     68
+#define RTE_QEI_IDX_PIN                     68  
 #define RTE_QEI_IDX_MUX                     3
-#define RTE_QEI_IDX_PAD                     26
+#define RTE_QEI_IDX_PAD                     26 
 #elif(RTE_QEI_IDX_PORT_ID == 5)
 #define RTE_QEI_IDX_PORT                    0
-#define RTE_QEI_IDX_PIN                     72
+#define RTE_QEI_IDX_PIN                     72    
 #define RTE_QEI_IDX_MUX                     3
-#define RTE_QEI_IDX_PAD                     30
+#define RTE_QEI_IDX_PAD                     30 
 #else
   #error "Invalid  RTE_QEI_IDX_PIN Pin Configuration!"
 #endif 
 
 
-//QEI_PHA <0=>GPIO_26 <1=>GPIO_47 <2=>GPIO_53 <3=>GPIO_65 <4=>GPIO_69 <5=>GPIO_73
+//QEI_PHA	<0=>GPIO_26 <1=>GPIO_47	<2=>GPIO_53 <3=>GPIO_65 <4=>GPIO_69 <5=>GPIO_73
 #ifdef BRD4325A
-#define RTE_QEI_PHA_PORT_ID                 4
+#define RTE_QEI_PHA_PORT_ID                 4     
 #else
-#define RTE_QEI_PHA_PORT_ID                 5
+#define RTE_QEI_PHA_PORT_ID                 5     
 #endif
 #if(RTE_QEI_PHA_PORT_ID == 0)
 #define RTE_QEI_PHA_PORT                    0
-#define RTE_QEI_PHA_PIN                     26
+#define RTE_QEI_PHA_PIN                     26      
 #define RTE_QEI_PHA_MUX                     5
-#define RTE_QEI_PHA_PAD                     0//no pad
+#define RTE_QEI_PHA_PAD                     0//no pad	 
 #elif(RTE_QEI_PHA_PORT_ID == 1)
 #define RTE_QEI_PHA_PORT                    0
-#define RTE_QEI_PHA_PIN                     47
+#define RTE_QEI_PHA_PIN                     47 
 #define RTE_QEI_PHA_MUX                     3
 #define RTE_QEI_PHA_PAD                     11
 #elif(RTE_QEI_PHA_PORT_ID == 2)
 #define RTE_QEI_PHA_PORT                    0
-#define RTE_QEI_PHA_PIN                     53
+#define RTE_QEI_PHA_PIN                     53    
 #define RTE_QEI_PHA_MUX                     5
-#define RTE_QEI_PHA_PAD                     17
+#define RTE_QEI_PHA_PAD                     17 
 #elif(RTE_QEI_PHA_PORT_ID == 3)
 #define RTE_QEI_PHA_PORT                    0
-#define RTE_QEI_PHA_PIN                     65
+#define RTE_QEI_PHA_PIN                     65     
 #define RTE_QEI_PHA_MUX                     3
-#define RTE_QEI_PHA_PAD                     23
+#define RTE_QEI_PHA_PAD                     23 
 #elif(RTE_QEI_PHA_PORT_ID == 4)
 #define RTE_QEI_PHA_PORT                    0
-#define RTE_QEI_PHA_PIN                     69
+#define RTE_QEI_PHA_PIN                     69  
 #define RTE_QEI_PHA_MUX                     3
-#define RTE_QEI_PHA_PAD                     27
+#define RTE_QEI_PHA_PAD                     27 
 #elif(RTE_QEI_PHA_PORT_ID == 5)
 #define RTE_QEI_PHA_PORT                    0
-#define RTE_QEI_PHA_PIN                     73
+#define RTE_QEI_PHA_PIN                     73    
 #define RTE_QEI_PHA_MUX                     3
 #define RTE_QEI_PHA_PAD                     31
 #else
-    #error "Invalid  RTE_QEI_PHA_PIN Pin Configuration!"
+		#error "Invalid  RTE_QEI_PHA_PIN Pin Configuration!"
 #endif 
 
-//QEI_PHB <0=>GPIO_27 <1=>GPIO_48 <1=>GPIO_56 <1=>GPIO_66 <1=>GPIO_70 <1=>GPIO_74
+//QEI_PHB	<0=>GPIO_27 <1=>GPIO_48 <1=>GPIO_56 <1=>GPIO_66 <1=>GPIO_70 <1=>GPIO_74
 #ifdef BRD4325A
 #define RTE_QEI_PHB_PORT_ID                 5
 #else
@@ -2590,34 +2591,34 @@
 #endif
 #if(RTE_QEI_PHB_PORT_ID == 0)
 #define RTE_QEI_PHB_PORT                    0
-#define RTE_QEI_PHB_PIN                     27
+#define RTE_QEI_PHB_PIN                     27     
 #define RTE_QEI_PHB_MUX                     5
-#define RTE_QEI_PHB_PAD                     0//no pad
+#define RTE_QEI_PHB_PAD                     0//no pad                  
 #elif(RTE_QEI_PHB_PORT_ID == 1)
 #define RTE_QEI_PHB_PORT                    0
-#define RTE_QEI_PHB_PIN                     48
+#define RTE_QEI_PHB_PIN                     48      
 #define RTE_QEI_PHB_MUX                     3
 #define RTE_QEI_PHB_PAD                     12
 #elif(RTE_QEI_PHB_PORT_ID == 2)
 #define RTE_QEI_PHB_PORT                    0
-#define RTE_QEI_PHB_PIN                     56
+#define RTE_QEI_PHB_PIN                     56      
 #define RTE_QEI_PHB_MUX                     5
 #define RTE_QEI_PHB_PAD                     20
 #elif(RTE_QEI_PHB_PORT_ID == 3)
 #define RTE_QEI_PHB_PORT                    0
-#define RTE_QEI_PHB_PIN                     66
+#define RTE_QEI_PHB_PIN                     66      
 #define RTE_QEI_PHB_MUX                     3
 #define RTE_QEI_PHB_PAD                     24
 #elif(RTE_QEI_PHB_PORT_ID == 4)
 #define RTE_QEI_PHB_PORT                    0
-#define RTE_QEI_PHB_PIN                     70
+#define RTE_QEI_PHB_PIN                     70      
 #define RTE_QEI_PHB_MUX                     3
 #define RTE_QEI_PHB_PAD                     28
 #elif(RTE_QEI_PHB_PORT_ID == 5)
 #define RTE_QEI_PHB_PORT                    0
-#define RTE_QEI_PHB_PIN                     74
+#define RTE_QEI_PHB_PIN                     74      
 #define RTE_QEI_PHB_MUX                     3
-#define RTE_QEI_PHB_PAD                     32
+#define RTE_QEI_PHB_PAD                     32 
 #else
   #error "Invalid  RTE_QEI_PHB_PIN Pin Configuration!"
 #endif 

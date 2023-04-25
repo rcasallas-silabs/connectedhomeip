@@ -31,7 +31,7 @@
 
 void RSI_TS_SetCntFreez(MCU_TEMP_Type *pstcTempSens, uint32_t u32CountFreez)
 {
-  pstcTempSens->TS_ENABLE_AND_TEMPERATURE_DONE_b.CONT_COUNT_FREEZE = (unsigned int)(u32CountFreez & 0x03FF);
+  pstcTempSens->TS_ENABLE_AND_TEMPERATURE_DONE_b.CONT_COUNT_FREEZE = u32CountFreez;
   return;
 }
 
@@ -49,7 +49,7 @@ void RSI_TS_SetCntFreez(MCU_TEMP_Type *pstcTempSens, uint32_t u32CountFreez)
 void RSI_TS_RefClkSel(MCU_TEMP_Type *pstcTempSens, boolean_t bRefClk)
 {
 
-  pstcTempSens->TS_ENABLE_AND_TEMPERATURE_DONE_b.REF_CLK_SEL = (unsigned int)(bRefClk & 0x01);
+  pstcTempSens->TS_ENABLE_AND_TEMPERATURE_DONE_b.REF_CLK_SEL = bRefClk;
   return;
 }
 
@@ -66,7 +66,7 @@ void RSI_TS_RefClkSel(MCU_TEMP_Type *pstcTempSens, boolean_t bRefClk)
 
 void RSI_TS_Enable(MCU_TEMP_Type *pstcTempSens, boolean_t bEn)
 {
-  pstcTempSens->TS_ENABLE_AND_TEMPERATURE_DONE_b.TEMP_SENS_EN = (unsigned int)(bEn & 0x01);
+  pstcTempSens->TS_ENABLE_AND_TEMPERATURE_DONE_b.TEMP_SENS_EN = bEn;
   return;
 }
 
@@ -85,10 +85,10 @@ void RSI_TS_Config(MCU_TEMP_Type *pstcTempSens, uint32_t u32Nomial)
 {
   volatile uint32_t reg_write_data                                  = 0;
   reg_write_data                                                    = RSI_IPMU_RO_TsConfig();
-  pstcTempSens->TS_SLOPE_SET_b.SLOPE                                = (unsigned int)(reg_write_data & 0x03FF);
-  pstcTempSens->TS_FE_COUNTS_NOMINAL_SETTINGS_b.NOMINAL_TEMPERATURE = (unsigned int)(u32Nomial & 0x7F);
+  pstcTempSens->TS_SLOPE_SET_b.SLOPE                                = reg_write_data;
+  pstcTempSens->TS_FE_COUNTS_NOMINAL_SETTINGS_b.NOMINAL_TEMPERATURE = u32Nomial;
   reg_write_data                                                    = RSI_IPMU_RO_TsEfuse();
-  pstcTempSens->TS_FE_COUNTS_NOMINAL_SETTINGS_b.F2_NOMINAL          = (unsigned int)(reg_write_data & 0x03FF);
+  pstcTempSens->TS_FE_COUNTS_NOMINAL_SETTINGS_b.F2_NOMINAL          = reg_write_data;
   return;
 }
 
@@ -128,7 +128,7 @@ void RSI_TS_RoBjtEnable(MCU_TEMP_Type *pstcTempSens, boolean_t enable)
     if (enable == 1U) {
       return;
     } else {
-      pstcTempSens->TS_SLOPE_SET_b.BJT_BASED_TEMP = (unsigned int)(enable & 0x01); //0
+      pstcTempSens->TS_SLOPE_SET_b.BJT_BASED_TEMP = enable; //0
     }
   } else {
     if (pstcTempSens->TS_SLOPE_SET_b.BJT_BASED_TEMP == 0U) {
@@ -137,7 +137,7 @@ void RSI_TS_RoBjtEnable(MCU_TEMP_Type *pstcTempSens, boolean_t enable)
         for (i = 100; i; i--)
           ; // wait for 100 us
       } else {
-        pstcTempSens->TS_SLOPE_SET_b.BJT_BASED_TEMP = (unsigned int)(enable & 0x01); //0
+        pstcTempSens->TS_SLOPE_SET_b.BJT_BASED_TEMP = enable; //0
       }
     }
   }
@@ -202,8 +202,8 @@ uint32_t RSI_TS_GetPtatClkCnt(MCU_TEMP_Type *pstcTempSens)
 
 void RSI_Periodic_TempUpdate(TIME_PERIOD_Type *temp, uint8_t enable, uint8_t trigger_time)
 {
-  temp->MCU_CAL_TEMP_PROG_REG_b.PERIODIC_TEMP_CALIB_EN = (unsigned int)(enable & 0x01);
-  temp->MCU_CAL_TEMP_PROG_REG_b.TEMP_TRIGGER_TIME_SEL  = (unsigned int)(trigger_time & 0x03);
+  temp->MCU_CAL_TEMP_PROG_REG_b.PERIODIC_TEMP_CALIB_EN = enable;
+  temp->MCU_CAL_TEMP_PROG_REG_b.TEMP_TRIGGER_TIME_SEL  = trigger_time;
   return;
 }
 

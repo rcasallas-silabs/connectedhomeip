@@ -55,18 +55,17 @@ static const PORT_PIN_T ledBits[] = { { 0, 0 }, { 0, 2 }, { 0, 12 } };
 #endif
 static const uint32_t ledBitsCnt = sizeof(ledBits) / sizeof(PORT_PIN_T);
 
-
-#if defined(M4_UART1_INSTANCE) && (M4_UART1_INSTANCE == 1)
+#if M4_UART1_INSTANCE
 extern ARM_DRIVER_USART Driver_USART0;
 static ARM_DRIVER_USART *UARTdrv = &Driver_USART0;
 #endif
 
-#if defined(M4_UART2_INSTANCE) && (M4_UART2_INSTANCE == 1)
+#if M4_UART2_INSTANCE
 extern ARM_DRIVER_USART Driver_UART1;
 static ARM_DRIVER_USART *UARTdrv = &Driver_UART1;
 #endif
 
-#if defined(ULP_UART_INSTANCE) && (ULP_UART_INSTANCE == 1)
+#if ULP_UART_INSTANCE
 extern ARM_DRIVER_USART Driver_ULP_UART;
 static ARM_DRIVER_USART *UARTdrv = &Driver_ULP_UART;
 #endif
@@ -134,15 +133,15 @@ void Board_Debug_Init(void)
                      | ARM_USART_FLOW_CONTROL_NONE,
                    BOARD_BAUD_VALUE);
 
-#if defined(M4_UART1_INSTANCE) && (M4_UART1_INSTANCE == 1)
+#if M4_UART1_INSTANCE
   NVIC_DisableIRQ(USART0_IRQn);
 #endif
 
-#if defined(M4_UART2_INSTANCE) && (M4_UART2_INSTANCE == 1)
+#if M4_UART2_INSTANCE
   NVIC_DisableIRQ(UART1_IRQn);
 #endif
 
-#if defined(ULP_UART_INSTANCE) && (ULP_UART_INSTANCE == 1)
+#if ULP_UART_INSTANCE
   NVIC_DisableIRQ(ULPSS_UART_IRQn);
 #endif
 
@@ -151,7 +150,7 @@ void Board_Debug_Init(void)
 
 #if defined(__GNUC__)
 
-#if defined (__REDLIB_INTERFACE_VERSION__) && (__REDLIB_INTERFACE_VERSION__ >= 20000)
+#if (__REDLIB_INTERFACE_VERSION__ >= 20000)
 /* We are using new Redlib_v2 semihosting interface */
 #define WRITEFUNC __sys_write
 #define READFUNC  __sys_readc
@@ -168,12 +167,10 @@ void Board_Debug_Init(void)
 #endif /* defined(DEBUG_ENABLE) */
 
 #if !defined(DEBUG_SEMIHOSTING)
-int WRITEFUNC(int iFileHandle, char *pcBuffer, int iLength);
 int WRITEFUNC(int iFileHandle, char *pcBuffer, int iLength)
 {
-(void)iFileHandle;
 #if defined(DEBUG_ENABLE)
-   int i;
+  unsigned int i;
   for (i = 0; i < iLength; i++) {
     Board_UARTPutChar(pcBuffer[i]);
   }
@@ -186,7 +183,6 @@ int WRITEFUNC(int iFileHandle, char *pcBuffer, int iLength)
    a character. With the default semihosting stub, this would read the character
    from the debugger console window (which acts as stdin). But this version reads
    the character from the LPC1768/RDB1768 UART. */
-int READFUNC(void);
 int READFUNC(void)
 {
 #if defined(DEBUG_ENABLE)
@@ -310,7 +306,7 @@ void Board_UARTPutSTR(uint8_t *ptr)
  */
 void RSI_Board_Init(void)
 {
-  uint32_t i;
+  int i;
 #ifdef BRD4325A
   for (i = 0; i < ledBitsCnt; i++) {
     if (i == 0) {
@@ -350,9 +346,9 @@ void RSI_Board_LED_Set(int x, int y)
 {
 #ifdef BRD4325A
   if (x == 0) {
-    RSI_EGPIO_SetPin(EGPIO, (uint8_t)ledBits[x].port, (uint8_t)ledBits[x].pin, (uint8_t)y);
+    RSI_EGPIO_SetPin(EGPIO, ledBits[x].port, ledBits[x].pin, y);
   } else if (x == 1) {
-    RSI_EGPIO_SetPin(EGPIO1, (uint8_t)ledBits[x].port, (uint8_t)ledBits[x].pin, (uint8_t)y);
+    RSI_EGPIO_SetPin(EGPIO1, ledBits[x].port, ledBits[x].pin, y);
   }
 #else
   RSI_EGPIO_SetPin(EGPIO1, ledBits[x].port, ledBits[x].pin, y);
@@ -392,13 +388,13 @@ uint8_t Board_UARTGetChar(void)
   recv_done      = 0;
   UARTdrv->Receive(&rev, 1);
   while (recv_done == 0) {
-#if defined(M4_UART1_INSTANCE) && (M4_UART1_INSTANCE == 1)
+#if M4_UART1_INSTANCE
     RSI_M4SSUsart0Handler();
 #endif
-#if defined(M4_UART1_INSTANCE) && (M4_UART1_INSTANCE == 1)
+#if M4_UART2_INSTANCE
     RSI_M4SSUart1Handler();
 #endif
-#if defined(ULP_UART_INSTANCE) && (ULP_UART_INSTANCE == 1)
+#if ULP_UART_INSTANCE
     RSI_ULPUartHandler();
 #endif
   }
@@ -408,7 +404,7 @@ uint8_t Board_UARTGetChar(void)
 /**
  * @fn          void Board_UARTPutChar(uint8_t ch)
  * @brief       Sends a single character on the UART, required for printf redirection.
- * @param[in]   ch  : character to send
+ * @param[in]   ch	: character to send
  * @return      none
  */
 void Board_UARTPutChar(uint8_t ch)
@@ -416,13 +412,13 @@ void Board_UARTPutChar(uint8_t ch)
   send_done = 0;
   UARTdrv->Send(&ch, sizeof(ch));
   while (send_done == 0) {
-#if defined(M4_UART1_INSTANCE) && (M4_UART1_INSTANCE == 1)
+#if M4_UART1_INSTANCE
     RSI_M4SSUsart0Handler();
 #endif
-#if defined(M4_UART2_INSTANCE) && (M4_UART2_INSTANCE == 1)
+#if M4_UART2_INSTANCE
     RSI_M4SSUart1Handler();
 #endif
-#if defined(ULP_UART_INSTANCE) && (ULP_UART_INSTANCE == 1)
+#if ULP_UART_INSTANCE
     RSI_ULPUartHandler();
 #endif
   }
@@ -585,15 +581,15 @@ size_t __write(int handle, const unsigned char *buffer, size_t size)
 
   if (buffer == 0) {
     /*
-       This means that we should flush internal buffers.  Since we
-       don't we just return.  (Remember, "handle" == -1 means that all
-       handles should be flushed.)
-     */
+		   This means that we should flush internal buffers.  Since we
+		   don't we just return.  (Remember, "handle" == -1 means that all
+		   handles should be flushed.)
+		 */
     return 0;
   }
 
   /* This template only writes to "standard out" and "standard err",
-     for all other file handles it returns failure. */
+	   for all other file handles it returns failure. */
   if ((handle != _LLIO_STDOUT) && (handle != _LLIO_STDERR)) {
     return _LLIO_ERROR;
   }

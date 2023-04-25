@@ -397,6 +397,14 @@ int32_t rsi_calib_app_task()
 #ifdef RSI_WITH_OS
   rsi_task_handle_t driver_task_handle = NULL;
 #endif
+  //! module intialisation
+  status = rsi_device_init(LOAD_NWP_FW);
+  if (status != RSI_SUCCESS) {
+    LOG_PRINT("Device init failed %lx\r\n", status);
+    return status;
+  }
+  LOG_PRINT("Device init success\r\n");
+
 #ifdef RSI_WITH_OS
   //! Task created for Driver task
   rsi_task_create((rsi_task_function_t)(uint32_t)rsi_wireless_driver_task,
@@ -406,14 +414,6 @@ int32_t rsi_calib_app_task()
                   RSI_DRIVER_TASK_PRIORITY,
                   &driver_task_handle);
 #endif
-  //! module intialisation
-  status = rsi_device_init(LOAD_NWP_FW);
-  if (status != RSI_SUCCESS) {
-    LOG_PRINT("Device init failed %lx\r\n", status);
-    return status;
-  }
-  LOG_PRINT("Device init success\r\n");
-
   //! WC initialization
   status = rsi_wireless_init(8, 0);
   if (status != RSI_SUCCESS) {

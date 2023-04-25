@@ -35,6 +35,7 @@
 #include "rsi_spi.h"
 #include "rsi_rom_table_rs9116.h"
 #if  ( (defined(A11_ROM)) && (defined(ROMDRIVER_PRESENT)) && (defined(CHIP_9117)) )
+extern const ROM_SSI_API_T ssi_api;
 #endif
 
 extern RSI_UDMA_HANDLE_T udmaHandle0;    //check
@@ -111,7 +112,7 @@ static SPI_PIN SSI_MASTER_sck  = {SSI_MASTER_SCK_PORT,  SSI_MASTER_SCK_PIN, SSI_
 static SPI_PIN SSI_MASTER_cs  =  {SSI_MASTER_CS0_PORT,  SSI_MASTER_CS0_PIN, SSI_MASTER_CS0_MODE, SSI_MASTER_CS0_PADSEL};
 #endif
 
-#if defined(SSI_MASTER_TX_DMA_Instance) && (SSI_MASTER_TX_DMA_Instance == 1)
+#if (SSI_MASTER_TX_DMA_Instance == 1)
 void SSI_MASTER_UDMA_Tx_Event (uint32_t event ,uint8_t dmaCh);
 static SPI_DMA SSI_MASTER_UDMA_TX_CHNL = {
 		{
@@ -127,7 +128,7 @@ static SPI_DMA SSI_MASTER_UDMA_TX_CHNL = {
 		SSI_MASTER_UDMA_Tx_Event
 };
 #endif
-#if defined(SSI_MASTER_RX_DMA_Instance) && (SSI_MASTER_RX_DMA_Instance == 1)
+#if (SSI_MASTER_RX_DMA_Instance == 1)
 void SSI_MASTER_UDMA_Rx_Event (uint32_t event ,uint8_t dmaCh);
 static SPI_DMA SSI_MASTER_UDMA_RX_CHNL = {
 		{
@@ -209,7 +210,7 @@ static SPI_PIN SSI_SLAVE_sck  = {SSI_SLAVE_SCK_PORT,  SSI_SLAVE_SCK_PIN, SSI_SLA
 static SPI_PIN SSI_SLAVE_cs  = {SSI_SLAVE_CS0_PORT,  SSI_SLAVE_CS0_PIN, SSI_SLAVE_CS0_MODE, SSI_SLAVE_CS0_PADSEL};
 #endif
 
-#if defined(SSI_SLAVE_TX_DMA_Instance) && (SSI_SLAVE_TX_DMA_Instance == 1)
+#if (SSI_SLAVE_TX_DMA_Instance == 1)
 void SSI_SLAVE_UDMA_Tx_Event (uint32_t event ,uint8_t dmaCh);
 static SPI_DMA SSI_SLAVE_UDMA_TX_CHNL = {
 		{
@@ -225,7 +226,7 @@ static SPI_DMA SSI_SLAVE_UDMA_TX_CHNL = {
 		SSI_SLAVE_UDMA_Tx_Event
 };
 #endif
-#if defined(SSI_SLAVE_RX_DMA_Instance) && (SSI_SLAVE_RX_DMA_Instance == 1)
+#if (SSI_SLAVE_RX_DMA_Instance == 1)
 void SSI_SLAVE_UDMA_Rx_Event (uint32_t event ,uint8_t dmaCh);
 static SPI_DMA SSI_SLAVE_UDMA_RX_CHNL = {
 		{
@@ -301,16 +302,16 @@ static SPI_INFO          SSI_ULP_MASTER_Info         = { 0U };
 static SPI_TRANSFER_INFO SSI_ULP_MASTER_TransferInfo = { 0U };
 
 #ifdef SSI_ULP_MASTER_MOSI_SEL
-static SPI_PIN SSI_ULP_MASTER_mosi = {SSI_ULP_MASTER_MOSI_PORT, SSI_ULP_MASTER_MOSI_PIN, SSI_ULP_MASTER_MOSI_MODE, 0};
+static SPI_PIN SSI_ULP_MASTER_mosi = {SSI_ULP_MASTER_MOSI_PORT, SSI_ULP_MASTER_MOSI_PIN, SSI_ULP_MASTER_MOSI_MODE};
 #endif
 #ifdef SSI_ULP_MASTER_MISO_SEL
-static SPI_PIN SSI_ULP_MASTER_miso = {SSI_ULP_MASTER_MISO_PORT, SSI_ULP_MASTER_MISO_PIN, SSI_ULP_MASTER_MISO_MODE, 0};
+static SPI_PIN SSI_ULP_MASTER_miso = {SSI_ULP_MASTER_MISO_PORT, SSI_ULP_MASTER_MISO_PIN, SSI_ULP_MASTER_MISO_MODE};
 #endif
 #ifdef SSI_ULP_MASTER_SCK_SEL
-static SPI_PIN SSI_ULP_MASTER_sck  = {SSI_ULP_MASTER_SCK_PORT,  SSI_ULP_MASTER_SCK_PIN, SSI_ULP_MASTER_SCK_MODE, 0};
+static SPI_PIN SSI_ULP_MASTER_sck  = {SSI_ULP_MASTER_SCK_PORT,  SSI_ULP_MASTER_SCK_PIN, SSI_ULP_MASTER_SCK_MODE};
 #endif
 #ifdef SSI_ULP_MASTER_CS0_SEL
-static SPI_PIN SSI_ULP_MASTER_cs  = {SSI_ULP_MASTER_CS0_PORT,  SSI_ULP_MASTER_CS0_PIN, SSI_ULP_MASTER_CS0_MODE, 0};
+static SPI_PIN SSI_ULP_MASTER_cs  = {SSI_ULP_MASTER_CS0_PORT,  SSI_ULP_MASTER_CS0_PIN, SSI_ULP_MASTER_CS0_MODE};
 #endif
 
 #if (SSI_ULP_MASTER_TX_DMA_Instance == 1)
@@ -529,7 +530,7 @@ void SSI_MASTER_IRQHandler (void)
 SPI_IRQHandler (&SSI_MASTER_Resources);
 	#endif
 }
-#if defined(SSI_MASTER_TX_DMA_Instance) && (SSI_MASTER_TX_DMA_Instance == 1)
+#if (SSI_MASTER_TX_DMA_Instance == 1)
 void SSI_MASTER_UDMA_Tx_Event (uint32_t event, uint8_t dmaCh) 
 {
 		 #if ( (defined(A11_ROM)) && (defined(ROMDRIVER_PRESENT)) && (defined(CHIP_9117)) )
@@ -539,7 +540,8 @@ SPI_UDMA_Tx_Event (event,dmaCh, &SSI_MASTER_Resources);
 #endif
 }
 #endif
-#if defined(SSI_MASTER_RX_DMA_Instance) && (SSI_MASTER_RX_DMA_Instance == 1)
+
+#if (SSI_MASTER_RX_DMA_Instance == 1)
 void SSI_MASTER_UDMA_Rx_Event (uint32_t event, uint8_t dmaCh) 
 {		 
 #if ( (defined(A11_ROM)) && (defined(ROMDRIVER_PRESENT)) && (defined(CHIP_9117)) )
@@ -680,7 +682,7 @@ void SSI_SLAVE_IRQHandler (void)
 SPI_IRQHandler (&SSI_SLAVE_Resources); 
 	#endif
 }
-#if defined(SSI_SLAVE_TX_DMA_Instance) && (SSI_SLAVE_TX_DMA_Instance == 1)
+#if (SSI_SLAVE_TX_DMA_Instance == 1)
 void SSI_SLAVE_UDMA_Tx_Event  (uint32_t event, uint8_t dmaCh) 
 {	
 	#if ( (defined(A11_ROM)) && (defined(ROMDRIVER_PRESENT)) && (defined(CHIP_9117)) )
@@ -691,7 +693,7 @@ SPI_UDMA_Tx_Event (event,dmaCh, &SSI_SLAVE_Resources);
 }
 #endif
 
-#if defined(SSI_SLAVE_RX_DMA_Instance) && (SSI_SLAVE_RX_DMA_Instance == 1)
+#if (SSI_SLAVE_RX_DMA_Instance == 1)
 void  SSI_SLAVE_UDMA_Rx_Event (uint32_t event, uint8_t dmaCh)
 {
 	#if ( (defined(A11_ROM)) && (defined(ROMDRIVER_PRESENT)) && (defined(CHIP_9117)) )

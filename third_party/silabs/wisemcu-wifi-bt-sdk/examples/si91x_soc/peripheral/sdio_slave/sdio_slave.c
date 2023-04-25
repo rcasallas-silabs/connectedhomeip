@@ -49,9 +49,9 @@
 
 #if SW_CORE_CLK
 #define ICACHE2_ADDR_TRANSLATE_1_REG  *(volatile uint32_t *)(0x20280000 + 0x24)
-#define MISC_CFG_SRAM_REDUNDANCY_CTRL *(volatile uint32_t *)(M4_MISC_CONFIG_BASE + 0x18)
-#define MISC_CONFIG_MISC_CTRL1        *(volatile uint32_t *)(M4_MISC_CONFIG_BASE + 0x44)
-#define MISC_QUASI_SYNC_MODE          *(volatile uint32_t *)(M4_MISC_CONFIG_BASE + 0x84)
+#define MISC_CFG_SRAM_REDUNDANCY_CTRL *(volatile uint32_t *)(0x46008000 + 0x18)
+#define MISC_CONFIG_MISC_CTRL1        *(volatile uint32_t *)(0x46008000 + 0x44)
+#define MISC_QUASI_SYNC_MODE          *(volatile uint32_t *)(0x46008000 + 0x84)
 
 #define SOC_PLL_REF_FREQUENCY 40000000  /*<! PLL input REFERENCE clock 40MHZ */
 #define PS4_SOC_FREQ          150000000 /*<! PLL out clock 150MHz            */
@@ -119,7 +119,7 @@ int main()
 
   SystemCoreClockUpdate();
 
-  /* Configure M4 core clock */
+  /* Switch M4 core clock to 180Mhz */
 #if SW_CORE_CLK
   switch_m4_frequency();
 #endif
@@ -141,13 +141,13 @@ int main()
   /* Interrupt enable command53 wr */
   SDIO_FN1_INT_UNMASK_REG = BIT(0);
 
-  /* Enable NVIC */
+  /*Enable NVIC*/
   NVIC_EnableIRQ(HIF0_IRQn);
 
-  /* Mask the host interrupts */
+  /* Mask the host interrupts.*/
   M4_HOST_INTR_MASK_REG = MASK_HOST_INTERRUPT;
 
-  /* Initialize debug UART */
+  /* Initialized board UART */
   DEBUGINIT();
   DEBUGOUT("\r\nSDIO slave application started\r\n");
 

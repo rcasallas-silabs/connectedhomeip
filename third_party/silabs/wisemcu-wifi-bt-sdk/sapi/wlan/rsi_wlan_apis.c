@@ -5400,7 +5400,7 @@ int32_t rsi_wlan_receive_stats_stop(void)
   SL_PRINTF(SL_WLAN_RX_STATS_STOP_ERROR_IN_SENDING_COMMAND, WLAN, LOG_ERROR, "status: %4x", status);
   return status;
 }
-/*! \cond RS9116 */
+
 /*==============================================*/
 /**
  * @brief       Start discovery in wi-fi direct mode.This is a non-blocking API.
@@ -5548,6 +5548,7 @@ int32_t rsi_wlan_wfd_start_discovery(
   SL_PRINTF(SL_WLAN_WFD_START_DISCOVERY_ERROR_IN_SENDING_COMMAND_2, WLAN, LOG_ERROR, "status: %4x", status);
   return status;
 }
+
 /*==============================================*/
 /**
  * @brief       A join_response_handler() API that connects to the specified Wi-Fi-Direct device.This is a non-blocking API.
@@ -5654,7 +5655,7 @@ int32_t rsi_wlan_wfd_connect(int8_t *device_name,
   SL_PRINTF(SL_WLAN_WFD_CONNECT_ERROR_IN_SENDING_COMMAND, WLAN, LOG_ERROR, "status: %4x", status);
   return status;
 }
-/*! \endcond */
+
 /*==============================================*/
 /**
  * @brief      Send the raw data in TCP/IP bypass mode. This is a blocking API.

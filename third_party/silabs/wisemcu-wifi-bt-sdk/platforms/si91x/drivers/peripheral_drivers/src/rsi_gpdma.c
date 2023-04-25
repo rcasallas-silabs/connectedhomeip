@@ -16,6 +16,7 @@
 ******************************************************************************/
 
 #include "rsi_ccp_user_config.h"
+
 #ifndef ROMDRIVER_PRESENT
 #include "rsi_rom_gpdma.h"
 
@@ -24,8 +25,9 @@ extern "C" {
 #endif
 
 /*==============================================*/
-/*
- * @fn          RSI_DRIVER_VERSION RSI_GPDMA_GetVersion(void)
+/**
+/**
+ * @fn          RSI_DRIVER_VERSION_M4 RSI_GPDMA_GetVersion(void)
  * @brief		    This API is used to get version information of the driver implementation
  * @return 		  structure of type RSI_DRIVER_VERSION_M4 and its members are as below
  *								- \ref RSI_GPDMA_API_VERSION   : Version of the CMSIS-Driver specification used to implement this driver.
@@ -1135,6 +1137,4 @@ uint32_t gpdma_channel_is_enabled(RSI_GPDMA_HANDLE_T pHandle, uint8_t dmaCh)
 #ifdef __cplusplus
 }
 #endif
-#else
-typedef int dummy; // To remove empty translation unit warning.
 #endif //ROMDRIVER_PRESENT

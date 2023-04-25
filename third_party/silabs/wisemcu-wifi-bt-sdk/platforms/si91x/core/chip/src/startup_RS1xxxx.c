@@ -18,9 +18,9 @@
 #include "system_RS1xxxx.h"
 #include "rsi_ps_ram_func.h"
 #include "core_cm4.h"
-/*----------Stack Symbols-----------------------------------------------*/
-extern uint32_t __StackTop;
-extern uint32_t __co_stackTop;
+/*----------Stack Configuration-----------------------------------------------*/
+#define STACK_SIZE 0x00000C00 /*!< Stack size (in Words)           */
+__attribute__((section(".co_stack"))) unsigned long pulStack[STACK_SIZE];
 
 /*----------Macro definition--------------------------------------------------*/
 #define WEAK __attribute__((weak))
@@ -154,6 +154,9 @@ extern unsigned long _sidata; /*!< Start address for the initialization
                                       values of the .data section.            */
 extern unsigned long _sdata;  /*!< Start address for the .data section     */
 extern unsigned long _edata;  /*!< End address for the .data section       */
+extern unsigned long _sbss;   /*!< Start address for the .bss section      */
+extern unsigned long _ebss;   /*!< End address for the .bss section        */
+extern void _eram;            /*!< End address for ram                     */
 
 /*----------Function prototypes-----------------------------------------------*/
 extern int main(void);             /*!< The entry point for the application  */
@@ -167,7 +170,7 @@ static void Default_Handler(void); /*!< Default exception handler            */
 __attribute__((used, section(".isr_vector"))) void (*const g_pfnVectors[])(void) = {
   /*----------------------------------Core Exceptions---------------------------------- */
 
-  (void *)&__StackTop, 					     /*!< The initial stack  pointer (0x00)            */
+  (void *)0x2fc00, 					 /*!< The initial stack  pointer (0x00)            */
   (void *)0x300001,                  /*!< Reset Handler                               */
   NMI_Handler,                       /*!< NMI Handler                                 */
   HardFault_Handler,                 /*!< Hard Fault Handler                          */
@@ -214,7 +217,7 @@ __attribute__((used, section(".isr_vector"))) void (*const g_pfnVectors[])(void)
   IRQ027_Handler,                    //   27:  Sleep Sensor Interrupts 7
   IRQ028_Handler,                    //   28:  Sleep Sensor Interrupts 8
   IRQ029_Handler,                    //   29:  Sleep Sensor Interrupts 9
-  (void *)&__co_stackTop,            //   30:	Reserved
+  (void *)&pulStack[STACK_SIZE - 1], //   30:	Reserved
   IRQ031_Handler,                    //   31:	RPDMA interrupt
   RSI_Default_Reset_Handler,         //   32: 	Reserved
   IRQ033_Handler,                    //   33:	UDMA interrupt

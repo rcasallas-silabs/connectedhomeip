@@ -1,0 +1,37 @@
+project_name: gatt_test
+package: wiseconnect
+quality: alpha
+label: BLE Gatt Test
+category: Example|WiSeConnect
+description: >
+  Demonstrates how to configure GATT server in BLE peripheral mode
+filter:
+  - name: "Wireless Technology"
+    value: ["Bluetooth"]
+  - name: "Device Type"
+    value: Undefined
+  - name: "Project Difficulty"
+    value: ["Advanced"]
+xml_filter: Undefined
+sdk: {id: gecko_sdk, version: 4.1.0}
+sdk_extension:
+  - id: wiseconnect
+    version: 1.0.1
+source:
+  - path: rsi_ble_gatt_test.c
+include:
+  - path: 
+    file_list:
+      - path: rsi_ble_config.h
+requires:
+  - name: wiseconnect_platform
+  - name: wiseconnect_sapi_ble
+  - name: wiseconnect_sapi_bluetooth
+toolchain_settings: []
+readme:
+  - path: readme.md
+other_file:
+ui_hints:
+  highlight:
+    - path: readme.md
+      focus: true

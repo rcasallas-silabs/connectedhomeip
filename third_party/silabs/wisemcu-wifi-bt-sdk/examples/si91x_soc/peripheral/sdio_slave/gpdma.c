@@ -16,7 +16,7 @@
  ******************************************************************************/
 /** @file gpdma.c
  * 
- *  @brief This file contains function definitions of transfer and receive
+ * 	@brief This file contains functions defination of transfer or receive
  *         SDIO slave data using GPDMA. 
  *
  */
@@ -28,18 +28,15 @@
 #define GPDMA_LASTCHANNEL 8
 #define NUMGPDMADESC      10
 #define TRANSFER_SIZE     256
-
-/* SDIO Write FIFO Data Register */
-#define RX_SOURCE_ADDR 0x20200080
-
-/* SDIO Read FIFO Data Register */
-#define TX_SOURCE_ADDR 0x20200040
+#define RX_SOURCE_ADDR    0x20200080
+#define TX_SOURCE_ADDR    0x20200040
 
 /* Private define ------------------------------------------------------------*/
-#define M4_HOST_INTR_STATUS_REG (*(volatile uint32_t *)(M4_MISC_CONFIG_BASE + 0x04))
+#define M4_HOST_INTR_STATUS_REG (*(volatile uint32_t *)(0x46008000 + 0x04))
+#define SDIO_REG_CMD            (*(volatile uint16_t *)(0x20200000 + 0x18))
 
-#define SDIO_REG_CMD                (*(volatile uint16_t *)(SDIO_BASE + 0x18))
-#define SDIO_BLK_CNT                (*(volatile uint16_t *)(SDIO_BASE + 0x14))
+#define SDIO_BLK_CNT (*(volatile uint16_t *)(0x20200000 + 0x14))
+
 #define SDIO_REG_RX_NUM_CHUNKS_ADDR (*(volatile uint32_t *)(SDIO_BASE + 0x242))
 
 /* DMA descriptors must be aligned to 16 bytes */
@@ -339,7 +336,7 @@ void GPDMA_TX_Trigger(uint8_t num_of_blocks, uint8_t *data_buf)
 
   Setup_TX_ChannelDesc(data_buf, num_of_blocks);
 
-  RX_NUM_CHUNKS = num_of_blocks; // to program no of blocks
+  (*(volatile uint32_t *)(0x20200000 + 0x242)) = num_of_blocks; // to program no .of blocks
 
   M4_HOST_INTR_STATUS_REG = BIT(3); // to raise interrupt to host
 

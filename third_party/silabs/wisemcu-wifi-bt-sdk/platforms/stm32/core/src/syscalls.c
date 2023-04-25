@@ -157,10 +157,10 @@ int _stat(char *file, struct stat *st)
 	return 0;
 }
 
-int _link(char *old_link, char *new_link)
+int _link(char *old, char *new)
 {
-	(void)old_link;//This statement is added only to resolve compilation warning, value is unchanged
-	(void)new_link;//This statement is added only to resolve compilation warning, value is unchanged
+	(void)old;//This statement is added only to resolve compilation warning, value is unchanged
+	(void)new;//This statement is added only to resolve compilation warning, value is unchanged
 	errno = EMLINK;
 	return -1;
 }

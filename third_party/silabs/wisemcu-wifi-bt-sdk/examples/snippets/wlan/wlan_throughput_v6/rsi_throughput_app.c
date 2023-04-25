@@ -461,7 +461,7 @@ int32_t application()
 
 #ifdef RSI_M4_INTERFACE
 #ifdef RSI_WITH_OS
-  tick_count_s = 1;
+  tick_count_s = 10;
 #endif
 
   switch_m4_frequency();

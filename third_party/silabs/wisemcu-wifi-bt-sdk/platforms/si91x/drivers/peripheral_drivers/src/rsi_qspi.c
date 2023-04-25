@@ -16,6 +16,7 @@
 ******************************************************************************/
 
 // Include Files
+
 #include "rsi_ccp_user_config.h"
 
 #ifndef ROMDRIVER_PRESENT
@@ -2879,6 +2880,4 @@ const ROM_QSPI_API_T qspi_api =
 		&RSI_QSPI_UpdateOperatingMode_and_ResetType,
 };
 */
-#else
-typedef int dummy; // To remove empty translation unit warning.
 #endif // ROMDRIVER_PRESENT

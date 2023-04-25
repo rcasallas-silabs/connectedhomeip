@@ -208,6 +208,9 @@ typedef  struct _USART0_DMA
 #define USART_RESET_REG                 0x00   ///< USART reset register address  
  
 typedef void (*ARM_USART_SignalEvent_t) (uint32_t event);  ///< Pointer to \ref ARM_USART_SignalEvent : Signal USART Event.
+void RSI_M4SSUsart0Handler(void);
+void RSI_M4SSUart1Handler(void);
+void RSI_ULPUartHandler(void);
 
 typedef struct _USART_CLOCK
 {
@@ -264,14 +267,6 @@ typedef struct
   USART_CLOCK              clock;
   USART_SYNC_MODE          sync_mode;
 } USART_RESOURCES;
-ARM_USART_CAPABILITIES USART_GetCapabilities (USART_RESOURCES *usart);
-ARM_DRIVER_VERSION ARM_USARTx_GetVersion(void);
-void IRQ038_Handler(void);
-void IRQ039_Handler(void);
-void IRQ012_Handler(void);
-void RSI_M4SSUsart0Handler(void);
-void RSI_M4SSUart1Handler(void);
-void RSI_ULPUartHandler(void);
 
 #ifdef __cplusplus
 }

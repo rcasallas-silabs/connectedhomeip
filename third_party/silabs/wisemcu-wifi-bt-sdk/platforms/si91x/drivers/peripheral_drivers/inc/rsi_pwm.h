@@ -238,16 +238,16 @@ STATIC INLINE error_t RSI_MCPWM_ReadCounter(RSI_MCPWM_T *pMCPWM, uint16_t *count
   // Gets Time period counter current value 
   switch (chnlNum) {
     case PWM_CHNL_0:
-      *counterVal = (uint16_t)(pMCPWM->PWM_TIME_PRD_CNTR_VALUE_CH0);
+      *counterVal = (pMCPWM->PWM_TIME_PRD_CNTR_VALUE_CH0);
       break;
     case PWM_CHNL_1:
-      *counterVal = (uint16_t)(pMCPWM->PWM_TIME_PRD_CNTR_VALUE_CH1);
+      *counterVal = (pMCPWM->PWM_TIME_PRD_CNTR_VALUE_CH1);
       break;
     case PWM_CHNL_2:
-      *counterVal = (uint16_t)(pMCPWM->PWM_TIME_PRD_CNTR_VALUE_CH2);
+      *counterVal = (pMCPWM->PWM_TIME_PRD_CNTR_VALUE_CH2);
       break;
     case PWM_CHNL_3:
-      *counterVal = (uint16_t)(pMCPWM->PWM_TIME_PRD_CNTR_VALUE_CH3);
+      *counterVal = (pMCPWM->PWM_TIME_PRD_CNTR_VALUE_CH3);
       break;
     default:
       return ERROR_PWM_INVALID_CHNLNUM;
@@ -271,16 +271,16 @@ STATIC INLINE error_t RSI_MCPWM_GetCounterDir(RSI_MCPWM_T *pMCPWM, uint8_t *coun
   // Gets the counter direction  
   switch (chnlNum) {
     case PWM_CHNL_0:
-      *counterDir = (uint8_t)(pMCPWM->PWM_TIME_PRD_STS_REG_CH0);
+      *counterDir = (pMCPWM->PWM_TIME_PRD_STS_REG_CH0);
       break;
     case PWM_CHNL_1:
-      *counterDir = (uint8_t)(pMCPWM->PWM_TIME_PRD_STS_REG_CH1);
+      *counterDir = (pMCPWM->PWM_TIME_PRD_STS_REG_CH1);
       break;
     case PWM_CHNL_2:
-      *counterDir = (uint8_t)(pMCPWM->PWM_TIME_PRD_STS_REG_CH2);
+      *counterDir = (pMCPWM->PWM_TIME_PRD_STS_REG_CH2);
       break;
     case PWM_CHNL_3:
-      *counterDir = (uint8_t)(pMCPWM->PWM_TIME_PRD_STS_REG_CH3);
+      *counterDir = (pMCPWM->PWM_TIME_PRD_STS_REG_CH3);
       break;
     default:
       return ERROR_PWM_INVALID_CHNLNUM;
@@ -483,7 +483,7 @@ STATIC INLINE void RSI_MCPWM_InterruptDisable(RSI_MCPWM_T *pMCPWM, uint16_t flag
  */
 STATIC INLINE uint16_t RSI_PWM_GetInterruptStatus(RSI_MCPWM_T *pMCPWM, uint16_t flag)
 {
-  return (uint16_t)(pMCPWM->PWM_INTR_STS & flag);
+  return (pMCPWM->PWM_INTR_STS & flag);
 }
 
 /*===================================================*/
@@ -805,7 +805,7 @@ STATIC INLINE error_t RSI_MCPWM_SetDutyCycle(RSI_MCPWM_T *pMCPWM, uint16_t dutyC
  */
 STATIC INLINE void RSI_MCPWM_ExternalTriggerControl(RSI_MCPWM_T *pMCPWM, boolean_t enable)
 {
-  pMCPWM->PWM_TIME_PRD_COMMON_REG_b.USE_EXT_TIMER_TRIG_FRM_REG = (unsigned int)(enable & 0x01);
+  pMCPWM->PWM_TIME_PRD_COMMON_REG_b.USE_EXT_TIMER_TRIG_FRM_REG = enable;
 }
 
 /*===================================================*/
@@ -819,7 +819,7 @@ STATIC INLINE void RSI_MCPWM_ExternalTriggerControl(RSI_MCPWM_T *pMCPWM, boolean
  */
 STATIC INLINE void RSI_MCPWM_BaseTimerSelect(RSI_MCPWM_T *pMCPWM, uint8_t baseTime)
 {
-  pMCPWM->PWM_TIME_PRD_COMMON_REG_b.PWM_TIME_PRD_USE_0TH_TIMER_ONLY = (unsigned int)(baseTime & 0x01);
+  pMCPWM->PWM_TIME_PRD_COMMON_REG_b.PWM_TIME_PRD_USE_0TH_TIMER_ONLY = baseTime;
 }
 //  PWM FUNCTION PROTOTYPES	
 RSI_DRIVER_VERSION_M4 RSI_MCPWM_GetVersion(void);

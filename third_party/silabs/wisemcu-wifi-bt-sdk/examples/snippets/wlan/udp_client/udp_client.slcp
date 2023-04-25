@@ -33,13 +33,33 @@ toolchain_settings: []
 readme:
   - path: readme.md
 other_file:
-  - path: resources/readme/udpclientapplicationconfiguration.png
-  - path: resources/readme/udpclientsetupncp.png
-  - path: resources/readme/udpclientiperfcommand.png
-  - path: resources/readme/udpclientsetupsoc.png
-  - path: resources/readme/udpclientiperflogs.png
-  - path: resources/readme/udpclientapplicationprintsncp.png
-  - path: resources/readme/udpclientapplicationprintssoc.png
+  - path: resources/readme/application_prints_ncp.png
+  - path: resources/readme/application_prints_soc.png
+  - path: resources/readme/udpclientsoc.png
+  - path: resources/readme/udp_client_program_mode.png
+  - path: resources/readme/bare_metal.png
+  - path: resources/readme/baud_rate.png
+  - path: resources/readme/usb_to_uart_2.png
+  - path: resources/readme/post_build_script.png
+  - path: resources/readme/macros.png
+  - path: resources/readme/usb_to_uart_1.png
+  - path: resources/readme/udplog.png
+  - path: resources/readme/udpclientncp.png
+  - path: resources/readme/udpport.png
+  - path: resources/readme/soc_board_detection.png
+  - path: resources/readme/chip_9117_macro.png
+  - path: resources/readme/run_mode.png
+  - path: resources/readme/efr32_board_detection.png
+  - path: resources/readme/udp_client_example_soc.png
+  - path: resources/readme/efm32_board_detection.png
+  - path: resources/readme/build_project_soc.png
+  - path: resources/readme/port_selection_ncp.png
+  - path: resources/readme/udp_client_create.png
+  - path: resources/readme/port_selection_soc.png
+  - path: resources/readme/udp_client_example_ncp.png
+  - path: resources/readme/serial_port_setup.png
+  - path: resources/readme/udp_client_build_project_ncp.png
+  - path: resources/readme/examples_demos.png
 ui_hints:
   highlight:
     - path: readme.md

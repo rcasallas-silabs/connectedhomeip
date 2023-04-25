@@ -40,13 +40,6 @@ toolchain_settings: []
 readme:
   - path: readme.md
 other_file:
-  - path: resources/readme/httpclientv6cmdsuccess.png
-  - path: resources/readme/httpclientv6applicationprintssoc.png
-  - path: resources/readme/httpclientv6applicationconfiguration.png
-  - path: resources/readme/httpclientv6setupncp.png
-  - path: resources/readme/httpclientv6applicationprintsncp.png
-  - path: resources/readme/httpclientv6setupsoc.png
-  - path: resources/readme/httpclientv6serverstartcommand.png
 ui_hints:
   highlight:
     - path: readme.md
