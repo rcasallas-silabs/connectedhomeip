@@ -12,6 +12,8 @@ bootloaderPath = ''
 buildFarmLabel = 'Build-Farm'
 buildFarmLargeLabel = 'Build-Farm-Large'
 chipBuildEfr32Image = "artifactory.silabs.net/gsdk-dockerhub-proxy/connectedhomeip/chip-build-efr32:0.5.64"
+saved_workspace = 'saved_workspace'
+ 
 
 secrets = [[path: 'teams/gecko-sdk/app/svc_gsdk', engineVersion: 2,
             secretValues: [[envVar: 'SL_PASSWORD', vaultKey: 'password'],
@@ -138,6 +140,9 @@ def buildOpenThreadExample(app)
 
             def relPath = "silabs/efr32"
 
+            // Remove -app at end of string for later use (if it exists)
+            def appNameOnly = app - '-app'
+
             withDockerRegistry([url: "https://artifactory.silabs.net ", credentialsId: 'svc_gsdk']){
                 sh "docker pull $chipBuildEfr32Image"
             }
@@ -161,14 +166,27 @@ def buildOpenThreadExample(app)
                                     if (sleepyBoard.contains(board)) {
                                         arguments = "--sed"
                                     }
-                                sh "./scripts/examples/gn_efr32_example.sh ./examples/${app}/${relPath} ./out/CSA/${app}/OpenThread/standard ${board}"
+                                sh """./scripts/examples/gn_efr32_example.sh ./examples/${app}/${relPath} ./out/CSA/${app}/OpenThread/standard ${board}
+                                        mkdir -p ${saved_workspace}/out/standard/${board}/OpenThread
+                                        cp ./out/CSA/${app}/OpenThread/standard/${board}/*.s37 ${saved_workspace}/out/standard/${board}/OpenThread/
+                                        cp ./out/CSA/${app}/OpenThread/standard/${board}/*.map ${saved_workspace}/out/standard/${board}/OpenThread/ 
+                                """
 
                                 if(buildRelease) {
-                                    sh "./scripts/examples/gn_efr32_example.sh ./examples/${app}/${relPath} ./out/CSA/${app}/OpenThread/release ${board} --release"
+                                    sh """./scripts/examples/gn_efr32_example.sh ./examples/${app}/${relPath} ./out/CSA/${app}/OpenThread/release ${board} --release
+                                          mkdir -p ${saved_workspace}/out/release/${board}/OpenThread
+                                          cp ./out/CSA/${app}/OpenThread/release/${board}/*.s37 ${saved_workspace}/out/release/${board}/OpenThread/
+                                          cp ./out/CSA/${app}/OpenThread/release/${board}/*.map ${saved_workspace}/out/release/${board}/OpenThread/
+                                    """
                                 }
                                 if(arguments) {
-                                    sh "./scripts/examples/gn_efr32_example.sh ./examples/${app}/${relPath} ./out/CSA/${app}/OpenThread/sleepy ${board} ${arguments}"
+                                    sh """./scripts/examples/gn_efr32_example.sh ./examples/${app}/${relPath} ./out/CSA/${app}/OpenThread/sleepy ${board} ${arguments}
+                                          mkdir -p ${saved_workspace}/out/sleepy/${board}/OpenThread
+                                          cp ./out/CSA/${app}/OpenThread/sleepy/${board}/*.s37 ${saved_workspace}/out/sleepy/${board}/OpenThread/
+                                          cp ./out/CSA/${app}/OpenThread/sleepy/${board}/*.map ${saved_workspace}/out/sleepy/${board}/OpenThread/
+                                    """
                                 }
+                                stash name: 'OpenThreadExamples-'+app+'-'+board, includes: 'out/**/*.s37 '
                             }
                         }
                     }
@@ -178,16 +196,11 @@ def buildOpenThreadExample(app)
                                                 saveDir,
                                                 '-name no-files')
                     throw e
-                }
-
-                openThreadBoards.each { board ->
-                    stash name: 'OpenThreadExamples-'+app+'-'+board, includes: 'out/CSA/*/OpenThread/**/*.s37 '
-                }
-
+                }           
             }
             deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
                                        workspaceTmpDir,
-                                       'matter/out/',
+                                       'matter/' + saved_workspace,
                                        '-name "*.s37" -o -name "*.map"')
         }
     }
@@ -217,7 +230,7 @@ def buildSilabsCustomOpenThreadExamples(app)
                 boardsForCustomOpenThread = ["BRD4161A", "BRD4186C", "BRD4166A"]
             }
 
-
+            def appNameOnly = app - '-app'
 
             dir(dirPath) {
                 try {
@@ -230,7 +243,7 @@ def buildSilabsCustomOpenThreadExamples(app)
                                 sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/${app}/efr32 ./out/silabs/${app}/OpenThread/ ${board}"
                             }
                         }
-                    }
+                    } 
                 } catch (e) {
                     deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
                                                 workspaceTmpDir,
@@ -238,13 +251,18 @@ def buildSilabsCustomOpenThreadExamples(app)
                                                 '-name no-files')
                     throw e
                 }
-
+                // Move binaries to standardized output
+                boardsForCustomOpenThread.each { board -> 
+                        sh """ mkdir -p ${saved_workspace}/out/standard/${board}/OpenThread
+                               cp ./out/silabs/${app}/OpenThread/${board}/*.s37 ${saved_workspace}/out/standard/${board}/OpenThread/
+                               cp ./out/silabs/${app}/OpenThread/${board}/*.map ${saved_workspace}/out/standard/${board}/OpenThread/ """
+                }
                 stash name: 'CustomOpenThreadExamples', includes:  'out/**/*.s37 '
 
             }
             deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
                                        workspaceTmpDir,
-                                       'matter/out/',
+                                       'matter/' + saved_workspace,
                                        '-name "*.s37" -o -name "*.map"')
         }
     }
@@ -281,15 +299,46 @@ def buildSilabsSensorApp()
                         {
 
                             boardsForCustomOpenThread.each { board ->
-                                sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/occupancy/OpenThread/ ${board} \"is_occupancy_sensor=true\""
-                                sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/temperature/OpenThread/ ${board} \"is_temperature_sensor=true\""
-                                sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/contact/OpenThread/ ${board} \"is_contact_sensor=true\""
-                                sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/occupancy-sed/OpenThread/ ${board} \"is_occupancy_sensor=true\" --sed"
-                                sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/temperature-sed/OpenThread/ ${board} \"is_temperature_sensor=true\" --sed"
-                                sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/contact-sed/OpenThread/ ${board} \"is_contact_sensor=true\" --sed"
+                                sh """ ./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/occupancy/OpenThread ${board} \"is_occupancy_sensor=true\"
+                                        mkdir -p ${saved_workspace}/out/standard/${board}/OpenThread/sensors/occupancy/
+                                        cp ./out/silabs/silabs-sensors/occupancy/OpenThread/${board}/*.s37 ${saved_workspace}/out/standard/${board}/OpenThread/sensors/occupancy/
+                                        cp ./out/silabs/silabs-sensors/occupancy/OpenThread/${board}/*.map ${saved_workspace}/out/standard/${board}/OpenThread/sensors/occupancy/
+                                """
+
+                                sh """ ./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/temperature/OpenThread ${board} \"is_temperature_sensor=true\"
+                                        mkdir -p ${saved_workspace}/out/standard/${board}/OpenThread/sensors/temperature/
+                                        cp ./out/silabs/silabs-sensors/temperature/OpenThread/${board}/*.s37 ${saved_workspace}/out/standard/${board}/OpenThread/sensors/temperature/
+                                        cp ./out/silabs/silabs-sensors/temperature/OpenThread/${board}/*.map ${saved_workspace}/out/standard/${board}/OpenThread/sensors/temperature/
+                                """
+
+                                sh """ ./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/contact/OpenThread ${board} \"is_contact_sensor=true\"
+                                        mkdir -p ${saved_workspace}/out/standard/${board}/OpenThread/sensors/contact/
+                                        cp ./out/silabs/silabs-sensors/contact/OpenThread/${board}/*.s37 ${saved_workspace}/out/standard/${board}/OpenThread/sensors/contact/
+                                        cp ./out/silabs/silabs-sensors/contact/OpenThread/${board}/*.map ${saved_workspace}/out/standard/${board}/OpenThread/sensors/contact/
+                                """
+
+                                sh """ ./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/occupancy-sed/OpenThread ${board} \"is_occupancy_sensor=true\" --sed
+                                        mkdir -p ${saved_workspace}/out/sleepy/${board}/OpenThread/sensors/occupancy-sed/
+                                        cp ./out/silabs/silabs-sensors/occupancy-sed/OpenThread/${board}/*.s37 ${saved_workspace}/out/sleepy/${board}/OpenThread/sensors/occupancy-sed/
+                                        cp ./out/silabs/silabs-sensors/occupancy-sed/OpenThread/${board}/*.map ${saved_workspace}/out/sleepy/${board}/OpenThread/sensors/occupancy-sed/
+                                """
+
+                                sh """ ./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/temperature-sed/OpenThread ${board} \"is_temperature_sensor=true\" --sed
+                                        mkdir -p ${saved_workspace}/out/sleepy/${board}/OpenThread/sensors/temperature-sed/
+                                        cp ./out/silabs/silabs-sensors/temperature-sed/OpenThread/${board}/*.s37 ${saved_workspace}/out/sleepy/${board}/OpenThread/sensors/temperature-sed/
+                                        cp ./out/silabs/silabs-sensors/temperature-sed/OpenThread/${board}/*.map ${saved_workspace}/out/sleepy/${board}/OpenThread/sensors/temperature-sed/
+                                """
+
+                                sh """ ./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/contact-sed/OpenThread ${board} \"is_contact_sensor=true\" --sed
+                                        mkdir -p ${saved_workspace}/out/sleepy/${board}/OpenThread/sensors/contact-sed/
+                                        cp ./out/silabs/silabs-sensors/contact-sed/OpenThread/${board}/*.s37 ${saved_workspace}/out/sleepy/${board}/OpenThread/sensors/contact-sed/
+                                        cp ./out/silabs/silabs-sensors/contact-sed/OpenThread/${board}/*.map ${saved_workspace}/out/sleepy/${board}/OpenThread/sensors/contact-sed/
+                                """
+
                             }
 
                         }
+
                     }
                 } catch (e) {
                         deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
@@ -299,12 +348,11 @@ def buildSilabsSensorApp()
                         throw e
                 }
                 stash name: 'CustomOpenThreadExamples', includes:  'out/**/*.s37 '
-
-
             }
+
             deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
                                        workspaceTmpDir,
-                                       'matter/out/',
+                                       'matter/' + saved_workspace,
                                        '-name "*.s37" -o -name "*.map"')
         }
     }
@@ -321,6 +369,10 @@ def buildWiFiExample(platform, app, board, wifiRadio, args, radioName, buildCust
             def saveDir = 'matter/'
             def exampleType =''
             def relPath = ''
+            def fileTypesToMove = ["s37","map"]
+
+            // Used to restructure output directory in later step
+            def appNameOnly = app - '-app'
 
             def sleepyBoard = [ "BRD4186C", "BRD4187C" ]
 
@@ -362,6 +414,25 @@ def buildWiFiExample(platform, app, board, wifiRadio, args, radioName, buildCust
                             }
                         }
                     }
+
+                    // Move binaries to standardized output 
+                    def platformAndRadio = "${platform}-${radioName}"
+                    if (platform == "SiWx917")
+                    {
+                        platformAndRadio = "${platform}"
+                    }
+                    fileTypesToMove.each { fileType ->
+                        sh """ 
+                            ls; pwd; mkdir -p ${saved_workspace}/out/standard/${board}/WiFi; mkdir -p ${saved_workspace}/out/release/${board}/WiFi
+                            cp out/${app}_wifi_${radioName}/${board}/*.${fileType} ${saved_workspace}/out/standard/${board}/WiFi/${platformAndRadio}-${appNameOnly}-example.${fileType}
+                            cp out/${app}_wifi_${radioName}/release/${board}/*.${fileType} ${saved_workspace}/out/release/${board}/WiFi/${platformAndRadio}-${appNameOnly}-example.${fileType} """
+                        if (sleepyBoard.contains(board)) {
+                            sh """ mkdir -p ${saved_workspace}/out/sleepy/${board}/WiFi
+                                cp ./out/${app}_wifi_${radioName}/sleepy/${board}/*.${fileType} ${saved_workspace}/out/sleepy/${board}/WiFi/${platformAndRadio}-${appNameOnly}-example.${fileType} """
+                        }
+                    }
+                    stash name: 'WiFiExamples-' + app + '-' + board + '-' + radioName, includes: 'out/**/*.s37 ' 
+
                 } catch (e) {
                     deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
                                                 workspaceTmpDir,
@@ -369,13 +440,11 @@ def buildWiFiExample(platform, app, board, wifiRadio, args, radioName, buildCust
                                                 '-name no-files')
                     throw e
                 }
-
-                stash name: 'WiFiExamples-' + app + '-' + board + '-' + radioName, includes: 'out/**/*.s37 '
-
             }
+
             deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
                                        workspaceTmpDir,
-                                       'matter/out/',
+                                       'matter/' + saved_workspace,
                                        '-name "*.s37" -o -name "*.map"')
         }
     }
@@ -419,14 +488,19 @@ def buildChipToolAndOTAProvider()
                                                     '-name no-files')
                         throw e
                 }
-
+                // Move binaries to standardized output
+                sh """ mkdir -p ${saved_workspace}/out/Chiptool/linux-arm64-ipv6only-clang
+                       mkdir -p ${saved_workspace}/out/OTA/linux-arm64-ipv6only-clang
+                       cp out/linux-arm64-chip-tool-ipv6only-clang/chip-tool ${saved_workspace}/out/Chiptool/linux-arm64-ipv6only-clang
+                       cp out/linux-arm64-ota-provider-ipv6only-clang/chip-ota-provider-app ${saved_workspace}/out/OTA/linux-arm64-ipv6only-clang
+                """
                 stash name: 'ChipTool', includes: 'out/linux-arm64-chip-tool-ipv6only-clang/chip-tool'
                 stash name: 'OTAProvider', includes: 'out/linux-arm64-ota-provider-ipv6only-clang/chip-ota-provider-app'
 
             }
             deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
                                        workspaceTmpDir,
-                                       'matter/out/',
+                                       'matter/' + saved_workspace,
                                        '-name "chip-tool" -o -name "chip-ota-provider-app"')
         }
     }
@@ -537,6 +611,16 @@ def buildUnifyBridge()
                                 }
                             }
                         }
+
+                        // Move binaries to standardized output
+                        sh """  mkdir -p ${saved_workspace}/out/Bridge/arm64_debian_bullseye; mkdir -p ${saved_workspace}/out/Chiptool/arm64_debian_bullseye
+                                mkdir -p ${saved_workspace}/out/Bridge/armhf_debian_bullseye; mkdir -p ${saved_workspace}/out/Chiptool/armhf_debian_bullseye
+                                    
+                                cp ./out/silabs_examples/unify-matter-bridge/arm64_debian_bullseye/obj/bin/unify-matter-bridge ${saved_workspace}/out/Bridge/arm64_debian_bullseye/
+                                cp ./out/silabs_examples/unify-matter-bridge/armhf_debian_bullseye/obj/bin/unify-matter-bridge ${saved_workspace}/out/Bridge/armhf_debian_bullseye/
+                                cp ./out/examples/chip-tool/arm64_debian_bullseye/chip-tool ${saved_workspace}/out/Chiptool/arm64_debian_bullseye/
+                                cp ./out/examples/chip-tool/armhf_debian_bullseye/chip-tool  ${saved_workspace}/out/Chiptool/armhf_debian_bullseye/
+                        """
                     }
                 }
             } catch (e) {
@@ -548,7 +632,7 @@ def buildUnifyBridge()
             }
             deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
                                             workspaceTmpDir,
-                                            saveDir,
+                                            'matter/' + saved_workspace,
                                             '-name "unify-matter-bridge" -o -type f -name "chip-tool"')
         }
     }
@@ -593,9 +677,10 @@ def exportIoTReports()
                         // Generate report for MG24 (BRD4187C) apps
                         openThreadMG24Apps.each { app ->
                             appVersion.each { version ->
+                                def appNameOnly = app - '-app'
                                 sh """unset OTEL_EXPORTER_OTLP_ENDPOINT
                                     code_size_analyzer_cli \
-                                    --map_file ./out/CSA/${app}/OpenThread/${version}/BRD4187C/*.map \
+                                    --map_file ${saved_workspace}/out/${version}/BRD4187C/OpenThread/chip-efr32-${appNameOnly}*.map \
                                     --stack_name matter \
                                     --target_part efr32mg24b210f1536im48 \
                                     --compiler gcc \
@@ -616,7 +701,7 @@ def exportIoTReports()
                         appVersion.each { version ->
                             sh """unset OTEL_EXPORTER_OTLP_ENDPOINT
                                 code_size_analyzer_cli \
-                                --map_file ./out/CSA/window-app/OpenThread/${version}/BRD4161A/*.map \
+                                --map_file ${saved_workspace}/out/${version}/BRD4161A/OpenThread/chip-efr32-window*.map \
                                 --stack_name matter \
                                 --target_part efr32mg12p432f1024gl125 \
                                 --compiler gcc \
@@ -633,9 +718,10 @@ def exportIoTReports()
 
                         // Generate report for WiFi implementation MG24 BRD4187C + RS9116
                         wifiSizeTrackingApp.each { app ->
+                            def appNameOnly = app - '-app'
                             sh """unset OTEL_EXPORTER_OTLP_ENDPOINT
                                 code_size_analyzer_cli \
-                                --map_file out/${app}_wifi_91x/BRD4187C/*.map \
+                                --map_file ${saved_workspace}/out/standard/BRD4187C/WiFi/efr32-91x-${appNameOnly}-example.map \
                                 --stack_name matter \
                                 --target_part efr32mg24b210f1536im48 \
                                 --compiler gcc \
@@ -795,7 +881,6 @@ def utfThreadTestSuite(nomadNode,deviceGroup,testBedName,appName,matterType,boar
                                     chiptoolPath = sh(script: "find " + pwd() + " -name 'chip-tool' -print",returnStdout: true).trim()
                                     echo chiptoolPath
                                     sh "cp out/CSA/${appName}/OpenThread/standard/${board}/*.s37 ../manifest"
-
                             }
 
                             withVault([vaultSecrets: secrets])
@@ -888,7 +973,7 @@ def utfWiFiTestSuite(nomadNode,deviceGroup,testBedName,appName,matterType,board,
                                 chiptoolPath = sh(script: "find " + pwd() + " -name 'chip-tool' -print",returnStdout: true).trim()
                                 echo chiptoolPath
 
-                                sh "cp out/${appName}_wifi_${wifi_module}/${board}/*.s37 ../manifest"
+                               sh "cp out/${appName}_wifi_${wifi_module}/${board}/*.s37 ../manifest"
 
                             }
 
@@ -972,11 +1057,11 @@ def generateGblFileAndOTAfiles()
                         pwd
 
                         if [ "${tech}" = "openThread" ] ; then
-                            bin_path="${dirPath}/out/CSA/${app}/OpenThread/release/${board}"
-                            file="\$(find \$bin_path/*.s37 | grep -o '[^/]*\$')"
+                            bin_path="${dirPath}/${saved_workspace}/out/release/${board}/OpenThread/"
+                            file="\$(find \$bin_path/*lighting-example.s37 | grep -o '[^/]*\$')"
                         else
-                            bin_path="${dirPath}/out/${app}_wifi_${radioName}/release/${board}"
-                            file="\$(find \$bin_path/*.s37 | grep -o '[^/]*\$')"
+                            bin_path="${dirPath}/${saved_workspace}/out/release/${board}/WiFi/"
+                            file="\$(find \$bin_path/*${radioName}-lighting-example.s37 | grep -o '[^/]*\$')"
                         fi
 
                         gbl_file="\$(basename \$file .s37).gbl"
@@ -1041,7 +1126,7 @@ def generateGblFileAndOTAfiles()
                         throw e
                 }
             }
-            deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(), workspaceTmpDir, 'matter/out','-name "*.gbl" -o -name "*.ota"')
+            deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(), workspaceTmpDir, 'matter/'+ saved_workspace,'-name "*.gbl" -o -name "*.ota"')
         }
     }
 }
@@ -1080,6 +1165,7 @@ def pushToArtifactoryAndUbai()
                                     set -x
                                     pwd
                                     file="build-binaries.zip"
+                                    cd saved_workspace
 
                                     zip -r "${file}" out -x *.gbl *.ota 
                                     ls -al
@@ -1334,7 +1420,7 @@ def pipeline()
                     {
                         args = "chip_build_libshell=false"
                     }
-                    parallelNodesBuild["Custom Wifi " + example + " " + board + " " + rcp]       = { this.buildWiFiExample(platform, example, board, rcp, args, radioName, true)   }
+                    parallelNodesBuild["Custom WiFi " + example + " " + board + " " + rcp]       = { this.buildWiFiExample(platform, example, board, rcp, args, radioName, true)   }
                 }
             }
         }
@@ -1364,13 +1450,13 @@ def pipeline()
 
     }
 
-    if (env.BRANCH_NAME.startsWith('silabs') || env.BRANCH_NAME.startsWith('RC_')) {
+    //if (env.BRANCH_NAME.startsWith('silabs') || env.BRANCH_NAME.startsWith('RC_')) {
         stage("Code Size analysis")
         {
             advanceStageMarker()
             exportIoTReports()
         }
-    }
+    //}
     stage("Generate GBL and OTA files")
     {
         advanceStageMarker()
