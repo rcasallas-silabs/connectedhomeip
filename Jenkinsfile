@@ -1450,13 +1450,13 @@ def pipeline()
 
     }
 
-    //if (env.BRANCH_NAME.startsWith('silabs') || env.BRANCH_NAME.startsWith('RC_')) {
+    if (env.BRANCH_NAME.startsWith('silabs') || env.BRANCH_NAME.startsWith('RC_')) {
         stage("Code Size analysis")
         {
             advanceStageMarker()
             exportIoTReports()
         }
-    //}
+    }
     stage("Generate GBL and OTA files")
     {
         advanceStageMarker()
