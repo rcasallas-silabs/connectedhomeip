@@ -33,13 +33,33 @@ toolchain_settings: []
 readme:
   - path: readme.md
 other_file:
-  - path: resources/readme/tcpclientapplicationprintsncp.png
-  - path: resources/readme/tcpclientsetupncp.png
-  - path: resources/readme/tcpclientiperfcommand.png
-  - path: resources/readme/tcpclientiperflogs.png
-  - path: resources/readme/tcpclientapplicationprintssoc.png
-  - path: resources/readme/tcpclientapplicationconfiguration.png
-  - path: resources/readme/tcpclientsetupsoc.png
+  - path: resources/readme/application_prints_ncp.png
+  - path: resources/readme/tcp_client_build.png
+  - path: resources/readme/application_prints_soc.png
+  - path: resources/readme/tcpserverport.png
+  - path: resources/readme/bare_metal.png
+  - path: resources/readme/baud_rate.png
+  - path: resources/readme/usb_to_uart_2.png
+  - path: resources/readme/post_build_script.png
+  - path: resources/readme/tcpclient.png
+  - path: resources/readme/macros.png
+  - path: resources/readme/usb_to_uart_1.png
+  - path: resources/readme/tcp_client_debug_mode.png
+  - path: resources/readme/tcp_client_example_soc.png
+  - path: resources/readme/tcpclientncp.png
+  - path: resources/readme/tcp_client_debug.png
+  - path: resources/readme/soc_board_detection.png
+  - path: resources/readme/chip_9117_macro.png
+  - path: resources/readme/tcp_client_example_ncp.png
+  - path: resources/readme/efr32_board_detection.png
+  - path: resources/readme/efm32_board_detection.png
+  - path: resources/readme/build_project_soc.png
+  - path: resources/readme/tcp_client_example_selection.png
+  - path: resources/readme/tcpclientsoc.png
+  - path: resources/readme/port_selection_ncp.png
+  - path: resources/readme/port_selection_soc.png
+  - path: resources/readme/serial_port_setup.png
+  - path: resources/readme/examples_demos.png
 ui_hints:
   highlight:
     - path: readme.md

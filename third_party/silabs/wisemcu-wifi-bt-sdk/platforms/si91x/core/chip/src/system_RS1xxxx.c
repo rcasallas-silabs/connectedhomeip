@@ -51,8 +51,8 @@ uint32_t npssIntrState = 0;
 uint32_t __sp;
 #define MAX_NVIC_REGS 4
 uint32_t nvic_enable[MAX_NVIC_REGS] = { 0 };
-uint32_t SiliconRev;
-uint32_t package_type;
+uint8_t SiliconRev;
+uint8_t package_type;
 /*----------------------------------------------------------------------------
   Clock functions
  *----------------------------------------------------------------------------*/
@@ -324,7 +324,7 @@ void SystemCoreClockUpdate(void) /* Get Core Clock Frequency      */
 error_t RSI_PS_EnterDeepSleep(SLEEP_TYPE_T sleepType, uint8_t lf_clk_mode)
 {
   volatile int var = 0, enable_sdcss_based_wakeup = 0, enable_m4ulp_retention = 0, Temp;
-  uint32_t ipmuDummyRead = 0, m4ulp_ram_core_status = 0, m4ulp_ram_peri_status = 0, disable_pads_ctrl = 0, ulp_proc_clk = 0;
+  uint32_t ipmuDummyRead = 0, m4ulp_ram_core_status = 0, m4ulp_ram_peri_status = 0, disable_pads_ctrl = 0, ulp_proc_clk;
   volatile uint8_t in_ps2_state = 0, x = 0;
 
   /*Save the NVIC registers */
@@ -390,7 +390,7 @@ error_t RSI_PS_EnterDeepSleep(SLEEP_TYPE_T sleepType, uint8_t lf_clk_mode)
       /*update the temperature periodically*/
       RSI_Periodic_TempUpdate(TIME_PERIOD, 1, 0);
       /*read the temperature*/
-      Temp = (int)RSI_TS_ReadTemp(MCU_TEMP);
+      Temp = RSI_TS_ReadTemp(MCU_TEMP);
       if (Temp > 45) {
         // disable the XTAL CAP mode
         RSI_IPMU_ProgramConfigData(lp_scdc_extcapmode);
@@ -459,9 +459,9 @@ error_t RSI_PS_EnterDeepSleep(SLEEP_TYPE_T sleepType, uint8_t lf_clk_mode)
 
   /*Restore the default value to the processor clock */
   if ((in_ps2_state)) {
-    ULPCLK->ULP_TA_CLK_GEN_REG_b.ULP_PROC_CLK_SEL = (unsigned int)(ulp_proc_clk & 0xF);
+    ULPCLK->ULP_TA_CLK_GEN_REG_b.ULP_PROC_CLK_SEL = ulp_proc_clk;
   }
-  
+
 #if ((defined COMMON_FLASH_EN) && (!(defined(RAM_COMPILATION))))
   /* Before TA is going to power save mode, set m4ss_ref_clk_mux_ctrl ,tass_ref_clk_mux_ctrl ,AON domain power supply controls form TA to M4 */
   RSI_Set_Cntrls_To_M4();
@@ -489,7 +489,7 @@ error_t RSI_PS_EnterDeepSleep(SLEEP_TYPE_T sleepType, uint8_t lf_clk_mode)
       /*update the temperature periodically*/
       RSI_Periodic_TempUpdate(TIME_PERIOD, 1, 0);
       /*read the temperature*/
-      Temp = (int)RSI_TS_ReadTemp(MCU_TEMP);
+      Temp = RSI_TS_ReadTemp(MCU_TEMP);
       if (Temp > 45) {
         //SCDC0
         RSI_IPMU_ProgramConfigData(scdc_volt_sel1);
@@ -615,7 +615,7 @@ void fpuInit(void)
  */
 void SystemInit(void)
 {
-  volatile uint32_t ipmuDummyRead = 0;
+  volatile uint32_t ipmuDummyRead = 0, bypass_curr_ctrl_reg = 0;
   volatile uint32_t spareReg2 = 0;
 
   /*IPMU dummy read to make IPMU block out of RESET*/

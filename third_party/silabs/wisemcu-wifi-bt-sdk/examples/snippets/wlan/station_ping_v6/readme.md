@@ -1,145 +1,280 @@
-# **Station Ping (IPv6)**
+# Station Ping
 
-## **1 Introduction**
+## 1 Purpose/Scope
 
-Ping is used diagnostically to ensure that a host computer the user is trying to reach is actually operating. Ping works by sending an Internet Control Message Protocol (ICMP) Echo Request to a specified interface on the network and waiting for a reply. The application demonstrates how to configure SiWx917 module in client mode to send ping request to target IP address.
+Ping is used diagnostically to ensure that a host computer the user is trying to reach is actually operating. Ping works by sending an Internet Control Message Protocol (ICMP) Echo Request to a specified interface on the network and waiting for a reply. Ping can be used for troubleshooting to test connectivity and determine response time.
+The application demonstrates how to configure Silicon Labs device in client mode to send ping request to target IP address.
 
-## **2 Prerequisites**
+## 2 Prerequisites/Set up Requirements
+
 For running the application, you will need the following:
-### **2.1 Hardware Requirements**
+
+### 2.1 Hardware Requirements
+
+- **NCP Mode**:
+   - [SiWx91x Wi-Fi Expansion Board](https://www.silabs.com/)
+   - A Host MCU. This example application has been tested with the following host MCUs.
+
+     - [Silicon Labs EFR32xG21 Starter Kit with Wireless Gecko](https://www.silabs.com/development-tools/wireless/efr32xg21-bluetooth-starter-kit) (SLSWSTK6006A Base board: BRD4001A, Radio board: BRD4180a or BRD4180b)
+
+     - [Silicon Labs EFM32GG11 Starter Kit with Wireless Gecko](https://www.silabs.com/development-tools/mcu/32-bit/efm32gg11-starter-kit) (SLSTK3701A Base board: BRD2204A)
+
 - A Windows PC
-- A Wi-Fi Access Point
-#### **2.1.1 SoC** 
-   - Silicon Labs SiWx917 PK6030A SoC Kit which includes
-      - BRD4001A/BRD4002A Wireless Starter Kit Mainboard
-      - BRD4325A Radio Board
-   - USB TO UART converter or TTL cable
-#### **2.1.2 NCP**
-   - Silicon Labs BRD8036A Si917 QMS SB Expansion Board
-   - [Silicon Labs SLWSTK6006A EFR32xG21 Wireless Starter Kit](https://www.silabs.com/development-tools/wireless/efr32xg21-wireless-starter-kit) which includes
-      - BRD4001A/BRD4002A Wireless Starter Kit Mainboard
-      - BRD4180A/BRD4180B Radio Board
-### **2.2 Software Requirements**
+
+### 2.2 Software Requirements
+
 - Simplicity Studio IDE
-   - To download and install the Simplicity Studio IDE, refer to the [Simplicity Studio IDE Set up](https://docs.silabs.com/) section in ***Getting started with SiWx91x*** guides.
-- SiWx917_WiSeConnect_SDK.x.x.x.x
-- Tera Term software or any other serial terminal software - for viewing application prints
 
-## **3 Set up diagram**
-### **3.1 SoC** 
+   - Download the [Simplicity Studio IDE](https://www.silabs.com/developers/simplicity-studio).
 
-![Figure: Setup Diagram for Station Ping v6 Example: SoC](resources/readme/stationpingv6setupsoc.png)
-### **3.2 NCP** 
+   - Follow the [Simplicity Studio user guide](https://docs.silabs.com/simplicity-studio-5-users-guide/1.1.0/ss-5-users-guide-getting-started/install-ss-5-and-software#install-ssv5) to install Simplicity Studio IDE.
 
-![Figure: Setup Diagram for Station Ping v6 Example: NCP](resources/readme/stationpingv6setupncp.png)
+- [Silicon Labs Gecko SDK](https://github.com/SiliconLabs/gecko_sdk)
 
-**NOTE**: 
-- The Host MCU platform (EFR32xG21) and the SiWx91x interact with each other through the SPI interface. 
+- [Si917 COMBO SDK](https://github.com/SiliconLabs/)
 
-## **4 Set up**
-### **4.1 SoC/NCP** 
-- Follow the [Hardware connections and Simplicity Studio IDE Set up](https://docs.silabs.com/)  section in the respective ***Getting Started with SiWx91x*** guides to make the hardware connections and add the Gecko and SiWx91x COMBO SDKs to Simplicity Studio IDE.
-### **4.2 SiWx91x module's Firmware Update**
-- Ensure the SiWx91x module is loaded with the latest firmware following the [SiWx91x Firmware Update]() section in the respective ***Getting started with SiWx91x*** guides.
+**NOTE:**
 
-## **5 Creation of Project**
+- This example application supports Bare metal and FreeRTOS configurations.
 
-To create the ICMP Ping v6 example project in the Simplicity Studio IDE, follow the [Creation of Project](https://docs.silabs.com/) section in the respective ***Getting started with SiWx91x*** guides. 
-   - For SoC, choose the **Wi-Fi - SoC Client ICMP Ping v6** example.
-   - For NCP, choose the **Wi-Fi - NCP Client ICMP Ping v6** example.
+## 3 Set up
 
-## **6 Application configuration**The application can be configured to suit user requirements and development environment.
-Read through the following sections and make any changes needed. 
+#### 3.1 NCP Mode  
+
+Set up diagram for NCP mode:
+
+![Figure: Setup Diagram NCP Mode for Station Ping Example](resources/readme/setup_ncp.png)
+
+Follow the [Getting Started with EFx32](https://docs.silabs.com/rs9116-wiseconnect/latest/wifibt-wc-getting-started-with-efx32/) guide to setup the hardware connections and Simplicity Studio IDE.
+
+**NOTE**:
+- The Host MCU platform (EFR32MG21) and the SiWx91x interact with each other through the SPI interface.
+- The Host MCU platform (EFM32GG11) and the SiWx91x interact with each other through the SDIO interface.
+
+
+## 4 Application Build Environment
+
+1. Ensure the SiWx91x loaded with the latest firmware following the [Getting started with a PC](https://docs.silabs.com/rs9116/latest/wiseconnect-getting-started). The firmware file is located at **<Si917 COMBO SDK> → connectivity_firmware**.
+
+2. Ensure the EFx32 and SiWx91x set up is connected to your PC.
+
+### 4.1 Board detection
+
+### 4.1.1 NCP mode
+
+1. In the Simplicity Studio IDE,
+    - The EFR32 board will be detected under **Debug Adapters** pane as shown below.
+
+      **![EFR32 Board detection](resources/readme/efr32_board_detection.png)**
+
+    - The EFM32 board will be detected under **Debug Adapters** pane as shown below.
+
+      **![EFM32 Board detection](resources/readme/efm32_board_detection.png)**
+
+### 4.2 Creation of project
+
+Ensure the latest Gecko SDK along with the extension Si917 COMBO SDK is added to Simplicity Studio.
+
+1. Click on the board detected and go to **EXAMPLE PROJECTS & DEMOS** section.
+
+   **![Examples and Demos](resources/readme/examples_demos.png)**
+
+2. Filter for Wi-Fi examples from the Gecko SDK added. For this, check the *Wi-Fi* checkbox under **Wireless Technology** and *Gecko SDK Suite* checkbox under **Provider**.
+
+3. Under provider, for SoC based example, check the *SoC* checkbox and for NCP based example, check the *NCP* checkbox.
+
+4. Now choose Wi-Fi- NCP  Client ICMP Ping v6 example for NCP mode and click on **Create**.
+
+    For NCP mode:
+
+   **![Station Ping project](resources/readme/station_ping_example_ncp.png)**
+
+5. Give the desired name to your project and cick on **Finish**.
+
+   **![Create Station Ping project](resources/readme/create_project.png)**
+
+### 4.3 Application configurations
+
+The application can be configured to suit user requirements and development environment.
   
-1. In the Project explorer pane of the IDE, expand the **station_ping_v6** folder and open the **rsi_station_ping.c** file. Configure the following parameters based on your requirements.
+1. In the Project explorer pane, expand the **station_ping** folder and open the **rsi_station_ping.c** file. Configure the following parameters based on your requirements.
 
-   ![Application configuration](resources/readme/stationpingv6applicationconfiguration.png)
+   **![Application configuration](resources/readme/application_configuration.png)**
+  
+```c
+#define SSID           "SILABS_AP"      // Wi-Fi Network Name
+#define PSK            "1234567890"     // Wi-Fi Password
+#define SECURITY_TYPE  RSI_WPA2         // Wi-Fi Security Type: RSI_OPEN / RSI_WPA / RSI_WPA2
+#define CHANNEL_NO     0                // Wi-Fi channel if the softAP is used (0 = auto select)
+```
 
-- ### **Wi-Fi configuration**
-   ```c
-   //! Wi-Fi Network Name
-   #define SSID           "SILABS_AP"      
+AP_BSSID  refer  to BSSID of AP, join based up on BSSID (Example : If two Access points had same SSID then at the time based on this BSSID,module will join to particular AP). This feature is valid only if  RSI_JOIN_FEAT_BIT_MAP set to RSI_JOIN_FEAT_BSSID_BASED in the rsi_wlan_config.h file.
 
-   //! Wi-Fi Password
-   #define PSK            "1234567890"     
+```c
+#define AP_BSSID                                    { }
+```
+  
+PSK refers to the secret key if the Access point configured in WPA-PSK/WPA2-PSK security modes.
 
-   //! Wi-Fi Security Type: RSI_OPEN / RSI_WPA / RSI_WPA2
-   #define SECURITY_TYPE  RSI_WPA2         
+```c
+#define PSK                                     "1234567890"
+```
 
-   //! Wi-Fi channel if the softAP is used (0 = auto select)
-   #define CHANNEL_NO     0                
+**To configure IP address**
 
-   //! AP_BSSID  refer  to BSSID of AP, join based up on BSSID (Example : If two Access points had same SSID then at the time based on this BSSID,module will join to particular AP). This feature is valid only if  RSI_JOIN_FEAT_BIT_MAP set to RSI_JOIN_FEAT_BSSID_BASED in the rsi_wlan_config.h file.
-   #define AP_BSSID                                    { }
+DHCP_MODE refers whether IP address configured through DHCP or STATIC
 
-   //! User can connect to access point through PMK. To Enable keep 1 else 0. If `CONNECT_WITH_PMK` is enabled, `SECURITY_TYPE` should be set to `RSI_WPA2_PMK`
-   #define CONNECT_WITH_PMK                         0
-   ```
+```c
+#define DHCP_MODE                                  1
+```
 
-- ### **Enable IPv6 macro**
+> Note
+> If user wants to configure STA IP address through DHCP then set DHCP_MODE to 1 and skip configuring the following DEVICE_IP,GATEWAY and NETMASK macros.
+> (Or)
+> If user wants to configure STA IP address through STATIC then set DHCP_MODE macro to "0" and configure following DEVICE_IP, GATEWAY and NETMASK macros.
 
-   - Right click on the project and choose 'Properties'
-   - Go to 'C/C++ Build' | 'Settings' | 'GNU ARM C Compiler' | 'Preprocessor' and add the macro `RSI_CONFIGURE_IPv6=1`
-   - Select 'Apply' and 'OK' to save the settings
+IP address to be configured to the device in STA mode
 
+```c
+#define DEVICE_IP6                               "2001:db8:0:1::121"
+```
+  
+IP address of the gateway
 
-- ### **Remote peer configurations**
-   ```c
-   //! IP address of the remote peer (AP IP address)
-   #define REMOTE_IP                               "2401:4290:1289:10ed::106"
-   
-   //! PING_SIZE refers the size of ping packet
-   #define PING_SIZE                               100
+```c
+#define GATEWAY6                                 "2001:db8:0:1::121"
+```
 
-   //! NUMBER_OF_PACKETS refers to number of pings to be sent from device
-   #define NUMBER_OF_PACKETS                       1000
-   ```  
+Configure following macro stoping initiate ping with the remote peer. IP address of the remote peer (AP IP address).
 
-- ### **To configure IP address** 
-   DHCP_MODE refers whether IP address configured through DHCP or STATIC
+```c
+#define REMOTE_IP                               "2001:db8:0:1::121"
+```
+  
+PING_SIZE refers the size of ping packet.
 
-   ```c   
-   //! Whether IP address is configured through DHCP or STATIC
-   #define DHCP_MODE               1           
-   ```
-   > If user wants to configure STA IP address through DHCP then set DHCP_MODE to "1" and skip configuring the DEVICE_IP6 and GATEWAY6 macros.
-                                       (or)
-   > If user wants to configure STA IP address through STATIC then set DHCP_MODE macro to "0" and configure the DEVICE_IP6 and GATEWAY6 macros.
-   ```c   
-   #define DEVICE_IP6              "2401:4290:1289:10ed::106"
-   #define GATEWAY6                "2401:4290:1289:10ed::106"
-   ```
+```c
+#define PING_SIZE                               100
+```
 
-## **7 Setup for Serial Prints**
+NUMBER_OF_PACKETS refers how many number of pings to send from device.
 
-To Setup the serial prints, follow the [Setup for Serial Prints]() section in the respective ***Getting started with SiWx91x*** guide.
+```c
+#define NUMBER_OF_PACKETS                       1000
+```  
+
+Application memory length which is required by the driver
+
+```c
+#define GLOBAL_BUFF_LEN                         15000
+```
+
+User can connect to access point through PMK. To Enable keep 1 else 0
+
+```c
+#define CONNECT_WITH_PMK                         0
+```
+
+**Note:**
+ If `CONNECT_WITH_PMK` is enable ,`SECURITY_TYPE` is set to `RSI_WPA2_PMK`
+
+2. Open **rsi\_wlan\_config.h** file and configure the following features as per your requirements.
+
+   **![Configuration file](resources/readme/configuration_file.png)**
+
+   - Opermode parameters
+
+     ```c  
+     #define RSI_FEATURE_BIT_MAP              FEAT_SECURITY_OPEN
+
+     #define RSI_TCP_IP_BYPASS                RSI_DISABLE
+
+     #define RSI_TCP_IP_FEATURE_BIT_MAP       (TCP_IP_FEAT_DHCPV4_CLIENT | TCP_IP_FEAT_ICMP | TCP_IP_FEAT_DHCPV6_CLIENT | TCP_IP_FEAT_IPV6)
+
+     #define RSI_CUSTOM_FEATURE_BIT_MAP       FEAT_CUSTOM_FEAT_EXTENTION_VALID
+
+     #define RSI_EXT_CUSTOM_FEATURE_BIT_MAP   EXT_FEAT_UART_SEL_FOR_DEBUG_PRINTS
+
+     #define RSI_EXT_TCPIP_FEATURE_BITMAP     0
+
+     #define RSI_BAND                        RSI_BAND_2P4GHZ
+     ```
+
+### 4.4 Execution of the Application
+
+Follow the below steps for the successful execution of the application.
+
+#### 4.4.1 Build the Project - NCP Mode
+
+1. Check for CHIP_9117 and RSI_CONFIGURE_IPV6 macro in preprocessor settings as mentioned below.
+   - Right click on project name.
+   - Go to **Properties → C/C++ Build → Settings → Tool Settings → GNU ARM C Compiler → Preprocessor → Defined Symbols (-D)**.
+   - If CHIP_9117 and RSI_CONFIGURE_IPV6 macro is not present, add it by clicking on **ADD** symbol.
+   - Click on **Apply and Close**.
+
+   ![Build Project for NCP mode](resources/readme/chip_9117_macro.png)
+
+2. Click on the build icon (hammer) or right click on project name and choose **Build Project** to build the project.
+
+   ![Build Project for NCP mode](resources/readme/build_project_ncp.png)
+
+- Make sure the build returns 0 Errors and 0 Warnings.
+
+### 4.4.2 Set up for application prints
+
+**Tera term set up - for NCP mode**
+
+1. Open the Tera Term tool.
  
-## **8 Build, Flash, and Run the Application**
+   - For NCP mode, choose the J-Link port and click on **OK**.
 
-To build, flash, and run the application project refer to the [Build and Flash the Project]() section in the respective ***Getting Started with SiWx91x*** guide.
+     **![J-link - NCP](resources/readme/port_selection_ncp.png)**
 
-## **9 Application Execution Flow**
+2. Navigate to the Setup → Serial port and update the baud rate to **115200** and click on **OK**.
 
-1. Configure the Access point in OPEN/WPA-PSK/WPA2-PSK mode to connect SiWx917 module in station mode.
+    **![Serial port](resources/readme/serial_port_setup.png)**
 
-2. After the program gets executed, SiWx917 module configured as client and connects to AP and gets IP.
+    **![Baud rate](resources/readme/serial_port.png)**
 
-3. After successful connection with the Access Point, the device starts sending ping requests to the given **REMOTE_IP** with configured **PING_SIZE** to check availability of target Device.
+The serial port is now connected.
+
+### 4.4.3 Execute the application
+
+1. Once the build was successful, right click on project and select Debug As → Silicon Labs ARM Program to program the device as shown in below image.
+
+   **![debug_mode_NCP](resources/readme/program_device.png)**
+
+2. As soon as the debug process is completed, the application control branches to the main().
+
+3. Go to the J-link Silicon Labs console pane to observe the debug prints in the Serial 1 tab.
+
+4. Click on the **Resume** icon in the Simplicity Studio IDE toolbar to run the application.
+
+   **![Run](resources/readme/run_example.png)**
+
+5. Configure the Access point in OPEN/WPA-PSK/WPA2-PSK mode to connect Silicon Labs device in STA mode.
+
+6. After the program gets executed, Silicon Labs module configured as client and connects to AP and gets IP.
+
+7. After successful connection with the Access Point, the device starts sending ping requests to the given **REMOTE_IP** with configured **PING_SIZE** to check availability of target Device.
 Device sends the number of ping packets configured in **NUMBER_OF_PACKETS**.
 
-4. In rsi_station_ping.c file, **rsi_wlan_ping_async** API returns success status, which means that the ping request packet is successfully sent in to the medium. When actual ping response
+8. In rsi_station_ping.c file, **rsi_wlan_ping_async** API returns success status, which means that the ping request packet is successfully sent in to the medium. When actual ping response
 comes from the remote node, it is known from the status parameter of the callback function (**rsi_ping_response_handler**) registered in the Ping API.
 
-5. The application prints can be observed as follows:
+### 4.4.4 **Application Prints
 
-- ### **SoC**
-  
-   ![Application prints](resources/readme/stationpingv6applicationprintssoc.png)
+- **NCP mode:**
 
-- ### **NCP**
+   **![Application Prints NCP](resources/readme/application_prints_ncp.png)**
 
-   ![Application prints](resources/readme/stationpingv6applicationprintsncp.png)
+## 5 Selecting Bare Metal configuration
 
-## **Appendix**
+1. By default, the application runs over FreeRTOS. To run the application with Bare metal configurations, follow the below steps.
+   - For Simplicity Studio IDE,
+      - Right click on project name
+      - Go to **Properties → C/C++ Build → Settings → Tool Settings → GNU ARM C Compiler → Preprocessor → Defined Symbols (-D)**.
+      - Select RSI_WITH_OS symbol and click on **Delete** symbol.
+      - Click on **Apply and Close**.
 
-By default, the application runs over FreeRTOS. To run the application with Bare metal configurations, follow the Bare Metal configuration section in the ***Getting Started with SiWx91x*** guide.
+   **![Bare metal configuration](resources/readme/bare_metal.png)**

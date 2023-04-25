@@ -62,7 +62,7 @@
 
 #define RSI_MQTT_TOPIC     "$aws/things/Test_IoT/shadow/update"
 #define DISCONNECTION_TIME 100
-#define GPIO_PIN           10
+#define GPIO_PIN           0
 #define DHCP_MODE          1
 #define SSID               "SILABS_AP"
 #define SECURITY_TYPE      RSI_WPA2
@@ -464,9 +464,8 @@ int32_t rsi_mqtt_client_app()
         LOG_PRINT("AWS IOT MQTT Yield ...\n");
 #ifdef RSI_M4_INTERFACE
         //! Configure LED
-        RSI_EGPIO_PadSelectionEnable(5);
-        RSI_EGPIO_SetPinMux(EGPIO, EGPIO_PORT0, GPIO_PIN, EGPIO_PIN_MUX_MODE0);
-        RSI_EGPIO_SetDir(EGPIO, EGPIO_PORT0, GPIO_PIN, EGPIO_CONFIG_DIR_OUTPUT);
+        RSI_EGPIO_SetPinMux(EGPIO1, EGPIO_PORT0, GPIO_PIN, EGPIO_PIN_MUX_MODE0);
+        RSI_EGPIO_SetDir(EGPIO1, EGPIO_PORT0, GPIO_PIN, EGPIO_CONFIG_DIR_OUTPUT);
 #endif
         //! Waiting for data from cloud
         LOG_PRINT("Waiting for data from cloud...\n");
@@ -481,7 +480,7 @@ int32_t rsi_mqtt_client_app()
               && client.clientData.readBuf[i + 2] == 'g') {
             LOG_PRINT("Toggling LED\n");
 #ifdef RSI_M4_INTERFACE
-            RSI_EGPIO_TogglePort(EGPIO, EGPIO_PORT0, (0x1 << GPIO_PIN));
+            RSI_EGPIO_TogglePort(EGPIO1, EGPIO_PORT0, (0x1 << GPIO_PIN));
 #endif
             break;
           }

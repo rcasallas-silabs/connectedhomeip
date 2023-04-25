@@ -2622,8 +2622,8 @@ void clk_config_pll_lock(boolean_t manual_lock, boolean_t bypass_manual_lock, ui
   uint32_t reg_read = 0;
   reg_read          = SPI_MEM_MAP_PLL(SOC_PLL_500_CTRL_REG9);
   reg_read &= ~((0xFF << 6) | BIT(15) | BIT(14));
-  reg_read |= (uint32_t)((manual_lock << 15U) | (bypass_manual_lock << 14U) | (mm_count_limit << 6U));
-  SPI_MEM_MAP_PLL(SOC_PLL_500_CTRL_REG9) = (uint16_t)reg_read;
+  reg_read |= ((manual_lock << 15U) | (bypass_manual_lock << 14U) | (mm_count_limit << 6U));
+  SPI_MEM_MAP_PLL(SOC_PLL_500_CTRL_REG9) = reg_read;
 }
 #endif
 
@@ -2856,7 +2856,7 @@ error_t clk_m4_soc_clk_config(M4CLK_Type *pCLK, M4_SOC_CLK_SRC_SEL_T clkSource, 
   while ((pCLK->PLL_STAT_REG_b.M4_SOC_CLK_SWITCHED) != 1)
     ;
   /*update the division factor */
-  pCLK->CLK_CONFIG_REG5_b.M4_SOC_CLK_DIV_FAC = (unsigned int)(divFactor & 0x3F);
+  pCLK->CLK_CONFIG_REG5_b.M4_SOC_CLK_DIV_FAC = divFactor;
 
   if (divFactor) {
     SystemCoreClock = SystemCoreClock / divFactor;

@@ -316,14 +316,14 @@ void rsi_ble_phy_update_complete_event(rsi_ble_event_phy_update_t *rsi_ble_event
 
 /*==============================================*/
 /**
- * @fn         rsi_ble_lr_2mbps
+ * @fn         rsi_ble_central
  * @brief      Tests the BLE GAP central role.
  * @param[in]  none
   * @return    none.
  * @section description
- * This function is used to test the BLE long range and 2Mbps data ratesand simple GAP API's.
+ * This function is used to test the BLE central role and simple GAP API's.
  */
-int32_t rsi_ble_lr_2mbps(void)
+int32_t rsi_ble_central(void)
 {
   int32_t status = 0;
   rsi_ble_resp_read_phy_t read_phy_resp;
@@ -625,7 +625,7 @@ int main(void)
   intialize_bt_stack(STACK_BTLE_MODE);
 
   //! Call BLE Central application
-  status = rsi_ble_lr_2mbps();
+  status = rsi_ble_central();
 
   //! Application main loop
   main_loop();
@@ -651,7 +651,7 @@ int main(void)
 
   //! OS case
   //! Task created for BLE task
-  rsi_task_create((rsi_task_function_t)(int32_t)rsi_ble_lr_2mbps,
+  rsi_task_create((rsi_task_function_t)(int32_t)rsi_ble_central,
                   (uint8_t *)"ble_task",
                   RSI_BT_TASK_STACK_SIZE,
                   NULL,

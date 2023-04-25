@@ -28,34 +28,34 @@ extern "C" {
 #include "base_types.h"
 
 /**
- * @fn          void RSI_WWDT_ConfigIntrTimer(MCU_WDT_Type *pstcWDT , uint16_t u16IntrTimerVal)
- * @brief       This API is used to configure the interrupt timer of the watch dog timer
- * @param[in]     pstcWDT          : pointer to the WDT register instance
- * @param[in]     u16IntrTimerVal  : interrupt timer value
- * @return      None
+ * @fn        	void RSI_WWDT_ConfigIntrTimer(MCU_WDT_Type *pstcWDT , uint16_t u16IntrTimerVal)
+ * @brief     	This API is used to configure the interrupt timer of the watch dog timer
+ * @param[in]  	  pstcWDT 	 			 : pointer to the WDT register instance
+ * @param[in]  	  u16IntrTimerVal  : interrupt timer value
+ * @return			None
  */
 STATIC INLINE void RSI_WWDT_ConfigIntrTimer(MCU_WDT_Type *pstcWDT, uint16_t u16IntrTimerVal)
 {
-  pstcWDT->MCU_WWD_INTERRUPT_TIMER_b.WWD_INTERRUPT_TIMER = (unsigned int)(u16IntrTimerVal & 0x1F);
+  pstcWDT->MCU_WWD_INTERRUPT_TIMER_b.WWD_INTERRUPT_TIMER = u16IntrTimerVal;
 }
 
 /**
- * @fn          void RSI_WWDT_ConfigSysRstTimer(MCU_WDT_Type *pstcWDT , uint16_t u16SysRstVal)  
- * @brief       This API is used to configure the system reset timer of the watch dog timer
- * @param[in]   pstcWDT         : pointer to the WDT register instance
- * @param[in]     u16SysRstVal    : reset value
- * @return      NONE
+ * @fn					void RSI_WWDT_ConfigSysRstTimer(MCU_WDT_Type *pstcWDT , uint16_t u16SysRstVal)	
+ * @brief   	 	This API is used to configure the system reset timer of the watch dog timer
+ * @param[in]	  pstcWDT 			  : pointer to the WDT register instance
+ * @param[in] 	  u16SysRstVal 		: reset value
+ * @return			NONE
  */
 STATIC INLINE void RSI_WWDT_ConfigSysRstTimer(MCU_WDT_Type *pstcWDT, uint16_t u16SysRstVal)
 {
-  pstcWDT->MCU_WWD_SYSTEM_RESET_TIMER_b.WWD_SYSTEM_RESET_TIMER = (unsigned int)(u16SysRstVal & 0x1F);
+  pstcWDT->MCU_WWD_SYSTEM_RESET_TIMER_b.WWD_SYSTEM_RESET_TIMER = u16SysRstVal;
 }
 
 /**
- * @fn          void RSI_WWDT_Disable(MCU_WDT_Type *pstcWDT)
- * @brief       This API is used to Disable the Watch dog timer
- * @param[in]     pstcWDT   :pointer to the WDT register instance
- * @return      None
+ * @fn			 		void RSI_WWDT_Disable(MCU_WDT_Type *pstcWDT)
+ * @brief   	 	This API is used to Disable the Watch dog timer
+ * @param[in] 	 	pstcWDT  	:pointer to the WDT register instance
+ * @return		 	None
  */
 STATIC INLINE void RSI_WWDT_Disable(MCU_WDT_Type *pstcWDT)
 {
@@ -64,10 +64,10 @@ STATIC INLINE void RSI_WWDT_Disable(MCU_WDT_Type *pstcWDT)
 }
 
 /**
- * @fn           void RSI_WWDT_ReStart(MCU_WDT_Type *pstcWDT)
- * @brief        This API is used to restart the Watch dog timer
- * @param[in]    pstcWDT  :pointer to the WDT register instance
- * @return       None
+ * @fn		 			 void RSI_WWDT_ReStart(MCU_WDT_Type *pstcWDT)
+ * @brief   		 This API is used to restart the Watch dog timer
+ * @param[in]		 pstcWDT  :pointer to the WDT register instance
+ * @return 			 None
  */
 STATIC INLINE void RSI_WWDT_ReStart(MCU_WDT_Type *pstcWDT)
 {
@@ -75,9 +75,9 @@ STATIC INLINE void RSI_WWDT_ReStart(MCU_WDT_Type *pstcWDT)
 }
 
 /**
- * @fn           void RSI_WWDT_IntrUnMask(void)
- * @brief        This API is used to unmask the Watch dog timer
- * @return       None
+ * @fn					 void RSI_WWDT_IntrUnMask(void)
+ * @brief   		 This API is used to unmask the Watch dog timer
+ * @return		   None
  */
 STATIC INLINE void RSI_WWDT_IntrUnMask(void)
 {
@@ -85,9 +85,9 @@ STATIC INLINE void RSI_WWDT_IntrUnMask(void)
 }
 
 /**
- * @fn           void RSI_WWDT_IntrMask(void)
- * @brief        This API is used to mask the Watch dog timer
- * @return       None
+ * @fn					 void RSI_WWDT_IntrMask(void)
+ * @brief   		 This API is used to mask the Watch dog timer
+ * @return		   None
  */
 STATIC INLINE void RSI_WWDT_IntrMask(void)
 {

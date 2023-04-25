@@ -33,7 +33,7 @@
 #include "rsi_board.h"
 #endif
 
-#define RSI_BLE_LOCAL_NAME "iBeacon"
+#define RSI_BLE_LOCAL_NAME "ibeacon"
 
 //! application events list
 #define RSI_APP_EVENT_CONNECTED    1
@@ -232,7 +232,6 @@ int32_t rsi_ble_ibeacon(void)
 {
   int32_t status         = 0;
   int32_t temp_event_map = 0;
-  uint8_t scan_data[31]  = { 2, 1, 6 };
   uint8_t adv[31]        = { 0x02, 0x01, 0x02, 0x1A, 0xFF, 0x4C, 0x00, 0x02, 0x15 }; //prefix(9bytes)
   uint8_t uuid[16] = { 0xFB, 0x0B, 0x57, 0xA2, 0x82, 0x28, 0x44, 0xCD, 0x91, 0x3A, 0x94, 0xA1, 0x22, 0xBA, 0x12, 0x06 };
   uint8_t major_num[2] = { 0x11, 0x22 };
@@ -330,31 +329,12 @@ int32_t rsi_ble_ibeacon(void)
   adv[9 + 16 + 2 + 2] = tx_power;
 
   //! set advertise data
-  status = rsi_ble_set_advertise_data(adv, 30);
-  if (status != RSI_SUCCESS) {
-    LOG_PRINT("\r\nSet Advertise Data Failed, Error Code : 0x%lX\r\n", status);
-    return status;
-  } else {
-    LOG_PRINT("\r\nSet Advertise Data Success\r\n");
-  }
-  scan_data[3] = strlen(RSI_BLE_LOCAL_NAME) + 1;
-  scan_data[4] = 9;
-  strcpy((char *)&scan_data[5], RSI_BLE_LOCAL_NAME);
-  status = rsi_ble_set_scan_response_data(scan_data, 31);
-  if (status != RSI_SUCCESS) {
-    LOG_PRINT("\r\nSet Scan Response Data Failed, Error Code : 0x%lX\r\n", status);
-    return status;
-  } else {
-    LOG_PRINT("\r\nSet Scan Response Data Success\r\n");
-  }
+  rsi_ble_set_advertise_data(adv, 30);
 
   //! start the advertising
   status = rsi_ble_start_advertising();
   if (status != RSI_SUCCESS) {
-    LOG_PRINT("\r\nStart Advertising Failed, Error Code : 0x%lX\r\n", status);
     return status;
-  } else {
-    LOG_PRINT("\r\nStart Advertising Success\r\n");
   }
 
   while (1) {

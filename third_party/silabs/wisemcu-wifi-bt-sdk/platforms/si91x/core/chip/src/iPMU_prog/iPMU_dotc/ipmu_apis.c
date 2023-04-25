@@ -20,6 +20,7 @@
 #include "rsi_ipmu.h"
 #define IPMU_DOTC_PROG
 #define IPMU_CALIB_DATA
+#define uint32  uint32_t
 #define uint16  uint16_t
 #define int32   int32_t
 #define uint8   uint8_t
@@ -73,7 +74,7 @@
 #include "bb_rf_calib.h"
 #include "wrappers_common.h"
 #endif
-void program_ipmu_data(uint32_t *src);
+void program_ipmu_data(uint32 *src);
 #ifndef BT_LE_ONLY_MODE
 #ifdef RSI_M4_INTERFACE
 void ipmu_init_mcu(void);
@@ -166,16 +167,16 @@ void ipmu_init_mcu(void)
  * @param   void
  * @return  void
  */
-void update_ipmu_data(uint32_t reg_addr, uint32_t reg_type, uint32_t data, uint32_t mask)
+void update_ipmu_data(uint32 reg_addr, uint32 reg_type, uint32 data, uint32 mask)
 {
-  uint32_t value = 0;
+  uint32 value = 0;
 
   if (reg_type == ULP_SPI) {
     value = PMU_DIRECT_ACCESS(reg_addr);
   } else if (reg_type == PMU_SPI) {
     value = PMU_SPI_DIRECT_ACCESS(reg_addr);
   } else if (reg_type == DIRECT) {
-    value = *(volatile uint32_t *)(reg_addr);
+    value = *(volatile uint32 *)(reg_addr);
   }
   value &= ~mask;
   value |= data;
@@ -184,7 +185,7 @@ void update_ipmu_data(uint32_t reg_addr, uint32_t reg_type, uint32_t data, uint3
   } else if (reg_type == PMU_SPI) {
     PMU_SPI_DIRECT_ACCESS(reg_addr) = value;
   } else if (reg_type == DIRECT) {
-    *(volatile uint32_t *)(reg_addr) = value;
+    *(volatile uint32 *)(reg_addr) = value;
   }
 }
 /**
@@ -195,8 +196,8 @@ void update_ipmu_data(uint32_t reg_addr, uint32_t reg_type, uint32_t data, uint3
 void update_ipmu_calib_data(efuse_ipmu_t *ipmu_calib_data) __attribute__((section(".common_tcm_code")));
 void update_ipmu_calib_data(efuse_ipmu_t *ipmu_calib_data)
 {
-  uint32_t data;
-  uint32_t mask;
+  uint32 data;
+  uint32 mask;
 #ifndef RSI_M4_INTERFACE
   common_info_ext_t *glbl_common_info_ext_p = (common_info_ext_t *)glbl_common_info.reserved_ptr;
 #endif
@@ -219,7 +220,7 @@ void update_ipmu_calib_data(efuse_ipmu_t *ipmu_calib_data)
   data |= (2 << 10) | (2 << 7);
   }
   else {
-  data |= (uint32_t)(ipmu_calib_data->scdc_dcdc_trim << 10) | (ipmu_calib_data->scdc_hpldo_trim << 7);
+  data |= (ipmu_calib_data->scdc_dcdc_trim << 10) | (ipmu_calib_data->scdc_hpldo_trim << 7);
   }
   mask |= MASK_BITS(3, 10) | MASK_BITS(3, 7);
   update_ipmu_data(BG_SCDC_PROG_REG_1_OFFSET, ULP_SPI, data, mask);
@@ -266,12 +267,12 @@ void update_ipmu_calib_data(efuse_ipmu_t *ipmu_calib_data)
   update_ipmu_data((TEMP_SENSOR_BASE_ADDRESS + TS_NOMINAL_SETTINGS_OFFSET), DIRECT, data, mask);
 
   //ROW 18
-  data = *(volatile uint32_t *)(ULP_TASS_MISC_CONFIG_REG + 0x34);
+  data = *(volatile uint32 *)(ULP_TASS_MISC_CONFIG_REG + 0x34);
   //! For AUX_LDO register access, need to enable ulp_aux_clock
-  *(volatile uint32_t *)(ULP_TASS_MISC_CONFIG_REG + 0x34) = 0x1;
+  *(volatile uint32 *)(ULP_TASS_MISC_CONFIG_REG + 0x34) = 0x1;
   update_ipmu_data((AUX_BASE_ADDR + 0x210), DIRECT, ipmu_calib_data->ldo_ctrl, MASK_BITS(4, 0));
   //! restore the reg
-  *(volatile uint32_t *)(ULP_TASS_MISC_CONFIG_REG + 0x34) = data;
+  *(volatile uint32 *)(ULP_TASS_MISC_CONFIG_REG + 0x34) = data;
 
   //ROW 34
   if(ipmu_calib_data->set_vref1p3 == 0){
@@ -289,33 +290,33 @@ void update_ipmu_calib_data(efuse_ipmu_t *ipmu_calib_data)
   update_ipmu_data(SPARE_REG_3_OFFSET, PMU_SPI, data, mask);
 
   //ROW 48
-#ifndef RSI_M4_INTERFACE  
+#ifndef RSI_M4_INTERFACE	
   if (glbl_common_info_ext_p->mfg_version >= 0x20) {//calibrating for 1MHz not adding anything in efuse for trim value
 #else
-    if (SiliconRev >= 0x20) {
-#endif    
-    data = (((ipmu_calib_data->dpwm_freq_trim) ) << 13);
+		if (SiliconRev >= 0x20) {
+#endif		
+		data = (((ipmu_calib_data->dpwm_freq_trim) ) << 13);
     mask = MASK_BITS(4, 13);
     update_ipmu_data(PMU_ADC_REG_OFFSET, PMU_SPI, data, mask);
   }
-#ifndef RSI_M4_INTERFACE      
+#ifndef RSI_M4_INTERFACE			
   else if (glbl_common_info_ext_p->mfg_version >= 0x17) {//calibrating for 1MHz also adding +3 in efuse itself for trim value
 #else
-    else if (SiliconRev >= 0x17) {
+		else if (SiliconRev >= 0x17) {
 #endif    
-    data = ((((ipmu_calib_data->dpwm_freq_trim)-0) ) << 13);
+		data = ((((ipmu_calib_data->dpwm_freq_trim)-0) ) << 13);
     mask = MASK_BITS(4, 13);
     update_ipmu_data(PMU_ADC_REG_OFFSET, PMU_SPI, data, mask);
   }
   else {//calibrating for 2MHz also adding +3 in efuse itself for trim value
-    data = (uint32_t)(((ipmu_calib_data->dpwm_freq_trim)+3 ) << 13);
+    data = (((ipmu_calib_data->dpwm_freq_trim)+3 ) << 13);
     mask = MASK_BITS(4, 13);
     update_ipmu_data(PMU_ADC_REG_OFFSET, PMU_SPI, data, mask);
 
     data = (1  << 2);
     mask = MASK_BITS(1, 2);
     update_ipmu_data(0x1CE, PMU_SPI, data, mask);
-  } 
+  }	
 #ifdef V1P20_IPMU_CHANGES
   if(ipmu_calib_data->set_vref1p3 == 0){
   data = (0x2 << 18);
@@ -336,9 +337,8 @@ void update_ipmu_calib_data(efuse_ipmu_t *ipmu_calib_data)
  * @param   void
  * @return  void
  */
-uint32_t init_ipmu_calib_data(uint32_t m4_present)
+uint32 init_ipmu_calib_data(uint32 m4_present)
 {
-  (void)m4_present;
   efuse_ipmu_t ipmu_calib_data;
   efuse_ipmu_t *ipmu_calib_data_p;
 #ifndef RSI_M4_INTERFACE
@@ -386,15 +386,15 @@ uint32_t init_ipmu_calib_data(uint32_t m4_present)
 #endif
 #ifdef IPMU_DOTC_PROG
 #ifdef RSI_M4_INTERFACE
-void program_ipmu_data(uint32_t *src);
+void program_ipmu_data(uint32 *src);
 #else
-void program_ipmu_data(uint32_t *src) __attribute__((section(".common_non_tcm_code")));
+void program_ipmu_data(uint32 *src) __attribute__((section(".common_non_tcm_code")));
 #endif
-void program_ipmu_data(uint32_t *src)
+void program_ipmu_data(uint32 *src)
 {
-  uint32_t write_data, num_of_reg, mask = 0, read_data;
-  uint32_t addr;
-  uint32_t ls_shift, ms_shift, mask_bits, inx = 0;
+  uint32 write_data, num_of_reg, mask = 0, read_data;
+  uint32 addr;
+  uint32 ls_shift, ms_shift, mask_bits, inx = 0;
   num_of_reg = src[inx];
   inx++;
 
@@ -410,7 +410,7 @@ void program_ipmu_data(uint32_t *src)
     ms_shift = (write_data >> MS_SHIFT) & 0x1F;
     //! Extracting 21-bit data from the structure
     write_data = write_data & IPMU_DATAMASK;
-    read_data  = *(uint32_t *)addr;
+    read_data  = *(uint32 *)addr;
     //! no of bits be updated
     mask_bits = ms_shift - ls_shift + 1;
     //! creating mask for the no of bits to be updated
@@ -420,7 +420,7 @@ void program_ipmu_data(uint32_t *src)
     //! resetting the bits in the read_data to update the data and writing the data to it
     read_data &= ~(mask << ls_shift);
     read_data |= (write_data & mask) << ls_shift;
-    *(uint32_t *)addr = read_data;
+    *(uint32 *)addr = read_data;
     inx += 2;
     mask = 0;
   }
@@ -434,7 +434,7 @@ void shut_down_non_wireless_mode_pds(void) __attribute__((section(".common_non_t
 #endif
 void shut_down_non_wireless_mode_pds(void)
 {
-  uint32_t reg_val = 0;
+  uint32 reg_val = 0;
   // WuRX
   PMU_DIRECT_ACCESS(iPMU_SPARE_REG2_OFFSET) &= ~(wurx_lvl_shift_en);
   PMU_DIRECT_ACCESS(iPMU_SPARE_REG2_OFFSET) &= ~(wurx_pg_en_1);
@@ -519,12 +519,12 @@ void ipmu_init(void)
 {
 #ifndef RSI_M4_INTERFACE
   //http://192.168.1.215:8090/display/IPMU40GF/Registers+Summary
-  uint32_t ipmu_calb_data_invalid = 1;
+  uint32 ipmu_calb_data_invalid = 1;
 #endif
 #ifndef IPMU_DOTC_PROG
-  uint32_t pmu_1p3_ctrl_data;
+  uint32 pmu_1p3_ctrl_data;
 #endif
-  uint32_t pmu_1p2_ctrl_word, bypass_curr_ctrl_data;
+  uint32 pmu_1p2_ctrl_word, bypass_curr_ctrl_data;
   retention_boot_status_word_t *retention_reg = (retention_boot_status_word_t *)MCURET_BOOTSTATUS;
 
   //! If M4 present and host interface with M4(M4 master) case, total IPMU and MCU FSM registers has to be initialised in M4.
@@ -614,8 +614,8 @@ void ipmu_init(void)
     // Setting VOUTBCK_LOW to 1.25V based on the data obtained from Calibration Data
     bypass_curr_ctrl_data = PMU_SPI_DIRECT_ACCESS(PMU_1P3_CTRL_REG_OFFSET);
     pmu_1p2_ctrl_word     = ((bypass_curr_ctrl_data >> 17) & 0xF) - 2;
-    bypass_curr_ctrl_data = ( uint32_t )PMU_SPI_DIRECT_ACCESS(BYPASS_CURR_CTRL_REG_OFFSET);
-    bypass_curr_ctrl_data &= (uint32_t) (~(0xF << 5));
+    bypass_curr_ctrl_data = PMU_SPI_DIRECT_ACCESS(BYPASS_CURR_CTRL_REG_OFFSET);
+    bypass_curr_ctrl_data &= ~(0xF << 5);
     PMU_SPI_DIRECT_ACCESS(BYPASS_CURR_CTRL_REG_OFFSET) = (bypass_curr_ctrl_data | (pmu_1p2_ctrl_word << 5));
 
     PMU_DIRECT_ACCESS(BG_SLEEP_TIMER_REG_OFFSET) |= BIT(19); //bgs_active_timer_sel
@@ -662,7 +662,7 @@ void configure_uulp_gpio_to_1p8v(void)
 #ifdef RSI_M4_INTERFACE
 void configure_ipmu_mode(uint32_t mode);
 #else
-void configure_ipmu_mode(uint32_t mode) __attribute__((section(".common_non_tcm_code")));
+void configure_ipmu_mode(uint32 mode) __attribute__((section(".common_non_tcm_code")));
 #endif
 void configure_ipmu_mode(uint32_t mode)
 {
@@ -689,17 +689,17 @@ void disable_ipmu_write_access()
 uint16 adc_read_data_func()
 {
   uint16 adc_data;
-  uint32_t dummy_read;
-  uint32_t adc_data_avg;
+  uint32 dummy_read;
+  uint32 adc_data_avg;
   //uint16 fifo_data[16][32];
-  uint32_t inxx2 = 0;
+  uint32 inxx2 = 0;
 
   adc_data_avg = 0;
 
   for (dummy_read = 0; dummy_read < 32; dummy_read++) {
-    while ((*(volatile uint32_t *)(0x24043830)) & BIT(2))
+    while ((*(volatile uint32 *)(0x24043830)) & BIT(2))
       ;
-    adc_data = ((*(volatile uint32_t *)(0x24043814)) & 0xFFF);
+    adc_data = ((*(volatile uint32 *)(0x24043814)) & 0xFFF);
     adc_data = BIT(11) ^ adc_data;
     if (dummy_read > 15) {
       adc_data_avg += adc_data;
@@ -711,17 +711,17 @@ uint16 adc_read_data_func()
   return adc_data_avg;
 }
 
-uint32_t adccalibDone;
-#define ULP_SPI_MEM_MAP(REG_ADR) (*((uint32_t volatile *)(PMU_SPI_BASE_ADDR + (0xa000 + (REG_ADR * 4)))))
-#define AUX_LDO                  *(volatile uint32_t *)(0x24043a10)
+uint32 adccalibDone;
+#define ULP_SPI_MEM_MAP(REG_ADR) (*((uint32 volatile *)(PMU_SPI_BASE_ADDR + (0xa000 + (REG_ADR * 4)))))
+#define AUX_LDO                  *(volatile uint32 *)(0x24043a10)
 void calibrate_adc()
 {
-  uint32_t auxadcCalibValueLoad = 0, auxadcCalibValue = 0;
+  uint32 auxadcCalibValueLoad = 0, auxadcCalibValue = 0;
 
   if (adccalibDone == 0) {
     ULP_SPI_MEM_MAP(0x110) |= BIT(11);
     ULP_SPI_MEM_MAP(0x110) |= (BIT(12) | BIT(13) | BIT(8) | BIT(7) | BIT(6));
-    while (*(volatile uint32_t *)(0x24050000 + 0x02) & BIT(8))
+    while (*(volatile uint32 *)(0x24050000 + 0x02) & BIT(8))
       ;
     while (!(ULP_SPI_MEM_MAP(0x1C1) & BIT(0)))
       ;
@@ -738,7 +738,7 @@ void calibrate_adc()
   }
   ULP_SPI_MEM_MAP(0x111) = (auxadcCalibValueLoad);
 
-  while (*(volatile uint32_t *)(0x24050000 + 0x02) & BIT(8))
+  while (*(volatile uint32 *)(0x24050000 + 0x02) & BIT(8))
     ;
 
   /* read calibrated p and n values */
@@ -750,7 +750,7 @@ void get_ipmu_temperature(common_info_t *glbl_common_info_p)
   int32 adc_off;
   int32 Vbg;
   int32 Voffset;
-  uint32_t pmu_reg;
+  uint32 pmu_reg;
   int32 irf_temperature;
   int32 adc_bjt;
   int32 adc_bg;
@@ -765,14 +765,14 @@ void get_ipmu_temperature(common_info_t *glbl_common_info_p)
     goto end_temp_measurement;
   }
   get_m4ss_access();
-  *(volatile uint32_t *)(0x2405a000 + (0x142 * 4)); //dummy read
+  *(volatile uint32 *)(0x2405a000 + (0x142 * 4)); //dummy read
 
   //reg_val1 = PMU_DIRECT_ACCESS(BG_SCDC_PROG_REG_1_OFFSET);
 
   //PMU_DIRECT_ACCESS(BG_SCDC_PROG_REG_1_OFFSET) = reg_val1 | BIT(4);
 
-  *(volatile uint32_t *)(0x2405a000 + (0x143 * 4)) = 0;
-  *(volatile uint32_t *)(0x2405a000 + (0x142 * 4)) = 0x1F910;
+  *(volatile uint32 *)(0x2405a000 + (0x143 * 4)) = 0;
+  *(volatile uint32 *)(0x2405a000 + (0x142 * 4)) = 0x1F910;
 
   ULPSS_PWRCTRL_SET_REG = ulpss_ext_pwrgate_en_n_ulp_AUX;
 
@@ -782,34 +782,34 @@ void get_ipmu_temperature(common_info_t *glbl_common_info_p)
   ULP_AUXADC_CLK_GEN_REG = 0x1;
   AUX_LDO                = 0x7b;
 
-  *(volatile uint32_t *)(0x2404380C) = 40;
+  *(volatile uint32 *)(0x2404380C) = 40;
 
   // wait for 50us
   usleep(100);
 
-  //*(uint32_t*)(0x2404C000 + 9 *(0x10))=(7<<2);//FIXME DELETE
+  //*(uint32*)(0x2404C000 + 9 *(0x10))=(7<<2);//FIXME DELETE
 
-  pmu_reg                                        = ~0x1E & (*(volatile uint32_t *)(0x2405a000 + (0x129 * 4)));
-  *(volatile uint32_t *)(0x2405a000 + (0x129 * 4)) = pmu_reg | (8 << 1);
-  *(volatile uint32_t *)(0x24043a18)               = 0x2e005;
+  pmu_reg                                        = ~0x1E & (*(volatile uint32 *)(0x2405a000 + (0x129 * 4)));
+  *(volatile uint32 *)(0x2405a000 + (0x129 * 4)) = pmu_reg | (8 << 1);
+  *(volatile uint32 *)(0x24043a18)               = 0x2e005;
 
-  while (*(volatile uint32_t *)(0x24050000 + 0x02) & BIT(8))
+  while (*(volatile uint32 *)(0x24050000 + 0x02) & BIT(8))
     ;
 
-  *(volatile uint32_t *)(0x24043800 + 0x24) &= ~BIT(4);
-  *((volatile uint32_t *)(0x24043800 + (512 + 8))) = 0x00000C15; //OPAMP2 Channel21
-  *((volatile uint32_t *)(0x24043800 + (78 * 4)))  = 0x00000000;
-  *((volatile uint32_t *)(0x24043800 + (94 * 4)))  = 0x00000001;
-  *((volatile uint32_t *)(0x24043800 + (119 * 4))) = 0x00000001;
-  *((volatile uint32_t *)(0x24043800 + (1 * 4)))   = 0x8000C05;
+  *(volatile uint32 *)(0x24043800 + 0x24) &= ~BIT(4);
+  *((volatile uint32 *)(0x24043800 + (512 + 8))) = 0x00000C15; //OPAMP2 Channel21
+  *((volatile uint32 *)(0x24043800 + (78 * 4)))  = 0x00000000;
+  *((volatile uint32 *)(0x24043800 + (94 * 4)))  = 0x00000001;
+  *((volatile uint32 *)(0x24043800 + (119 * 4))) = 0x00000001;
+  *((volatile uint32 *)(0x24043800 + (1 * 4)))   = 0x8000C05;
 
   usleep(400);
   calibrate_adc();
 
   adc_bg = adc_read_data_func();
 
-  *((volatile uint32_t *)(0x24043800 + (1 * 4)))   = 0x0;
-  *((volatile uint32_t *)(0x24043800 + (512 + 8))) = 0x15;
+  *((volatile uint32 *)(0x24043800 + (1 * 4)))   = 0x0;
+  *((volatile uint32 *)(0x24043800 + (512 + 8))) = 0x15;
   ////////////TS BJT /////////////////////////
 
   TS_SLOPE_SET |= BIT(28);
@@ -825,23 +825,23 @@ void get_ipmu_temperature(common_info_t *glbl_common_info_p)
   TEM = 0x00000001;
 
   //BJT TEMP TEST MUX
-  *(volatile uint32_t *)(0x2405a000 + (0x143 * 4)) = 0x3C0010;
-  *(volatile uint32_t *)(0x2405a000 + (0x140 * 4)) = 0x220;
-  while (*(volatile uint32_t *)(0x24050000 + 0x02) & BIT(8))
+  *(volatile uint32 *)(0x2405a000 + (0x143 * 4)) = 0x3C0010;
+  *(volatile uint32 *)(0x2405a000 + (0x140 * 4)) = 0x220;
+  while (*(volatile uint32 *)(0x24050000 + 0x02) & BIT(8))
     ;
 
-  *(volatile uint32_t *)(0x2404380C) = 20;
-  *(volatile uint32_t *)(0x24043800 + 0x24) &= ~BIT(4);
-  *((volatile uint32_t *)(0x24043800 + (512 + 8))) = 0x00000C17;
-  *((volatile uint32_t *)(0x24043800 + (1 * 4)))   = 0x8000C05;
+  *(volatile uint32 *)(0x2404380C) = 20;
+  *(volatile uint32 *)(0x24043800 + 0x24) &= ~BIT(4);
+  *((volatile uint32 *)(0x24043800 + (512 + 8))) = 0x00000C17;
+  *((volatile uint32 *)(0x24043800 + (1 * 4)))   = 0x8000C05;
 
   adc_bjt = adc_read_data_func();
 
   ADC_CHANNEL = 0x00000000;
   ADC_CHANNEL;
   /* turn off adc */
-  *((volatile uint32_t *)(0x24043800 + (512 + 8))) &= ~((BIT(10) | BIT(11)));
-  *((volatile uint32_t *)(0x24043800 + (1 * 4))) &= ~BIT(0);
+  *((volatile uint32 *)(0x24043800 + (512 + 8))) &= ~((BIT(10) | BIT(11)));
+  *((volatile uint32 *)(0x24043800 + (1 * 4))) &= ~BIT(0);
   //PMU_DIRECT_ACCESS(BG_SCDC_PROG_REG_1_OFFSET) = reg_val1;
 
   adc_off = glbl_common_info_ext_p->auxadc_offset_single;

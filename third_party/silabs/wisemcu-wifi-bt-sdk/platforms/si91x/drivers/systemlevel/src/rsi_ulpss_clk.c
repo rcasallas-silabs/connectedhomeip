@@ -1146,7 +1146,7 @@ error_t ulpss_ulp_proc_clk_config(ULPCLK_Type *pULPCLK,
   while (pULPCLK->CLOCK_STAUS_REG_b.CLOCK_SWITCHED_PROC_CLK_b != 1)
     ;
   /*update the division factor */
-  pULPCLK->ULP_TA_CLK_GEN_REG_b.ULP_PROC_CLK_DIV_FACTOR = (char)divFactor;
+  pULPCLK->ULP_TA_CLK_GEN_REG_b.ULP_PROC_CLK_DIV_FACTOR = divFactor;
   /*clock Enable */
   pULPCLK->ULP_TA_CLK_GEN_REG_b.ULP2M4_A2A_BRDG_CLK_EN_b = 1;
 

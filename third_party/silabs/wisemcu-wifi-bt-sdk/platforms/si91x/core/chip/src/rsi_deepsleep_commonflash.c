@@ -18,10 +18,10 @@
 /**
  * Includes
  */
+
 #ifdef TA_DEEP_SLEEP_COMMON_FLASH
 #include "rsi_ccp_common.h"
 #include "rsi_chip.h"
-
 
 #define NWPAON_MEM_HOST_ACCESS_CTRL_CLEAR_1 (*(volatile uint32_t *)(0x41300000 + 0x4))
 #define NWPAON_MEM_HOST_ACCESS_CTRL_SET_1   (*(volatile uint32_t *)(0x41300000 + 0x0))
@@ -349,6 +349,4 @@ error_t RSI_PS_EnterDeepSleep(SLEEP_TYPE_T sleepType, uint8_t lf_clk_mode)
 
   return RSI_OK;
 }
-#else
-typedef int dummy; // To remove empty translation unit warning.
 #endif

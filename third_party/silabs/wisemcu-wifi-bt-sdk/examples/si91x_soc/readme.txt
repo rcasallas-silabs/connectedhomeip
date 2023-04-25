@@ -6,27 +6,24 @@ Peripheral examples
 ===============================
 ADC Static Mode
 Analog Comparator
-AWS Combined Peripheral App
 Blinky
-Combined Peripheral App
 Bod
 CTS
 DAC FIFO
 DAC Static
+OPAMP
 GPIO
 I2C
 I2S
-OPAMP
 PWM
-QEI
 RTC
-SDIO_SLAVE
-SENSORHUB
+QEI
+SDIO
 SPI
 UART
-USART
 UDMA
 WDT
+Combined Peripheral App
 
 ULP (Ultra Low Power Peripherals)
 =================================
@@ -45,13 +42,11 @@ I2C DeepSleep Wakeup Without Retention
 UART DeepSleep Wakeup Without Retention
 
 
+
 Path : si91x_soc\wlan
 
 SOC Powersave examples
 ===========================
-Aws_device_shadow_ps
-Aws_device_shadow_without_retention
-M4_firmware_update
 Periodic Tx DeepSleep
 TCP Periodic Data Powersave
 TCP Tx on Periodic Wakeup
@@ -60,9 +55,13 @@ Tx on Button Wakeup
 Tx on Periodic Wakeup
 Wake On Wireless
 Without Retention DeepSleep
+aws_device_shadow_without_retention
+aws_device_shadow_ps
 	
 Example folder contents
 ========================
 1. 'projects' folder which has simplicity studio project files which are used to test the example.
 2. 'resources' and 'readme.md' - documentaion for the example
 3.  source files
+
+

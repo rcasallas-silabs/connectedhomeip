@@ -36,23 +36,6 @@ toolchain_settings: []
 readme:
   - path: readme.md
 other_file:
-  - path: resources/readme/mqttclientv6applicationconfiguration.png
-  - path: resources/readme/mosquittopublishfrommodulemqttdemov6.png
-  - path: resources/readme/mqttclientv6applicationprintssoc.png
-  - path: resources/readme/mqttexplorercreateconnection.png
-  - path: resources/readme/mosquittoporterrorresolution.png
-  - path: resources/readme/mosquittoconnectsubscribemqttdemov6.png
-  - path: resources/readme/mqttclientv6applicationprintsncp.png
-  - path: resources/readme/mqttexplorermsgmqttdemo.png
-  - path: resources/readme/mqttexploreradvancedoption.png
-  - path: resources/readme/mqttclientv6setupsoc.png
-  - path: resources/readme/mqttexploreraddtopicmqttdemo.png
-  - path: resources/readme/mqttexplorerdeleteconnections.png
-  - path: resources/readme/mqttexploreraddtopicsilabstest.png
-  - path: resources/readme/mqttexplorerdeletetopics.png
-  - path: resources/readme/mqttexplorerconnect.png
-  - path: resources/readme/mqttclientv6setupncp.png
-  - path: resources/readme/mqttserver.png
 ui_hints:
   highlight:
     - path: readme.md

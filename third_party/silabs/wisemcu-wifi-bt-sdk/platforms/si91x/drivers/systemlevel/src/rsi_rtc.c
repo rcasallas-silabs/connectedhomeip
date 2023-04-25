@@ -104,15 +104,16 @@ error_t RSI_RTC_SetDateTime(RTC_Type *Cal, RTC_TIME_CONFIG_T *date)
   if ((Cal == NULL) || (date == NULL)) {
     return ERROR_CAL_INVALID_PARAMETERS;
   }
-  Cal->MCU_CAL_PROG_TIME_2_b.PROG_DAY      = (unsigned int)((date->Day) & 0x1F);
+  Cal->MCU_CAL_PROG_TIME_2_b.PROG_DAY      = date->Day;
   Cal->MCU_CAL_PROG_TIME_2_b.PROG_WEEK_DAY = date->DayOfWeek;
   Cal->MCU_CAL_PROG_TIME_2_b.PROG_MONTH    = date->Month;
-  Cal->MCU_CAL_PROG_TIME_2_b.PROG_YEAR     = (unsigned int)((date->Year) & 0x7F);
-  Cal->MCU_CAL_PROG_TIME_2_b.PROG_CENTURY  = (unsigned int)((date->Century) & 0x03);
-  Cal->MCU_CAL_PROG_TIME_1_b.PROG_MSEC      = (unsigned int)((date->MilliSeconds) & 0x03FF);
-  Cal->MCU_CAL_PROG_TIME_1_b.PROG_SEC       = (unsigned int)((date->Second) & 0x3F);
-  Cal->MCU_CAL_PROG_TIME_1_b.PROG_MIN       = (unsigned int)(date->Minute & 0x3F);
-  Cal->MCU_CAL_PROG_TIME_1_b.PROG_HOUR      = (unsigned int)(date->Hour & 0x1F);
+  Cal->MCU_CAL_PROG_TIME_2_b.PROG_YEAR     = date->Year;
+  Cal->MCU_CAL_PROG_TIME_2_b.PROG_CENTURY  = date->Century;
+
+  Cal->MCU_CAL_PROG_TIME_1_b.PROG_MSEC      = date->MilliSeconds;
+  Cal->MCU_CAL_PROG_TIME_1_b.PROG_SEC       = date->Second;
+  Cal->MCU_CAL_PROG_TIME_1_b.PROG_MIN       = date->Minute;
+  Cal->MCU_CAL_PROG_TIME_1_b.PROG_HOUR      = date->Hour;
   Cal->MCU_CAL_PROG_TIME_2_b.PROG_TIME_TRIG = 1U;
   /*Wait for applied values to updated to registers */
   while (Cal->MCU_CAL_READ_TIME_LSB_b.MILLISECONDS_COUNT != date->MilliSeconds)
@@ -170,15 +171,15 @@ error_t RSI_RTC_SetAlarmDateTime(RTC_Type *Cal, RTC_TIME_CONFIG_T *alarm)
     return ERROR_CAL_INVALID_PARAMETERS;
   }
 
-  Cal->MCU_CAL_ALARM_PROG_1_b.PROG_ALARM_HOUR = (unsigned int)((alarm->Hour) & 0x1F);         //HH
-  Cal->MCU_CAL_ALARM_PROG_1_b.PROG_ALARM_MIN  = (unsigned int)((alarm->Minute) & 0x3F);       //MM
-  Cal->MCU_CAL_ALARM_PROG_1_b.PROG_ALARM_SEC  = (unsigned int)((alarm->Second) & 0x3F);       //SS
-  Cal->MCU_CAL_ALARM_PROG_1_b.PROG_ALARM_MSEC = (unsigned int)((alarm->MilliSeconds) & 0x03FF); // MSEC
+  Cal->MCU_CAL_ALARM_PROG_1_b.PROG_ALARM_HOUR = alarm->Hour;         //HH
+  Cal->MCU_CAL_ALARM_PROG_1_b.PROG_ALARM_MIN  = alarm->Minute;       //MM
+  Cal->MCU_CAL_ALARM_PROG_1_b.PROG_ALARM_SEC  = alarm->Second;       //SS
+  Cal->MCU_CAL_ALARM_PROG_1_b.PROG_ALARM_MSEC = alarm->MilliSeconds; // MSEC
 
-  Cal->MCU_CAL_ALARM_PROG_2_b.PROG_ALARM_CENTURY = (unsigned int)((alarm->Century) & 0x03); // CC
-  Cal->MCU_CAL_ALARM_PROG_2_b.PROG_ALARM_DAY     = (unsigned int)((alarm->Day) & 0x1F);     // DAY
+  Cal->MCU_CAL_ALARM_PROG_2_b.PROG_ALARM_CENTURY = alarm->Century; // CC
+  Cal->MCU_CAL_ALARM_PROG_2_b.PROG_ALARM_DAY     = alarm->Day;     // DAY
   Cal->MCU_CAL_ALARM_PROG_2_b.PROG_ALARM_MONTH   = alarm->Month;   //MONTH
-  Cal->MCU_CAL_ALARM_PROG_2_b.PROG_ALARM_YEAR    = (unsigned int)((alarm->Year) & 0x7F);    // YEAR
+  Cal->MCU_CAL_ALARM_PROG_2_b.PROG_ALARM_YEAR    = alarm->Year;    // YEAR
   /*Wait for applied values to updated to registers */
   while (Cal->MCU_CAL_ALARM_PROG_1_b.PROG_ALARM_MIN != alarm->Minute)
     ;
@@ -202,7 +203,7 @@ error_t RSI_RTC_SetAlarmDateTime(RTC_Type *Cal, RTC_TIME_CONFIG_T *alarm)
 
 void RSI_RTC_AlamEnable(RTC_Type *Cal, boolean_t val)
 {
-  Cal->MCU_CAL_ALARM_PROG_2_b.ALARM_EN = (unsigned int)(val & 0x01);
+  Cal->MCU_CAL_ALARM_PROG_2_b.ALARM_EN = val;
   return;
 }
 
@@ -351,9 +352,9 @@ void RSI_RTC_CalibInitilization(void)
 void RSI_RTC_RCCLK_Calib(TIME_PERIOD_Type *rtc, uint8_t enable, uint8_t periodic_en, uint8_t trigger_time)
 {
   rtc->MCU_CAL_TEMP_PROG_REG_b.RTC_TIMER_PERIOD_MUX_SEL = 1;
-  rtc->MCU_CAL_START_REG_b.START_CALIB_RC               = (unsigned int)(enable & 0x01);
-  rtc->MCU_CAL_START_REG_b.PERIODIC_RC_CALIB_EN         = (unsigned int)(periodic_en & 0x01);
-  rtc->MCU_CAL_START_REG_b.RC_TRIGGER_TIME_SEL          = (unsigned int)(trigger_time & 0x07);
+  rtc->MCU_CAL_START_REG_b.START_CALIB_RC               = enable;
+  rtc->MCU_CAL_START_REG_b.PERIODIC_RC_CALIB_EN         = periodic_en;
+  rtc->MCU_CAL_START_REG_b.RC_TRIGGER_TIME_SEL          = trigger_time;
   return;
 }
 
@@ -398,9 +399,9 @@ void RSI_RTC_ROCLK_Calib(TIME_PERIOD_Type *rtc,
 {
   RSI_RTC_RCCLK_Calib(rtc, enable, periodic_en, trigger_time);
   rtc->MCU_CAL_TEMP_PROG_REG_b.RTC_TIMER_PERIOD_MUX_SEL = 1;
-  rtc->MCU_CAL_START_REG_b.START_CALIB_RO               = (unsigned int)(ro_enable & 0x01);
-  rtc->MCU_CAL_START_REG_b.PERIODIC_RO_CALIB_EN         = (unsigned int)(ro_periodic_en & 0x01);
-  rtc->MCU_CAL_START_REG_b.RO_TRIGGER_TIME_SEL          = (unsigned int)(ro_trigger_time & 0x03);
+  rtc->MCU_CAL_START_REG_b.START_CALIB_RO               = ro_enable;
+  rtc->MCU_CAL_START_REG_b.PERIODIC_RO_CALIB_EN         = ro_periodic_en;
+  rtc->MCU_CAL_START_REG_b.RO_TRIGGER_TIME_SEL          = ro_trigger_time;
   return;
 }
 

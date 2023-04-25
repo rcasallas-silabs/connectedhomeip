@@ -16,7 +16,7 @@
 ******************************************************************************/
 /** @file gpdma.h
  * 
- *  @brief This file contains function prototypes of transfer and receive
+ * 	@brief This file contains functions prototype of transfer or receive
  *         SDIO slave data using GPDMA. 
  *
  */

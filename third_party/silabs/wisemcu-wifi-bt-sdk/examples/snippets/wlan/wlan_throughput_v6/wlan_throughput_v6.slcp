@@ -33,19 +33,10 @@ requires:
   - name: wiseconnect_sapi_ipv6_utils
 define:
   - name: FLOAT_PRINT_BYPASS
-  - name: EXECUTION_FROM_RAM
-template_contribution:
-  - name: EXECUTION_FROM_RAM
-    value: 1
 toolchain_settings: []
 readme:
   - path: readme.md
 other_file:
-  - path: resources/readme/wlanthroughputv6applicationprintsncp.png
-  - path: resources/readme/wlanthroughputv6setupsoc.png
-  - path: resources/readme/wlanthroughputv6setupncp.png
-  - path: resources/readme/wlanthroughputv6applicationconfiguration.png
-  - path: resources/readme/wlanthroughputv6applicationprintssoc.png
 ui_hints:
   highlight:
     - path: readme.md

@@ -1075,6 +1075,4 @@ void I2Cx_IRQHandler(I2C_RESOURCES *i2c)
 }
 /** @} */
 
-#else
-typedef int dummy; // To remove empty translation unit warning.
 #endif //A11_ROM || ROMDRIVER_PRESENT

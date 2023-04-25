@@ -168,9 +168,9 @@ int main()
 
     if (adcChConfig.input_type[0]) {
       vout = vout - (vref_value / 2);
-      DEBUGOUT("Differential ended input  :%f\n", vout);
+      DEBUGOUT("Differential ended input  :%d\n", (int)vout);
     } else {
-      DEBUGOUT("Single ended input :%f\n", vout);
+      DEBUGOUT("Single ended input :%d\n", (int)vout);
     }
 #ifdef CHIP_9117
     RSI_ADC_ChnlIntrUnMask(AUX_ADC_DAC_COMP, 0, adcConfig.operation_mode);

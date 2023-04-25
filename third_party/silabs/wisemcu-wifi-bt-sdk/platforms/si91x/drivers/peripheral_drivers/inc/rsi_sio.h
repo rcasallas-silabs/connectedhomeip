@@ -97,9 +97,9 @@ typedef void (*sio_Uart_func_ptr_t)(en_sio_Uart_events_t enUartSio, uint16_t u16
 // SIO-I2S Transfer structure
 typedef struct stc_sio_i2s_xfer {
   void *txBuff; /* TX buffer pointer; Must be a uint16_t pointer when transfer
-                         size is 16 bits and uint8_t pointer when transfer size is 8 bits (can be NULL only when *txCount is 0) */
+										     size is 16 bits and uint8_t pointer when transfer size is 8 bits (can be NULL only when *txCount is 0) */
   void *rxBuff; /* RX buffer pointer; Must be uint16_t pointer when transfer size is 16 bits or
-                         must be uint8_t pointer when transfer is 8-bits (can be NULL only when *txCount is 0) */
+										     must be uint8_t pointer when transfer is 8-bits (can be NULL only when *txCount is 0) */
   int32_t
     txCount; // Pointer to an int32_t memory (never initialize to NULL) that has the Size of the txBuff in items (not bytes), not modified by driver 
   int32_t
@@ -107,7 +107,7 @@ typedef struct stc_sio_i2s_xfer {
   uint8_t u8BitLen; // number of bits to transfer 8 , 16 , 32 
   int32_t
     txDoneCount; /* Total items (not bytes) transmitted (initialize to 0), 
-                                           modified by driver [In case of underflow txDoneCount will be greater than *txCount] */
+	                                         modified by driver [In case of underflow txDoneCount will be greater than *txCount] */
   int32_t
     rxDoneCount; // Total items (not bytes) received (initialize to 0), modified by driver [In case of over flow rxDoneCount will be greater than *rxCount] 
   sio_i2s_func_ptr_t pfnCb;
@@ -150,9 +150,9 @@ typedef struct stc_sio_spi_cfg {
 typedef struct stc_sio_spi_xfer {
 
   void *txBuff; /* TX buffer pointer; Must be a uint16_t pointer when transfer
-                       size is 16 bits and uint8_t pointer when transfer size is 8 bits (can be NULL only when *txCount is 0) */
+									     size is 16 bits and uint8_t pointer when transfer size is 8 bits (can be NULL only when *txCount is 0) */
   void *rxBuff; /* RX buffer pointer; Must be uint16_t pointer when transfer size is 16 bits or
-                       must be uint8_t pointer when transfer is 8-bits (can be NULL only when *txCount is 0) */
+									     must be uint8_t pointer when transfer is 8-bits (can be NULL only when *txCount is 0) */
   int32_t
     txCount; // Pointer to an int32_t memory (never initialize to NULL) that has the Size of the txBuff in items (not bytes), not modified by driver 
   int32_t
@@ -236,7 +236,7 @@ typedef struct stc_sio_cb {
 extern stc_sio_cb_t gstcSioCb;
 
 //  SIO_SIO apis function prototype 
-void RSI_SIO_ClockEnable(void);
+static void RSI_SIO_ClockEnable(void);
 void RSI_SIO_I2cGenerateStop(volatile SIO_Type *pstcSio);
 error_t RSI_SIO_Init(volatile SIO_Type *pstcSio);
 error_t RSI_SIO_InitSpi(volatile SIO_Type *pstcSio, stc_sio_spi_cfg_t *pstcSpiConfig);
@@ -258,8 +258,8 @@ int RSI_SIO_UARTRead(volatile SIO_Type *pstcSio, void *data, int numBytes);
 int RSI_SIO_UARTReadBlocking(volatile SIO_Type *pstcSio, void *data, int numBytes);
 
 //  SIO_I2C apis function prototype 
-uint32_t RSI_SIO_I2cPrepareWrite(uint8_t u8InDat);
-uint32_t RSI_SIO_I2cPrepareRead(uint32_t u32Indata);
+static uint32_t RSI_SIO_I2cPrepareWrite(uint8_t u8InDat);
+static uint32_t RSI_SIO_I2cPrepareRead(uint32_t u32Indata);
 error_t RSI_SIO_I2cWrite(volatile SIO_Type *pstcSio,
                          stc_sio_i2c_config_t *pstcConfig,
                          uint8_t u8SlaveAddr,

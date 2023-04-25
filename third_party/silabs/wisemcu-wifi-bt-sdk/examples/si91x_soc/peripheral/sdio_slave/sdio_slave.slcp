@@ -1,8 +1,8 @@
 # Silicon Labs Project Configuration Tools: slcp, v0, Component selection file.
 project_name: sdio_slave
-label: SI91x - SoC Peripheral SDIO Slave
+label: SI91x - SoC Peripheral SDIO_SLAVE
 description: |
-  Demonstrates how to use the SDIO Slave interface on the SI91x SoC device.
+  Demonstrates how to use the SDIO_SLAVE interface on the SI91x SoC device.
 category: example|peripheral
 package: platform
 quality: alpha

@@ -241,4 +241,3 @@ void RSI_CTS_TouchDetection(uint16_t *fifo_read, uint8_t *sensor_count);
 #endif  // RSI_CTS_H
 /** @} */
 
-

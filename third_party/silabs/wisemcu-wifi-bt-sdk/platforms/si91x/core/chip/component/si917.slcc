@@ -41,7 +41,7 @@
   - name: device_ram_addr
     value: 1024
   - name: device_ram_size
-    value: 194560
+    value: 195584
   - name: device_fpu
     value: true
   - name: device_mpu
