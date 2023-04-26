@@ -173,7 +173,8 @@ def buildOpenThreadExample(app)
                                 """
 
                                 if(buildRelease) {
-                                    sh """./scripts/examples/gn_efr32_example.sh ./examples/${app}/${relPath} ./out/CSA/${app}/OpenThread/release ${board} --release
+                                    // TODO: --use_ot_lib is used in the release build options until thread issue with NDEBUG is found and fixed
+                                    sh """./scripts/examples/gn_efr32_example.sh ./examples/${app}/${relPath} ./out/CSA/${app}/OpenThread/release ${board} --release --use_ot_lib
                                           mkdir -p ${saved_workspace}/out/release/${board}/OpenThread
                                           cp ./out/CSA/${app}/OpenThread/release/${board}/*.s37 ${saved_workspace}/out/release/${board}/OpenThread/
                                           cp ./out/CSA/${app}/OpenThread/release/${board}/*.map ${saved_workspace}/out/release/${board}/OpenThread/
