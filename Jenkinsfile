@@ -1136,6 +1136,89 @@ def generateGblFileAndOTAfiles()
     }
 }
 
+def generateRpsFiles()
+{
+    actionWithRetry {
+        node(buildFarmLabel)
+        {
+            def boards = "BRD4325B"
+            def wifiPlatforms = "917_soc"
+            def appName = "lighting,lock,light-switch,window,onoff-plug"
+            def workspaceTmpDir = createWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
+                                                            buildOverlayDir)
+            def dirPath = workspaceTmpDir + createWorkspaceOverlay.overlayMatterPath
+            def saveDir = 'matter/'
+
+            def image = "artifactory.silabs.net/gsdk-docker-production/gsdk_nomad_containers/gsdk_23q2:latest"
+
+            // Closure to generate the rps files
+            def genRpsFiles = {app, board, radioName ->
+
+                sh """
+
+                        commander --version
+                        pwd
+
+                        bin_path_std="${dirPath}/${saved_workspace}/out/standard/${board}/WiFi/"
+                        bin_path_release="${dirPath}/${saved_workspace}/out/release/${board}/WiFi/"
+                        file_std="\$(find \$bin_path_std/*${app}*.s37 | grep -o '[^/]*\$')"
+                        file_release="\$(find \$bin_path_release/*${app}*.s37 | grep -o '[^/]*\$')"
+
+                        rps_file_std="\$(basename \$file_std .s37).rps"
+                        rps_file_release="\$(basename \$file_release .s37).rps"
+
+                        commander rps create \$bin_path_std/\$rps_file_std --app \$bin_path_std/\$file_std
+                        commander rps create \$bin_path_release/\$rps_file_release --app \$bin_path_release/\$file_release
+
+                        ls -al \$bin_path_std
+                        ls -al \$bin_path_release
+
+                    """
+                return 0
+            }
+
+            withDockerRegistry([url: "https://artifactory.silabs.net ", credentialsId: 'svc_gsdk']){
+                sh "docker pull $image"
+            }
+
+            dir(dirPath) {
+                try{
+                    withDockerContainer(image: image)
+                    {
+                        withCredentials([usernamePassword(credentialsId: 'svc_gsdk', passwordVariable: 'SL_PASSWORD', usernameVariable: 'SL_USERNAME')])
+                        {
+                            withEnv(['file_std=""',
+                                     'file_release=""',
+                                     'rps_file_std=""',
+                                     'rps_file_release=""',
+                                     'bin_path_std=""',
+                                     'bin_path_release=""']){
+                                boards.tokenize(",").each{ brd ->
+                                    wifiPlatforms.tokenize(",").each{ platform ->
+                                        appName.tokenize(",").each{ app ->
+                                            // generating the RPS file for BRD4325B
+                                            genRpsFiles.call(app, brd, platform)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (e)
+                {
+                        deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
+                                  workspaceTmpDir,
+                                  saveDir,
+                                  '-name no-files')
+                        throw e
+                }
+            }
+            deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(), workspaceTmpDir, 'matter/' + saved_workspace,'-name "*.rps"')
+        }
+    }
+}
+
 def pushToArtifactoryAndUbai()
 {
     actionWithRetry {
@@ -1462,7 +1545,8 @@ def pipeline()
             exportIoTReports()
         }
     }
-    stage("Generate GBL and OTA files")
+    def parallelNodesImages = [:]
+    stage("Generate SQA images")
     {
         advanceStageMarker()
         /*
@@ -1471,9 +1555,16 @@ def pipeline()
             BRD4161A and BRD4187C
         WiFi
             mg12 + wf200/rs9116             ( one per each combo)
-            mg24 + wf200/rs9116/917/917_soc ( one per each combo)
+            mg24 + wf200/rs9116/917         ( one per each combo)
         */
-        generateGblFileAndOTAfiles()
+
+        parallelNodesImages['Generate GBL and OTA files'] = { this.generateGblFileAndOTAfiles() }
+
+        // Generating the RPS file for 917 SoC
+        parallelNodesImages['Generate Rps files'] =         { this.generateRpsFiles()   }
+
+        parallelNodesImages.failFast = false
+        parallel parallelNodesImages
     }
     stage("Push to Artifactory and UBAI")
     {
