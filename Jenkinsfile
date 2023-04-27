@@ -685,7 +685,7 @@ def exportIoTReports()
                                 def appNameOnly = app - '-app'
                                 sh """unset OTEL_EXPORTER_OTLP_ENDPOINT
                                     code_size_analyzer_cli \
-                                    --map_file ${saved_workspace}/out/${version}/BRD4187C/OpenThread/chip-efr32-${appNameOnly}*.map \
+                                    --map_file ${saved_workspace}/out/${version}/BRD4187C/OpenThread/chip-efr32-${appNameOnly}-example*.map \
                                     --stack_name matter \
                                     --target_part efr32mg24b210f1536im48 \
                                     --compiler gcc \
