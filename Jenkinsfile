@@ -166,7 +166,8 @@ def buildOpenThreadExample(app)
                                     if (sleepyBoard.contains(board)) {
                                         arguments = "--sed"
                                     }
-                                sh """./scripts/examples/gn_efr32_example.sh ./examples/${app}/${relPath} ./out/CSA/${app}/OpenThread/standard ${board}
+                                // Enable matter shell with chip_build_libshell=true argument for SQA tests
+                                sh """./scripts/examples/gn_efr32_example.sh ./examples/${app}/${relPath} ./out/CSA/${app}/OpenThread/standard ${board} chip_build_libshell=true
                                         mkdir -p ${saved_workspace}/out/standard/${board}/OpenThread
                                         cp ./out/CSA/${app}/OpenThread/standard/${board}/*.s37 ${saved_workspace}/out/standard/${board}/OpenThread/
                                         cp ./out/CSA/${app}/OpenThread/standard/${board}/*.map ${saved_workspace}/out/standard/${board}/OpenThread/ 
@@ -245,7 +246,8 @@ def buildSilabsCustomOpenThreadExamples(app)
                         withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
                         {
                             boardsForCustomOpenThread.each { board ->
-                                sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/${app}/efr32 ./out/silabs/${app}/OpenThread/ ${board}"
+                                // Enable matter shell with chip_build_libshell=true argument for SQA tests
+                                sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/${app}/efr32 ./out/silabs/${app}/OpenThread/ ${board} chip_build_libshell=true"
                             }
                         }
                     } 
@@ -304,19 +306,19 @@ def buildSilabsSensorApp()
                         {
 
                             boardsForCustomOpenThread.each { board ->
-                                sh """ ./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/occupancy/OpenThread ${board} \"is_occupancy_sensor=true\"
+                                sh """ ./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/occupancy/OpenThread ${board} \"is_occupancy_sensor=true\" chip_build_libshell=true
                                         mkdir -p ${saved_workspace}/out/standard/${board}/OpenThread/sensors/occupancy/
                                         cp ./out/silabs/silabs-sensors/occupancy/OpenThread/${board}/*.s37 ${saved_workspace}/out/standard/${board}/OpenThread/sensors/occupancy/
                                         cp ./out/silabs/silabs-sensors/occupancy/OpenThread/${board}/*.map ${saved_workspace}/out/standard/${board}/OpenThread/sensors/occupancy/
                                 """
 
-                                sh """ ./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/temperature/OpenThread ${board} \"is_temperature_sensor=true\"
+                                sh """ ./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/temperature/OpenThread ${board} \"is_temperature_sensor=true\" chip_build_libshell=true
                                         mkdir -p ${saved_workspace}/out/standard/${board}/OpenThread/sensors/temperature/
                                         cp ./out/silabs/silabs-sensors/temperature/OpenThread/${board}/*.s37 ${saved_workspace}/out/standard/${board}/OpenThread/sensors/temperature/
                                         cp ./out/silabs/silabs-sensors/temperature/OpenThread/${board}/*.map ${saved_workspace}/out/standard/${board}/OpenThread/sensors/temperature/
                                 """
 
-                                sh """ ./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/contact/OpenThread ${board} \"is_contact_sensor=true\"
+                                sh """ ./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/contact/OpenThread ${board} \"is_contact_sensor=true\" chip_build_libshell=true
                                         mkdir -p ${saved_workspace}/out/standard/${board}/OpenThread/sensors/contact/
                                         cp ./out/silabs/silabs-sensors/contact/OpenThread/${board}/*.s37 ${saved_workspace}/out/standard/${board}/OpenThread/sensors/contact/
                                         cp ./out/silabs/silabs-sensors/contact/OpenThread/${board}/*.map ${saved_workspace}/out/standard/${board}/OpenThread/sensors/contact/
@@ -409,8 +411,8 @@ def buildWiFiExample(platform, app, board, wifiRadio, args, radioName, buildCust
                         // CSA Examples build
                         withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
                         {
-
-                            sh "./scripts/examples/gn_efr32_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName} ${board} ${args}"
+                            // Enable matter shell, on standard builds, with chip_build_libshell=true argument for SQA tests
+                            sh "./scripts/examples/gn_efr32_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName} ${board} ${args} chip_build_libshell=true"
                             sh "./scripts/examples/gn_efr32_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName}/release ${board} ${args} --release"
 
                             // for sleepy devices
