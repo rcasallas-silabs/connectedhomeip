@@ -1,7 +1,13 @@
 #!groovy
 @Library('gsdk-shared-lib@master')
 import groovy.json.JsonSlurper
-properties([disableConcurrentBuilds()])
+properties([
+    disableConcurrentBuilds(),
+    parameters([
+        // Allows the building of additional binaries with different software version for OTA automation
+        booleanParam(name: 'OTA_AUTOMATION_TEST', defaultValue: false, description: 'Set to true to generate additional SQA images for ota testing')
+    ])
+])
 
 buildOverlayDir = ''
 //TO DO, this is for SQA UTF testing, this value should get from db or somewhere instead of hardcoded
@@ -13,7 +19,8 @@ buildFarmLabel = 'Build-Farm'
 buildFarmLargeLabel = 'Build-Farm-Large'
 chipBuildEfr32Image = "artifactory.silabs.net/gsdk-dockerhub-proxy/connectedhomeip/chip-build-efr32:0.5.64"
 saved_workspace = 'saved_workspace'
- 
+software_version = 'sl_matter_version_str=\\"2\\" sl_matter_version=2'
+commanderImage = "artifactory.silabs.net/gsdk-docker-production/sqa-testnode-lite:latest"
 
 secrets = [[path: 'teams/gecko-sdk/app/svc_gsdk', engineVersion: 2,
             secretValues: [[envVar: 'SL_PASSWORD', vaultKey: 'password'],
@@ -125,7 +132,7 @@ def runInWorkspace(Map args, Closure cl)
     }
 }
 
-def buildOpenThreadExample(app)
+def buildOpenThreadExample(app, ota_automation=false, config_args='')
 {
     actionWithRetry {
         node(buildFarmLargeLabel)
@@ -134,12 +141,12 @@ def buildOpenThreadExample(app)
                                                             buildOverlayDir)
             def dirPath = workspaceTmpDir + createWorkspaceOverlay.overlayMatterPath
             def saveDir = 'matter/'
+            def out_dir = saved_workspace
             def buildRelease = true
             def openThreadBoards = [:]
             def sleepyBoard = ["BRD4161A", "BRD4186C"]
-
             def relPath = "silabs/efr32"
-
+            
             // Remove -app at end of string for later use (if it exists)
             def appNameOnly = app - '-app'
 
@@ -147,7 +154,12 @@ def buildOpenThreadExample(app)
                 sh "docker pull $chipBuildEfr32Image"
             }
             // Build only for release candidate branch
-            if (env.BRANCH_NAME.startsWith('RC_')) {
+            if (ota_automation) {
+                openThreadBoards = ["BRD4161A", "BRD4187C"]
+                sleepyBoard = [:]
+                buildRelease = false
+            }
+            else if (env.BRANCH_NAME.startsWith('RC_')) {
                 openThreadBoards = ["BRD4161A", "BRD4162A", "BRD4163A", "BRD4164A", "BRD4166A", "BRD4186C", "BRD4187C", "BRD2703A", "BRD2601B", "BRD4316A", "BRD4317A", "BRD4319A"]
             } else {
                 openThreadBoards = ["BRD4161A", "BRD4166A", "BRD4187C", "BRD2703A","BRD4316A", "BRD4319A" ]
@@ -162,37 +174,47 @@ def buildOpenThreadExample(app)
                         withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
                         {
                             openThreadBoards.each { board ->
-                                def arguments = ""
-                                    if (sleepyBoard.contains(board)) {
-                                        arguments = "--sed"
-                                    }
-                                // Enable matter shell with chip_build_libshell=true argument for SQA tests
-                                sh """./scripts/examples/gn_efr32_example.sh ./examples/${app}/${relPath} ./out/CSA/${app}/OpenThread/standard ${board} chip_build_libshell=true
-                                        mkdir -p ${saved_workspace}/out/standard/${board}/OpenThread
-                                        cp ./out/CSA/${app}/OpenThread/standard/${board}/*.s37 ${saved_workspace}/out/standard/${board}/OpenThread/
-                                        cp ./out/CSA/${app}/OpenThread/standard/${board}/*.map ${saved_workspace}/out/standard/${board}/OpenThread/ 
-                                """
 
-                                if(buildRelease) {
-                                    // TODO: --use_ot_lib is used in the release build options until thread issue with NDEBUG is found and fixed
-                                    // TODO: Skip MGM24 modules release build. They don't have thread_cert_libs to workaround above issue ^
-                                    def skipRelease = ["BRD4316A", "BRD4317A", "BRD4319A"]
-                                    if (!skipRelease.contains(board)) {
-                                        sh """./scripts/examples/gn_efr32_example.sh ./examples/${app}/${relPath} ./out/CSA/${app}/OpenThread/release ${board} --release --use_ot_lib
-                                            mkdir -p ${saved_workspace}/out/release/${board}/OpenThread
-                                            cp ./out/CSA/${app}/OpenThread/release/${board}/*.s37 ${saved_workspace}/out/release/${board}/OpenThread/
-                                            cp ./out/CSA/${app}/OpenThread/release/${board}/*.map ${saved_workspace}/out/release/${board}/OpenThread/
+                                if(ota_automation){
+                                    // Move binaries to standardized output
+                                    sh """ ./scripts/examples/gn_efr32_example.sh ./examples/${app}/${relPath} ./out/OTA/ota_automation_out/${app}/OpenThread/ ${board} ${config_args} chip_build_libshell=true 
+                                            mkdir -p ${saved_workspace}/out/OTA/ota_automation_out/${app}/OpenThread/${board}
+                                            cp ./out/OTA/ota_automation_out/${app}/OpenThread/${board}/*.s37 ${saved_workspace}/out/OTA/ota_automation_out/${app}/OpenThread/${board}/"""
+                                }
+                                else{                                
+                                        def arguments = ""
+                                        if (sleepyBoard.contains(board)) {
+                                            arguments = "--sed"
+                                        }
+                                        // Enable matter shell with chip_build_libshell=true argument for SQA tests
+                                        sh """./scripts/examples/gn_efr32_example.sh ./examples/${app}/${relPath} ./out/CSA/${app}/OpenThread/standard ${board} chip_build_libshell=true 
+                                                mkdir -p ${saved_workspace}/out/standard/${board}/OpenThread
+                                                cp ./out/CSA/${app}/OpenThread/standard/${board}/*.s37 ${saved_workspace}/out/standard/${board}/OpenThread/
+                                                cp ./out/CSA/${app}/OpenThread/standard/${board}/*.map ${saved_workspace}/out/standard/${board}/OpenThread/ 
+                                        """
+                                    
+                                    if(buildRelease) {
+                                        // TODO: --use_ot_lib is used in the release build options until thread issue with NDEBUG is found and fixed
+                                        // TODO: Skip MGM24 modules release build. They don't have thread_cert_libs to workaround above issue ^
+                                        def skipRelease = ["BRD4316A", "BRD4317A", "BRD4319A"]
+                                        if (!skipRelease.contains(board)) {
+                                            sh """./scripts/examples/gn_efr32_example.sh ./examples/${app}/${relPath} ./out/CSA/${app}/OpenThread/release ${board} --release --use_ot_lib
+                                                mkdir -p ${saved_workspace}/out/release/${board}/OpenThread
+                                                cp ./out/CSA/${app}/OpenThread/release/${board}/*.s37 ${saved_workspace}/out/release/${board}/OpenThread/
+                                                cp ./out/CSA/${app}/OpenThread/release/${board}/*.map ${saved_workspace}/out/release/${board}/OpenThread/
+                                            """
+                                        }
+                                    }
+                                    if(arguments) {
+                                        sh """./scripts/examples/gn_efr32_example.sh ./examples/${app}/${relPath} ./out/CSA/${app}/OpenThread/sleepy ${board} ${arguments}
+                                            mkdir -p ${saved_workspace}/out/sleepy/${board}/OpenThread
+                                            cp ./out/CSA/${app}/OpenThread/sleepy/${board}/*.s37 ${saved_workspace}/out/sleepy/${board}/OpenThread/
+                                            cp ./out/CSA/${app}/OpenThread/sleepy/${board}/*.map ${saved_workspace}/out/sleepy/${board}/OpenThread/
                                         """
                                     }
+                                    stash name: 'OpenThreadExamples-'+app+'-'+board, includes: 'out/**/*.s37 '
                                 }
-                                if(arguments) {
-                                    sh """./scripts/examples/gn_efr32_example.sh ./examples/${app}/${relPath} ./out/CSA/${app}/OpenThread/sleepy ${board} ${arguments}
-                                          mkdir -p ${saved_workspace}/out/sleepy/${board}/OpenThread
-                                          cp ./out/CSA/${app}/OpenThread/sleepy/${board}/*.s37 ${saved_workspace}/out/sleepy/${board}/OpenThread/
-                                          cp ./out/CSA/${app}/OpenThread/sleepy/${board}/*.map ${saved_workspace}/out/sleepy/${board}/OpenThread/
-                                    """
-                                }
-                                stash name: 'OpenThreadExamples-'+app+'-'+board, includes: 'out/**/*.s37 '
+                                
                             }
                         }
                     }
@@ -365,7 +387,7 @@ def buildSilabsSensorApp()
     }
 }
 
-def buildWiFiExample(platform, app, board, wifiRadio, args, radioName, buildCustom)
+def buildWiFiExample(platform, app, board, wifiRadio, args, radioName, buildCustom, ota_automation=false, config_args='')
 {
     actionWithRetry {
         node(buildFarmLargeLabel)
@@ -403,7 +425,7 @@ def buildWiFiExample(platform, app, board, wifiRadio, args, radioName, buildCust
             withDockerRegistry([url: "https://artifactory.silabs.net ", credentialsId: 'svc_gsdk']){
                     sh "docker pull $chipBuildEfr32Image"
             }
-
+            
             dir(dirPath) {
                 try {
                     withDockerContainer(image: chipBuildEfr32Image, args: "-u root")
@@ -411,9 +433,15 @@ def buildWiFiExample(platform, app, board, wifiRadio, args, radioName, buildCust
                         // CSA Examples build
                         withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
                         {
-                            // Enable matter shell, on standard builds, with chip_build_libshell=true argument for SQA tests
-                            sh "./scripts/examples/gn_efr32_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName} ${board} ${args} chip_build_libshell=true"
-                            sh "./scripts/examples/gn_efr32_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName}/release ${board} ${args} --release"
+                            if(ota_automation){
+                                sh "./scripts/examples/gn_efr32_example.sh ${exampleType}/${app}/${relPath}/ out/OTA/ota_automation_out/WiFi/${app}_wifi_${radioName}/ ${board} ${args} ${config_args} chip_build_libshell=true "
+                            }
+                            else{
+                                // Enable matter shell, on standard builds, with chip_build_libshell=true argument for SQA tests
+                                sh "./scripts/examples/gn_efr32_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName} ${board} ${args} chip_build_libshell=true"
+                                sh "./scripts/examples/gn_efr32_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName}/release ${board} ${args} --release"                                
+                            }
+
 
                             // for sleepy devices
                             if (sleepyBoard.contains(board)) {
@@ -428,17 +456,28 @@ def buildWiFiExample(platform, app, board, wifiRadio, args, radioName, buildCust
                     {
                         platformAndRadio = "${platform}"
                     }
-                    fileTypesToMove.each { fileType ->
-                        sh """ 
-                            ls; pwd; mkdir -p ${saved_workspace}/out/standard/${board}/WiFi; mkdir -p ${saved_workspace}/out/release/${board}/WiFi
-                            cp out/${app}_wifi_${radioName}/${board}/*.${fileType} ${saved_workspace}/out/standard/${board}/WiFi/${platformAndRadio}-${appNameOnly}-example.${fileType}
-                            cp out/${app}_wifi_${radioName}/release/${board}/*.${fileType} ${saved_workspace}/out/release/${board}/WiFi/${platformAndRadio}-${appNameOnly}-example.${fileType} """
-                        if (sleepyBoard.contains(board)) {
-                            sh """ mkdir -p ${saved_workspace}/out/sleepy/${board}/WiFi
-                                cp ./out/${app}_wifi_${radioName}/sleepy/${board}/*.${fileType} ${saved_workspace}/out/sleepy/${board}/WiFi/${platformAndRadio}-${appNameOnly}-example.${fileType} """
-                        }
+                    if (ota_automation){
+
+                         sh """ 
+                            ls; pwd; mkdir -p ${saved_workspace}/out/OTA/ota_automation_out/WiFi/${app}_wifi_${radioName}/${board}
+                            cp out/OTA/ota_automation_out/WiFi/${app}_wifi_${radioName}/${board}/*.s37  ${saved_workspace}/out/OTA/ota_automation_out/WiFi/${app}_wifi_${radioName}/${board}/${platformAndRadio}-${appNameOnly}-example.s37"""                       
                     }
-                    stash name: 'WiFiExamples-' + app + '-' + board + '-' + radioName, includes: 'out/**/*.s37 ' 
+                    else{
+                        fileTypesToMove.each { fileType ->
+                            sh """ 
+                                ls; pwd; mkdir -p ${saved_workspace}/out/standard/${board}/WiFi; mkdir -p ${saved_workspace}/out/release/${board}/WiFi
+                                cp out/${app}_wifi_${radioName}/${board}/*.${fileType} ${saved_workspace}/out/standard/${board}/WiFi/${platformAndRadio}-${appNameOnly}-example.${fileType}
+                                cp out/${app}_wifi_${radioName}/release/${board}/*.${fileType} ${saved_workspace}/out/release/${board}/WiFi/${platformAndRadio}-${appNameOnly}-example.${fileType} """                        
+                        
+
+                            if (sleepyBoard.contains(board)) {
+                                sh """ mkdir -p ${saved_workspace}/out/sleepy/${board}/WiFi
+                                    cp ./out/${app}_wifi_${radioName}/sleepy/${board}/*.${fileType} ${saved_workspace}/out/sleepy/${board}/WiFi/${platformAndRadio}-${appNameOnly}-example.${fileType} """
+                            }
+                        }
+                        stash name: 'WiFiExamples-' + app + '-' + board + '-' + radioName, includes: 'out/**/*.s37 '
+                    }
+                     
 
                 } catch (e) {
                     deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
@@ -1044,16 +1083,14 @@ def generateGblFileAndOTAfiles()
         node(buildFarmLabel)
         {
  
-            def boards = "BRD4161A,BRD4187C,BRD4325B"
-            def technology = "openThread,WiFi"
-            def wifiPlatforms = "wf200,rs9116,91x"
+            def boards = ["BRD4161A","BRD4187C"]
+            def technology = ["OpenThread","WiFi"]
+            def wifiRCP = ["wf200","rs9116", "91x"]
             def appName = "lighting-app"
             def workspaceTmpDir = createWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
                                                             buildOverlayDir)
             def dirPath = workspaceTmpDir + createWorkspaceOverlay.overlayMatterPath
             def saveDir = 'matter/'
-
-            def image = "artifactory.silabs.net/gsdk-docker-production/sqa-testnode-lite:latest"
 
             // Closure to generate the gbl and ota files
             def genFiles = {app, tech, board, radioName ->
@@ -1063,19 +1100,19 @@ def generateGblFileAndOTAfiles()
                         commander --version
                         pwd
 
-                        if [ "${tech}" = "openThread" ] ; then
-                            bin_path="${dirPath}/${saved_workspace}/out/release/${board}/OpenThread/"
-                            file="\$(find \$bin_path/*lighting-example.s37 | grep -o '[^/]*\$')"
+                        if [ "${tech}" = "OpenThread" ] ; then
+                            bin_path="${dirPath}/${saved_workspace}/out/OTA/ota_automation_out/${app}/OpenThread/${board}"
+                            file="\$(find \$bin_path/ -name \\*.s37 | grep -o '[^/]*\$')"
                         else
-                            bin_path="${dirPath}/${saved_workspace}/out/release/${board}/WiFi/"
-                            file="\$(find \$bin_path/*${radioName}-lighting-example.s37 | grep -o '[^/]*\$')"
+                            bin_path="${dirPath}/${saved_workspace}/out/OTA/ota_automation_out/WiFi/${app}_wifi_${radioName}/${board}"
+                            file="\$(find \$bin_path/ -name \\*.s37 | grep -o '[^/]*\$')"
                         fi
 
                         gbl_file="\$(basename \$file .s37).gbl"
                         ota_file="\$(basename \$file .s37).ota"
 
                         commander gbl create \$bin_path/\$gbl_file --app \$bin_path/\$file
-                        src/app/ota_image_tool.py create -v 0xFFF1 -p 0x8005 -vn 2 -vs 2.0 -da sha256 \$bin_path/\$gbl_file \$bin_path/\$ota_file
+                        ${dirPath}/src/app/ota_image_tool.py create -v 0xFFF1 -p 0x8005 -vn 2 -vs 2.0 -da sha256 \$bin_path/\$gbl_file \$bin_path/\$ota_file
 
                         ls -al \$bin_path
 
@@ -1084,12 +1121,12 @@ def generateGblFileAndOTAfiles()
             }
 
             withDockerRegistry([url: "https://artifactory.silabs.net ", credentialsId: 'svc_gsdk']){
-                sh "docker pull $image"
+                sh "docker pull $commanderImage"
             }
 
             dir(dirPath) {
                 try{
-                    withDockerContainer(image: image)
+                    withDockerContainer(image: commanderImage)
                     {
                         withCredentials([usernamePassword(credentialsId: 'svc_gsdk', passwordVariable: 'SL_PASSWORD', usernameVariable: 'SL_USERNAME')])
                         {
@@ -1098,23 +1135,20 @@ def generateGblFileAndOTAfiles()
                                      'ota_file=""',
                                      'bin_path=""']){
 
-                                    technology.tokenize(",").each{ tech_ ->   
-                                        boards.tokenize(",").each{ brd ->
+                                    technology.each{ tech_ ->   
+                                        boards.each{ brd ->
                                             
                                             if(tech_ == "WiFi"){
-                                                wifiPlatforms.tokenize(",").each{ platform -> 
-                                                    if (brd == "BRD4161A" && (platform != "91x" && platform != "917_soc")){
-                                                        genFiles.call(appName, tech_, brd, platform)
+                                                wifiRCP.each{ radioName -> 
+                                                    if (brd == "BRD4161A" && radioName != "91x"){
+                                                        genFiles.call(appName, tech_, brd, radioName)
                                                     }
-                                                    else if (brd == "BRD4187C" && platform != "917_soc"){
-                                                        genFiles.call(appName, tech_, brd, platform)
-                                                    }
-                                                    else if (brd == "BRD4325B" && platform == "917_soc"){
-                                                        genFiles.call(appName, tech_, brd, platform)
+                                                    else if (brd == "BRD4187C"){
+                                                        genFiles.call(appName, tech_, brd, radioName)
                                                     }
                                                 }
                                             }
-                                            else if (tech_ == "openThread" && brd != "BRD4325B"){
+                                            else if (tech_ == "OpenThread"){
                                                 genFiles.call(appName, tech_, brd, "")
                                             }
                                     
@@ -1257,7 +1291,11 @@ def pushToArtifactoryAndUbai()
                                     file="build-binaries.zip"
                                     cd saved_workspace
 
-                                    zip -r "${file}" out -x *.gbl *.ota 
+                                    if [ -d "out/OTA/ota_automation_out" ]; then
+                                        zip -r "${file}" out -x out/OTA/ota_automation_out/\\*
+                                    else
+                                        zip -r "${file}" out
+                                    fi
                                     ls -al
 
                                     status_code=$(curl -s  -w "%{http_code}" --upload-file "$file" \
@@ -1344,6 +1382,7 @@ def pipeline()
             sh 'sudo exportfs -af'
         }
     }
+    
     def parallelNodesBuild = [:]
     stage("Build")
     {
@@ -1548,26 +1587,64 @@ def pipeline()
         }
     }
     def parallelNodesImages = [:]
-    stage("Generate SQA images")
-    {
-        advanceStageMarker()
-        /*
-        Generate .gbl and .ota files for the following combinations
-        openThread
-            BRD4161A and BRD4187C
-        WiFi
-            mg12 + wf200/rs9116             ( one per each combo)
-            mg24 + wf200/rs9116/917         ( one per each combo)
-        */
 
-        parallelNodesImages['Generate GBL and OTA files'] = { this.generateGblFileAndOTAfiles() }
+    if(params.OTA_AUTOMATION_TEST == true){
+        stage("Generate SQA images")
+        {    
+            advanceStageMarker()
+            /*
+            SMG:
+                Thread:
+                    Lighting app:
+                        BRD4161A and BRD4187C
+                WiFi
+                    Lighting app:
+                        mg12 + wf200/rs9116 ( one per each combo)
+                        mg24 + wf200/rs9116 ( one per each combo)
+                        mg24 + 917          ( one per each combo)*/
+            
+            def parallelNodesOTABuild = [:]
 
-        // Generating the RPS file for 917 SoC
-        parallelNodesImages['Generate Rps files'] =         { this.generateRpsFiles()   }
+            def boards =   ["BRD4161A", "BRD4187C"]
+            def wifiRCP=   ["wf200", "rs9116", "91x"]
 
-        parallelNodesImages.failFast = false
-        parallel parallelNodesImages
+            parallelNodesImages["OpenThread lighting-app"]      = {this.buildOpenThreadExample("lighting-app", ota_automation=true, config_args=software_version)}
+            def args = ""
+
+            boards.each { board ->
+                wifiRCP.each { radioName ->
+                    if(board == "BRD4187C" && radioName == "91x"){ 
+                        parallelNodesImages["WiFi $board $radioName"]      = { this.buildWiFiExample("efr32", "lighting-app", board, "SiWx917", args, radioName, false,ota_automation=true, config_args=software_version)  } 
+                    }
+                    else if(radioName != "91x"){
+                        if(board == "BRD4161A" && radioName == "wf200"){
+                            args = "is_debug=false" // need to add this to MG12 + WF200 
+                        }
+                        parallelNodesImages["WiFi $board $radioName"]      = { this.buildWiFiExample("efr32", "lighting-app", board, radioName, args, radioName, false, ota_automation=true, config_args=software_version)  } 
+                    }
+                    
+                }
+            }
+                
+            parallelNodesImages.failFast = false
+            parallel parallelNodesImages
+            
+        } 
+        stage("Generate Gbl/Ota files"){
+
+            advanceStageMarker()
+            generateGblFileAndOTAfiles()
+        }          
     }
+
+    stage("Generate RPS files")
+    {   
+        // Generating the RPS file for 917 SoC
+        advanceStageMarker()
+        generateRpsFiles()
+
+    }
+
     stage("Push to Artifactory and UBAI")
     {
         advanceStageMarker()
