@@ -177,7 +177,7 @@ public:
 
     // Client Monitoring
 
-    static StorageKeyName ClientMonitoringTableEntry(chip::FabricIndex fabric)
+    static StorageKeyName IcdManagementTableEntry(chip::FabricIndex fabric)
     {
         return StorageKeyName::Formatted("f/%x/cm", fabric);
     }

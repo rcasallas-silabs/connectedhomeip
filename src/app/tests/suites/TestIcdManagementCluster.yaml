@@ -11,11 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-name: Client Monitoring Tests
+name: ICD Management Tests
 
 config:
     nodeId: 0x12344321
-    cluster: "Client Monitoring"
+    cluster: "ICD Management"
     endpoint: 0
 
 tests:

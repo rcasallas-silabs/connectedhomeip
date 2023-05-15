@@ -29302,7 +29302,7 @@ class ElectricalMeasurement(Cluster):
 
 
 @dataclass
-class ClientMonitoring(Cluster):
+class IcdManagement(Cluster):
     id: typing.ClassVar[int] = 0x1046
 
     @ChipUtility.classproperty
@@ -29312,7 +29312,7 @@ class ClientMonitoring(Cluster):
                 ClusterObjectFieldDescriptor(Label="idleModeInterval", Tag=0x00000000, Type=uint),
                 ClusterObjectFieldDescriptor(Label="activeModeInterval", Tag=0x00000001, Type=uint),
                 ClusterObjectFieldDescriptor(Label="activeModeThreshold", Tag=0x00000002, Type=uint),
-                ClusterObjectFieldDescriptor(Label="expectedClients", Tag=0x00000003, Type=typing.List[ClientMonitoring.Structs.MonitoringRegistrationStruct]),
+                ClusterObjectFieldDescriptor(Label="expectedClients", Tag=0x00000003, Type=typing.List[IcdManagement.Structs.MonitoringRegistrationStruct]),
                 ClusterObjectFieldDescriptor(Label="ICDCounter", Tag=0x00000004, Type=uint),
                 ClusterObjectFieldDescriptor(Label="generatedCommandList", Tag=0x0000FFF8, Type=typing.List[uint]),
                 ClusterObjectFieldDescriptor(Label="acceptedCommandList", Tag=0x0000FFF9, Type=typing.List[uint]),
@@ -29325,7 +29325,7 @@ class ClientMonitoring(Cluster):
     idleModeInterval: 'uint' = None
     activeModeInterval: 'uint' = None
     activeModeThreshold: 'uint' = None
-    expectedClients: 'typing.List[ClientMonitoring.Structs.MonitoringRegistrationStruct]' = None
+    expectedClients: 'typing.List[IcdManagement.Structs.MonitoringRegistrationStruct]' = None
     ICDCounter: 'uint' = None
     generatedCommandList: 'typing.List[uint]' = None
     acceptedCommandList: 'typing.List[uint]' = None
@@ -29352,11 +29352,11 @@ class ClientMonitoring(Cluster):
 
     class Commands:
         @dataclass
-        class RegisterClientMonitoring(ClusterCommand):
+        class RegisterClient(ClusterCommand):
             cluster_id: typing.ClassVar[int] = 0x1046
             command_id: typing.ClassVar[int] = 0x00000000
             is_client: typing.ClassVar[bool] = True
-            response_type: typing.ClassVar[str] = 'RegisterClientMonitoringResponse'
+            response_type: typing.ClassVar[str] = 'RegisterClientResponse'
 
             @ChipUtility.classproperty
             def descriptor(cls) -> ClusterObjectDescriptor:
@@ -29370,7 +29370,7 @@ class ClientMonitoring(Cluster):
             key: 'bytes' = b""
 
         @dataclass
-        class RegisterClientMonitoringResponse(ClusterCommand):
+        class RegisterClientResponse(ClusterCommand):
             cluster_id: typing.ClassVar[int] = 0x1046
             command_id: typing.ClassVar[int] = 0x00000001
             is_client: typing.ClassVar[bool] = False
@@ -29388,7 +29388,7 @@ class ClientMonitoring(Cluster):
             ICDCounter: 'typing.Union[Nullable, uint]' = NullValue
 
         @dataclass
-        class UnregisterClientMonitoring(ClusterCommand):
+        class UnregisterClient(ClusterCommand):
             cluster_id: typing.ClassVar[int] = 0x1046
             command_id: typing.ClassVar[int] = 0x00000002
             is_client: typing.ClassVar[bool] = True
@@ -29404,7 +29404,7 @@ class ClientMonitoring(Cluster):
             clientNodeID: 'uint' = 0
 
         @dataclass
-        class StayAwakeRequest(ClusterCommand):
+        class StayActiveRequest(ClusterCommand):
             cluster_id: typing.ClassVar[int] = 0x1046
             command_id: typing.ClassVar[int] = 0x00000003
             is_client: typing.ClassVar[bool] = True
@@ -29477,9 +29477,9 @@ class ClientMonitoring(Cluster):
 
             @ChipUtility.classproperty
             def attribute_type(cls) -> ClusterObjectFieldDescriptor:
-                return ClusterObjectFieldDescriptor(Type=typing.List[ClientMonitoring.Structs.MonitoringRegistrationStruct])
+                return ClusterObjectFieldDescriptor(Type=typing.List[IcdManagement.Structs.MonitoringRegistrationStruct])
 
-            value: 'typing.List[ClientMonitoring.Structs.MonitoringRegistrationStruct]' = field(default_factory=lambda: [])
+            value: 'typing.List[IcdManagement.Structs.MonitoringRegistrationStruct]' = field(default_factory=lambda: [])
 
         @dataclass
         class ICDCounter(ClusterAttributeDescriptor):
@@ -32255,4 +32255,3 @@ class FaultInjection(Cluster):
                 return ClusterObjectFieldDescriptor(Type=uint)
 
             value: 'uint' = 0
-
