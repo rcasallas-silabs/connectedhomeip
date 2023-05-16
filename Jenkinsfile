@@ -144,7 +144,7 @@ def buildOpenThreadExample(app, ota_automation=false, config_args='')
             def out_dir = saved_workspace
             def buildRelease = true
             def openThreadBoards = [:]
-            def sleepyBoard = ["BRD4161A", "BRD4186C"]
+            def sleepyBoard = ["BRD4161A", "BRD4187C"]
             def relPath = "silabs/efr32"
             
             // Remove -app at end of string for later use (if it exists)
@@ -1362,6 +1362,7 @@ def triggerSqaSmokeAndRegressionTest(buildTool)
                                 echo 'in product jenkin.... '
                                 sqaFunctions.commitToMatterSqaPipelines(buildTool, 'smoke')
                                 sqaFunctions.commitToMatterSqaPipelines(buildTool, 'regression')
+                                sqaFunctions.commitToMatterSqaPipelines(buildTool, 'endurance-customers-issues')
                             }
                 }
             }
