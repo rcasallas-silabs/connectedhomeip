@@ -28,12 +28,16 @@
 #include <app/util/af.h>
 #include <app/util/attribute-storage.h>
 
+#include <access/AccessControl.h>
+#include <access/Privilege.h>
+#include <app/AttributeAccessInterface.h>
+
 using namespace chip;
 using namespace chip::app;
 using namespace chip::app::Clusters;
 using namespace chip::app::Clusters::IcdManagement;
 using namespace Protocols;
-
+using namespace chip::Access;
 
 //==============================================================================
 
@@ -89,7 +93,9 @@ CHIP_ERROR IcdManagementAttributeAccess::ReadExpectedClients(EndpointId endpoint
         {
             for(uint16_t i = 0; i < table.Count(); ++i) {
                 auto e = table.At(i);
-                ReturnErrorOnFailure(subEncoder.Encode(e));                
+                CHIP_ERROR err = subEncoder.Encode(e);
+                ChipLogProgress(Zcl, "[%d] uid:%lx, f:%d, err:#%lx", i, (unsigned long)e.checkInNodeID, e.fabricIndex, err.AsInteger());
+                ReturnErrorOnFailure(err);
             }
         }
         else if (err == CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND)
@@ -103,13 +109,40 @@ CHIP_ERROR IcdManagementAttributeAccess::ReadExpectedClients(EndpointId endpoint
     });
 }
 
-IcdManagementAttributeAccess gAttribute;
+InteractionModel::Status CheckAdmin(chip::app::CommandHandler * commandObj, bool & is_admin)
+{
+    Access::SubjectDescriptor desc = commandObj->GetSubjectDescriptor();
+    chip::Access::AccessControl::EntryIterator iterator;
+    chip::Access::AccessControl::Entry entry;
+    chip::Access::Privilege priv;
 
+    CHIP_ERROR err = GetAccessControl().Entries(commandObj->GetAccessingFabricIndex(), iterator);
+    VerifyOrReturnError(CHIP_NO_ERROR == err, InteractionModel::Status::Failure);
+
+    is_admin = false;
+    while ((err = iterator.Next(entry)) == CHIP_NO_ERROR)
+    {
+        size_t count = 0;
+        entry.GetPrivilege(priv);
+        entry.GetSubjectCount(count);
+        for(size_t i = 0; !is_admin && Privilege::kAdminister == priv && i < count; ++i) {
+            NodeId id;
+            entry.GetSubject(i, id);
+            is_admin = (desc.subject == id);
+        }
+    }
+
+    return InteractionModel::Status::Success;
+}
+
+
+IcdManagementAttributeAccess gAttribute;
 
 } //namespace
 
 
 //==============================================================================
+
 
 InteractionModel::Status IcdManagementServer::RegisterClient(
         chip::app::CommandHandler * commandObj, const chip::app::ConcreteCommandPath & commandPath,
@@ -118,14 +151,61 @@ InteractionModel::Status IcdManagementServer::RegisterClient(
     FabricIndex fabric = commandObj->GetAccessingFabricIndex();
     IcdMonitoringTable table(& chip::Server::GetInstance().GetPersistentStorage(), fabric);
 
-    IcdMonitoringEntry entry;
+    // Get admin status
+    bool is_admin = false;
+    InteractionModel::Status status = CheckAdmin(commandObj, is_admin);
+    VerifyOrReturnError(InteractionModel::Status::Success == status, status);
 
+
+    // Get current entry, if exists
+    IcdMonitoringEntry entry;
     entry.fabricIndex = fabric;
     entry.checkInNodeID = commandData.checkInNodeID;
+    CHIP_ERROR err = table.Find(entry, false);
+    VerifyOrReturnError(CHIP_NO_ERROR == err || CHIP_ERROR_NOT_FOUND == err, InteractionModel::Status::Failure);
+
+    // Validations
+    ChipLogDetail(Zcl, "\n");
+
+    ChipLogDetail(Zcl, "RegisterClient, table(%u/%u), id:0x%lx", table.Count(), table.Limit(), (unsigned long) entry.checkInNodeID);
+    ChipLogByteSpan(Zcl, entry.key);
+    if(commandData.verificationKey.HasValue())
+    {
+        bool match = commandData.verificationKey.Value().data_equal(entry.key);
+        ChipLogDetail(Zcl, "RegisterClient, VERIFY: %s", match ? "MATCH!": "X");
+        ChipLogByteSpan(Zcl, commandData.verificationKey.Value());
+    }
+
+    if(CHIP_ERROR_NOT_FOUND == err)
+    {
+        // New entry
+        ChipLogDetail(Zcl, "RegisterClient, NEW");
+        VerifyOrReturnError(table.Count() < table.Limit(), InteractionModel::Status::ResourceExhausted);
+    }
+    else if(is_admin)
+    {
+        // Administrator
+        ChipLogDetail(Zcl, "RegisterClient, ADMIN");
+        if(commandData.verificationKey.HasValue())
+        {
+            ChipLogByteSpan(Zcl, commandData.verificationKey.Value());
+            VerifyOrReturnError(commandData.verificationKey.Value().data_equal(entry.key), InteractionModel::Status::Failure);
+        }
+    }
+    else
+    {
+        // Not admin
+        ChipLogDetail(Zcl, "RegisterClient, NON-ADMIN");
+        VerifyOrReturnError(commandData.verificationKey.HasValue(), InteractionModel::Status::Failure);
+        VerifyOrReturnError(commandData.verificationKey.Value().data_equal(entry.key), InteractionModel::Status::Failure);
+    }
+
+    // Save
+    entry.fabricIndex = fabric;
     entry.monitoredSubject = commandData.monitoredSubject;
     entry.key = commandData.key;
-    CHIP_ERROR err = table.Set(entry, true);
-    ChipLogDetail(Zcl, "RegisterClient: 0x%lx\n", err.AsInteger());
+    err = table.Store(entry);
+    ChipLogDetail(Zcl, "\nRegisterClient, SAVE: 0x%lx\n", err.AsInteger());
     VerifyOrReturnError(CHIP_NO_ERROR == err, InteractionModel::Status::Failure);
 
     return InteractionModel::Status::Success;

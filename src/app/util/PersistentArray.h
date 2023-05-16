@@ -54,10 +54,10 @@ struct PersistentList: public PersistentData<kMaxSerializedSize> {
         uint8_t bit = id % 8;
         uint8_t mask = static_cast<uint8_t>(1 << bit);
         if(active) {
-            mBitmap[byte] |= mask; 
+            mBitmap[byte] |= mask;
         }
         else {
-            mBitmap[byte] &= ~mask; 
+            mBitmap[byte] &= ~mask;
         }
     }
 
@@ -78,6 +78,7 @@ struct PersistentList: public PersistentData<kMaxSerializedSize> {
         return CHIP_NO_ERROR;
     }
 
+    uint16_t Limit() { return mLimit; }
     uint16_t Count() { return mCount; }
 
 protected:
@@ -178,7 +179,7 @@ struct PersistentArray: public PersistentList<kMaxSerializedSize, kMaxListSize, 
         return reader.ExitContainer(container);
     }
 
-    CHIP_ERROR Set(size_t index, const EntryType & value)
+    CHIP_ERROR Store(size_t index, const EntryType & value)
     {
         CHIP_ERROR err = this->Load(this->mStorage);
         VerifyOrReturnError(CHIP_ERROR_NOT_FOUND == err || CHIP_NO_ERROR == err, err);
@@ -219,11 +220,11 @@ struct PersistentArray: public PersistentList<kMaxSerializedSize, kMaxListSize, 
         return CHIP_NO_ERROR;
     }
 
-    CHIP_ERROR Set(const EntryType & value, bool do_override = true)
+    CHIP_ERROR Store(const EntryType & value, bool do_override = true)
     {
         CHIP_ERROR err = this->Load(this->mStorage);
         VerifyOrReturnError(CHIP_ERROR_NOT_FOUND == err || CHIP_NO_ERROR == err, err);
-        
+
         // Check existing
         for(size_t i = 0; i < this->mCount; ++i)
         {
@@ -248,18 +249,17 @@ struct PersistentArray: public PersistentList<kMaxSerializedSize, kMaxListSize, 
         return CHIP_NO_ERROR;
     }
 
-    CHIP_ERROR Get(size_t index, EntryType & value, PersistentId & id)
+    CHIP_ERROR Find(size_t index, EntryType & value)
     {
         ReturnErrorOnFailure(this->Load(this->mStorage));
         VerifyOrReturnError(index < this->mLimit, CHIP_ERROR_NOT_FOUND);
         VerifyOrReturnError(index < this->mCount, CHIP_ERROR_NOT_FOUND);
         Entry & e = mEntries[index];
-        id = e.id;
         value = e.value;
         return CHIP_NO_ERROR;
     }
 
-    CHIP_ERROR Get(EntryType & value, PersistentId & id, bool do_create = false)
+    CHIP_ERROR Find(EntryType & value, bool do_create = false)
     {
         CHIP_ERROR err = this->Load(this->mStorage);
         VerifyOrReturnError(CHIP_ERROR_NOT_FOUND == err || CHIP_NO_ERROR == err, err);
@@ -313,7 +313,7 @@ struct PersistentArray: public PersistentList<kMaxSerializedSize, kMaxListSize, 
         }
         return CHIP_NO_ERROR;
     }
-    
+
     virtual bool Compare(const EntryType & a, const EntryType & b) const
     {
         return a == b;

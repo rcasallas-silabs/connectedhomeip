@@ -25,7 +25,7 @@ namespace chip {
 
     enum class IcdTags : uint8_t
     {
-        kNodeId = static_cast<uint8_t>(PersistentTags::kEntryData) + 1,
+        kRegisteredClient = static_cast<uint8_t>(PersistentTags::kEntryData) + 1,
         kKey,
     };
 
@@ -34,7 +34,7 @@ namespace chip {
     {
         VerifyOrReturnError(kUndefinedFabricIndex != mFabric, CHIP_ERROR_INVALID_FABRIC_INDEX);
         key = DefaultStorageKeyAllocator::IcdManagementTableEntry(mFabric);
-        ChipLogDetail(Zcl, "IcdMonitoringTable::UpdateKey: '%s'\n", key.KeyName());
+        // ChipLogDetail(Zcl, "IcdMonitoringTable::UpdateKey: '%s'\n", key.KeyName());
         return CHIP_NO_ERROR;
     }
 
@@ -44,24 +44,18 @@ namespace chip {
         entry.key = ByteSpan();
     }
 
-    CHIP_ERROR IcdMonitoringTable::Serialize(TLV::TLVWriter & writer, const IcdMonitoringEntry & entry) const 
+    CHIP_ERROR IcdMonitoringTable::Serialize(TLV::TLVWriter & writer, const IcdMonitoringEntry & entry) const
     {
-        // CheckInNodeID
-        ReturnErrorOnFailure(writer.Put(TLV::ContextTag(IcdTags::kNodeId), static_cast<uint16_t>(entry.checkInNodeID)));
-        // key
-        ReturnErrorOnFailure(writer.Put(TLV::ContextTag(IcdTags::kKey), entry.key));
+        ReturnErrorOnFailure(entry.EncodeForWrite(writer, TLV::ContextTag(IcdTags::kRegisteredClient)));
         return CHIP_NO_ERROR;
 
     }
 
-    CHIP_ERROR IcdMonitoringTable::Deserialize(TLV::TLVReader & reader, IcdMonitoringEntry & entry) 
+    CHIP_ERROR IcdMonitoringTable::Deserialize(TLV::TLVReader & reader, IcdMonitoringEntry & entry)
     {
-        // CheckInNodeID
-        ReturnErrorOnFailure(reader.Next(TLV::ContextTag(IcdTags::kNodeId)));
-        ReturnErrorOnFailure(reader.Get(entry.checkInNodeID));
-        // key
-        ReturnErrorOnFailure(reader.Next(TLV::ContextTag(IcdTags::kKey)));
-        ReturnErrorOnFailure(reader.Get(entry.key));
+        ReturnErrorOnFailure(reader.Next(TLV::ContextTag(IcdTags::kRegisteredClient)));
+        ReturnErrorOnFailure(entry.Decode(reader));
+        entry.fabricIndex = mFabric;
         return CHIP_NO_ERROR;
     }
 
