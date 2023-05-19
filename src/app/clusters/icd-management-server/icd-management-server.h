@@ -28,11 +28,14 @@ using chip::Protocols::InteractionModel::Status;
 class IcdManagementServer
 {
 public:
-    Status RegisterClient(chip::app::CommandHandler * commandObj, const chip::app::ConcreteCommandPath & commandPath,
-                          const chip::app::Clusters::IcdManagement::Commands::RegisterClient::DecodableType & commandData);
+    Status RegisterClient(
+        chip::app::CommandHandler * commandObj, const chip::app::ConcreteCommandPath & commandPath,
+        const chip::app::Clusters::IcdManagement::Commands::RegisterClient::DecodableType & commandData);
 
-    Status UnregisterClient(chip::app::CommandHandler * commandObj, const chip::app::ConcreteCommandPath & commandPath,
-                            const chip::app::Clusters::IcdManagement::Commands::UnregisterClient::DecodableType & commandData);
+    Status UnregisterClient(
+        chip::app::CommandHandler * commandObj, const chip::app::ConcreteCommandPath & commandPath,
+        const chip::app::Clusters::IcdManagement::Commands::UnregisterClient::DecodableType & commandData);
 
-    Status StayActiveRequest(const chip::app::ConcreteCommandPath & commandPath);
+    Status StayActive(const chip::app::ConcreteCommandPath & commandPath);
+
 };

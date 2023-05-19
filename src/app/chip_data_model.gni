@@ -170,9 +170,8 @@ template("chip_data_model") {
       "${_app_root}/clusters/scenes/scenes.h",
 
       # Disable CM cluster table tests until update is done
-      # https://github.com/project-chip/connectedhomeip/issues/24425
-      # "${_app_root}/util/ClientMonitoringRegistrationTable.cpp",
-      # "${_app_root}/util/ClientMonitoringRegistrationTable.h",
+      "${_app_root}/util/IcdMonitoringTable.cpp",
+      "${_app_root}/util/IcdMonitoringTable.h",
       "${_app_root}/util/DataModelHandler.cpp",
       "${_app_root}/util/attribute-size-util.cpp",
       "${_app_root}/util/attribute-storage.cpp",
