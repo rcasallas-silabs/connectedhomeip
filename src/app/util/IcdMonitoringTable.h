@@ -20,27 +20,51 @@
 #pragma once
 
 #include <app-common/zap-generated/cluster-objects.h>
+#include <app-common/zap-generated/attributes/Accessors.h>
 #include <lib/core/CHIPConfig.h>
 #include <lib/core/CHIPPersistentStorageDelegate.h>
 #include <lib/core/DataModelTypes.h>
 #include <lib/support/CodeUtils.h>
-#include <lib/support/PersistentArray.h>
-
-
-constexpr size_t kPersistentBufferMax = 1024;
+#include <lib/support/PersistentData.h>
+#include <stddef.h>
 
 
 namespace chip {
 
-struct IcdMonitoringEntry : chip::app::Clusters::IcdManagement::Structs::MonitoringRegistrationStruct::Type
+constexpr size_t kIcdMonitoringBufferSize = 1024;
+
+
+
+struct IcdMonitoringEntry: public PersistentData<kIcdMonitoringBufferSize>, chip::app::Clusters::IcdManagement::Structs::MonitoringRegistrationStruct::Type
 {
+
+    IcdMonitoringEntry(FabricIndex fabric = kUndefinedFabricIndex, NodeId nodeId = kUndefinedNodeId)
+    {
+        this->fabricIndex = fabric;
+        this->checkInNodeID = nodeId;
+        this->monitoredSubject = nodeId;
+    }
+
     bool IsValid() { return this->checkInNodeID != kUndefinedNodeId && this->fabricIndex != kUndefinedFabricIndex; }
 
     bool operator==(const IcdMonitoringEntry & other) const
     {
         return (this->fabricIndex == other.fabricIndex) && (this->checkInNodeID == other.checkInNodeID);
     }
+
+    CHIP_ERROR UpdateKey(StorageKeyName & key) override;
+    CHIP_ERROR Serialize(TLV::TLVWriter & writer) const override;
+    CHIP_ERROR Deserialize(TLV::TLVReader & reader) override;
+    void Clear();
+
+    void Debug() const {
+        ChipLogDetail(Zcl, "Entry[%u] f:%u id:#%lx, k(%lu)", this->index, this->fabricIndex, (unsigned long)this->checkInNodeID, (unsigned long)this->key.size());
+        ChipLogByteSpan(Zcl, this->key);
+    }
+
+    uint16_t index = 0;
 };
+
 
 /**
  * @brief IcdMonitoringTable exists to manage the persistence of entries in the ClientMonitoring Cluster.
@@ -54,19 +78,25 @@ struct IcdMonitoringEntry : chip::app::Clusters::IcdManagement::Structs::Monitor
  *        https://github.com/project-chip/connectedhomeip/issues/24288
  */
 
-struct IcdMonitoringTable: public PersistentArray<kPersistentBufferMax, CHIP_CONFIG_MAX_FABRICS, IcdMonitoringEntry> {
-
+struct IcdMonitoringTable
+{
     IcdMonitoringTable(PersistentStorageDelegate * storage, FabricIndex fabric):
-        PersistentArray<kPersistentBufferMax, CHIP_CONFIG_MAX_FABRICS, IcdMonitoringEntry>(storage),
-        mFabric(fabric) {}
+        mStorage(storage),
+        mFabric(fabric),
+        mLimit(1)
+    {
+        chip::app::Clusters::IcdManagement::Attributes::ClientsSupportedPerFabric::Get(0, &mLimit);
+    }
+    CHIP_ERROR Get(uint16_t index, IcdMonitoringEntry & entry);
+    CHIP_ERROR Set(uint16_t index, IcdMonitoringEntry & entry);
+    CHIP_ERROR Find(NodeId id, IcdMonitoringEntry & entry);
+    CHIP_ERROR Remove(NodeId id);
+    // uint16_t Count();
+    uint16_t Limit();
 
-    CHIP_ERROR UpdateKey(StorageKeyName & key) override;
-
-    void Clear(IcdMonitoringEntry & entry) override;
-    CHIP_ERROR Serialize(TLV::TLVWriter & writer, const IcdMonitoringEntry & entry) const override;
-    CHIP_ERROR Deserialize(TLV::TLVReader & reader, IcdMonitoringEntry & entry) override;
-
+    PersistentStorageDelegate * mStorage;
     FabricIndex mFabric;
+    uint16_t mLimit = 0;
 };
 
 } // chip

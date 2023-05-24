@@ -2029,12 +2029,12 @@ endpoint 0 {
     ram      attribute activeModeThreshold default = 300;
     callback attribute registeredClients;
     ram      attribute ICDCounter;
-    ram      attribute clientsSupportedPerFabric default = 1;
+    ram      attribute clientsSupportedPerFabric default = 3;
     callback attribute generatedCommandList;
     callback attribute acceptedCommandList;
     callback attribute eventList;
     callback attribute attributeList;
-    ram      attribute featureMap default = 1;
+    ram      attribute featureMap default = 0;
     ram      attribute clusterRevision default = 1;
   }
 }

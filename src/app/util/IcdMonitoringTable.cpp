@@ -1,63 +1,89 @@
-/**
- *
- *    Copyright (c) 2022 Project CHIP Authors
- *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
- *
- *        http://www.apache.org/licenses/LICENSE-2.0
- *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
- */
-
-// Disable CM cluster table until update is done
-// https://github.com/project-chip/connectedhomeip/issues/24425
 #include "IcdMonitoringTable.h"
-#include <lib/support/DefaultStorageKeyAllocator.h>
-
+#include <lib/support/CodeUtils.h>
 
 namespace chip {
 
-    enum class IcdTags : uint8_t
-    {
-        kRegisteredClient = static_cast<uint8_t>(PersistentTags::kEntryData) + 1,
-        kKey,
-    };
+
+CHIP_ERROR IcdMonitoringEntry::UpdateKey(StorageKeyName & skey)
+{
+    VerifyOrReturnError(kUndefinedFabricIndex != this->fabricIndex, CHIP_ERROR_INVALID_FABRIC_INDEX);
+    skey = DefaultStorageKeyAllocator::IcdManagementTableEntry(this->fabricIndex, index);
+    return CHIP_NO_ERROR;
+}
+
+CHIP_ERROR IcdMonitoringEntry::Serialize(TLV::TLVWriter & writer) const
+{
+    return this->EncodeForWrite(writer, TLV::AnonymousTag());
+}
 
 
-    CHIP_ERROR IcdMonitoringTable::UpdateKey(StorageKeyName & key)
+CHIP_ERROR IcdMonitoringEntry::Deserialize(TLV::TLVReader & reader)
+{
+    ReturnErrorOnFailure(reader.Next(TLV::AnonymousTag()));
+    return this->Decode(reader);
+}
+
+
+void IcdMonitoringEntry::Clear()
+{
+    this->fabricIndex = kUndefinedFabricIndex;
+    this->checkInNodeID = kUndefinedNodeId;
+}
+
+
+CHIP_ERROR IcdMonitoringTable::Get(uint16_t index, IcdMonitoringEntry & entry)
+{
+    entry.fabricIndex = this->mFabric;
+    entry.index = index;
+
+    ReturnErrorOnFailure(entry.Load(this->mStorage));
+    entry.fabricIndex = this->mFabric;
+    return CHIP_NO_ERROR;
+}
+
+CHIP_ERROR IcdMonitoringTable::Find(NodeId id, IcdMonitoringEntry & entry)
+{
+    uint16_t index = 0;
+    while(index < this->Limit())
     {
-        VerifyOrReturnError(kUndefinedFabricIndex != mFabric, CHIP_ERROR_INVALID_FABRIC_INDEX);
-        key = DefaultStorageKeyAllocator::IcdManagementTableEntry(mFabric);
-        // ChipLogDetail(Zcl, "IcdMonitoringTable::UpdateKey: '%s'\n", key.KeyName());
-        return CHIP_NO_ERROR;
+        ReturnErrorOnFailure(this->Get(index++, entry));
+        if(id == entry.checkInNodeID)
+        {
+            return CHIP_NO_ERROR;
+        }
     }
+    entry.index = index;
+    return CHIP_ERROR_NOT_FOUND;
+}
 
-    void IcdMonitoringTable::Clear(IcdMonitoringEntry & entry)
+CHIP_ERROR IcdMonitoringTable::Set(uint16_t index, IcdMonitoringEntry & entry)
+{
+    entry.fabricIndex = this->mFabric;
+    entry.index = index;
+    return entry.Save(this->mStorage);
+}
+
+
+CHIP_ERROR IcdMonitoringTable::Remove(NodeId id)
+{
+    IcdMonitoringEntry entry;
+    ReturnErrorOnFailure(this->Find(id, entry));
+    // Shift remaining entries down one position
+    uint16_t index = entry.index;
+    while(CHIP_NO_ERROR == this->Get(index + 1, entry))
     {
-        entry.checkInNodeID = 0;
-        entry.key = ByteSpan();
+        ChipLogProgress(Zcl, "REMOVE[%u]", index);
+        entry.Debug();
+        this->Set(index++, entry);
     }
+    // Remove
+    entry.fabricIndex = this->mFabric;
+    entry.index = index;
+    return entry.Delete(this->mStorage);
+}
 
-    CHIP_ERROR IcdMonitoringTable::Serialize(TLV::TLVWriter & writer, const IcdMonitoringEntry & entry) const
-    {
-        ReturnErrorOnFailure(entry.EncodeForWrite(writer, TLV::ContextTag(IcdTags::kRegisteredClient)));
-        return CHIP_NO_ERROR;
+uint16_t IcdMonitoringTable::Limit() {
+    return mLimit;
+}
 
-    }
-
-    CHIP_ERROR IcdMonitoringTable::Deserialize(TLV::TLVReader & reader, IcdMonitoringEntry & entry)
-    {
-        ReturnErrorOnFailure(reader.Next(TLV::ContextTag(IcdTags::kRegisteredClient)));
-        ReturnErrorOnFailure(entry.Decode(reader));
-        entry.fabricIndex = mFabric;
-        return CHIP_NO_ERROR;
-    }
-
-
-} // chip
+} // namespace chip
