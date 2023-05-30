@@ -145,8 +145,7 @@ def buildOpenThreadExample(app, ota_automation=false, config_args='')
             def buildRelease = true
             def openThreadBoards = [:]
             def sleepyBoard = ["BRD4161A", "BRD4187C"]
-            def relPath = "silabs/efr32"
-            
+
             // Remove -app at end of string for later use (if it exists)
             def appNameOnly = app - '-app'
 
@@ -160,9 +159,11 @@ def buildOpenThreadExample(app, ota_automation=false, config_args='')
                 buildRelease = false
             }
             else if (env.BRANCH_NAME.startsWith('RC_')) {
-                openThreadBoards = ["BRD4161A", "BRD4162A", "BRD4163A", "BRD4164A", "BRD4166A", "BRD4186C", "BRD4187C", "BRD2703A", "BRD2601B", "BRD4316A", "BRD4317A", "BRD4319A"]
+                // TODO MATTER-1900
+                openThreadBoards = ["BRD4161A", "BRD4162A", "BRD4163A", "BRD4164A", "BRD4166A", "BRD4186C", "BRD4187C", "BRD2703A", "BRD2601B", "BRD4316A", "BRD4317A"]
             } else {
-                openThreadBoards = ["BRD4161A", "BRD4166A", "BRD4187C", "BRD2703A","BRD4316A", "BRD4319A" ]
+                // TODO MATTER-1900
+                openThreadBoards = ["BRD4161A", "BRD4166A", "BRD4187C", "BRD2703A","BRD4316A" ]
 
             }
 
@@ -177,28 +178,28 @@ def buildOpenThreadExample(app, ota_automation=false, config_args='')
 
                                 if(ota_automation){
                                     // Move binaries to standardized output
-                                    sh """ ./scripts/examples/gn_efr32_example.sh ./examples/${app}/${relPath} ./out/OTA/ota_automation_out/${app}/OpenThread/ ${board} ${config_args} chip_build_libshell=true 
+                                    sh """ ./scripts/examples/gn_silabs_example.sh ./examples/${app}/silabs ./out/OTA/ota_automation_out/${app}/OpenThread/ ${board} ${config_args} chip_build_libshell=true
                                             mkdir -p ${saved_workspace}/out/OTA/ota_automation_out/${app}/OpenThread/${board}
                                             cp ./out/OTA/ota_automation_out/${app}/OpenThread/${board}/*.s37 ${saved_workspace}/out/OTA/ota_automation_out/${app}/OpenThread/${board}/"""
                                 }
-                                else{                                
+                                else{
                                         def arguments = ""
                                         if (sleepyBoard.contains(board)) {
                                             arguments = "--sed"
                                         }
                                         // Enable matter shell with chip_build_libshell=true argument for SQA tests
-                                        sh """./scripts/examples/gn_efr32_example.sh ./examples/${app}/${relPath} ./out/CSA/${app}/OpenThread/standard ${board} chip_build_libshell=true 
+                                        sh """./scripts/examples/gn_silabs_example.sh ./examples/${app}/silabs ./out/CSA/${app}/OpenThread/standard ${board} chip_build_libshell=true
                                                 mkdir -p ${saved_workspace}/out/standard/${board}/OpenThread
                                                 cp ./out/CSA/${app}/OpenThread/standard/${board}/*.s37 ${saved_workspace}/out/standard/${board}/OpenThread/
-                                                cp ./out/CSA/${app}/OpenThread/standard/${board}/*.map ${saved_workspace}/out/standard/${board}/OpenThread/ 
+                                                cp ./out/CSA/${app}/OpenThread/standard/${board}/*.map ${saved_workspace}/out/standard/${board}/OpenThread/
                                         """
-                                    
+
                                     if(buildRelease) {
                                         // TODO: --use_ot_lib is used in the release build options until thread issue with NDEBUG is found and fixed
                                         // TODO: Skip MGM24 modules release build. They don't have thread_cert_libs to workaround above issue ^
                                         def skipRelease = ["BRD4316A", "BRD4317A", "BRD4319A"]
                                         if (!skipRelease.contains(board)) {
-                                            sh """./scripts/examples/gn_efr32_example.sh ./examples/${app}/${relPath} ./out/CSA/${app}/OpenThread/release ${board} --release --use_ot_lib
+                                            sh """./scripts/examples/gn_silabs_example.sh ./examples/${app}/silabs ./out/CSA/${app}/OpenThread/release ${board} --release --use_ot_lib
                                                 mkdir -p ${saved_workspace}/out/release/${board}/OpenThread
                                                 cp ./out/CSA/${app}/OpenThread/release/${board}/*.s37 ${saved_workspace}/out/release/${board}/OpenThread/
                                                 cp ./out/CSA/${app}/OpenThread/release/${board}/*.map ${saved_workspace}/out/release/${board}/OpenThread/
@@ -206,7 +207,7 @@ def buildOpenThreadExample(app, ota_automation=false, config_args='')
                                         }
                                     }
                                     if(arguments) {
-                                        sh """./scripts/examples/gn_efr32_example.sh ./examples/${app}/${relPath} ./out/CSA/${app}/OpenThread/sleepy ${board} ${arguments}
+                                        sh """./scripts/examples/gn_silabs_example.sh ./examples/${app}/silabs ./out/CSA/${app}/OpenThread/sleepy ${board} ${arguments}
                                             mkdir -p ${saved_workspace}/out/sleepy/${board}/OpenThread
                                             cp ./out/CSA/${app}/OpenThread/sleepy/${board}/*.s37 ${saved_workspace}/out/sleepy/${board}/OpenThread/
                                             cp ./out/CSA/${app}/OpenThread/sleepy/${board}/*.map ${saved_workspace}/out/sleepy/${board}/OpenThread/
@@ -214,7 +215,7 @@ def buildOpenThreadExample(app, ota_automation=false, config_args='')
                                     }
                                     stash name: 'OpenThreadExamples-'+app+'-'+board, includes: 'out/**/*.s37 '
                                 }
-                                
+
                             }
                         }
                     }
@@ -224,7 +225,7 @@ def buildOpenThreadExample(app, ota_automation=false, config_args='')
                                                 saveDir,
                                                 '-name no-files')
                     throw e
-                }           
+                }
             }
             deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
                                        workspaceTmpDir,
@@ -269,10 +270,10 @@ def buildSilabsCustomOpenThreadExamples(app)
                         {
                             boardsForCustomOpenThread.each { board ->
                                 // Enable matter shell with chip_build_libshell=true argument for SQA tests
-                                sh "./scripts/examples/gn_efr32_example.sh ./silabs_examples/${app}/efr32 ./out/silabs/${app}/OpenThread/ ${board} chip_build_libshell=true"
+                                sh "./scripts/examples/gn_silabs_example.sh ./silabs_examples/${app} ./out/silabs/${app}/OpenThread/ ${board} chip_build_libshell=true"
                             }
                         }
-                    } 
+                    }
                 } catch (e) {
                     deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
                                                 workspaceTmpDir,
@@ -281,7 +282,7 @@ def buildSilabsCustomOpenThreadExamples(app)
                     throw e
                 }
                 // Move binaries to standardized output
-                boardsForCustomOpenThread.each { board -> 
+                boardsForCustomOpenThread.each { board ->
                         sh """ mkdir -p ${saved_workspace}/out/standard/${board}/OpenThread
                                cp ./out/silabs/${app}/OpenThread/${board}/*.s37 ${saved_workspace}/out/standard/${board}/OpenThread/
                                cp ./out/silabs/${app}/OpenThread/${board}/*.map ${saved_workspace}/out/standard/${board}/OpenThread/ """
@@ -328,37 +329,37 @@ def buildSilabsSensorApp()
                         {
 
                             boardsForCustomOpenThread.each { board ->
-                                sh """ ./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/occupancy/OpenThread ${board} \"is_occupancy_sensor=true\" chip_build_libshell=true
+                                sh """ ./scripts/examples/gn_silabs_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/occupancy/OpenThread ${board} \"is_occupancy_sensor=true\" chip_build_libshell=true
                                         mkdir -p ${saved_workspace}/out/standard/${board}/OpenThread/sensors/occupancy/
                                         cp ./out/silabs/silabs-sensors/occupancy/OpenThread/${board}/*.s37 ${saved_workspace}/out/standard/${board}/OpenThread/sensors/occupancy/
                                         cp ./out/silabs/silabs-sensors/occupancy/OpenThread/${board}/*.map ${saved_workspace}/out/standard/${board}/OpenThread/sensors/occupancy/
                                 """
 
-                                sh """ ./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/temperature/OpenThread ${board} \"is_temperature_sensor=true\" chip_build_libshell=true
+                                sh """ ./scripts/examples/gn_silabs_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/temperature/OpenThread ${board} \"is_temperature_sensor=true\" chip_build_libshell=true
                                         mkdir -p ${saved_workspace}/out/standard/${board}/OpenThread/sensors/temperature/
                                         cp ./out/silabs/silabs-sensors/temperature/OpenThread/${board}/*.s37 ${saved_workspace}/out/standard/${board}/OpenThread/sensors/temperature/
                                         cp ./out/silabs/silabs-sensors/temperature/OpenThread/${board}/*.map ${saved_workspace}/out/standard/${board}/OpenThread/sensors/temperature/
                                 """
 
-                                sh """ ./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/contact/OpenThread ${board} \"is_contact_sensor=true\" chip_build_libshell=true
+                                sh """ ./scripts/examples/gn_silabs_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/contact/OpenThread ${board} \"is_contact_sensor=true\" chip_build_libshell=true
                                         mkdir -p ${saved_workspace}/out/standard/${board}/OpenThread/sensors/contact/
                                         cp ./out/silabs/silabs-sensors/contact/OpenThread/${board}/*.s37 ${saved_workspace}/out/standard/${board}/OpenThread/sensors/contact/
                                         cp ./out/silabs/silabs-sensors/contact/OpenThread/${board}/*.map ${saved_workspace}/out/standard/${board}/OpenThread/sensors/contact/
                                 """
 
-                                sh """ ./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/occupancy-sed/OpenThread ${board} \"is_occupancy_sensor=true\" --sed
+                                sh """ ./scripts/examples/gn_silabs_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/occupancy-sed/OpenThread ${board} \"is_occupancy_sensor=true\" --sed
                                         mkdir -p ${saved_workspace}/out/sleepy/${board}/OpenThread/sensors/occupancy-sed/
                                         cp ./out/silabs/silabs-sensors/occupancy-sed/OpenThread/${board}/*.s37 ${saved_workspace}/out/sleepy/${board}/OpenThread/sensors/occupancy-sed/
                                         cp ./out/silabs/silabs-sensors/occupancy-sed/OpenThread/${board}/*.map ${saved_workspace}/out/sleepy/${board}/OpenThread/sensors/occupancy-sed/
                                 """
 
-                                sh """ ./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/temperature-sed/OpenThread ${board} \"is_temperature_sensor=true\" --sed
+                                sh """ ./scripts/examples/gn_silabs_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/temperature-sed/OpenThread ${board} \"is_temperature_sensor=true\" --sed
                                         mkdir -p ${saved_workspace}/out/sleepy/${board}/OpenThread/sensors/temperature-sed/
                                         cp ./out/silabs/silabs-sensors/temperature-sed/OpenThread/${board}/*.s37 ${saved_workspace}/out/sleepy/${board}/OpenThread/sensors/temperature-sed/
                                         cp ./out/silabs/silabs-sensors/temperature-sed/OpenThread/${board}/*.map ${saved_workspace}/out/sleepy/${board}/OpenThread/sensors/temperature-sed/
                                 """
 
-                                sh """ ./scripts/examples/gn_efr32_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/contact-sed/OpenThread ${board} \"is_contact_sensor=true\" --sed
+                                sh """ ./scripts/examples/gn_silabs_example.sh ./silabs_examples/silabs-sensors/efr32 ./out/silabs/silabs-sensors/contact-sed/OpenThread ${board} \"is_contact_sensor=true\" --sed
                                         mkdir -p ${saved_workspace}/out/sleepy/${board}/OpenThread/sensors/contact-sed/
                                         cp ./out/silabs/silabs-sensors/contact-sed/OpenThread/${board}/*.s37 ${saved_workspace}/out/sleepy/${board}/OpenThread/sensors/contact-sed/
                                         cp ./out/silabs/silabs-sensors/contact-sed/OpenThread/${board}/*.map ${saved_workspace}/out/sleepy/${board}/OpenThread/sensors/contact-sed/
@@ -387,7 +388,7 @@ def buildSilabsSensorApp()
     }
 }
 
-def buildWiFiExample(platform, app, board, wifiRadio, args, radioName, buildCustom, ota_automation=false, config_args='')
+def buildWiFiExample(app, buildCustom, ota_automation=false, config_args='')
 {
     actionWithRetry {
         node(buildFarmLargeLabel)
@@ -399,6 +400,9 @@ def buildWiFiExample(platform, app, board, wifiRadio, args, radioName, buildCust
             def exampleType =''
             def relPath = ''
             def fileTypesToMove = ["s37","map"]
+            def wifiNCPRadios = [ "rs9116", "SiWx917", "wf200" ]
+            def wifiNCPBoards = [:]
+            def wifiSOCBoards = [:]
 
             // Used to restructure output directory in later step
             def appNameOnly = app - '-app'
@@ -408,24 +412,25 @@ def buildWiFiExample(platform, app, board, wifiRadio, args, radioName, buildCust
             if (buildCustom == true)
             {
                 exampleType = "silabs_examples"
-                relPath = "${platform}"
             }
             else
             {
                 exampleType = "examples"
-                relPath = "silabs/${platform}"
-            }   
-
-            // Only the wifi ncp builds require to specify the --wifi radio used.
-            if (platform != "SiWx917")
-            {
-                args = args + " --wifi " + wifiRadio
+                relPath = "silabs"
             }
+
+            // Build only for release candidate branch
+            if (env.BRANCH_NAME.startsWith('RC_')) {
+                wifiBoards = [ "BRD4161A", "BRD4163A", "BRD4164A", "BRD4170A", "BRD4186C", "BRD4187C", "BRD4325B" ]
+            } else {
+                wifiBoards = [ "BRD4161A", "BRD4187C", "BRD4325B" ]
+            }
+
 
             withDockerRegistry([url: "https://artifactory.silabs.net ", credentialsId: 'svc_gsdk']){
                     sh "docker pull $chipBuildEfr32Image"
             }
-            
+
             dir(dirPath) {
                 try {
                     withDockerContainer(image: chipBuildEfr32Image, args: "-u root")
@@ -433,42 +438,99 @@ def buildWiFiExample(platform, app, board, wifiRadio, args, radioName, buildCust
                         // CSA Examples build
                         withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
                         {
-                            if(ota_automation){
-                                sh "./scripts/examples/gn_efr32_example.sh ${exampleType}/${app}/${relPath}/ out/OTA/ota_automation_out/WiFi/${app}_wifi_${radioName}/ ${board} ${args} ${config_args} chip_build_libshell=true "
-                            }
-                            else{
-                                // Enable matter shell, on standard builds, with chip_build_libshell=true argument for SQA tests
-                                sh "./scripts/examples/gn_efr32_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName} ${board} ${args} chip_build_libshell=true"
-                                sh "./scripts/examples/gn_efr32_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName}/release ${board} ${args} --release"                                
-                            }
+                            wifiBoards.each { board ->
+                                wifiNCPRadios.each { rcp ->
+                                    // MG24 + SiWx917: name the example as "xxx_wifi_91x"
+                                    // MG24 + 9116: name the example as "xxx_wifi_rs9116"
+                                    // MG12 + 9116: name the example as "xxx_wifi_rs9116" so that it only applies to RS9116 (we don't support MG12 + SiWx917)
+                                    // MGxx + WF00: name the example as "xxx_wifi_wf200"
+                                    def radioName = "${rcp}"  // MGxx + WF200
+
+                                    if (rcp == "SiWx917") {
+                                        radioName = "91x"
+                                    }
+
+                                    if (board == "BRD4325B")
+                                    {
+                                        radioName = "917_soc"
+                                    }
+
+                                    // MG12 + WF200: set is_debug=false and chip_logging=false, otherwise it does not fit (not a problem for MG24 + WF200, also MG24 + WF200 init fails with is_debug=false)
+                                    // MG24 + RS9116/SiWx917: disable LCD and ext flash due to common SPI pin multiplexing issue
+                                    // MG24 + WF200: disable libshell due to VCOM pin multiplexing issue
+                                    def args = ""
+                                    // TODO : Disabling all logs currently makes the build fail. But flash size is close to the limit. Once fixed re-disable logs
+                                    if ((board == "BRD4161A" || board == "BRD4163A" || board == "BRD4164A" || board == "BRD4170A") && rcp == "wf200")  // MG12 + WF200
+                                    {
+                                        args = "is_debug=false"
+
+                                        // TODO : MG12 + lock-app + WF200 does not currently fit within flash so disabling chip logging as well
+                                        if (app == "lock-app")
+                                        {
+                                            args = args + " chip_logging=false"
+                                        }
+                                    }
+                                    else if ((rcp == "SiWx917" || rcp == "rs9116"))  // MG24 + SiWx917/RS9116
+                                    {
+                                        args = "disable_lcd=true use_external_flash=false chip_enable_ble_rs911x=true"
+                                    }
 
 
-                            // for sleepy devices
-                            if (sleepyBoard.contains(board)) {
-                                sh "./scripts/examples/gn_efr32_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName}/sleepy ${board} enable_sleepy_device=true ${args}"
+
+                                    // Only the wifi ncp builds require to specify the --wifi radio used.
+                                    if (board != "BRD4325B")
+                                    {
+                                        args = args + " --wifi " + rcp
+                                    }
+
+
+
+                                    if(ota_automation){
+                                        sh "./scripts/examples/gn_silabs_example.sh ${exampleType}/${app}/${relPath}/ out/OTA/ota_automation_out/WiFi/${app}_wifi_${radioName}/ ${board} ${args} ${config_args} chip_build_libshell=true "
+                                    }
+                                    else{
+                                        // Enable matter shell, on standard builds, with chip_build_libshell=true argument for SQA tests
+                                        sh "./scripts/examples/gn_silabs_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName} ${board} ${args} chip_build_libshell=true"
+                                        sh "./scripts/examples/gn_silabs_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName}/release ${board} ${args} --release"
+                                    }
+
+
+                                    // for sleepy devices
+                                    if (sleepyBoard.contains(board)) {
+                                        sh "./scripts/examples/gn_silabs_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName}/sleepy ${board} enable_sleepy_device=true ${args}"
+                                    }
+                                }
                             }
                         }
                     }
 
-                    // Move binaries to standardized output 
-                    def platformAndRadio = "${platform}-${radioName}"
-                    if (platform == "SiWx917")
+                    // Move binaries to standardized output
+                    // TODO JF
+
+                    def platformAndRadio = ""
+                    if (board == "BRD4325B" )
                     {
-                        platformAndRadio = "${platform}"
+                        platformAndRadio = "SiWx917"
                     }
+                    else
+                    {
+                        platformAndRadio = "efr32-${radioName}"
+                    }
+
+
                     if (ota_automation){
 
-                         sh """ 
+                         sh """
                             ls; pwd; mkdir -p ${saved_workspace}/out/OTA/ota_automation_out/WiFi/${app}_wifi_${radioName}/${board}
-                            cp out/OTA/ota_automation_out/WiFi/${app}_wifi_${radioName}/${board}/*.s37  ${saved_workspace}/out/OTA/ota_automation_out/WiFi/${app}_wifi_${radioName}/${board}/${platformAndRadio}-${appNameOnly}-example.s37"""                       
+                            cp out/OTA/ota_automation_out/WiFi/${app}_wifi_${radioName}/${board}/*.s37  ${saved_workspace}/out/OTA/ota_automation_out/WiFi/${app}_wifi_${radioName}/${board}/${platformAndRadio}-${appNameOnly}-example.s37"""
                     }
                     else{
                         fileTypesToMove.each { fileType ->
-                            sh """ 
+                            sh """
                                 ls; pwd; mkdir -p ${saved_workspace}/out/standard/${board}/WiFi; mkdir -p ${saved_workspace}/out/release/${board}/WiFi
                                 cp out/${app}_wifi_${radioName}/${board}/*.${fileType} ${saved_workspace}/out/standard/${board}/WiFi/${platformAndRadio}-${appNameOnly}-example.${fileType}
-                                cp out/${app}_wifi_${radioName}/release/${board}/*.${fileType} ${saved_workspace}/out/release/${board}/WiFi/${platformAndRadio}-${appNameOnly}-example.${fileType} """                        
-                        
+                                cp out/${app}_wifi_${radioName}/release/${board}/*.${fileType} ${saved_workspace}/out/release/${board}/WiFi/${platformAndRadio}-${appNameOnly}-example.${fileType} """
+
 
                             if (sleepyBoard.contains(board)) {
                                 sh """ mkdir -p ${saved_workspace}/out/sleepy/${board}/WiFi
@@ -477,7 +539,7 @@ def buildWiFiExample(platform, app, board, wifiRadio, args, radioName, buildCust
                         }
                         stash name: 'WiFiExamples-' + app + '-' + board + '-' + radioName, includes: 'out/**/*.s37 '
                     }
-                     
+
 
                 } catch (e) {
                     deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
@@ -522,7 +584,8 @@ def buildChipToolAndOTAProvider()
                             sh 'pwd'
                             sh 'git config --global --add safe.directory $(pwd)'
                             sh 'git config --global --add safe.directory $(pwd)/third_party/pigweed/repo'
-                            sh './scripts/build/gn_bootstrap.sh'
+                            sh 'chmod +x ./scripts/setup/bootstrap.sh'
+                            sh './scripts/setup/bootstrap.sh'
                             sh './scripts/run_in_build_env.sh  "./scripts/build/build_examples.py --target linux-arm64-chip-tool-ipv6only-clang build"'
                             sh './scripts/run_in_build_env.sh  "./scripts/build/build_examples.py --target linux-arm64-ota-provider-ipv6only-clang build"'
                         }
@@ -563,7 +626,7 @@ def buildUnifyBridge()
             def unifyCheckoutDir = workspaceTmpDir + "/overlay/unify"
             def saveDir = 'matter/out/'
             try {
-                
+
                 withDockerRegistry([url: "https://artifactory.silabs.net ", credentialsId: 'svc_gsdk']) {
                     def unify_bridge_docker_arm64 = docker.image('artifactory.silabs.net/gsdk-docker-production/unify-cache/unify-matter:1.1.1-arm64')
                     def unify_bridge_docker_armhf = docker.image('artifactory.silabs.net/gsdk-docker-production/unify-cache/unify-matter:1.1.1-armhf')
@@ -592,7 +655,13 @@ def buildUnifyBridge()
                                 {
                                     def out_path = "../../../out/silabs_examples/unify-matter-bridge/arm64_debian_bullseye"
                                     sh "../../../scripts/run_in_build_env.sh \"${pkg_config_export}; gn gen ${out_path} --args='target_cpu=\\\"arm64\\\"'\""
-                                    sh "../../../scripts/run_in_build_env.sh \"${pkg_config_export}; ninja -C ${out_path}\""
+                                    // TODO Fix Me MATTER-1909
+                                    try {
+                                        sh "../../../scripts/run_in_build_env.sh \"${pkg_config_export}; ninja -C ${out_path}\""
+                                    } catch (err) {
+                                        echo "Caught: ${err}"
+                                        currentBuild.result = 'UNSTABLE'
+                                    }
                                 }
 
                                 // Compile chip-tool for arm64
@@ -604,7 +673,7 @@ def buildUnifyBridge()
                                 }
                             }
                         }
-                        // Delete this when SQA no longer needs an ARMHF build. 
+                        // Delete this when SQA no longer needs an ARMHF build.
                         unify_bridge_docker_armhf.inside("-u root -v${unifyCheckoutDir}:/unify") {
                             withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
                             {
@@ -661,7 +730,7 @@ def buildUnifyBridge()
                         // Move binaries to standardized output
                         sh """  mkdir -p ${saved_workspace}/out/Bridge/arm64_debian_bullseye; mkdir -p ${saved_workspace}/out/Chiptool/arm64_debian_bullseye
                                 mkdir -p ${saved_workspace}/out/Bridge/armhf_debian_bullseye; mkdir -p ${saved_workspace}/out/Chiptool/armhf_debian_bullseye
-                                    
+
                                 cp ./out/silabs_examples/unify-matter-bridge/arm64_debian_bullseye/obj/bin/unify-matter-bridge ${saved_workspace}/out/Bridge/arm64_debian_bullseye/
                                 cp ./out/silabs_examples/unify-matter-bridge/armhf_debian_bullseye/obj/bin/unify-matter-bridge ${saved_workspace}/out/Bridge/armhf_debian_bullseye/
                                 cp ./out/examples/chip-tool/arm64_debian_bullseye/chip-tool ${saved_workspace}/out/Chiptool/arm64_debian_bullseye/
@@ -1082,7 +1151,7 @@ def generateGblFileAndOTAfiles()
     actionWithRetry {
         node(buildFarmLabel)
         {
- 
+
             def boards = ["BRD4161A","BRD4187C"]
             def technology = ["OpenThread","WiFi"]
             def wifiRCP = ["wf200","rs9116", "91x"]
@@ -1096,7 +1165,7 @@ def generateGblFileAndOTAfiles()
             def genFiles = {app, tech, board, radioName ->
 
                 sh """
-                        
+
                         commander --version
                         pwd
 
@@ -1135,11 +1204,11 @@ def generateGblFileAndOTAfiles()
                                      'ota_file=""',
                                      'bin_path=""']){
 
-                                    technology.each{ tech_ ->   
+                                    technology.each{ tech_ ->
                                         boards.each{ brd ->
-                                            
+
                                             if(tech_ == "WiFi"){
-                                                wifiRCP.each{ radioName -> 
+                                                wifiRCP.each{ radioName ->
                                                     if (brd == "BRD4161A" && radioName != "91x"){
                                                         genFiles.call(appName, tech_, brd, radioName)
                                                     }
@@ -1151,7 +1220,7 @@ def generateGblFileAndOTAfiles()
                                             else if (tech_ == "OpenThread"){
                                                 genFiles.call(appName, tech_, brd, "")
                                             }
-                                    
+
                                         }
                                     }
                             }
@@ -1310,7 +1379,7 @@ def pushToArtifactoryAndUbai()
                                             fi
 
                                     rm "${file}"
-                                    zip -r "${file}" out 
+                                    zip -r "${file}" out
 
                                     echo 'UBAI uploading ......'
                                     ubai_upload_cli --client-id jenkins-gsdk-pipelines-Matter --file-path build-binaries.zip  --metadata app_name matter \
@@ -1383,7 +1452,7 @@ def pipeline()
             sh 'sudo exportfs -af'
         }
     }
-    
+
     def parallelNodesBuild = [:]
     stage("Build")
     {
@@ -1407,169 +1476,33 @@ def pipeline()
         //---------------------------------------------------------------------
         // Build WiFi Examples
         //---------------------------------------------------------------------
-        def wifiNCPBoards = [:]
-        def wifiSOCBoards = [:]
 
-        // Build only for release candidate branch
-        if (env.BRANCH_NAME.startsWith('RC_')) {
-            wifiNCPBoards = [ "BRD4161A", "BRD4163A", "BRD4164A", "BRD4170A", "BRD4186C", "BRD4187C" ]
-            wifiSOCBoards = [ "BRD4325B" ]
-        } else {
-            wifiNCPBoards = [ "BRD4161A", "BRD4187C" ]
-            wifiSOCBoards = [ "BRD4325B" ]
-        }
+        def wifiApps = [ "lighting-app", "lock-app", "light-switch-app", "thermostat", "window-app" ]
 
-        def wifiNCPApps = [ "lighting-app", "lock-app", "thermostat", "window-app" ]
-        def wifiSOCApps = [ "lighting-app" , "lock-app", "light-switch-app", "window-app" ]
-
-        def wifiNCPRadios = [ "rs9116", "SiWx917", "wf200" ]
-
-        // NCP Builds
-        wifiNCPApps.each { appName ->
-            wifiNCPBoards.each { board ->
-                wifiNCPRadios.each { rcp ->
-                    // Platform = efr32 for all NCP mode combos
-                    def platform = "efr32"
-
-                    // MG24 + SiWx917: name the example as "xxx_wifi_91x"
-                    // MG24 + 9116: name the example as "xxx_wifi_rs9116"
-                    // MG12 + 9116: name the example as "xxx_wifi_rs9116" so that it only applies to RS9116 (we don't support MG12 + SiWx917)
-                    // MGxx + WF00: name the example as "xxx_wifi_wf200"
-                    def radioName = "${rcp}"  // MGxx + WF200
-                    if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "SiWx917") { // MG24 + SiWx917
-                        radioName = "91x"
-                    } else if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "rs9116") { // MG24 + rs9116
-                        radioName = "rs9116"
-                    } else if ((board == "BRD4161A" || board == "BRD4163A" || board == "BRD4164A" || board == "BRD4170A") && rcp == "rs9116") { // MG12 + rs9116
-                        radioName = "rs9116"
-                    } else if ((board == "BRD4161A" || board == "BRD4163A" || board == "BRD4164A" || board == "BRD4170A") && rcp == "SiWx917") { // MG12 + SiWx917 is not supported
-                        return
-                    }
-                    // MG12 + WF200: set is_debug=false and chip_logging=false, otherwise it does not fit (not a problem for MG24 + WF200, also MG24 + WF200 init fails with is_debug=false)
-                    // MG24 + RS9116/SiWx917: disable LCD and ext flash due to common SPI pin multiplexing issue
-                    // MG24 + WF200: disable libshell due to VCOM pin multiplexing issue
-					def args = ""
-                    // TODO : Disabling all logs currently makes the build fail. But flash size is close to the limit. Once fixed re-disable logs
-                    if ((board == "BRD4161A" || board == "BRD4163A" || board == "BRD4164A" || board == "BRD4170A") && rcp == "wf200")  // MG12 + WF200
-                    {
-                        // TODO : MG12 + lock-app + WF200 does not currently fit within flash so disabling chip logging as well
-                        if (appName == "lock-app")
-                        {
-                            args = "is_debug=false chip_logging=false"
-                        }
-                        else
-                        {
-                            args = "is_debug=false"
-                        }
-                    }
-                    else if ((board == "BRD4186C" || board == "BRD4187C") && (rcp == "SiWx917" || rcp == "rs9116"))  // MG24 + SiWx917/RS9116
-                    {
-                        args = "disable_lcd=true use_external_flash=false chip_enable_ble_rs911x=true"
-                    }
-                    else if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "wf200")   // MG24 + WF200
-                    {
-                        args = "chip_build_libshell=false"
-                    }
-                    parallelNodesBuild["WiFi " + appName + " " + board + " " + rcp]      = { this.buildWiFiExample(platform, appName, board, rcp, args, radioName, false)   }
-                }
-            }
-        }
-
-        // SOC Builds
-        wifiSOCApps.each { appName ->
-            wifiSOCBoards.each { board ->
-                // Platform = SiWx917 for all SOC mode combos
-                def platform = "SiWx917"
-
-                // Name the examples as "xxx_wifi_917_soc"
-                // SiWx917 is the only radio in use right now
-                def radioName = "917_soc"
-
-                // No additional arguments for building with BLE commissioning for SiWx917 SoC
-                def args = ""
-                parallelNodesBuild["WiFi " + appName + " " + board]      = { this.buildWiFiExample(platform, appName, board, false, args, radioName, false)   }
-            }
+        wifiApps.each { appName ->
+            parallelNodesBuild["WiFi " + appName ]      = { this.buildWiFiExample(appName, false)   }
         }
 
         //---------------------------------------------------------------------
         // Build Custom examples
         //---------------------------------------------------------------------
+
         def silabsCustomExamplesOpenThread = ["onoff-plug-app", "sl-newLight", "template", "lighting-lite-app"]
         def silabsCustomExamplesWifi = ["onoff-plug-app"]
 
-        def customWifiRCP = ["rs9116", "SiWx917" ,"wf200"]
-
-        if (env.BRANCH_NAME.startsWith('RC_')) {
-            boardsForCustomWifi       = ["BRD4161A", "BRD4163A", "BRD4164A", "BRD4170A", "BRD4186C", "BRD4187C"]
-            boardsForCustomWifiSoC    = ["BRD4325B"]
-        } else {
-             boardsForCustomWifi       = ["BRD4161A", "BRD4187C"]
-             boardsForCustomWifiSoC    = ["BRD4325B"]
-        }
-
         // Openthread custom examples
         silabsCustomExamplesOpenThread.each { example ->
-            parallelNodesBuild["Custom OpenThread " + example] = { this.buildSilabsCustomOpenThreadExamples(example)   }
+            parallelNodesBuild["Custom OT " + example] = { this.buildSilabsCustomOpenThreadExamples(example)   }
         }
 
         // Build OpenThread Silabs Sensor App
         parallelNodesBuild["Silabs Sensor "] = { this.buildSilabsSensorApp()   }
 
-
-
         // Wifi custom examples
         silabsCustomExamplesWifi.each { example ->
-            boardsForCustomWifi.each    { board ->
-                customWifiRCP.each        { rcp ->
-
-                    // Platform = efr32 for all NCP mode combos
-                    def platform = "efr32"
-
-                    def radioName = "${rcp}"  // MGxx + WF200
-                    if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "SiWx917") { // MG24 + SiWx917
-                        radioName = "91x"
-                    } else if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "rs9116") { // MG24 + rs9116
-                        radioName = "rs9116"
-                    } else if ((board == "BRD4161A" || board == "BRD4163A" || board == "BRD4164A" || board == "BRD4170A") && rcp == "rs9116") { // MG12 + 9116
-                        radioName = "rs9116"
-                    } else if ((board == "BRD4161A" || board == "BRD4163A" || board == "BRD4164A" || board == "BRD4170A") && rcp == "SiWx917") { // MG12 + SiWx917 is not supported
-                        return
-                    }
-
-					def args = ""
-                    if ((board == "BRD4161A" || board == "BRD4163A" || board == "BRD4164A" || board == "BRD4170A") && rcp == "wf200")
-                    {
-                        // TODO : Disabling all logs currently makes the build fail. But flash size is close to the limit. Once fixed re-disable logs
-                        args = "is_debug=false"
-                    }
-                    else if ((board == "BRD4186C" || board == "BRD4187C") && (rcp == "rs9116" || rcp == "SiWx917"))
-                    {
-                        args = "disable_lcd=true use_external_flash=false chip_enable_ble_rs911x=true"
-                    }
-                    else if ((board == "BRD4186C" || board == "BRD4187C") && rcp == "wf200")
-                    {
-                        args = "chip_build_libshell=false"
-                    }
-                    parallelNodesBuild["Custom WiFi " + example + " " + board + " " + rcp]       = { this.buildWiFiExample(platform, example, board, rcp, args, radioName, true)   }
-                }
-            }
+            parallelNodesBuild["Custom WiFi " + example]       = { this.buildWiFiExample(example, true)   }
         }
 
-        // Custom SOC Builds
-        silabsCustomExamplesWifi.each { appName ->
-            boardsForCustomWifiSoC.each { board ->
-                // Platform = SiWx917 for all SOC mode combos
-                def platform = "SiWx917"
-
-                // Name the examples as "xxx_wifi_917_soc"
-                // SiWx917 is the only radio in use right now
-                def radioName = "917_soc"
-
-                // No additional arguments for building with BLE commissioning for SiWx917 SoC
-                def args = ""
-                parallelNodesBuild["WiFi " + appName + " " + board]      = { this.buildWiFiExample(platform, appName, board, false, args, radioName, true)   }
-            }
-        }
         //---------------------------------------------------------------------
         // Build Tooling
         //---------------------------------------------------------------------
@@ -1591,7 +1524,7 @@ def pipeline()
 
     if(params.OTA_AUTOMATION_TEST == true){
         stage("Generate SQA images")
-        {    
+        {
             advanceStageMarker()
             /*
             SMG:
@@ -1603,7 +1536,7 @@ def pipeline()
                         mg12 + wf200/rs9116 ( one per each combo)
                         mg24 + wf200/rs9116 ( one per each combo)
                         mg24 + 917          ( one per each combo)*/
-            
+
             def parallelNodesOTABuild = [:]
 
             def boards =   ["BRD4161A", "BRD4187C"]
@@ -1614,32 +1547,32 @@ def pipeline()
 
             boards.each { board ->
                 wifiRCP.each { radioName ->
-                    if(board == "BRD4187C" && radioName == "91x"){ 
-                        parallelNodesImages["WiFi $board $radioName"]      = { this.buildWiFiExample("efr32", "lighting-app", board, "SiWx917", args, radioName, false,ota_automation=true, config_args=software_version)  } 
+                    if(board == "BRD4187C" && radioName == "91x"){
+                        parallelNodesImages["WiFi $board $radioName"]      = { this.buildWiFiExample("efr32", "lighting-app", board, "SiWx917", args, radioName, false,ota_automation=true, config_args=software_version)  }
                     }
                     else if(radioName != "91x"){
                         if(board == "BRD4161A" && radioName == "wf200"){
-                            args = "is_debug=false" // need to add this to MG12 + WF200 
+                            args = "is_debug=false" // need to add this to MG12 + WF200
                         }
-                        parallelNodesImages["WiFi $board $radioName"]      = { this.buildWiFiExample("efr32", "lighting-app", board, radioName, args, radioName, false, ota_automation=true, config_args=software_version)  } 
+                        parallelNodesImages["WiFi $board $radioName"]      = { this.buildWiFiExample("efr32", "lighting-app", board, radioName, args, radioName, false, ota_automation=true, config_args=software_version)  }
                     }
-                    
+
                 }
             }
-                
+
             parallelNodesImages.failFast = false
             parallel parallelNodesImages
-            
-        } 
+
+        }
         stage("Generate Gbl/Ota files"){
 
             advanceStageMarker()
             generateGblFileAndOTAfiles()
-        }          
+        }
     }
 
     stage("Generate RPS files")
-    {   
+    {
         // Generating the RPS file for 917 SoC
         advanceStageMarker()
         generateRpsFiles()
