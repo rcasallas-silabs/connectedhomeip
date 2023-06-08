@@ -582,6 +582,7 @@ CHIP_ERROR CASESession::RecoverInitiatorIpk()
 
 CHIP_ERROR CASESession::SendSigma1()
 {
+    chip::Progress::Start("Send Sigma 1");
     MATTER_TRACE_EVENT_SCOPE("SendSigma1", "CASESession");
     const size_t mrpParamsSize = mLocalMRPConfig.HasValue() ? TLV::EstimateStructOverhead(sizeof(uint16_t), sizeof(uint16_t)) : 0;
     size_t data_len            = TLV::EstimateStructOverhead(kSigmaParamRandomNumberSize, // initiatorRandom
@@ -911,6 +912,7 @@ CHIP_ERROR CASESession::SendSigma2Resume()
 
 CHIP_ERROR CASESession::SendSigma2()
 {
+    chip::Progress::Start("Send Sigma 2");
     MATTER_TRACE_EVENT_SCOPE("SendSigma2", "CASESession");
 
     VerifyOrReturnError(GetLocalSessionId().HasValue(), CHIP_ERROR_INCORRECT_STATE);
@@ -1124,6 +1126,7 @@ CHIP_ERROR CASESession::HandleSigma2_and_SendSigma3(System::PacketBufferHandle &
 
 CHIP_ERROR CASESession::HandleSigma2(System::PacketBufferHandle && msg)
 {
+
     MATTER_TRACE_EVENT_SCOPE("HandleSigma2", "CASESession");
     CHIP_ERROR err = CHIP_NO_ERROR;
     System::PacketBufferTLVReader tlvReader;
@@ -1293,6 +1296,9 @@ exit:
 
 CHIP_ERROR CASESession::SendSigma3a()
 {
+    chip::Progress::Result(CHIP_NO_ERROR);
+    chip::Progress::Start("Send Sigma 3");
+
     MATTER_TRACE_EVENT_SCOPE("SendSigma3", "CASESession");
     CHIP_ERROR err = CHIP_NO_ERROR;
 
@@ -2171,6 +2177,8 @@ exit:
         DiscardExchange();
         AbortPendingEstablish(err);
     }
+
+    chip::Progress::Result(err);
     return err;
 }
 

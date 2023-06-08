@@ -82,6 +82,7 @@ void PASESession::OnSessionReleased()
 
 void PASESession::Finish()
 {
+    chip::Progress::Result(CHIP_NO_ERROR);
     mPairingComplete = true;
     PairingSession::Finish();
 }
@@ -264,6 +265,7 @@ CHIP_ERROR PASESession::DeriveSecureSession(CryptoContext & session) const
 
 CHIP_ERROR PASESession::SendPBKDFParamRequest()
 {
+    chip::Progress::Start("Send PBKDF");
     MATTER_TRACE_EVENT_SCOPE("SendPBKDFParamRequest", "PASESession");
 
     VerifyOrReturnError(GetLocalSessionId().HasValue(), CHIP_ERROR_INCORRECT_STATE);
@@ -376,6 +378,9 @@ exit:
 
 CHIP_ERROR PASESession::SendPBKDFParamResponse(ByteSpan initiatorRandom, bool initiatorHasPBKDFParams)
 {
+    chip::Progress::Result(CHIP_NO_ERROR);
+    chip::Progress::Start("Send PBKDF Response");
+
     MATTER_TRACE_EVENT_SCOPE("SendPBKDFParamResponse", "PASESession");
 
     VerifyOrReturnError(GetLocalSessionId().HasValue(), CHIP_ERROR_INCORRECT_STATE);
@@ -533,6 +538,9 @@ exit:
 
 CHIP_ERROR PASESession::SendMsg1()
 {
+    chip::Progress::Result(CHIP_NO_ERROR);
+    chip::Progress::Start("PAKE Contribution");
+
     MATTER_TRACE_EVENT_SCOPE("SendMsg1", "PASESession");
     const size_t max_msg_len       = TLV::EstimateStructOverhead(kMAX_Point_Length);
     System::PacketBufferHandle msg = System::PacketBufferHandle::New(max_msg_len);
@@ -636,6 +644,9 @@ exit:
 
 CHIP_ERROR PASESession::HandleMsg2_and_SendMsg3(System::PacketBufferHandle && msg2)
 {
+    chip::Progress::Result(CHIP_NO_ERROR);
+    chip::Progress::Start("PAKE Verification");
+
     MATTER_TRACE_EVENT_SCOPE("HandleMsg2_and_SendMsg3", "PASESession");
     CHIP_ERROR err = CHIP_NO_ERROR;
 
@@ -712,6 +723,9 @@ exit:
 
 CHIP_ERROR PASESession::HandleMsg3(System::PacketBufferHandle && msg)
 {
+    chip::Progress::Result(CHIP_NO_ERROR);
+    chip::Progress::Start("PAKE Verification");
+
     MATTER_TRACE_EVENT_SCOPE("HandleMsg3", "PASESession");
     CHIP_ERROR err = CHIP_NO_ERROR;
 

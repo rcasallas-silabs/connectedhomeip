@@ -51,5 +51,6 @@ int main(int argc, char * argv[])
     registerCommandsStorage(commands);
     registerCommandsSessionManagement(commands, &credIssuerCommands);
 
+    chip::Progress::Init();
     return commands.Run(argc, argv);
 }

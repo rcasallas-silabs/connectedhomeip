@@ -80,6 +80,8 @@ void PrintQrCodeURL(const chip::MutableCharSpan qrCode)
     const size_t qrCodeBufferMaxSize = strlen(kQrCodeBaseUrl) + strlen(kUrlDataAssignmentPhrase) + 3 * qrCode.size() + 1;
     qrCodeBuffer.Alloc(qrCodeBufferMaxSize);
 
+    chip::Progress::Start("SetupQRCode");
+    chip::Progress::Finish(qrCode.data());
     ChipLogProgress(AppServer, "SetupQRCode: [%s]", qrCode.data());
     if (GetQRCodeUrl(qrCodeBuffer.Get(), qrCodeBufferMaxSize, qrCode) == CHIP_NO_ERROR)
     {

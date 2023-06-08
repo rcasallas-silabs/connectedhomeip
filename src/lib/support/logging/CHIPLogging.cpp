@@ -275,6 +275,16 @@ bool IsCategoryEnabled(uint8_t category)
 }
 #endif // CHIP_LOG_FILTERING
 
+#else // _CHIP_USE_LOGGING
+
+void SetLogFilter(uint8_t category)
+{
+}
+
+void SetLogRedirectCallback(LogRedirectCallback_t callback)
+{
+}
+
 #endif // _CHIP_USE_LOGGING
 
 } // namespace Logging

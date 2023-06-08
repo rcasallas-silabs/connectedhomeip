@@ -75,6 +75,8 @@
  *
  */
 
+#include "Progress.h"
+
 namespace chip {
 
 template <class T>
