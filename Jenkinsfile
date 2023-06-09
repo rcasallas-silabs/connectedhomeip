@@ -664,6 +664,7 @@ def buildUnifyBridge()
                                 {
                                     def out_path = "../../../out/silabs_examples/unify-matter-bridge/arm64_debian_bullseye"
                                     sh "../../../scripts/run_in_build_env.sh \"${pkg_config_export}; gn gen ${out_path} --args='target_cpu=\\\"arm64\\\"'\""
+                                    sh "../../../scripts/run_in_build_env.sh \"${pkg_config_export}; ninja -C ${out_path}\""
                                 }
 
                                 // Compile chip-tool for arm64
@@ -1467,8 +1468,8 @@ def pipeline()
         //---------------------------------------------------------------------
         // Build Unify Matter Bridge
         //---------------------------------------------------------------------
-        // TODO Fix Me MATTER-1909
-            // parallelNodesBuild["Unify Matter Bridge"] = {this.buildUnifyBridge()}
+        
+            parallelNodesBuild["Unify Matter Bridge"] = {this.buildUnifyBridge()}
         //---------------------------------------------------------------------
         // Build OpenThread Examples
         //---------------------------------------------------------------------
