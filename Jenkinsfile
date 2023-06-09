@@ -1529,7 +1529,7 @@ def pipeline()
     }
     def parallelNodesImages = [:]
 
-    if(params.OTA_AUTOMATION_TEST == true){
+    if(params.OTA_AUTOMATION_TEST == true || env.BRANCH_NAME.startsWith('RC_')){
         stage("Generate SQA images")
         {
             advanceStageMarker()
