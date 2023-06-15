@@ -637,9 +637,9 @@ def buildUnifyBridge()
             try {
 
                 withDockerRegistry([url: "https://artifactory.silabs.net ", credentialsId: 'svc_gsdk']) {
-                    def unify_bridge_docker_arm64 = docker.image('artifactory.silabs.net/gsdk-docker-production/unify-cache/unify-matter:1.1.1-arm64')
-                    def unify_bridge_docker_armhf = docker.image('artifactory.silabs.net/gsdk-docker-production/unify-cache/unify-matter:1.1.1-armhf')
-                    def unify_bridge_docker_amd64 = docker.image('artifactory.silabs.net/gsdk-docker-production/unify-cache/unify-matter:1.1.1-amd64')
+                    def unify_bridge_docker_arm64 = docker.image('artifactory.silabs.net/gsdk-docker-production/unify-cache/unify-matter:1.1.2-arm64')
+                    def unify_bridge_docker_armhf = docker.image('artifactory.silabs.net/gsdk-docker-production/unify-cache/unify-matter:1.1.2-armhf')
+                    def unify_bridge_docker_amd64 = docker.image('artifactory.silabs.net/gsdk-docker-production/unify-cache/unify-matter:1.1.2-amd64')
                     dir(dirPath)
                     {
                         // Currently official supported platform
