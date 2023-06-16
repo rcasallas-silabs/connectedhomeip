@@ -145,6 +145,8 @@ def buildOpenThreadExample(app, ota_automation=false, config_args='')
             def buildRelease = true
             def openThreadBoards = [:]
             def sleepyBoard = ["BRD4161A", "BRD4187C"]
+            // Boards for Code Size report
+            def codeSizeBoard = ["BRD4187C", "BRD4325B"]
 
             // Remove -app at end of string for later use (if it exists)
             def appNameOnly = app - '-app'
@@ -195,10 +197,7 @@ def buildOpenThreadExample(app, ota_automation=false, config_args='')
                                         """
 
                                     if(buildRelease) {
-                                        // TODO: --use_ot_lib is used in the release build options until thread issue with NDEBUG is found and fixed
-                                        // TODO: Skip MGM24 modules release build. They don't have thread_cert_libs to workaround above issue ^
-                                        def skipRelease = ["BRD4316A", "BRD4317A", "BRD4319A"]
-                                        if (!skipRelease.contains(board)) {
+                                        if (codeSizeBoard.contains(board)) {
                                             sh """./scripts/examples/gn_silabs_example.sh ./examples/${app}/silabs ./out/CSA/${app}/OpenThread/release ${board} --release --use_ot_lib
                                                 mkdir -p ${saved_workspace}/out/release/${board}/OpenThread
                                                 cp ./out/CSA/${app}/OpenThread/release/${board}/*.s37 ${saved_workspace}/out/release/${board}/OpenThread/
@@ -390,13 +389,18 @@ def buildSilabsSensorApp()
 
 def executeWifiBuild(exampleType, app, relPath, radioName, board, args, ota_automation, sleepyBoard )
 {
+    // Boards for Code Size report
+    def codeSizeBoard = ["BRD4187C", "BRD4325B"]
+
     if(ota_automation){
         sh "./scripts/examples/gn_silabs_example.sh ${exampleType}/${app}/${relPath}/ out/OTA/ota_automation_out/WiFi/${app}_wifi_${radioName}/ ${board} ${args} chip_build_libshell=true "
     }
     else{
         // Enable matter shell, on standard builds, with chip_build_libshell=true argument for SQA tests
         sh "./scripts/examples/gn_silabs_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName} ${board} ${args} chip_build_libshell=true"
-        sh "./scripts/examples/gn_silabs_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName}/release ${board} ${args} --release"
+        if (codeSizeBoard.contains(board)){
+            sh "./scripts/examples/gn_silabs_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName}/release ${board} ${args} --release"
+        }
     }
 
 
@@ -412,6 +416,8 @@ def moveWifiBinaries(app, board, radioName, ota_automation, sleepyBoard)
     // Used to restructure output directory in later step
     def appNameOnly = app - '-app'
     def fileTypesToMove = ["s37","map"]
+    // Boards for Code Size report
+    def codeSizeBoard = ["BRD4187C", "BRD4325B"]
 
     if (board == "BRD4325B" )
     {
@@ -433,8 +439,10 @@ def moveWifiBinaries(app, board, radioName, ota_automation, sleepyBoard)
         fileTypesToMove.each { fileType ->
             sh """
                 ls; pwd; mkdir -p ${saved_workspace}/out/standard/${board}/WiFi; mkdir -p ${saved_workspace}/out/release/${board}/WiFi
-                cp out/${app}_wifi_${radioName}/${board}/*.${fileType} ${saved_workspace}/out/standard/${board}/WiFi/${platformAndRadio}-${appNameOnly}-example.${fileType}
-                cp out/${app}_wifi_${radioName}/release/${board}/*.${fileType} ${saved_workspace}/out/release/${board}/WiFi/${platformAndRadio}-${appNameOnly}-example.${fileType} """
+                cp out/${app}_wifi_${radioName}/${board}/*.${fileType} ${saved_workspace}/out/standard/${board}/WiFi/${platformAndRadio}-${appNameOnly}-example.${fileType} """
+                if (codeSizeBoard.contains(board)){
+                    sh """ cp out/${app}_wifi_${radioName}/release/${board}/*.${fileType} ${saved_workspace}/out/release/${board}/WiFi/${platformAndRadio}-${appNameOnly}-example.${fileType} """
+                }
 
 
             if (sleepyBoard.contains(board)) {
@@ -785,15 +793,18 @@ def exportIoTReports()
                         sh "echo ${env.BUILD_NUMBER}"
 
                         // This set of Applications to track code size was
-                        // approved by Rob Alexander on September 7 2022
-                        // Light --> MG24 (BRD4187C)
-                        // Lock ---> MG24 (BRD4187C) (Thread and RS9116)
-                        // Window ---> MG12 (BRD4161A) + MG24 (BRD4187C)
-                        // Thermostat ---> MG24 (BRD4187C) (Thread and RS9116)
+                        // approved by Rob Alexander on June 7 2023
+                        // Matter Thread MG24 (BRD4187C) – Light
+                        // Matter Thread MG24 (BRD4187C) – Lock
+                        // Matter Thread MG24 (BRD4187C) – Window Shade
+                        // Matter Wi-Fi 9116 (BRD4187C) – Lock
+                        // Matter Wi-Fi 9116 (BRD4187C) – Thermostat
+                        // Matter Wi-Fi 917 (BRD4325B) – Lock
+                        // Matter Wi-Fi 917 (BRD4325B) – Thermostat
 
                         def wifiSizeTrackingApp = [ "lock-app", "thermostat"]
                         def openThreadMG24Apps = ["lighting-app", "lock-app", "window-app"]
-                        def appVersion = ["standard", "release"]
+                        def appVersion = ["release"]
 
                         // Generate report for MG24 (BRD4187C) apps
                         openThreadMG24Apps.each { app ->
@@ -818,25 +829,6 @@ def exportIoTReports()
                             }
                         }
 
-                        // Generate report for MG12 (BRD4161A) Window-app only
-                        appVersion.each { version ->
-                            sh """unset OTEL_EXPORTER_OTLP_ENDPOINT
-                                code_size_analyzer_cli \
-                                --map_file ${saved_workspace}/out/${version}/BRD4161A/OpenThread/matter-silabs-window*.map \
-                                --stack_name matter \
-                                --target_part efr32mg12p432f1024gl125 \
-                                --compiler gcc \
-                                --target_board BRD4161A \
-                                --app_name window-app-${version}-MG12 \
-                                --service_url https://code-size-analyzer.silabs.net \
-                                --branch_name ${env.BRANCH_NAME} \
-                                --build_number b${env.BUILD_NUMBER} \
-                                --output_file window-app-MG12.json \
-                                --store_results True \
-                                --verify_ssl False
-                            """
-                        }
-
                         // Generate report for WiFi implementation MG24 BRD4187C + RS9116
                         wifiSizeTrackingApp.each { app ->
                             def appNameOnly = app - '-app'
@@ -852,6 +844,26 @@ def exportIoTReports()
                                 --branch_name ${env.BRANCH_NAME} \
                                 --build_number b${env.BUILD_NUMBER} \
                                 --output_file ${app}-WiFi-MG24.json \
+                                --store_results True \
+                                --verify_ssl False
+                            """
+                        }
+
+                        // Generate report for WiFi SOC (BRD4325B)s
+                        wifiSizeTrackingApp.each { app ->
+                            def appNameOnly = app - '-app'
+                            sh """unset OTEL_EXPORTER_OTLP_ENDPOINT
+                                code_size_analyzer_cli \
+                                --map_file ${saved_workspace}/out/release/BRD4325B/WiFi/SiWx917-${appNameOnly}-example.map \
+                                --stack_name matter \
+                                --target_part SiWG917M612LGTAA \
+                                --compiler gcc \
+                                --target_board BRD4325B \
+                                --app_name ${app}-WiFi-917 \
+                                --service_url https://code-size-analyzer.silabs.net \
+                                --branch_name ${env.BRANCH_NAME} \
+                                --build_number b${env.BUILD_NUMBER} \
+                                --output_file ${app}-WiFi-917.json \
                                 --store_results True \
                                 --verify_ssl False
                             """
@@ -1468,7 +1480,7 @@ def pipeline()
         //---------------------------------------------------------------------
         // Build Unify Matter Bridge
         //---------------------------------------------------------------------
-        
+
             parallelNodesBuild["Unify Matter Bridge"] = {this.buildUnifyBridge()}
         //---------------------------------------------------------------------
         // Build OpenThread Examples
