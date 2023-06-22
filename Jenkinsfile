@@ -84,7 +84,7 @@ def initWorkspaceAndScm()
                  extensions: [[$class: 'CloneOption', depth: 1, noTags: false, reference: '', shallow: true],
                                 [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true,
                                 recursiveSubmodules: true, reference: '', shallow: true, trackingSubmodules: false]],
-                    userRemoteConfigs: [[credentialsId: 'svc_gsdk', url: 'https://bitbucket-cph.silabs.com/scm/stash/uic/uic.git']]]
+                    userRemoteConfigs: [[credentialsId: 'svc_gsdk', url: 'https://stash.silabs.com/scm/uic/uic.git']]]
     }
     dir(buildOverlayDir+createWorkspaceOverlay.overlayPrebuiltZapPath){
         packageManagers.downloadLatestZapBuild('pipelineMetadata.toolchain_info.zap.zapBranch')
