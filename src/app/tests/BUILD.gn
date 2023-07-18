@@ -54,6 +54,20 @@ source_set("binding-test-srcs") {
   ]
 }
 
+source_set("icd-management-test-srcs") {
+  sources = [
+    "${chip_root}/src/app/icd/IcdManagementServer.cpp",
+    "${chip_root}/src/app/icd/IcdManagementServer.h",
+    "${chip_root}/src/app/icd/IcdMonitoringTable.cpp",
+    "${chip_root}/src/app/icd/IcdMonitoringTable.h",
+  ]
+
+  public_deps = [
+    "${chip_root}/src/app/common:cluster-objects",
+    "${chip_root}/src/lib/core",
+  ]
+}
+
 source_set("ota-requestor-test-srcs") {
   sources = [
     "${chip_root}/src/app/clusters/ota-requestor/DefaultOTARequestorStorage.cpp",
@@ -176,8 +190,8 @@ chip_test_suite("tests") {
     ":time-sync-data-provider-test-srcs",
     "${chip_root}/src/app",
     "${chip_root}/src/app/common:cluster-objects",
+    "${chip_root}/src/app/icd:cluster-srcs",
     "${chip_root}/src/app/icd:manager-srcs",
-    "${chip_root}/src/app/icd:monitoring-table",
     "${chip_root}/src/app/tests:helpers",
     "${chip_root}/src/app/util/mock:mock_ember",
     "${chip_root}/src/lib/core",
