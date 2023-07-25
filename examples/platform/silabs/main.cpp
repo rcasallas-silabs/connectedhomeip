@@ -48,6 +48,7 @@ int main(void)
 {
     GetPlatform().Init();
 
+    ChipLogProgress(Zcl, "*** Main ***");
     if (SilabsMatterConfig::InitMatter(BLE_DEV_NAME) != CHIP_NO_ERROR)
         appError(CHIP_ERROR_INTERNAL);
 
