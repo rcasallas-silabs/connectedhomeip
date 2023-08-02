@@ -1451,6 +1451,7 @@ def triggerSqaSmokeAndRegressionTest(buildTool)
                                 sqaFunctions.commitToMatterSqaPipelines(buildTool, 'smoke')
                                 sqaFunctions.commitToMatterSqaPipelines(buildTool, 'regression')
                                 sqaFunctions.commitToMatterSqaPipelines(buildTool, 'endurance-customers-issues')
+                                sqaFunctions.commitToMatterSqaPipelines(buildTool, 'regression-binding-enhanced')
                             }
                 }
             }
