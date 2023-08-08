@@ -189,7 +189,7 @@ def buildOpenThreadExample(app, ota_automation=false, config_args='')
                                 else{
                                         def arguments = ""
                                         if (sleepyBoard.contains(board)) {
-                                            arguments = "--sed"
+                                            arguments = "--icd"
                                         }
                                         // Enable matter shell with chip_build_libshell=true argument for SQA tests
                                         sh """./scripts/examples/gn_silabs_example.sh ./examples/${app}/silabs ./out/CSA/${app}/OpenThread/standard ${board} chip_build_libshell=true
@@ -348,19 +348,19 @@ def buildSilabsSensorApp()
                                         cp ./out/silabs/silabs-sensors/contact/OpenThread/${board}/*.map ${saved_workspace}/out/standard/${board}/OpenThread/sensors/contact/
                                 """
 
-                                sh """ ./scripts/examples/gn_silabs_example.sh ./silabs_examples/silabs-sensors ./out/silabs/silabs-sensors/occupancy-sed/OpenThread ${board} \"is_occupancy_sensor=true\" --sed
+                                sh """ ./scripts/examples/gn_silabs_example.sh ./silabs_examples/silabs-sensors ./out/silabs/silabs-sensors/occupancy-sed/OpenThread ${board} \"is_occupancy_sensor=true\" --icd
                                         mkdir -p ${saved_workspace}/out/sleepy/${board}/OpenThread/sensors/occupancy-sed/
                                         cp ./out/silabs/silabs-sensors/occupancy-sed/OpenThread/${board}/*.s37 ${saved_workspace}/out/sleepy/${board}/OpenThread/sensors/occupancy-sed/
                                         cp ./out/silabs/silabs-sensors/occupancy-sed/OpenThread/${board}/*.map ${saved_workspace}/out/sleepy/${board}/OpenThread/sensors/occupancy-sed/
                                 """
 
-                                sh """ ./scripts/examples/gn_silabs_example.sh ./silabs_examples/silabs-sensors ./out/silabs/silabs-sensors/temperature-sed/OpenThread ${board} \"is_temperature_sensor=true\" --sed
+                                sh """ ./scripts/examples/gn_silabs_example.sh ./silabs_examples/silabs-sensors ./out/silabs/silabs-sensors/temperature-sed/OpenThread ${board} \"is_temperature_sensor=true\" --icd
                                         mkdir -p ${saved_workspace}/out/sleepy/${board}/OpenThread/sensors/temperature-sed/
                                         cp ./out/silabs/silabs-sensors/temperature-sed/OpenThread/${board}/*.s37 ${saved_workspace}/out/sleepy/${board}/OpenThread/sensors/temperature-sed/
                                         cp ./out/silabs/silabs-sensors/temperature-sed/OpenThread/${board}/*.map ${saved_workspace}/out/sleepy/${board}/OpenThread/sensors/temperature-sed/
                                 """
 
-                                sh """ ./scripts/examples/gn_silabs_example.sh ./silabs_examples/silabs-sensors ./out/silabs/silabs-sensors/contact-sed/OpenThread ${board} \"is_contact_sensor=true\" --sed
+                                sh """ ./scripts/examples/gn_silabs_example.sh ./silabs_examples/silabs-sensors ./out/silabs/silabs-sensors/contact-sed/OpenThread ${board} \"is_contact_sensor=true\" --icd
                                         mkdir -p ${saved_workspace}/out/sleepy/${board}/OpenThread/sensors/contact-sed/
                                         cp ./out/silabs/silabs-sensors/contact-sed/OpenThread/${board}/*.s37 ${saved_workspace}/out/sleepy/${board}/OpenThread/sensors/contact-sed/
                                         cp ./out/silabs/silabs-sensors/contact-sed/OpenThread/${board}/*.map ${saved_workspace}/out/sleepy/${board}/OpenThread/sensors/contact-sed/
@@ -408,7 +408,7 @@ def executeWifiBuild(exampleType, app, relPath, radioName, board, args, ota_auto
 
     // for sleepy devices
     if (sleepyBoard.contains(board)) {
-        sh "./scripts/examples/gn_silabs_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName}/sleepy ${board} enable_sleepy_device=true ${args}"
+       sh "./scripts/examples/gn_silabs_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName}/sleepy ${board} chip_enable_icd_server=true ${args}"
     }
 }
 
