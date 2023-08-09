@@ -34,6 +34,7 @@ silabs_examples/ @@MatterWatt @@MatterWifi
 
 silabs_examples/unify-matter-bridge/ @@Unify
 silabs_examples/unify-matter-pc/ @@Unify
+silabs_examples/unify-matter-common/ @@Unify
 
 CODEOWNERS               @@MatterWatt
 
