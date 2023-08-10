@@ -106,6 +106,16 @@ CHIP_ERROR AES_CCM_encrypt(const uint8_t * plaintext, size_t plaintext_length, c
                            const Aes128KeyHandle & key, const uint8_t * nonce, size_t nonce_length, uint8_t * ciphertext,
                            uint8_t * tag, size_t tag_length)
 {
+    uint8_t kbuf[sizeof(Aes128KeyByteArray)];
+    size_t key_len = 0;
+    psa_status_t stat = 0;
+
+    stat = psa_export_key(key.As<psa_key_id_t>(), kbuf, sizeof(kbuf), &key_len);
+
+    Progress::Debug("◆ AES_CCM_encrypt, key(%u):%04x [%02x %02x] !%d",
+    key_len, (unsigned)key.As<psa_key_id_t>(), kbuf[0], kbuf[1], stat);
+
+
     VerifyOrReturnError(isBufferNonEmpty(nonce, nonce_length), CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrReturnError(isValidTag(tag, tag_length), CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrReturnError((ciphertext != nullptr && plaintext != nullptr) || plaintext_length == 0, CHIP_ERROR_INVALID_ARGUMENT);
@@ -160,6 +170,16 @@ CHIP_ERROR AES_CCM_decrypt(const uint8_t * ciphertext, size_t ciphertext_length,
                            const uint8_t * tag, size_t tag_length, const Aes128KeyHandle & key, const uint8_t * nonce,
                            size_t nonce_length, uint8_t * plaintext)
 {
+    uint8_t kbuf[sizeof(Aes128KeyByteArray)];
+    size_t key_len = 0;
+    psa_status_t stat = 0;
+
+    stat = psa_export_key(key.As<psa_key_id_t>(), kbuf, sizeof(kbuf), &key_len);
+
+    Progress::Debug("◇ AES_CCM_encrypt, key(%u):%04x [%02x %02x] !%d",
+    key_len, (unsigned)key.As<psa_key_id_t>(), kbuf[0], kbuf[1], stat);
+
+
     VerifyOrReturnError(isBufferNonEmpty(nonce, nonce_length), CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrReturnError(isValidTag(tag, tag_length), CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrReturnError((ciphertext != nullptr && plaintext != nullptr) || ciphertext_length == 0, CHIP_ERROR_INVALID_ARGUMENT);
@@ -168,7 +188,7 @@ CHIP_ERROR AES_CCM_decrypt(const uint8_t * ciphertext, size_t ciphertext_length,
     const psa_algorithm_t algorithm = PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, tag_length);
     psa_status_t status             = PSA_SUCCESS;
     psa_aead_operation_t operation  = PSA_AEAD_OPERATION_INIT;
-    size_t outLength;
+    size_t outLength = 0;
 
     status = psa_aead_decrypt_setup(&operation, key.As<psa_key_id_t>(), algorithm);
     VerifyOrReturnError(status == PSA_SUCCESS, CHIP_ERROR_INTERNAL);
@@ -193,12 +213,14 @@ CHIP_ERROR AES_CCM_decrypt(const uint8_t * ciphertext, size_t ciphertext_length,
     {
         status = psa_aead_update(&operation, ciphertext, ciphertext_length, plaintext,
                                  PSA_AEAD_UPDATE_OUTPUT_SIZE(PSA_KEY_TYPE_AES, algorithm, ciphertext_length), &outLength);
+        Progress::Debug("AES_CCM_decrypt, psa_aead_update: !%d, olen:%u", status, (unsigned)outLength);
         VerifyOrReturnError(status == PSA_SUCCESS, CHIP_ERROR_INTERNAL);
 
         plaintext += outLength;
 
         status = psa_aead_verify(&operation, plaintext, PSA_AEAD_VERIFY_OUTPUT_SIZE(PSA_KEY_TYPE_AES, algorithm), &outLength, tag,
                                  tag_length);
+        Progress::Debug("AES_CCM_decrypt, psa_aead_verify1: !%d", status);
     }
     else
     {

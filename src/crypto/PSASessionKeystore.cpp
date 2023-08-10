@@ -35,7 +35,7 @@ public:
 
         psa_set_key_type(&mAttrs, PSA_KEY_TYPE_AES);
         psa_set_key_algorithm(&mAttrs, kAlgorithm);
-        psa_set_key_usage_flags(&mAttrs, PSA_KEY_USAGE_ENCRYPT | PSA_KEY_USAGE_DECRYPT);
+        psa_set_key_usage_flags(&mAttrs, PSA_KEY_USAGE_ENCRYPT | PSA_KEY_USAGE_DECRYPT | PSA_KEY_USAGE_EXPORT);
         psa_set_key_bits(&mAttrs, CHIP_CRYPTO_SYMMETRIC_KEY_LENGTH_BYTES * 8);
     }
 
