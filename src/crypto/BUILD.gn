@@ -139,13 +139,20 @@ static_library("crypto") {
 
   if (chip_crypto == "psa") {
     sources += [
+      "PSAKeyDerivation.cpp",
+      "PSAKeyDerivation.h",
       "PSASessionKeystore.cpp",
       "PSASessionKeystore.h",
     ]
   } else {
     sources += [
-      "RawKeySessionKeystore.cpp",
-      "RawKeySessionKeystore.h",
+      "PSAKeyDerivation.cpp",
+      "PSAKeyDerivation.h",
+      "PSASessionKeystore.cpp",
+      "PSASessionKeystore.h",
+
+      # "RawKeySessionKeystore.cpp",
+      # "RawKeySessionKeystore.h",
     ]
   }
 

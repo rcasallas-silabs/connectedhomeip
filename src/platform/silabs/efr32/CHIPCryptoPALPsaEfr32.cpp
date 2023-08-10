@@ -118,13 +118,14 @@ static void _log_PSA_error(psa_status_t status)
     }
 }
 
-static bool _isValidTagLength(size_t tag_length)
+bool isBufferNonEmpty(const uint8_t * data, size_t data_length)
 {
-    if (tag_length == 8 || tag_length == 12 || tag_length == 16)
-    {
-        return true;
-    }
-    return false;
+    return data != nullptr && data_length > 0;
+}
+
+bool isValidTag(const uint8_t * tag, size_t tag_length)
+{
+    return tag != nullptr && (tag_length == 8 || tag_length == 12 || tag_length == 16);
 }
 
 /**
@@ -157,119 +158,128 @@ static int timeCompare(mbedtls_x509_time * t1, mbedtls_x509_time * t2)
     return 0;
 }
 
+
 CHIP_ERROR AES_CCM_encrypt(const uint8_t * plaintext, size_t plaintext_length, const uint8_t * aad, size_t aad_length,
                            const Aes128KeyHandle & key, const uint8_t * nonce, size_t nonce_length, uint8_t * ciphertext,
                            uint8_t * tag, size_t tag_length)
 {
-    CHIP_ERROR error          = CHIP_NO_ERROR;
-    psa_status_t status       = PSA_ERROR_BAD_STATE;
-    psa_key_attributes_t attr = PSA_KEY_ATTRIBUTES_INIT;
-    size_t output_length      = 0;
-    uint8_t * buffer          = nullptr;
-    bool allocated_buffer     = false;
+    VerifyOrReturnError(isBufferNonEmpty(nonce, nonce_length), CHIP_ERROR_INVALID_ARGUMENT);
+    VerifyOrReturnError(isValidTag(tag, tag_length), CHIP_ERROR_INVALID_ARGUMENT);
+    VerifyOrReturnError((ciphertext != nullptr && plaintext != nullptr) || plaintext_length == 0, CHIP_ERROR_INVALID_ARGUMENT);
+    VerifyOrReturnError(aad != nullptr || aad_length == 0, CHIP_ERROR_INVALID_ARGUMENT);
 
-    VerifyOrExit(_isValidTagLength(tag_length), error = CHIP_ERROR_INVALID_ARGUMENT);
-    VerifyOrExit(nonce != nullptr, error = CHIP_ERROR_INVALID_ARGUMENT);
-    VerifyOrExit(nonce_length > 0, error = CHIP_ERROR_INVALID_ARGUMENT);
-    VerifyOrExit(CanCastTo<int>(nonce_length), error = CHIP_ERROR_INVALID_ARGUMENT);
-    VerifyOrExit(tag != nullptr, error = CHIP_ERROR_INVALID_ARGUMENT);
+    Progress::Debug("◆ AES_CCM_encrypt, key:%04x", (unsigned)key.As<psa_key_id_t>());
 
-    // If the ciphertext and tag outputs aren't a contiguous buffer, the PSA API requires buffer copying
-    if (Uint8::to_uchar(ciphertext) + plaintext_length != Uint8::to_uchar(tag))
+    const psa_algorithm_t algorithm = PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, tag_length);
+    psa_status_t status             = PSA_SUCCESS;
+    psa_aead_operation_t operation  = PSA_AEAD_OPERATION_INIT;
+    size_t out_length;
+    size_t tag_out_length;
+
+    status = psa_aead_encrypt_setup(&operation, key.As<psa_key_id_t>(), algorithm);
+    VerifyOrReturnError(status == PSA_SUCCESS, CHIP_ERROR_INTERNAL);
+
+    status = psa_aead_set_lengths(&operation, aad_length, plaintext_length);
+    VerifyOrReturnError(status == PSA_SUCCESS, CHIP_ERROR_INTERNAL);
+
+    status = psa_aead_set_nonce(&operation, nonce, nonce_length);
+    VerifyOrReturnError(status == PSA_SUCCESS, CHIP_ERROR_INTERNAL);
+
+    if (aad_length != 0)
     {
-        buffer           = (uint8_t *) MemoryCalloc(1, plaintext_length + tag_length);
-        allocated_buffer = true;
-        VerifyOrExit(buffer != nullptr, error = CHIP_ERROR_NO_MEMORY);
+        status = psa_aead_update_ad(&operation, aad, aad_length);
+        VerifyOrReturnError(status == PSA_SUCCESS, CHIP_ERROR_INTERNAL);
+    }
+    else
+    {
+        ChipLogDetail(Crypto, "AES_CCM_encrypt: Using aad == null path");
     }
 
-    psa_crypto_init();
-
-    psa_set_key_type(&attr, PSA_KEY_TYPE_AES);
-    psa_set_key_bits(&attr, sizeof(Aes128KeyByteArray) * 8);
-    psa_set_key_algorithm(&attr, PSA_ALG_AEAD_WITH_AT_LEAST_THIS_LENGTH_TAG(PSA_ALG_CCM, 8));
-    psa_set_key_usage_flags(&attr, PSA_KEY_USAGE_ENCRYPT);
-
-    status = psa_driver_wrapper_aead_encrypt(
-        &attr, key.As<Aes128KeyByteArray>(), sizeof(Aes128KeyByteArray), PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, tag_length),
-        Uint8::to_const_uchar(nonce), nonce_length, Uint8::to_const_uchar(aad), aad_length, Uint8::to_const_uchar(plaintext),
-        plaintext_length, allocated_buffer ? buffer : ciphertext, plaintext_length + tag_length, &output_length);
-
-    VerifyOrExit(status == PSA_SUCCESS, error = CHIP_ERROR_INTERNAL);
-    VerifyOrExit(output_length == plaintext_length + tag_length, error = CHIP_ERROR_INTERNAL);
-
-    if (allocated_buffer)
+    if (plaintext_length != 0)
     {
-        memcpy(Uint8::to_uchar(ciphertext), buffer, plaintext_length);
-        memcpy(Uint8::to_uchar(tag), buffer + plaintext_length, tag_length);
-        memset(buffer, 0, plaintext_length + tag_length);
-    }
+        status = psa_aead_update(&operation, plaintext, plaintext_length, ciphertext,
+                                 PSA_AEAD_UPDATE_OUTPUT_SIZE(PSA_KEY_TYPE_AES, algorithm, plaintext_length), &out_length);
+        VerifyOrReturnError(status == PSA_SUCCESS, CHIP_ERROR_INTERNAL);
 
-exit:
-    if (allocated_buffer)
-    {
-        MemoryFree(buffer);
+        ciphertext += out_length;
+
+        status = psa_aead_finish(&operation, ciphertext, PSA_AEAD_FINISH_OUTPUT_SIZE(PSA_KEY_TYPE_AES, algorithm), &out_length, tag,
+                                 tag_length, &tag_out_length);
     }
-    psa_reset_key_attributes(&attr);
-    return error;
+    else
+    {
+        status = psa_aead_finish(&operation, nullptr, 0, &out_length, tag, tag_length, &tag_out_length);
+    }
+    VerifyOrReturnError(status == PSA_SUCCESS && tag_length == tag_out_length, CHIP_ERROR_INTERNAL);
+
+    return CHIP_NO_ERROR;
 }
 
-CHIP_ERROR AES_CCM_decrypt(const uint8_t * ciphertext, size_t ciphertext_len, const uint8_t * aad, size_t aad_len,
+CHIP_ERROR AES_CCM_decrypt(const uint8_t * ciphertext, size_t ciphertext_length, const uint8_t * aad, size_t aad_length,
                            const uint8_t * tag, size_t tag_length, const Aes128KeyHandle & key, const uint8_t * nonce,
                            size_t nonce_length, uint8_t * plaintext)
 {
-    CHIP_ERROR error          = CHIP_NO_ERROR;
-    psa_status_t status       = PSA_ERROR_BAD_STATE;
-    psa_key_attributes_t attr = PSA_KEY_ATTRIBUTES_INIT;
-    size_t output_length      = 0;
-    uint8_t * buffer          = nullptr;
-    bool allocated_buffer     = false;
 
-    VerifyOrExit(_isValidTagLength(tag_length), error = CHIP_ERROR_INVALID_ARGUMENT);
-    VerifyOrExit(tag != nullptr, error = CHIP_ERROR_INVALID_ARGUMENT);
-    VerifyOrExit(nonce != nullptr, error = CHIP_ERROR_INVALID_ARGUMENT);
-    VerifyOrExit(nonce_length > 0, error = CHIP_ERROR_INVALID_ARGUMENT);
+    uint8_t kbuf[sizeof(Aes128KeyByteArray)];
+    size_t key_len = 0;
+    psa_status_t stat = 0;
 
-    // If the ciphertext and tag outputs aren't a contiguous buffer, the PSA API requires buffer copying
-    if (Uint8::to_const_uchar(ciphertext) + ciphertext_len != Uint8::to_const_uchar(tag))
+    stat = psa_export_key(key.As<psa_key_id_t>(), kbuf, sizeof(kbuf), &key_len);
+
+    Progress::Debug("◇ AES_CCM_decrypt, key(%u):%04x [%02x %02x] !%d",
+        key_len, (unsigned)key.As<psa_key_id_t>(), kbuf[0], kbuf[1], stat);
+
+    VerifyOrReturnError(isBufferNonEmpty(nonce, nonce_length), CHIP_ERROR_INVALID_ARGUMENT);
+    VerifyOrReturnError(isValidTag(tag, tag_length), CHIP_ERROR_INVALID_ARGUMENT);
+    VerifyOrReturnError((ciphertext != nullptr && plaintext != nullptr) || ciphertext_length == 0, CHIP_ERROR_INVALID_ARGUMENT);
+    VerifyOrReturnError(aad != nullptr || aad_length == 0, CHIP_ERROR_INVALID_ARGUMENT);
+
+    const psa_algorithm_t algorithm = PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, tag_length);
+    psa_status_t status             = PSA_SUCCESS;
+    psa_aead_operation_t operation  = PSA_AEAD_OPERATION_INIT;
+    size_t outLength = 0;
+
+    status = psa_aead_decrypt_setup(&operation, key.As<psa_key_id_t>(), algorithm);
+    VerifyOrReturnError(status == PSA_SUCCESS, CHIP_ERROR_INTERNAL);
+
+    status = psa_aead_set_lengths(&operation, aad_length, ciphertext_length);
+    VerifyOrReturnError(status == PSA_SUCCESS, CHIP_ERROR_INTERNAL);
+
+    status = psa_aead_set_nonce(&operation, nonce, nonce_length);
+    VerifyOrReturnError(status == PSA_SUCCESS, CHIP_ERROR_INTERNAL);
+
+    if (aad_length != 0)
     {
-        buffer           = (uint8_t *) MemoryCalloc(1, ciphertext_len + tag_length);
-        allocated_buffer = true;
-        VerifyOrExit(buffer != nullptr, error = CHIP_ERROR_NO_MEMORY);
+        status = psa_aead_update_ad(&operation, aad, aad_length);
+        VerifyOrReturnError(status == PSA_SUCCESS, CHIP_ERROR_INTERNAL);
+    }
+    else
+    {
+        ChipLogDetail(Crypto, "AES_CCM_decrypt: Using aad == null path");
     }
 
-    psa_crypto_init();
-
-    psa_set_key_type(&attr, PSA_KEY_TYPE_AES);
-    psa_set_key_bits(&attr, sizeof(Aes128KeyByteArray) * 8);
-    psa_set_key_algorithm(&attr, PSA_ALG_AEAD_WITH_AT_LEAST_THIS_LENGTH_TAG(PSA_ALG_CCM, 8));
-    psa_set_key_usage_flags(&attr, PSA_KEY_USAGE_DECRYPT);
-
-    if (allocated_buffer)
+    if (ciphertext_length != 0)
     {
-        memcpy(buffer, ciphertext, ciphertext_len);
-        memcpy(buffer + ciphertext_len, tag, tag_length);
+        status = psa_aead_update(&operation, ciphertext, ciphertext_length, plaintext,
+                                 PSA_AEAD_UPDATE_OUTPUT_SIZE(PSA_KEY_TYPE_AES, algorithm, ciphertext_length), &outLength);
+        Progress::Debug("AES_CCM_decrypt, psa_aead_update: !%d, olen:%u", status, (unsigned)outLength);
+        VerifyOrReturnError(status == PSA_SUCCESS, CHIP_ERROR_INTERNAL);
+
+        plaintext += outLength;
+
+        status = psa_aead_verify(&operation, plaintext, PSA_AEAD_VERIFY_OUTPUT_SIZE(PSA_KEY_TYPE_AES, algorithm), &outLength, tag,
+                                 tag_length);
+        Progress::Debug("AES_CCM_decrypt, psa_aead_verify1: !%d", status);
+    }
+    else
+    {
+        status = psa_aead_verify(&operation, nullptr, 0, &outLength, tag, tag_length);
+        Progress::Debug("AES_CCM_decrypt, psa_aead_verify2: !%d", status);
     }
 
-    status = psa_driver_wrapper_aead_decrypt(
-        &attr, key.As<Aes128KeyByteArray>(), sizeof(Aes128KeyByteArray), PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, tag_length),
-        Uint8::to_const_uchar(nonce), nonce_length, Uint8::to_const_uchar(aad), aad_len, allocated_buffer ? buffer : ciphertext,
-        ciphertext_len + tag_length, plaintext, ciphertext_len, &output_length);
+    VerifyOrReturnError(status == PSA_SUCCESS, CHIP_ERROR_INTERNAL);
 
-    if (allocated_buffer)
-    {
-        memset(buffer, 0, ciphertext_len + tag_length);
-    }
-
-    VerifyOrExit(status == PSA_SUCCESS, error = CHIP_ERROR_INTERNAL);
-    VerifyOrExit(output_length == ciphertext_len, error = CHIP_ERROR_INTERNAL);
-exit:
-    if (allocated_buffer)
-    {
-        MemoryFree(buffer);
-    }
-
-    psa_reset_key_attributes(&attr);
-    return error;
+    return CHIP_NO_ERROR;
 }
 
 CHIP_ERROR Hash_SHA256(const uint8_t * data, const size_t data_length, uint8_t * out_buffer)

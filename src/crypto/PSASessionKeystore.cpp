@@ -16,6 +16,7 @@
  */
 
 #include "PSASessionKeystore.h"
+#include "PSAKeyDerivation.h"
 
 #include <crypto/CHIPCryptoPALPSA.h>
 
@@ -35,7 +36,7 @@ public:
 
         psa_set_key_type(&mAttrs, PSA_KEY_TYPE_AES);
         psa_set_key_algorithm(&mAttrs, kAlgorithm);
-        psa_set_key_usage_flags(&mAttrs, PSA_KEY_USAGE_ENCRYPT | PSA_KEY_USAGE_DECRYPT);
+        psa_set_key_usage_flags(&mAttrs, PSA_KEY_USAGE_ENCRYPT | PSA_KEY_USAGE_DECRYPT | PSA_KEY_USAGE_EXPORT);
         psa_set_key_bits(&mAttrs, CHIP_CRYPTO_SYMMETRIC_KEY_LENGTH_BYTES * 8);
     }
 
@@ -51,6 +52,8 @@ private:
 
 CHIP_ERROR PSASessionKeystore::CreateKey(const Aes128KeyByteArray & keyMaterial, Aes128KeyHandle & key)
 {
+    Progress::Debug("◇ PSASessionKeystore::CreateKey, key:%04x", (unsigned)key.As<psa_key_id_t>());
+
     // Destroy the old key if already allocated
     psa_destroy_key(key.As<psa_key_id_t>());
 
@@ -65,6 +68,8 @@ CHIP_ERROR PSASessionKeystore::DeriveKey(const P256ECDHDerivedSecret & secret, c
                                          Aes128KeyHandle & key)
 {
     PsaKdf kdf;
+
+    Progress::Debug("◇ PSASessionKeystore::DeriveKey, key:%04x", (unsigned)key.As<psa_key_id_t>());
     ReturnErrorOnFailure(kdf.Init(PSA_ALG_HKDF(PSA_ALG_SHA_256), secret.Span(), salt, info));
 
     AesKeyAttributes attrs;
@@ -77,14 +82,25 @@ CHIP_ERROR PSASessionKeystore::DeriveSessionKeys(const ByteSpan & secret, const 
                                                  AttestationChallenge & attestationChallenge)
 {
     PsaKdf kdf;
-    ReturnErrorOnFailure(kdf.Init(PSA_ALG_HKDF(PSA_ALG_SHA_256), secret, salt, info));
-
     CHIP_ERROR error;
     AesKeyAttributes attrs;
+    uint8_t i2r[sizeof(Aes128KeyByteArray)];
+    uint8_t r2i[sizeof(Aes128KeyByteArray)];
+    size_t key_len = 0;
+    psa_status_t stat1 = 0;
+    psa_status_t stat2 = 0;
+
+    ReturnErrorOnFailure(kdf.Init(PSA_ALG_HKDF(PSA_ALG_SHA_256), secret, salt, info));
 
     SuccessOrExit(error = kdf.DeriveKey(attrs.Get(), i2rKey.AsMutable<psa_key_id_t>()));
     SuccessOrExit(error = kdf.DeriveKey(attrs.Get(), r2iKey.AsMutable<psa_key_id_t>()));
     SuccessOrExit(error = kdf.DeriveBytes(MutableByteSpan(attestationChallenge.Bytes(), AttestationChallenge::Capacity())));
+
+    stat1 = psa_export_key(i2rKey.As<psa_key_id_t>(), i2r, sizeof(i2r), &key_len);
+    stat2 = psa_export_key(r2iKey.As<psa_key_id_t>(), r2i, sizeof(r2i), &key_len);
+
+    Progress::Debug("◇ PSASessionKeystore::DeriveSessionKeys, I2R:%04x [%02x %02x] !%d, R2I:%04x [%02x %02x] !%d",
+        (unsigned)i2rKey.As<psa_key_id_t>(), i2r[0], i2r[1], stat1, (unsigned)r2iKey.As<psa_key_id_t>(), r2i[0], r2i[1], stat2);
 
 exit:
     if (error != CHIP_NO_ERROR)
@@ -100,6 +116,7 @@ void PSASessionKeystore::DestroyKey(Aes128KeyHandle & key)
 {
     auto & keyId = key.AsMutable<psa_key_id_t>();
 
+    Progress::Debug("◇ PSASessionKeystore::DestroyKey, key:%04x", (unsigned)key.As<psa_key_id_t>());
     psa_destroy_key(keyId);
     keyId = 0;
 }
