@@ -2335,6 +2335,9 @@ void DeviceCommissioner::PerformCommissioningStep(DeviceProxy * proxy, Commissio
                                                   CommissioningDelegate * delegate, EndpointId endpoint,
                                                   Optional<System::Clock::Timeout> timeout)
 {
+
+    Progress::Debug("  ∙ %s", StageToString(step));
+
     if (params.GetCompletionStatus().err == CHIP_NO_ERROR)
     {
         ChipLogProgress(Controller, "Performing next commissioning step '%s'", StageToString(step));

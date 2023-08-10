@@ -57,7 +57,7 @@ declare_args() {
   sl_icd_supported_clients_per_fabric = 2  # 2 registration slots per fabric
   sl_use_subscription_synching = false
 
-  silabs_log_enabled = true
+  silabs_log_enabled = chip_logging
 
   # Argument to enable IPv4 for wifi
   # aligning to match chip_inet_config_enable_ipv4 default configuration

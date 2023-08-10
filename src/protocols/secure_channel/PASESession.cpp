@@ -264,6 +264,7 @@ CHIP_ERROR PASESession::DeriveSecureSession(CryptoContext & session) const
 
 CHIP_ERROR PASESession::SendPBKDFParamRequest()
 {
+    Progress::Debug("‣ PASE: PBKDF Param Request");
     MATTER_TRACE_SCOPE("SendPBKDFParamRequest", "PASESession");
 
     VerifyOrReturnError(GetLocalSessionId().HasValue(), CHIP_ERROR_INCORRECT_STATE);
@@ -313,6 +314,7 @@ CHIP_ERROR PASESession::SendPBKDFParamRequest()
 
 CHIP_ERROR PASESession::HandlePBKDFParamRequest(System::PacketBufferHandle && msg)
 {
+    Progress::Debug("◦ PASE: PBKDF Param Request");
     MATTER_TRACE_SCOPE("HandlePBKDFParamRequest", "PASESession");
     CHIP_ERROR err = CHIP_NO_ERROR;
 
@@ -376,6 +378,7 @@ exit:
 
 CHIP_ERROR PASESession::SendPBKDFParamResponse(ByteSpan initiatorRandom, bool initiatorHasPBKDFParams)
 {
+    Progress::Debug("‣ PASE: PBKDF Param Response");
     MATTER_TRACE_SCOPE("SendPBKDFParamResponse", "PASESession");
 
     VerifyOrReturnError(GetLocalSessionId().HasValue(), CHIP_ERROR_INCORRECT_STATE);
@@ -437,6 +440,7 @@ CHIP_ERROR PASESession::SendPBKDFParamResponse(ByteSpan initiatorRandom, bool in
 
 CHIP_ERROR PASESession::HandlePBKDFParamResponse(System::PacketBufferHandle && msg)
 {
+    Progress::Debug("◦ PASE: PBKDF Param Response");
     MATTER_TRACE_SCOPE("HandlePBKDFParamResponse", "PASESession");
     CHIP_ERROR err = CHIP_NO_ERROR;
 
@@ -533,6 +537,7 @@ exit:
 
 CHIP_ERROR PASESession::SendMsg1()
 {
+    Progress::Debug("‣ PASE: Pake1 (Contribution)");
     MATTER_TRACE_SCOPE("SendMsg1", "PASESession");
     const size_t max_msg_len       = TLV::EstimateStructOverhead(kMAX_Point_Length);
     System::PacketBufferHandle msg = System::PacketBufferHandle::New(max_msg_len);
@@ -566,6 +571,7 @@ CHIP_ERROR PASESession::SendMsg1()
 
 CHIP_ERROR PASESession::HandleMsg1_and_SendMsg2(System::PacketBufferHandle && msg1)
 {
+    Progress::Debug("◦ PASE: Pake1 (Contribution)");
     MATTER_TRACE_SCOPE("HandleMsg1_and_SendMsg2", "PASESession");
     CHIP_ERROR err = CHIP_NO_ERROR;
 
@@ -617,6 +623,7 @@ CHIP_ERROR PASESession::HandleMsg1_and_SendMsg2(System::PacketBufferHandle && ms
         SuccessOrExit(err = tlvWriter.EndContainer(outerContainerType));
         SuccessOrExit(err = tlvWriter.Finalize(&msg2));
 
+        Progress::Debug("‣ PASE: Pake2 (Contribution/Verification)");
         err = mExchangeCtxt->SendMessage(MsgType::PASE_Pake2, std::move(msg2), SendFlags(SendMessageFlags::kExpectResponse));
         SuccessOrExit(err);
 
@@ -636,6 +643,7 @@ exit:
 
 CHIP_ERROR PASESession::HandleMsg2_and_SendMsg3(System::PacketBufferHandle && msg2)
 {
+    Progress::Debug("◦ PASE: Pake2 (Contribution/Verification)");
     MATTER_TRACE_SCOPE("HandleMsg2_and_SendMsg3", "PASESession");
     CHIP_ERROR err = CHIP_NO_ERROR;
 
@@ -693,6 +701,7 @@ CHIP_ERROR PASESession::HandleMsg2_and_SendMsg3(System::PacketBufferHandle && ms
         SuccessOrExit(err = tlvWriter.EndContainer(outerContainerType));
         SuccessOrExit(err = tlvWriter.Finalize(&msg3));
 
+        Progress::Debug("‣ PASE: Pake3 (Verification)");
         err = mExchangeCtxt->SendMessage(MsgType::PASE_Pake3, std::move(msg3), SendFlags(SendMessageFlags::kExpectResponse));
         SuccessOrExit(err);
 
@@ -712,6 +721,7 @@ exit:
 
 CHIP_ERROR PASESession::HandleMsg3(System::PacketBufferHandle && msg)
 {
+    Progress::Debug("◦ PASE: Pake3 (Verification)");
     MATTER_TRACE_SCOPE("HandleMsg3", "PASESession");
     CHIP_ERROR err = CHIP_NO_ERROR;
 
@@ -740,6 +750,7 @@ CHIP_ERROR PASESession::HandleMsg3(System::PacketBufferHandle && msg)
     SuccessOrExit(err = mSpake2p.GetKeys(mKe, &mKeLen));
 
     // Send confirmation to peer that we succeeded so they can start using the session.
+    Progress::Debug("‣ PASE: Pake Finished");
     SendStatusReport(mExchangeCtxt, kProtocolCodeSuccess);
 
     Finish();
@@ -754,12 +765,14 @@ exit:
 
 void PASESession::OnSuccessStatusReport()
 {
+    Progress::Debug("◦ PASE: Pake Finished");
     Finish();
 }
 
 CHIP_ERROR PASESession::OnFailureStatusReport(Protocols::SecureChannel::GeneralStatusCode generalCode, uint16_t protocolCode)
 {
     CHIP_ERROR err = CHIP_NO_ERROR;
+    Progress::Debug("△ PASE: Pake FAILED (%04x)", (unsigned) err.AsInteger());
     switch (protocolCode)
     {
     case kProtocolCodeInvalidParam:

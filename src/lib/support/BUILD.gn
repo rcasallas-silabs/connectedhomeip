@@ -144,6 +144,8 @@ static_library("support") {
     "ZclString.h",
     "logging/CHIPLogging.cpp",
     "logging/CHIPLogging.h",
+    "logging/Progress.cpp",
+    "logging/Progress.h",
     "verhoeff/Verhoeff.cpp",
     "verhoeff/Verhoeff.h",
     "verhoeff/Verhoeff10.cpp",

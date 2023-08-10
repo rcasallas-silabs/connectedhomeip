@@ -30,6 +30,7 @@
 #include <lib/core/CHIPError.h>
 #include <lib/support/ErrorStr.h>
 #include <lib/support/logging/CHIPLogging.h>
+#include <lib/support/logging/Progress.h>
 
 /**
  * Base-level abnormal termination.

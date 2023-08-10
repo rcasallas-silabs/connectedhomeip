@@ -172,7 +172,7 @@ CHIP_ERROR CryptoContext::Encrypt(const uint8_t * input, size_t input_length, ui
                                   PacketHeader & header, MessageAuthenticationCode & mac) const
 {
 
-    const size_t taglen = header.MICTagLength();
+    volatile const size_t taglen = header.MICTagLength();
 
     VerifyOrDie(taglen <= kMaxTagLen);
 

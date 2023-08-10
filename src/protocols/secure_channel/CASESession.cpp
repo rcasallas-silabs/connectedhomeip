@@ -639,6 +639,7 @@ CHIP_ERROR CASESession::RecoverInitiatorIpk()
 
 CHIP_ERROR CASESession::SendSigma1()
 {
+    Progress::Debug("‣ CASE: Sigma1");
     MATTER_TRACE_SCOPE("SendSigma1", "CASESession");
     const size_t mrpParamsSize =
         mLocalMRPConfig.HasValue() ? TLV::EstimateStructOverhead(sizeof(uint16_t), sizeof(uint16_t), sizeof(uint16_t)) : 0;
@@ -831,6 +832,7 @@ CHIP_ERROR CASESession::TryResumeSession(SessionResumptionStorage::ConstResumpti
 
 CHIP_ERROR CASESession::HandleSigma1(System::PacketBufferHandle && msg)
 {
+    Progress::Debug("◦ CASE: Sigma1");
     MATTER_TRACE_SCOPE("HandleSigma1", "CASESession");
     CHIP_ERROR err = CHIP_NO_ERROR;
     System::PacketBufferTLVReader tlvReader;
@@ -970,6 +972,7 @@ CHIP_ERROR CASESession::SendSigma2Resume()
 
 CHIP_ERROR CASESession::SendSigma2()
 {
+    Progress::Debug("‣ CASE: Sigma2");
     MATTER_TRACE_SCOPE("SendSigma2", "CASESession");
 
     VerifyOrReturnError(GetLocalSessionId().HasValue(), CHIP_ERROR_INCORRECT_STATE);
@@ -1109,6 +1112,7 @@ CHIP_ERROR CASESession::SendSigma2()
 
 CHIP_ERROR CASESession::HandleSigma2Resume(System::PacketBufferHandle && msg)
 {
+    Progress::Debug("◦ CASE: Sigma2 Resume");
     MATTER_TRACE_SCOPE("HandleSigma2Resume", "CASESession");
     CHIP_ERROR err = CHIP_NO_ERROR;
     System::PacketBufferTLVReader tlvReader;
@@ -1184,6 +1188,7 @@ CHIP_ERROR CASESession::HandleSigma2_and_SendSigma3(System::PacketBufferHandle &
 
 CHIP_ERROR CASESession::HandleSigma2(System::PacketBufferHandle && msg)
 {
+    Progress::Debug("◦ CASE: Sigma2");
     MATTER_TRACE_SCOPE("HandleSigma2", "CASESession");
     CHIP_ERROR err = CHIP_NO_ERROR;
     System::PacketBufferTLVReader tlvReader;
@@ -1353,6 +1358,7 @@ exit:
 
 CHIP_ERROR CASESession::SendSigma3a()
 {
+    Progress::Debug("‣ CASE: Sigma3a");
     MATTER_TRACE_SCOPE("SendSigma3", "CASESession");
     CHIP_ERROR err = CHIP_NO_ERROR;
 
@@ -1430,6 +1436,7 @@ exit:
 
 CHIP_ERROR CASESession::SendSigma3b(SendSigma3Data & data, bool & cancel)
 {
+    Progress::Debug("‣ CASE: Sigma3b");
     // Generate a signature
     if (data.keystore != nullptr)
     {
@@ -1484,6 +1491,7 @@ CHIP_ERROR CASESession::SendSigma3b(SendSigma3Data & data, bool & cancel)
 
 CHIP_ERROR CASESession::SendSigma3c(SendSigma3Data & data, CHIP_ERROR status)
 {
+    Progress::Debug("‣ CASE: Sigma3c");
     CHIP_ERROR err = CHIP_NO_ERROR;
 
     System::PacketBufferHandle msg_R3;
@@ -1567,6 +1575,7 @@ exit:
 
 CHIP_ERROR CASESession::HandleSigma3a(System::PacketBufferHandle && msg)
 {
+    Progress::Debug("◦ CASE: Sigma3a");
     MATTER_TRACE_SCOPE("HandleSigma3", "CASESession");
     CHIP_ERROR err = CHIP_NO_ERROR;
     System::PacketBufferTLVReader tlvReader;
@@ -1717,6 +1726,7 @@ exit:
 
 CHIP_ERROR CASESession::HandleSigma3b(HandleSigma3Data & data, bool & cancel)
 {
+    Progress::Debug("◦ CASE: Sigma3b");
     // Step 5/6
     // Validate initiator identity located in msg->Start()
     // Constructing responder identity
@@ -1741,6 +1751,7 @@ CHIP_ERROR CASESession::HandleSigma3b(HandleSigma3Data & data, bool & cancel)
 
 CHIP_ERROR CASESession::HandleSigma3c(HandleSigma3Data & data, CHIP_ERROR status)
 {
+    Progress::Debug("◦ CASE: Sigma3c");
     CHIP_ERROR err = CHIP_NO_ERROR;
 
     VerifyOrExit(mState == State::kHandleSigma3Pending, err = CHIP_ERROR_INCORRECT_STATE);

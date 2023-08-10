@@ -19,6 +19,8 @@
 
 #include <lib/support/BufferReader.h>
 
+#pragma GCC optimize("Og")
+
 namespace chip {
 namespace Crypto {
 
@@ -26,6 +28,8 @@ using HKDF_sha_crypto = HKDF_sha;
 
 CHIP_ERROR RawKeySessionKeystore::CreateKey(const Aes128KeyByteArray & keyMaterial, Aes128KeyHandle & key)
 {
+    volatile unsigned e = 0;
+    Progress::Debug("◉ RawKeySessionKeystore::CreateKey, err:%u", e);
     memcpy(key.AsMutable<Aes128KeyByteArray>(), keyMaterial, sizeof(Aes128KeyByteArray));
     return CHIP_NO_ERROR;
 }
