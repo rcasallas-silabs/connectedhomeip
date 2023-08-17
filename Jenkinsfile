@@ -1039,19 +1039,21 @@ def utfThreadTestSuite(nomadNode,deviceGroup,testBedName,appName,matterType,boar
 
                         dir('utf_app_matter')
                         {
-                            checkout scm: [$class                     : 'GitSCM',
-                                            branches                         : [[name: 'master']],
-                                            browser                          : [$class: 'Stash',
-                                            repoUrl: 'https://stash.silabs.com/scm/utf/utf_app_matter.git/'],
-                                            userRemoteConfigs                : [[credentialsId: 'svc_gsdk',
-                                                            url: 'ssh://git@stash.silabs.com/utf/utf_app_matter.git']]]
+                            sshagent(['svc_gsdk-ssh']) {
+                                checkout scm: [$class                     : 'GitSCM',
+                                                branches                         : [[name: 'master']],
+                                                browser                          : [$class: 'Stash',
+                                                repoUrl: 'https://stash.silabs.com/scm/utf/utf_app_matter.git/'],
+                                                userRemoteConfigs                : [[credentialsId: 'svc_gsdk-ssh',
+                                                                url: 'ssh://git@stash.silabs.com/utf/utf_app_matter.git']]]
 
-                            sh ''' git submodule sync --recursive
-                                git submodule update --init --recursive -q '''
-                            sh 'git submodule foreach --recursive git fetch --tags'
-                            sh ''' git clean -ffdx
-                                git submodule foreach --recursive -q git reset --hard -q
-                                git submodule foreach --recursive -q git clean -ffdx -q '''
+                                sh ''' git submodule sync --recursive
+                                    git submodule update --init --recursive -q '''
+                                sh 'git submodule foreach --recursive git fetch --tags'
+                                sh ''' git clean -ffdx
+                                    git submodule foreach --recursive -q git reset --hard -q
+                                    git submodule foreach --recursive -q git clean -ffdx -q '''
+                            }
 
                             dir('matter')
                             {
@@ -1130,20 +1132,22 @@ def utfWiFiTestSuite(nomadNode,deviceGroup,testBedName,appName,matterType,board,
 
                         dir('utf_app_matter')
                         {
-                            checkout scm: [$class                     : 'GitSCM',
-                                            branches                         : [[name: 'master']],
-                                            browser                          : [$class: 'Stash',
-                                            repoUrl: 'https://stash.silabs.com/scm/utf/utf_app_matter.git/'],
-                                            userRemoteConfigs                : [[credentialsId: 'svc_gsdk',
-                                                            url: 'ssh://git@stash.silabs.com/utf/utf_app_matter.git']]]
+                            sshagent(['svc_gsdk-ssh']) {
+                                checkout scm: [$class                     : 'GitSCM',
+                                                branches                         : [[name: 'master']],
+                                                browser                          : [$class: 'Stash',
+                                                repoUrl: 'https://stash.silabs.com/scm/utf/utf_app_matter.git/'],
+                                                userRemoteConfigs                : [[credentialsId: 'svc_gsdk-ssh',
+                                                                url: 'ssh://git@stash.silabs.com/utf/utf_app_matter.git']]]
 
 
-                            sh ''' git submodule sync --recursive
-                                git submodule update --init --recursive -q '''
-                            sh 'git submodule foreach --recursive git fetch --tags'
-                            sh ''' git clean -ffdx
-                                git submodule foreach --recursive -q git reset --hard -q
-                                git submodule foreach --recursive -q git clean -ffdx -q '''
+                                sh ''' git submodule sync --recursive
+                                    git submodule update --init --recursive -q '''
+                                sh 'git submodule foreach --recursive git fetch --tags'
+                                sh ''' git clean -ffdx
+                                    git submodule foreach --recursive -q git reset --hard -q
+                                    git submodule foreach --recursive -q git clean -ffdx -q '''
+                            }
 
 
 
@@ -1265,33 +1269,30 @@ def generateGblFileAndOTAfiles()
                 try{
                     withDockerContainer(image: commanderImage)
                     {
-                        withCredentials([usernamePassword(credentialsId: 'svc_gsdk', passwordVariable: 'SL_PASSWORD', usernameVariable: 'SL_USERNAME')])
-                        {
-                            withEnv(['file=""',
-                                     'gbl_file=""',
-                                     'ota_file=""',
-                                     'bin_path=""']){
+                        withEnv(['file=""',
+                                    'gbl_file=""',
+                                    'ota_file=""',
+                                    'bin_path=""']){
 
-                                    technology.each{ tech_ ->
-                                        boards.each{ brd ->
+                                technology.each{ tech_ ->
+                                    boards.each{ brd ->
 
-                                            if(tech_ == "WiFi"){
-                                                wifiRCP.each{ radioName ->
-                                                    if (brd == "BRD4161A" && radioName != "91x"){
-                                                        genFiles.call(appName, tech_, brd, radioName)
-                                                    }
-                                                    else if (brd == "BRD4187C"){
-                                                        genFiles.call(appName, tech_, brd, radioName)
-                                                    }
+                                        if(tech_ == "WiFi"){
+                                            wifiRCP.each{ radioName ->
+                                                if (brd == "BRD4161A" && radioName != "91x"){
+                                                    genFiles.call(appName, tech_, brd, radioName)
+                                                }
+                                                else if (brd == "BRD4187C"){
+                                                    genFiles.call(appName, tech_, brd, radioName)
                                                 }
                                             }
-                                            else if (tech_ == "OpenThread"){
-                                                genFiles.call(appName, tech_, brd, "")
-                                            }
-
                                         }
+                                        else if (tech_ == "OpenThread"){
+                                            genFiles.call(appName, tech_, brd, "")
+                                        }
+
                                     }
-                            }
+                                }
                         }
                     }
                 }
@@ -1359,20 +1360,17 @@ def generateRpsFiles()
                 try{
                     withDockerContainer(image: image)
                     {
-                        withCredentials([usernamePassword(credentialsId: 'svc_gsdk', passwordVariable: 'SL_PASSWORD', usernameVariable: 'SL_USERNAME')])
-                        {
-                            withEnv(['file_std=""',
-                                     'file_release=""',
-                                     'rps_file_std=""',
-                                     'rps_file_release=""',
-                                     'bin_path_std=""',
-                                     'bin_path_release=""']){
-                                boards.tokenize(",").each{ brd ->
-                                    wifiPlatforms.tokenize(",").each{ platform ->
-                                        appName.tokenize(",").each{ app ->
-                                            // generating the RPS file for BRD4325B
-                                            genRpsFiles.call(app, brd, platform)
-                                        }
+                        withEnv(['file_std=""',
+                                    'file_release=""',
+                                    'rps_file_std=""',
+                                    'rps_file_release=""',
+                                    'bin_path_std=""',
+                                    'bin_path_release=""']){
+                            boards.tokenize(",").each{ brd ->
+                                wifiPlatforms.tokenize(",").each{ platform ->
+                                    appName.tokenize(",").each{ app ->
+                                        // generating the RPS file for BRD4325B
+                                        genRpsFiles.call(app, brd, platform)
                                     }
                                 }
                             }
@@ -1404,6 +1402,7 @@ def pushToArtifactoryAndUbai()
             def saveDir = 'matter/'
 
             def image = "artifactory.silabs.net/gsdk-docker-production/gsdk_nomad_containers/gsdk_ubai:latest"
+            
             withDockerRegistry([url: "https://artifactory.silabs.net ", credentialsId: 'svc_gsdk']){
                 sh "docker pull $image"
             }
