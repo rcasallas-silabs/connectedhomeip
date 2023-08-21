@@ -7,7 +7,9 @@ properties([
         // Allows the building of additional binaries with different software version for OTA automation
         booleanParam(name: 'OTA_AUTOMATION_TEST', defaultValue: false, description: 'Set to true to generate additional SQA images for ota testing'),
         // Allows the building of unify components in matter 
-        booleanParam(name: 'BUILD_UNIFY_MATTER', defaultValue: false, description: 'Set to true to build and generate unify matter artifacts (UMB and UMPC)')
+        booleanParam(name: 'BUILD_UNIFY_MATTER', defaultValue: false, description: 'Set to true to build and generate unify matter artifacts (UMB and UMPC)'),
+        // Allows the building of additional binaries with different software version for ECOSYSTEM automation
+        booleanParam(name: 'ECOSYSTEM_AUTOMATION_TEST', defaultValue: false, description: 'Set to true to generate additional SQA images for ecosystem testing')
     ])
 ])
 
@@ -134,7 +136,7 @@ def runInWorkspace(Map args, Closure cl)
     }
 }
 
-def buildOpenThreadExample(app, ota_automation=false, config_args='')
+def buildOpenThreadExample(app, ota_automation=false, ecosystem_automation=false, config_args='')
 {
     actionWithRetry {
         node(buildFarmLargeLabel)
@@ -162,6 +164,11 @@ def buildOpenThreadExample(app, ota_automation=false, config_args='')
                 sleepyBoard = [:]
                 buildRelease = false
             }
+            if (ecosystem_automation) {
+                openThreadBoards = ["BRD4187C"]
+                sleepyBoard = [:]
+                buildRelease = false
+            }
             else if (env.BRANCH_NAME.startsWith('RC_')) {
                 // TODO MATTER-1900
                 openThreadBoards = ["BRD4161A", "BRD4162A", "BRD4163A", "BRD4164A", "BRD4166A", "BRD4186C", "BRD4187C", "BRD2703A", "BRD2601B", "BRD4316A", "BRD4317A"]
@@ -185,6 +192,12 @@ def buildOpenThreadExample(app, ota_automation=false, config_args='')
                                     sh """ ./scripts/examples/gn_silabs_example.sh ./examples/${app}/silabs ./out/OTA/ota_automation_out/${app}/OpenThread/ ${board} ${config_args} chip_build_libshell=true
                                             mkdir -p ${saved_workspace}/out/OTA/ota_automation_out/${app}/OpenThread/${board}
                                             cp ./out/OTA/ota_automation_out/${app}/OpenThread/${board}/*.s37 ${saved_workspace}/out/OTA/ota_automation_out/${app}/OpenThread/${board}/"""
+                                }
+                                else if(ecosystem_automation){
+                                    // Move binaries to standardized output
+                                    sh """./scripts/examples/gn_silabs_example.sh ./examples/${app}/silabs ./out/ECOSYSTEM/ecosystem_automation_out/${app}/OpenThread/ ${board} 'import("//with_pw_rpc.gni")'
+                                           mkdir -p ${saved_workspace}/out/ECOSYSTEM/ecosystem_automation_out/${app}/OpenThread/${board}
+                                           cp ./out/ECOSYSTEM/ecosystem_automation_out/${app}/OpenThread/${board}/*.s37 ${saved_workspace}/out/ECOSYSTEM/ecosystem_automation_out/${app}/OpenThread/${board}/"""
                                 }
                                 else{
                                         def arguments = ""
@@ -1429,9 +1442,17 @@ def pushToArtifactoryAndUbai()
                                     cd saved_workspace
 
                                     if [ -d "out/OTA/ota_automation_out" ]; then
-                                        zip -r "${file}" out -x out/OTA/ota_automation_out/\\*
+                                        if [ -d "out/ECOSYSTEM/ecosystem_automation_out" ]; then
+                                            zip -r "${file}" out -x out/OTA/ota_automation_out/\\* -x out/ECOSYSTEM/ecosystem_automation_out/\\*
+                                        else
+                                            zip -r "${file}" out -x out/OTA/ota_automation_out/\\*
+                                        fi
                                     else
-                                        zip -r "${file}" out
+                                        if [ -d "out/ECOSYSTEM/ecosystem_automation_out" ]; then
+                                            zip -r "${file}" out -x out/ECOSYSTEM/ecosystem_automation_out/\\*
+                                        else
+                                            zip -r "${file}" out
+                                        fi
                                     fi
                                     ls -al
 
@@ -1638,6 +1659,22 @@ def pipeline()
             generateGblFileAndOTAfiles()
         }
     }
+
+    def parallelNodesEcosystemImages = [:]
+
+    if(params.ECOSYSTEM_AUTOMATION_TEST == true || env.BRANCH_NAME.startsWith('RC_')){
+        stage("Generate SQA ECOSYSTEM images")
+        {
+            advanceStageMarker()
+
+            parallelNodesEcosystemImages["Ecosystem Lighting"]         = {this.buildOpenThreadExample("lighting-app", ota_automation=false, ecosystem_automation=true)}
+            //Will need to add node for wifi when pigweed support is added for 917soc
+            parallelNodesEcosystemImages.failFast = false
+            parallel parallelNodesEcosystemImages
+
+        }
+    }
+
 
     stage("Generate RPS files")
     {
