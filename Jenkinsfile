@@ -149,6 +149,7 @@ def buildOpenThreadExample(app, ota_automation=false, ecosystem_automation=false
             def buildRelease = true
             def openThreadBoards = [:]
             def sleepyBoard = ["BRD4161A", "BRD4187C"]
+            def lowPowerBoard = ["BRD4186C"]
             // Boards for Code Size report
             def codeSizeBoard = ["BRD4187C", "BRD4325B"]
 
@@ -174,7 +175,7 @@ def buildOpenThreadExample(app, ota_automation=false, ecosystem_automation=false
                 openThreadBoards = ["BRD4161A", "BRD4162A", "BRD4163A", "BRD4164A", "BRD4166A", "BRD4186C", "BRD4187C", "BRD2703A", "BRD2601B", "BRD4316A", "BRD4317A"]
             } else {
                 // TODO MATTER-1900
-                openThreadBoards = ["BRD4161A", "BRD4166A", "BRD4187C", "BRD2703A","BRD4316A" ]
+                openThreadBoards = ["BRD4161A", "BRD4166A", "BRD4186C", "BRD4187C", "BRD2703A","BRD4316A" ]
 
             }
 
@@ -200,10 +201,7 @@ def buildOpenThreadExample(app, ota_automation=false, ecosystem_automation=false
                                            cp ./out/ECOSYSTEM/ecosystem_automation_out/${app}/OpenThread/${board}/*.s37 ${saved_workspace}/out/ECOSYSTEM/ecosystem_automation_out/${app}/OpenThread/${board}/"""
                                 }
                                 else{
-                                        def arguments = ""
-                                        if (sleepyBoard.contains(board)) {
-                                            arguments = "--icd"
-                                        }
+                                    
                                         // Enable matter shell with chip_build_libshell=true argument for SQA tests
                                         sh """./scripts/examples/gn_silabs_example.sh ./examples/${app}/silabs ./out/CSA/${app}/OpenThread/standard ${board} chip_build_libshell=true
                                                 mkdir -p ${saved_workspace}/out/standard/${board}/OpenThread
@@ -211,23 +209,35 @@ def buildOpenThreadExample(app, ota_automation=false, ecosystem_automation=false
                                                 cp ./out/CSA/${app}/OpenThread/standard/${board}/*.map ${saved_workspace}/out/standard/${board}/OpenThread/
                                         """
 
-                                    if(buildRelease) {
-                                        if (codeSizeBoard.contains(board)) {
-                                            sh """./scripts/examples/gn_silabs_example.sh ./examples/${app}/silabs ./out/CSA/${app}/OpenThread/release ${board} --release --use_ot_lib
-                                                mkdir -p ${saved_workspace}/out/release/${board}/OpenThread
-                                                cp ./out/CSA/${app}/OpenThread/release/${board}/*.s37 ${saved_workspace}/out/release/${board}/OpenThread/
-                                                cp ./out/CSA/${app}/OpenThread/release/${board}/*.map ${saved_workspace}/out/release/${board}/OpenThread/
+                                        if(buildRelease) {
+                                            if (codeSizeBoard.contains(board)) {
+                                                sh """./scripts/examples/gn_silabs_example.sh ./examples/${app}/silabs ./out/CSA/${app}/OpenThread/release ${board} --release --use_ot_lib
+                                                    mkdir -p ${saved_workspace}/out/release/${board}/OpenThread
+                                                    cp ./out/CSA/${app}/OpenThread/release/${board}/*.s37 ${saved_workspace}/out/release/${board}/OpenThread/
+                                                    cp ./out/CSA/${app}/OpenThread/release/${board}/*.map ${saved_workspace}/out/release/${board}/OpenThread/
+                                                """
+                                            }
+                                        }
+
+                                        if(sleepyBoard.contains(board)) {
+                                            // Builds --icd examples
+                                            sh """./scripts/examples/gn_silabs_example.sh ./examples/${app}/silabs ./out/CSA/${app}/OpenThread/sleepy ${board} --icd
+                                                mkdir -p ${saved_workspace}/out/sleepy/${board}/OpenThread
+                                                cp ./out/CSA/${app}/OpenThread/sleepy/${board}/*.s37 ${saved_workspace}/out/sleepy/${board}/OpenThread/
+                                                cp ./out/CSA/${app}/OpenThread/sleepy/${board}/*.map ${saved_workspace}/out/sleepy/${board}/OpenThread/
                                             """
                                         }
-                                    }
-                                    if(arguments) {
-                                        sh """./scripts/examples/gn_silabs_example.sh ./examples/${app}/silabs ./out/CSA/${app}/OpenThread/sleepy ${board} ${arguments}
-                                            mkdir -p ${saved_workspace}/out/sleepy/${board}/OpenThread
-                                            cp ./out/CSA/${app}/OpenThread/sleepy/${board}/*.s37 ${saved_workspace}/out/sleepy/${board}/OpenThread/
-                                            cp ./out/CSA/${app}/OpenThread/sleepy/${board}/*.map ${saved_workspace}/out/sleepy/${board}/OpenThread/
-                                        """
-                                    }
-                                    stash name: 'OpenThreadExamples-'+app+'-'+board, includes: 'out/**/*.s37 '
+
+                                        if(lowPowerBoard.contains(board)) {
+                                            // Build BRD4186C with --icd and --low_power
+                                            sh """./scripts/examples/gn_silabs_example.sh ./examples/${app}/silabs ./out/CSA/${app}/OpenThread/low_power_sleepy ${board} --icd --low-power
+                                                mkdir -p ${saved_workspace}/out/low_power_sleepy/${board}/OpenThread
+                                                cp ./out/CSA/${app}/OpenThread/low_power_sleepy/${board}/*.s37 ${saved_workspace}/out/low_power_sleepy/${board}/OpenThread/
+                                                cp ./out/CSA/${app}/OpenThread/low_power_sleepy/${board}/*.map ${saved_workspace}/out/low_power_sleepy/${board}/OpenThread/
+                                            """
+                                        }
+
+                                        stash name: 'OpenThreadExamples-'+app+'-'+board, includes: 'out/**/*.s37 '
                                 }
 
                             }
