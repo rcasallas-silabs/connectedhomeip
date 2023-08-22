@@ -416,13 +416,19 @@ def executeWifiBuild(exampleType, app, relPath, radioName, board, args, ota_auto
 {
     // Boards for Code Size report
     def codeSizeBoard = ["BRD4187C", "BRD4325B"]
+    def mg12Board = ["BRD4161A", "BRD4163A", "BRD4164A", "BRD4170A"]
 
     if(ota_automation){
         sh "./scripts/examples/gn_silabs_example.sh ${exampleType}/${app}/${relPath}/ out/OTA/ota_automation_out/WiFi/${app}_wifi_${radioName}/ ${board} ${args} chip_build_libshell=true "
     }
     else{
-        // Enable matter shell, on standard builds, with chip_build_libshell=true argument for SQA tests
-        sh "./scripts/examples/gn_silabs_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName} ${board} ${args} chip_build_libshell=true"
+        if(mg12Board.contains(board) && radioName == "wf200"){
+            // Enabling matter shell only on lock-apps for MG12 + WF200  due to flash overflow. Disabling chip logs is required to fit application in the FLASH when enabling the shell
+            sh "./scripts/examples/gn_silabs_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName} ${board} ${args}"
+        } else {
+            // Enable matter shell, on standard builds, with chip_build_libshell=true argument for SQA tests
+            sh "./scripts/examples/gn_silabs_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName} ${board} ${args} chip_build_libshell=true"
+        }
         if (codeSizeBoard.contains(board)){
             sh "./scripts/examples/gn_silabs_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName}/release ${board} ${args} --release"
         }
@@ -534,17 +540,14 @@ def buildWiFiExample(app, buildCustom, ota_automation=false, config_args='')
 
                                 if (board == "BRD4325B")
                                 {
-                                    // TODO MATTER-1925 fix me once window app is refactored
-                                    if (app == "window-app")
-                                    {
-                                        return
-                                    }
                                     sh 'echo Building 917'
                                     radioName = "917_soc"
                                     executeWifiBuild(exampleType, app, relPath, radioName, board, args, ota_automation, sleepyBoard)
                                     moveWifiBinaries(app, board, radioName, ota_automation, sleepyBoard)
                                 } else {
                                     wifiNCPRadios.each { rcp ->
+                                        // Reset args for every board + NCP combination
+                                        args = config_args
                                         // MG24 + SiWx917: name the example as "xxx_wifi_91x"
                                         // MG24 + 9116: name the example as "xxx_wifi_rs9116"
                                         // MG12 + 9116: name the example as "xxx_wifi_rs9116" so that it only applies to RS9116 (we don't support MG12 + SiWx917)
@@ -565,7 +568,8 @@ def buildWiFiExample(app, buildCustom, ota_automation=false, config_args='')
                                             // TODO : MG12 + lock-app + WF200 does not currently fit within flash so disabling chip logging as well
                                             if (app == "lock-app")
                                             {
-                                                args = args + " chip_logging=false"
+                                                // enabling matter shell and disabling the chip logs for the wf200 lock app only due to memory overflow
+                                                args = args + " chip_logging=false chip_build_libshell=true"
                                             }
                                         }
                                         else if ((rcp == "SiWx917" || rcp == "rs9116"))  // MG24 + SiWx917/RS9116
