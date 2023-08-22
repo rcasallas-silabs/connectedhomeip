@@ -95,8 +95,9 @@ class MatterTool:
             utils.print_red(f"Device with alias '{alias}' cannot be found.")
         return Device
     
-    def SystemCall(self, command: str, args: list[str]):
+    def SystemCall(self, command: str, args: list[str], shouldValidate: bool = False):
         Process = None
+        Output = []
         try:
             RunArgs = [command] + args
             self.LogManager.DumpCommandInfo(command)
@@ -110,12 +111,42 @@ class MatterTool:
                 if RealtimeOutput == '' and Process.poll() is not None:
                     break
                 if RealtimeOutput:
+                    Output.append(RealtimeOutput)
                     if self.VERBOSE:
                         print(RealtimeOutput.strip(), flush=True)
                     self.LogManager.DumpLine(RealtimeOutput.strip())
         finally:
             self.SaveSession()
+            if shouldValidate:
+                if self.ValidateOutput(Output):
+                    utils.print_green("Sucessfully ran command " + command)
+                else:
+                    utils.print_red("Error when running command " + command + ", check logs for further informations")
             return Process.returncode
+        
+    def ValidateOutput(self, output: list[str]) -> bool:
+        # This def replace ErrorInfo def by analysing the output of a command instead of just checking the return code
+        # Could be further developed to help SQA tasks...
+
+        MatterOutputString = ','.join(output)
+
+        # Extracting InvokeResponseMessage OBJECT
+        Start = MatterOutputString.find("InvokeResponseMessage")
+        End = MatterOutputString.find("Received Command Response Status")
+        SubString = ""
+        if Start != -1 and End != -1:
+            eol = MatterOutputString.find(',', End, len(MatterOutputString) - 1)
+            SubString = MatterOutputString[Start:eol:]
+        else:
+            return False
+
+        StatusIBStart = SubString.find("status =")
+        StatusIBEnd = SubString.find(',', StatusIBStart)
+
+        if StatusIBStart != -1 and StatusIBEnd:
+            Status = SubString[StatusIBStart:StatusIBEnd:]
+            if 'success' in Status.lower():
+                return True
 
     def ToggleVerbose(self) -> None:
         self.VERBOSE = not self.VERBOSE
@@ -366,8 +397,7 @@ class MatterTool:
         self.ErrorInfo(SysCallResult, "Pairing BLE device on WiFi network")
 
     def SendOnOffCmds(self, device: matterdevice.MatterDevice = None) -> None:
-        SysCallResult = self.SystemCall(f"{self.CHIPTOOL_PATH} onoff {self.cmd} {str(self.NODE_ID)} {str(self.ENDPOINT)}", [])
-        self.ErrorInfo(SysCallResult, "Sending on/off command")
+        SysCallResult = self.SystemCall(f"{self.CHIPTOOL_PATH} onoff {self.cmd} {str(self.NODE_ID)} {str(self.ENDPOINT)}", [], shouldValidate=True)
         
     def SendParseSetupPayload(self) -> None:
         SysCallResult = self.SystemCall(f"{self.CHIPTOOL_PATH} payload parse-setup-payload {' '.join(self.OptArgs)}", [])
