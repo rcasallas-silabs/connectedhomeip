@@ -159,18 +159,18 @@ def buildOpenThreadExample(app, ota_automation=false, ecosystem_automation=false
             withDockerRegistry([url: "https://artifactory.silabs.net ", credentialsId: 'svc_gsdk']){
                 sh "docker pull $chipBuildEfr32Image"
             }
-            // Build only for release candidate branch
-            if (ota_automation) {
+            
+            if (ota_automation) { 
                 openThreadBoards = ["BRD4161A", "BRD4187C"]
                 sleepyBoard = [:]
                 buildRelease = false
             }
-            if (ecosystem_automation) {
+            else if (ecosystem_automation) {
                 openThreadBoards = ["BRD4187C"]
                 sleepyBoard = [:]
                 buildRelease = false
             }
-            else if (env.BRANCH_NAME.startsWith('RC_')) {
+            else if (env.BRANCH_NAME.startsWith('RC_')) { // Build only for release candidate branch
                 // TODO MATTER-1900
                 openThreadBoards = ["BRD4161A", "BRD4162A", "BRD4163A", "BRD4164A", "BRD4166A", "BRD4186C", "BRD4187C", "BRD2703A", "BRD2601B", "BRD4316A", "BRD4317A"]
             } else {
