@@ -121,14 +121,14 @@ Start_ThreadNetwork()
 	sudo ot-ctl factoryreset
 	sleep 3
 	sudo ot-ctl srp server disable
-	sudo ot-ctl srp server enable
-	sudo ot-ctl thread stop
-	sudo ot-ctl ifconfig down
+    sudo ot-ctl thread stop
+    sudo ot-ctl ifconfig down
+    sudo ot-ctl dataset init new
+    sudo ot-ctl dataset commit active
+    sudo ot-ctl srp server enable
 	sudo ot-ctl ifconfig up
-	sudo ot-ctl prefix add fd11:22::/64 paros
 	sudo ot-ctl thread start
 	sleep 7
-	sudo ot-ctl extpanid
 	Get_ThreadDataset
 }
 
