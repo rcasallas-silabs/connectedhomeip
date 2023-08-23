@@ -419,7 +419,7 @@ def executeWifiBuild(exampleType, app, relPath, radioName, board, args, ota_auto
     def mg12Board = ["BRD4161A", "BRD4163A", "BRD4164A", "BRD4170A"]
 
     if(ota_automation){
-        sh "./scripts/examples/gn_silabs_example.sh ${exampleType}/${app}/${relPath}/ out/OTA/ota_automation_out/WiFi/${app}_wifi_${radioName}/ ${board} ${args} chip_build_libshell=true "
+        sh "./scripts/examples/gn_silabs_example.sh ${exampleType}/${app}/${relPath}/ out/OTA/ota_automation_out/WiFi/${app}_wifi_${radioName}/ ${board} ${args} "
     }
     else{
         if(mg12Board.contains(board) && radioName == "wf200"){
