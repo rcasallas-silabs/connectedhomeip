@@ -315,14 +315,14 @@ class MatterTool:
         subprocess.call("echo {} | sudo ot-ctl factoryreset".format(Password), shell=True)
         time.sleep(3)
         subprocess.call("echo {} | sudo ot-ctl srp server disable".format(Password), shell=True)
-        subprocess.call("echo {} | sudo ot-ctl srp server enable".format(Password), shell=True)
         subprocess.call("echo {} | sudo ot-ctl thread stop".format(Password), shell=True)
         subprocess.call("echo {} | sudo ot-ctl ifconfig down".format(Password), shell=True)
+        subprocess.call("echo {} | sudo ot-ctl dataset init new".format(Password), shell=True)
+        subprocess.call("echo {} | sudo ot-ctl dataset commit active".format(Password), shell=True)
+        subprocess.call("echo {} | sudo ot-ctl srp server enable".format(Password), shell=True)
         subprocess.call("echo {} | sudo ot-ctl ifconfig up".format(Password), shell=True)
-        subprocess.call("echo {} | sudo ot-ctl prefix add fd11:22::/64 paros".format(Password), shell=True)
         subprocess.call("echo {} | sudo ot-ctl thread start".format(Password), shell=True)
         time.sleep(7)
-        subprocess.call("echo {} | sudo ot-ctl extpanid".format(Password), shell=True)
         self.GetThreadDataset()
 
     def SaveSession(self) -> None:
