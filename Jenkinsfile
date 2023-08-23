@@ -335,9 +335,9 @@ def buildSilabsSensorApp()
             def boardsForCustomOpenThread = [:]
 
             if (env.BRANCH_NAME.startsWith('RC_')) {
-                boardsForCustomOpenThread = ["BRD4161A", "BRD4186C", "BRD4187C", "BRD4166A"]
+                boardsForCustomOpenThread = ["BRD4161A", "BRD4186C", "BRD4187C", "BRD4166A", "BRD4316A"]
             } else {
-                boardsForCustomOpenThread = ["BRD4161A", "BRD4186C", "BRD4166A"]
+                boardsForCustomOpenThread = ["BRD4161A", "BRD4186C", "BRD4166A", "BRD4316A"]
             }
 
             withDockerRegistry([url: "https://artifactory.silabs.net ", credentialsId: 'svc_gsdk']){
