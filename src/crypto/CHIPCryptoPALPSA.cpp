@@ -109,12 +109,12 @@ CHIP_ERROR AES_CCM_encrypt(const uint8_t * plaintext, size_t plaintext_length, c
     uint8_t kbuf[sizeof(Aes128KeyByteArray)];
     size_t key_len = 0;
     psa_status_t stat = 0;
-
     stat = psa_export_key(key.As<psa_key_id_t>(), kbuf, sizeof(kbuf), &key_len);
-
-    Progress::Debug("◆ AES_CCM_encrypt, key(%u):%04x [%02x %02x] !%d",
-    key_len, (unsigned)key.As<psa_key_id_t>(), kbuf[0], kbuf[1], stat);
-
+    Progress::Debug("◆ AES_CCM_encrypt(PSA), key(%04x) !%d", (unsigned)key.As<psa_key_id_t>(), stat);
+    si_debug_hex("Key  ", kbuf, key_len);
+    // si_debug_hex("AAD  ", aad, aad_length);
+    // si_debug_hex("Nonce", nonce, nonce_length);
+    si_debug_hex("Plain", plaintext, plaintext_length);
 
     VerifyOrReturnError(isBufferNonEmpty(nonce, nonce_length), CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrReturnError(isValidTag(tag, tag_length), CHIP_ERROR_INVALID_ARGUMENT);
@@ -163,6 +163,7 @@ CHIP_ERROR AES_CCM_encrypt(const uint8_t * plaintext, size_t plaintext_length, c
     }
     VerifyOrReturnError(status == PSA_SUCCESS && tag_length == tag_out_length, CHIP_ERROR_INTERNAL);
 
+    si_debug_hex("Tag", tag, tag_length);
     return CHIP_NO_ERROR;
 }
 
@@ -170,15 +171,19 @@ CHIP_ERROR AES_CCM_decrypt(const uint8_t * ciphertext, size_t ciphertext_length,
                            const uint8_t * tag, size_t tag_length, const Aes128KeyHandle & key, const uint8_t * nonce,
                            size_t nonce_length, uint8_t * plaintext)
 {
-    uint8_t kbuf[sizeof(Aes128KeyByteArray)];
+    uint8_t kbuf[sizeof(Aes128KeyByteArray)] = { 0 };
     size_t key_len = 0;
     psa_status_t stat = 0;
+    uint8_t * p = plaintext;
 
+    // memset(plaintext, 0x00, ciphertext_length);
     stat = psa_export_key(key.As<psa_key_id_t>(), kbuf, sizeof(kbuf), &key_len);
-
-    Progress::Debug("◇ AES_CCM_encrypt, key(%u):%04x [%02x %02x] !%d",
-    key_len, (unsigned)key.As<psa_key_id_t>(), kbuf[0], kbuf[1], stat);
-
+    Progress::Debug("◇ AES_CCM_decrypt(PSA), key(%04x) !%d; %p, %p", (unsigned)key.As<psa_key_id_t>(), stat, ciphertext, plaintext);
+    si_debug_hex("Key   ", kbuf, key_len);
+    // si_debug_hex("AAD   ", aad, aad_length);
+    // si_debug_hex("Nonce ", nonce, nonce_length);
+    si_debug_hex("Cipher", ciphertext, ciphertext_length);
+    si_debug_hex("Tag", tag, tag_length);
 
     VerifyOrReturnError(isBufferNonEmpty(nonce, nonce_length), CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrReturnError(isValidTag(tag, tag_length), CHIP_ERROR_INVALID_ARGUMENT);
@@ -214,13 +219,14 @@ CHIP_ERROR AES_CCM_decrypt(const uint8_t * ciphertext, size_t ciphertext_length,
         status = psa_aead_update(&operation, ciphertext, ciphertext_length, plaintext,
                                  PSA_AEAD_UPDATE_OUTPUT_SIZE(PSA_KEY_TYPE_AES, algorithm, ciphertext_length), &outLength);
         Progress::Debug("AES_CCM_decrypt, psa_aead_update: !%d, olen:%u", status, (unsigned)outLength);
+        // si_debug_hex("Plain-", p, ciphertext_length);
         VerifyOrReturnError(status == PSA_SUCCESS, CHIP_ERROR_INTERNAL);
 
         plaintext += outLength;
-
         status = psa_aead_verify(&operation, plaintext, PSA_AEAD_VERIFY_OUTPUT_SIZE(PSA_KEY_TYPE_AES, algorithm), &outLength, tag,
                                  tag_length);
-        Progress::Debug("AES_CCM_decrypt, psa_aead_verify1: !%d", status);
+        si_debug_hex("Plain+", p, ciphertext_length);
+        Progress::Debug("AES_CCM_decrypt, psa_aead_verify1(%u): !%d", (unsigned)outLength, status);
     }
     else
     {
@@ -254,11 +260,13 @@ CHIP_ERROR Hash_SHA1(const uint8_t * data, const size_t data_length, uint8_t * o
 
 static inline psa_hash_operation_t * toHashOperation(HashSHA256OpaqueContext * context)
 {
+    // Progress::Debug("◇ toHashOperation*(%u; %u)", sizeof(HashSHA256OpaqueContext), sizeof(psa_hash_operation_t));
     return SafePointerCast<psa_hash_operation_t *>(context);
 }
 
 static inline psa_hash_operation_t & toHashOperation(HashSHA256OpaqueContext & context)
 {
+    // Progress::Debug("◇ toHashOperation&(%u; %u)", sizeof(HashSHA256OpaqueContext), sizeof(psa_hash_operation_t));
     return *SafePointerCast<psa_hash_operation_t *>(&context);
 }
 

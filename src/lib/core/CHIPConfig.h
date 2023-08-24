@@ -182,7 +182,7 @@
  *
  */
 #ifndef CHIP_CONFIG_SHA256_CONTEXT_SIZE
-#define CHIP_CONFIG_SHA256_CONTEXT_SIZE ((sizeof(unsigned int) * (8 + 2 + 16 + 2)) + sizeof(uint64_t))
+#define CHIP_CONFIG_SHA256_CONTEXT_SIZE 230 //((sizeof(unsigned int) * (8 + 2 + 16 + 2)) + sizeof(uint64_t))
 #endif // CHIP_CONFIG_SHA256_CONTEXT_SIZE
 
 /**

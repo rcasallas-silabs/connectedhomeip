@@ -37,7 +37,7 @@ size_t si_format_hex(const uint8_t *input, size_t in_size, char *output, size_t 
             }
             else
             {
-                n = snprintf(&output[out_off], out_left, "  %02x", (unsigned)input[in_offset]);
+                n = snprintf(&output[out_off], out_left, "\n%02x", (unsigned)input[in_offset]);
             }
         }
         else if(in_offset % 4 == 0)
@@ -69,5 +69,5 @@ void si_debug_hex(const char *tag, const uint8_t *data, size_t data_size)
 {
     char buffer[1024];
     si_format_hex(data, data_size, buffer, sizeof(buffer));
-    printf("%s(%u): %s\n", tag, (unsigned) data_size, buffer);
+    printf("%s(%u):\n%s\n", tag, (unsigned) data_size, buffer);
 }

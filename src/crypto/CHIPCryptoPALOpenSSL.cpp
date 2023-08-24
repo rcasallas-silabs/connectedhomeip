@@ -173,6 +173,15 @@ CHIP_ERROR AES_CCM_encrypt(const uint8_t * plaintext, size_t plaintext_length, c
     uint8_t placeholder_ciphertext[kAES_CCM128_Block_Length];
     bool ciphertext_was_null = (ciphertext == nullptr);
 
+    const uint8_t *kbuf = key.As<Aes128KeyByteArray>();
+    size_t key_len = sizeof(Aes128KeyByteArray);
+
+    Progress::Debug("◆ AES_CCM_encrypt(OSSL)");
+    si_debug_hex("Key  ", kbuf, key_len);
+    // si_debug_hex("AAD  ", aad, aad_length);
+    // si_debug_hex("Nonce", nonce, nonce_length);
+    si_debug_hex("Plain", plaintext, plaintext_length);
+
     if (plaintext_length == 0)
     {
         if (plaintext == nullptr)
@@ -267,6 +276,9 @@ CHIP_ERROR AES_CCM_encrypt(const uint8_t * plaintext, size_t plaintext_length, c
     VerifyOrExit(result == 1, error = CHIP_ERROR_INTERNAL);
 #endif // CHIP_CRYPTO_BORINGSSL
 
+    si_debug_hex("Cipher", ciphertext, ciphertext_length);
+    si_debug_hex("Tag", tag, tag_length);
+
 exit:
     if (context != nullptr)
     {
@@ -306,6 +318,18 @@ CHIP_ERROR AES_CCM_decrypt(const uint8_t * ciphertext, size_t ciphertext_length,
     // we are only doing auth and don't care about output).
     uint8_t placeholder_plaintext[kAES_CCM128_Block_Length];
     bool plaintext_was_null = (plaintext == nullptr);
+
+
+    const uint8_t *kbuf = key.As<Aes128KeyByteArray>();
+    size_t key_len = sizeof(Aes128KeyByteArray);
+
+    Progress::Debug("◇ AES_CCM_decrypt(OSSL)");
+    si_debug_hex("Key   ", kbuf, key_len);
+    // si_debug_hex("AAD   ", aad, aad_length);
+    // si_debug_hex("Nonce ", nonce, nonce_length);
+    si_debug_hex("Cipher", ciphertext, ciphertext_length);
+    si_debug_hex("Tag", tag, tag_length);
+
 
     if (ciphertext_length == 0)
     {

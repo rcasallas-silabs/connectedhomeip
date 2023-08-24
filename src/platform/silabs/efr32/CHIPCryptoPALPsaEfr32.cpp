@@ -167,12 +167,19 @@ CHIP_ERROR AES_CCM_encrypt(const uint8_t * plaintext, size_t plaintext_length, c
     size_t output_length      = 0;
     uint8_t * buffer          = nullptr;
     bool allocated_buffer     = false;
+    const uint8_t *kbuf = key.As<Aes128KeyByteArray>();
+    size_t key_len = sizeof(Aes128KeyByteArray);
 
     VerifyOrExit(_isValidTagLength(tag_length), error = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(nonce != nullptr, error = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(nonce_length > 0, error = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(CanCastTo<int>(nonce_length), error = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(tag != nullptr, error = CHIP_ERROR_INVALID_ARGUMENT);
+
+    Progress::Debug("◆ AES_CCM_encrypt(EFR32)");
+    si_debug_hex("Key", kbuf, key_len);
+    si_debug_hex("AAD", aad, aad_length);
+    si_debug_hex("Nonce", nonce, nonce_length);
 
     // If the ciphertext and tag outputs aren't a contiguous buffer, the PSA API requires buffer copying
     if (Uint8::to_uchar(ciphertext) + plaintext_length != Uint8::to_uchar(tag))
@@ -223,11 +230,18 @@ CHIP_ERROR AES_CCM_decrypt(const uint8_t * ciphertext, size_t ciphertext_len, co
     size_t output_length      = 0;
     uint8_t * buffer          = nullptr;
     bool allocated_buffer     = false;
+    const uint8_t *kbuf = key.As<Aes128KeyByteArray>();
+    size_t key_len = sizeof(Aes128KeyByteArray);
 
     VerifyOrExit(_isValidTagLength(tag_length), error = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(tag != nullptr, error = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(nonce != nullptr, error = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(nonce_length > 0, error = CHIP_ERROR_INVALID_ARGUMENT);
+
+    Progress::Debug("◇ AES_CCM_decrypt(EFR32)");
+    si_debug_hex("Key", kbuf, key_len);
+    si_debug_hex("AAD", aad, aad_len);
+    si_debug_hex("Nonce", nonce, nonce_length);
 
     // If the ciphertext and tag outputs aren't a contiguous buffer, the PSA API requires buffer copying
     if (Uint8::to_const_uchar(ciphertext) + ciphertext_len != Uint8::to_const_uchar(tag))
