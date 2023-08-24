@@ -1452,6 +1452,9 @@ def pushToArtifactoryAndUbai()
                                     set -o pipefail
                                     set -x
                                     pwd
+
+                                    # Upload Build Binaries
+
                                     file="build-binaries.zip"
                                     cd saved_workspace
 
@@ -1484,15 +1487,33 @@ def pushToArtifactoryAndUbai()
                                     rm "${file}"
                                     zip -r "${file}" out
 
-                                    echo 'UBAI uploading ......'
-                                    ubai_upload_cli --client-id jenkins-gsdk-pipelines-Matter --file-path build-binaries.zip  --metadata app_name matter \
+                                    echo 'Uploading build binaries to UBAI... '
+                                    ubai_upload_cli --client-id jenkins-gsdk-pipelines-Matter --file-path "${file}"  --metadata app_name matter \
                                             --metadata branch ${JOB_BASE_NAME} --metadata build_number ${BUILD_NUMBER} --metadata stack matter --metadata target matter  --username ${SL_USERNAME} --password ${SL_PASSWORD}
 
                                     if [ $? -eq 0 ]; then
-                                        echo 'uploaded to UBAI successfully....... '
+                                        echo 'Build binaries successfully uploaded to UBAI... '
                                     else
                                         echo FAIL
                                     fi
+
+                                    # Upload Provisioning tool
+
+                                    file="provision.zip"
+                                    cd ..
+                                    rm -f "${file}"
+                                    zip -r "${file}" "provision" -x "provision/config/latest.json" -x "provision/support/*" -x "provision/modules/__pycache__/*" -x "provision/temp/*"
+
+                                    echo 'Uploading provisioning tool to UBAI... '
+                                    ubai_upload_cli --client-id jenkins-gsdk-pipelines-Matter --file-path "${file}"  --metadata app_name matter_provision \
+                                            --metadata branch ${JOB_BASE_NAME} --metadata build_number ${BUILD_NUMBER} --metadata stack matter --metadata target matter  --username ${SL_USERNAME} --password ${SL_PASSWORD}
+
+                                    if [ $? -eq 0 ]; then
+                                        echo 'Provisioning tool successfully uploaded to UBAI... '
+                                    else
+                                        echo FAIL
+                                    fi
+
                             '''
                             }
                     }
