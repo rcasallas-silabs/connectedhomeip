@@ -415,14 +415,18 @@ def buildSilabsSensorApp()
 def executeWifiBuild(exampleType, app, relPath, radioName, board, args, ota_automation, sleepyBoard )
 {
     // Boards for Code Size report
-    def codeSizeBoard = ["BRD4187C", "BRD4325B"]
+    def codeSizeBoard = ["BRD4187C", "BRD4325B", "BRD4325C"]
     def mg12Board = ["BRD4161A", "BRD4163A", "BRD4164A", "BRD4170A"]
+    def wifiSoCBoards = ["BRD4325B", "BRD4325C"]
 
     if(ota_automation){
         sh "./scripts/examples/gn_silabs_example.sh ${exampleType}/${app}/${relPath}/ out/OTA/ota_automation_out/WiFi/${app}_wifi_${radioName}/ ${board} ${args} "
     }
     else{
-        if(mg12Board.contains(board) && radioName == "wf200"){
+        // For matter shell, 917 SoC the uart pins needs to be connected to USB to UART converter or else the application is just in the waiting state
+        // since no rx is received. Therefore, disabling the shell for 917 SoC.
+        // TODO remove this MATTER-2362
+        if((mg12Board.contains(board) && radioName == "wf200") || wifiSoCBoards.contains(board)){
             // Enabling matter shell only on lock-apps for MG12 + WF200  due to flash overflow. Disabling chip logs is required to fit application in the FLASH when enabling the shell
             sh "./scripts/examples/gn_silabs_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName} ${board} ${args}"
         } else {
@@ -447,10 +451,11 @@ def moveWifiBinaries(app, board, radioName, ota_automation, sleepyBoard)
     // Used to restructure output directory in later step
     def appNameOnly = app - '-app'
     def fileTypesToMove = ["s37","map"]
+    def wifiSoCBoards = ["BRD4325B", "BRD4325C"]
     // Boards for Code Size report
-    def codeSizeBoard = ["BRD4187C", "BRD4325B"]
+    def codeSizeBoard = ["BRD4187C", "BRD4325B", "BRD4325C"]
 
-    if (board == "BRD4325B" )
+    if (wifiSoCBoards.contains(board))
     {
         platformAndRadio = "SiWx917"
     }
@@ -500,6 +505,7 @@ def buildWiFiExample(app, buildCustom, ota_automation=false, config_args='')
             def args = config_args
             def radioName = ''
             def sleepyBoard = [ "BRD4186C", "BRD4187C" ]
+            def wifiSoCBoards = [ "BRD4325B", "BRD4325C" ]
             def wifiBoards = ''
 
             if (buildCustom == true)
@@ -517,9 +523,9 @@ def buildWiFiExample(app, buildCustom, ota_automation=false, config_args='')
             } else {
                 // Build only for release candidate branch
                 if (env.BRANCH_NAME.startsWith('RC_')) {
-                    wifiBoards = [ "BRD4161A", "BRD4163A", "BRD4164A", "BRD4170A", "BRD4186C", "BRD4187C", "BRD4325B" ]
+                    wifiBoards = [ "BRD4161A", "BRD4163A", "BRD4164A", "BRD4170A", "BRD4186C", "BRD4187C", "BRD4325B", "BRD4325C" ]
                 } else {
-                    wifiBoards = [ "BRD4161A", "BRD4187C", "BRD4325B" ]
+                    wifiBoards = [ "BRD4161A", "BRD4187C", "BRD4325B", "BRD4325C" ]
                 }
             }
 
@@ -538,10 +544,13 @@ def buildWiFiExample(app, buildCustom, ota_automation=false, config_args='')
                                 // Reset args string per board
                                 args = config_args
 
-                                if (board == "BRD4325B")
+                                if (wifiSoCBoards.contains(board))
                                 {
                                     sh 'echo Building 917'
                                     radioName = "917_soc"
+                                    if(board == "BRD4325C") {
+                                        args = args + " is_debug=false"
+                                    }
                                     executeWifiBuild(exampleType, app, relPath, radioName, board, args, ota_automation, sleepyBoard)
                                     moveWifiBinaries(app, board, radioName, ota_automation, sleepyBoard)
                                 } else {
@@ -1342,7 +1351,7 @@ def generateRpsFiles()
     actionWithRetry {
         node(buildFarmLabel)
         {
-            def boards = "BRD4325B"
+            def boards = "BRD4325B,BRD4325C"
             def wifiPlatforms = "917_soc"
             // TODO Matter-1925
             def appName = "lighting,lock,light-switch,onoff-plug,window"
@@ -1351,7 +1360,7 @@ def generateRpsFiles()
             def dirPath = workspaceTmpDir + createWorkspaceOverlay.overlayMatterPath
             def saveDir = 'matter/'
 
-            def image = "artifactory.silabs.net/gsdk-docker-production/gsdk_nomad_containers/gsdk_23q2:latest"
+            def image = "artifactory.silabs.net/gsdk-docker-production/gsdk_nomad_containers/matter_23q2_commander_1v15:latest"
 
             // Closure to generate the rps files
             def genRpsFiles = {app, board, radioName ->
@@ -1396,7 +1405,7 @@ def generateRpsFiles()
                             boards.tokenize(",").each{ brd ->
                                 wifiPlatforms.tokenize(",").each{ platform ->
                                     appName.tokenize(",").each{ app ->
-                                        // generating the RPS file for BRD4325B
+                                        // generating the RPS file for 917 SoC
                                         genRpsFiles.call(app, brd, platform)
                                     }
                                 }
