@@ -1345,7 +1345,7 @@ def generateRpsFiles()
             def boards = "BRD4325B"
             def wifiPlatforms = "917_soc"
             // TODO Matter-1925
-            def appName = "lighting,lock,light-switch,onoff-plug"
+            def appName = "lighting,lock,light-switch,onoff-plug,window"
             def workspaceTmpDir = createWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
                                                             buildOverlayDir)
             def dirPath = workspaceTmpDir + createWorkspaceOverlay.overlayMatterPath
