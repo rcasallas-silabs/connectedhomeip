@@ -724,9 +724,7 @@ def buildUnifyARM(arch, triples, app)
                                     withEnv(['PW_ENVIRONMENT_ROOT=' + dirPath])
                                     {
                                         def pkg_config_export = "export PKG_CONFIG_PATH=:/unify/stage_" + arch + "/share/pkgconfig:/usr/lib/" + triples + "/pkgconfig"
-                                        def python_path_export = "export PYTHONPATH=\$PYTHONPATH:/usr/local/miniconda/lib/python3.9/site-packages/"
-                                        def all_env_exports = "${pkg_config_export}; ${python_path_export}"
-                                        buildUnifyApp(arch, app, all_env_exports, "silabs_examples/unify-matter-" + app + "/linux", "../../../out/silabs_examples/unify-matter-" + app + "/" + arch + "_debian_bullseye")
+                                        buildUnifyApp(arch, app, pkg_config_export, "silabs_examples/unify-matter-" + app + "/linux", "../../../out/silabs_examples/unify-matter-" + app + "/" + arch + "_debian_bullseye")
                                     }
                                 }
 
