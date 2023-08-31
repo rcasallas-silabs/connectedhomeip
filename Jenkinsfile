@@ -479,7 +479,29 @@ def moveWifiBinaries(app, board, radioName, ota_automation, sleepyBoard)
                 if (codeSizeBoard.contains(board)){
                     sh """ cp out/${app}_wifi_${radioName}/release/${board}/*.${fileType} ${saved_workspace}/out/release/${board}/WiFi/${platformAndRadio}-${appNameOnly}-example.${fileType} """
                 }
+                
+            if (wifiSoCBoards.contains(board)){
+                sh """
+                   mkdir -p ${saved_workspace}/out/WiFi-Firmware/${board} """
+                   if (board == "BRD4325B"){
+                       sh """ cp third_party/silabs/wifi_sdk/connectivity_firmware/SiWG917-A.*.rps ${saved_workspace}/out/WiFi-Firmware/${board}/ """
+                   }
+                   if(board == "BRD4325C"){
+                       sh """ cp third_party/silabs/wifi_sdk/connectivity_firmware/SiWG917-B.*.rps ${saved_workspace}/out/WiFi-Firmware/${board}/ """
+                   }
+            }
 
+            if (radioName == "rs9116"){
+                sh """
+                   mkdir -p ${saved_workspace}/out/WiFi-Firmware/${radioName}
+                   cp third_party/silabs/wiseconnect-wifi-bt-sdk/firmware/RS916W.2.*.rps ${saved_workspace}/out/WiFi-Firmware/${radioName}/ """
+            }
+
+            if (radioName == "91x"){
+                sh """
+                   mkdir -p ${saved_workspace}/out/WiFi-Firmware/SiWx917
+                   cp third_party/silabs/wifi_sdk/connectivity_firmware/SiWG917-A.*.rps ${saved_workspace}/out/WiFi-Firmware/SiWx917/ """
+            }
 
             if (sleepyBoard.contains(board)) {
                 sh """ mkdir -p ${saved_workspace}/out/sleepy/${board}/WiFi
@@ -608,7 +630,7 @@ def buildWiFiExample(app, buildCustom, ota_automation=false, config_args='')
             deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
                                        workspaceTmpDir,
                                        'matter/' + saved_workspace,
-                                       '-name "*.s37" -o -name "*.map"')
+                                       '-name "*.s37" -o -name "*.map" -o -name "*.rps"')
         }
     }
 }
