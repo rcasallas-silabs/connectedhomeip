@@ -1710,7 +1710,7 @@ def pipeline()
             advanceStageMarker()
             def parallelNodesOTABuild = [:]
 
-            parallelNodesImages["OT OTA Light"]         = {this.buildOpenThreadExample("lighting-app", ota_automation=true, config_args=software_version)}
+            parallelNodesImages["OT OTA Light"]         = {this.buildOpenThreadExample("lighting-app", ota_automation=true, ecosystem_automation=false, config_args=software_version)}
             parallelNodesImages["WiFi OTA imgage"]      = { this.buildWiFiExample("lighting-app", false, ota_automation=true, config_args=software_version)  }
 
             parallelNodesImages.failFast = false
