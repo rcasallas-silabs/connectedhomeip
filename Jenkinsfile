@@ -191,8 +191,8 @@ def buildOpenThreadExample(app, ota_automation=false, ecosystem_automation=false
                                 if(ota_automation){
                                     // Move binaries to standardized output
                                     sh """ ./scripts/examples/gn_silabs_example.sh ./examples/${app}/silabs ./out/OTA/ota_automation_out/${app}/OpenThread/ ${board} ${config_args} chip_build_libshell=true
-                                            mkdir -p ${saved_workspace}/out/OTA/ota_automation_out/${app}/OpenThread/${board}
-                                            cp ./out/OTA/ota_automation_out/${app}/OpenThread/${board}/*.s37 ${saved_workspace}/out/OTA/ota_automation_out/${app}/OpenThread/${board}/"""
+                                            mkdir -p ${saved_workspace}/out/OTA/ota_automation_out/${app}/${board}/OpenThread
+                                            cp ./out/OTA/ota_automation_out/${app}/OpenThread/${board}/*.s37 ${saved_workspace}/out/OTA/ota_automation_out/${app}/${board}/OpenThread/"""
                                 }
                                 else if(ecosystem_automation){
                                     // Move binaries to standardized output
@@ -468,8 +468,8 @@ def moveWifiBinaries(app, board, radioName, ota_automation, sleepyBoard)
     if (ota_automation){
 
         sh """
-            ls; pwd; mkdir -p ${saved_workspace}/out/OTA/ota_automation_out/WiFi/${app}_wifi_${radioName}/${board}
-            cp out/OTA/ota_automation_out/WiFi/${app}_wifi_${radioName}/${board}/*.s37  ${saved_workspace}/out/OTA/ota_automation_out/WiFi/${app}_wifi_${radioName}/${board}/${platformAndRadio}-${appNameOnly}-example.s37"""
+            ls; pwd; mkdir -p ${saved_workspace}/out/OTA/ota_automation_out/${app}/${board}/WiFi
+            cp out/OTA/ota_automation_out/WiFi/${app}_wifi_${radioName}/${board}/*.s37  ${saved_workspace}/out/OTA/ota_automation_out/${app}/${board}/WiFi/${platformAndRadio}-${appNameOnly}-example.s37"""
     }
     else{
         fileTypesToMove.each { fileType ->
@@ -1298,11 +1298,11 @@ def generateGblFileAndOTAfiles()
                         pwd
 
                         if [ "${tech}" = "OpenThread" ] ; then
-                            bin_path="${dirPath}/${saved_workspace}/out/OTA/ota_automation_out/${app}/OpenThread/${board}"
+                            bin_path="${dirPath}/${saved_workspace}/out/OTA/ota_automation_out/${app}/${board}/OpenThread/"
                             file="\$(find \$bin_path/ -name \\*.s37 | grep -o '[^/]*\$')"
                         else
-                            bin_path="${dirPath}/${saved_workspace}/out/OTA/ota_automation_out/WiFi/${app}_wifi_${radioName}/${board}"
-                            file="\$(find \$bin_path/ -name \\*.s37 | grep -o '[^/]*\$')"
+                            bin_path="${dirPath}/${saved_workspace}/out/OTA/ota_automation_out/${app}/${board}/WiFi/"
+                            file="\$(find \$bin_path/ -name efr32-${radioName}-lighting-example.s37 | grep -o '[^/]*\$')"
                         fi
 
                         gbl_file="\$(basename \$file .s37).gbl"
