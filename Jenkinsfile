@@ -597,7 +597,7 @@ def buildWiFiExample(app, buildCustom, ota_automation=false, config_args='')
                                             args = args + " is_debug=false"
 
                                             // TODO : MG12 + lock-app + WF200 does not currently fit within flash so disabling chip logging as well
-                                            if (app == "lock-app")
+                                            if (app == "lock-app" || app == "lighting-app")
                                             {
                                                 // enabling matter shell and disabling the chip logs for the wf200 lock app only due to memory overflow
                                                 args = args + " chip_logging=false chip_build_libshell=true"
