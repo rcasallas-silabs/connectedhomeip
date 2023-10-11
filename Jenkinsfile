@@ -1131,6 +1131,7 @@ def utfThreadTestSuite(nomadNode,deviceGroup,testBedName,appName,matterType,boar
                                     'UTF_QUEUE_SERVER_URL=amqps://' + SL_USERNAME + ':' + SL_PASSWORD + '@utf-queue-central.silabs.net:443/%2f',
                                     "UTF_PRODUCER_APP_ID=$BUILD_TAG",
                                     "RELEASE_NAME=$RELEASE_NAME",
+                                    "STACK_NAME=matter",
                                     "TEST_SUITE=MatterCI", // ?
                                     "TEST_SCRIPT_REPO=utf-app-matter",
                                     "SDK_URL=N/A",        // ?
@@ -1227,6 +1228,7 @@ def utfWiFiTestSuite(nomadNode,deviceGroup,testBedName,appName,matterType,board,
                                     'UTF_QUEUE_SERVER_URL=amqps://' + SL_USERNAME + ':' + SL_PASSWORD + '@utf-queue-central.silabs.net:443/%2f',
                                     "UTF_PRODUCER_APP_ID=$BUILD_TAG",
                                     "RELEASE_NAME=$RELEASE_NAME",
+                                    "STACK_NAME=matter",
                                     "TEST_SUITE=MatterCI", // ?
                                     "TEST_SCRIPT_REPO=utf-app-matter",
                                     "SDK_URL=N/A",        // ?
