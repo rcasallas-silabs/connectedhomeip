@@ -440,7 +440,8 @@ def executeWifiBuild(exampleType, app, relPath, radioName, board, args, ota_auto
 
 
     // for sleepy devices
-    if (sleepyBoard.contains(board)) {
+    // TODO re-enable sleepy for 917 ncp when MATTER-2533 is fixed
+    if (sleepyBoard.contains(board) && radioName != "91x") {
        sh "./scripts/examples/gn_silabs_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName}/sleepy ${board} chip_enable_icd_server=true ${args}"
     }
 }
@@ -503,7 +504,8 @@ def moveWifiBinaries(app, board, radioName, ota_automation, sleepyBoard)
                    cp third_party/silabs/wifi_sdk/connectivity_firmware/SiWG917-A.*.rps ${saved_workspace}/out/WiFi-Firmware/SiWx917/ """
             }
 
-            if (sleepyBoard.contains(board)) {
+             // TODO re-enable sleepy for 917 ncp when MATTER-2533 is fixed
+            if (sleepyBoard.contains(board) && radioName != "91x") {
                 sh """ mkdir -p ${saved_workspace}/out/sleepy/${board}/WiFi
                     cp ./out/${app}_wifi_${radioName}/sleepy/${board}/*.${fileType} ${saved_workspace}/out/sleepy/${board}/WiFi/${platformAndRadio}-${appNameOnly}-example.${fileType} """
             }
