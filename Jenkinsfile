@@ -415,9 +415,9 @@ def buildSilabsSensorApp()
 def executeWifiBuild(exampleType, app, relPath, radioName, board, args, ota_automation, sleepyBoard )
 {
     // Boards for Code Size report
-    def codeSizeBoard = ["BRD4187C", "BRD4325B", "BRD4325C"]
+    def codeSizeBoard = ["BRD4187C", "BRD4325B", "BRD4338A"]
     def mg12Board = ["BRD4161A", "BRD4163A", "BRD4164A", "BRD4170A"]
-    def wifiSoCBoards = ["BRD4325B", "BRD4325C"]
+    def wifiSoCBoards = ["BRD4325B", "BRD4325C", "BRD4338A"]
 
     if(ota_automation){
         sh "./scripts/examples/gn_silabs_example.sh ${exampleType}/${app}/${relPath}/ out/OTA/ota_automation_out/WiFi/${app}_wifi_${radioName}/ ${board} ${args} "
@@ -452,9 +452,9 @@ def moveWifiBinaries(app, board, radioName, ota_automation, sleepyBoard)
     // Used to restructure output directory in later step
     def appNameOnly = app - '-app'
     def fileTypesToMove = ["s37","map"]
-    def wifiSoCBoards = ["BRD4325B", "BRD4325C"]
+    def wifiSoCBoards = ["BRD4325B", "BRD4325C", "BRD4338A"]
     // Boards for Code Size report
-    def codeSizeBoard = ["BRD4187C", "BRD4325B", "BRD4325C"]
+    def codeSizeBoard = ["BRD4187C", "BRD4325B", "BRD4338A"]
 
     if (wifiSoCBoards.contains(board))
     {
@@ -487,7 +487,8 @@ def moveWifiBinaries(app, board, radioName, ota_automation, sleepyBoard)
                    if (board == "BRD4325B"){
                        sh """ cp third_party/silabs/wifi_sdk/connectivity_firmware/SiWG917-A.*.rps ${saved_workspace}/out/WiFi-Firmware/${board}/ """
                    }
-                   else{
+                   else {
+                        // for common flash boards brd4325c and brd4338a
                        sh """ cp third_party/silabs/wifi_sdk/connectivity_firmware/SiWG917-B.*.rps ${saved_workspace}/out/WiFi-Firmware/${board}/ """
                    }
             }
@@ -531,7 +532,7 @@ def buildWiFiExample(app, buildCustom, ota_automation=false, config_args='')
             def args = config_args
             def radioName = ''
             def sleepyBoard = [ "BRD4186C", "BRD4187C" ]
-            def wifiSoCBoards = [ "BRD4325B", "BRD4325C" ]
+            def wifiSoCBoards = [ "BRD4325B", "BRD4325C", "BRD4338A" ]
             def wifiBoards = ''
 
             if (buildCustom == true)
@@ -549,9 +550,9 @@ def buildWiFiExample(app, buildCustom, ota_automation=false, config_args='')
             } else {
                 // Build only for release candidate branch
                 if (env.BRANCH_NAME.startsWith('RC_')) {
-                    wifiBoards = [ "BRD4161A", "BRD4163A", "BRD4164A", "BRD4170A", "BRD4186C", "BRD4187C", "BRD4325B", "BRD4325C" ]
+                    wifiBoards = [ "BRD4161A", "BRD4163A", "BRD4164A", "BRD4170A", "BRD4186C", "BRD4187C", "BRD4325B", "BRD4325C", "BRD4338A" ]
                 } else {
-                    wifiBoards = [ "BRD4161A", "BRD4187C", "BRD4325B", "BRD4325C" ]
+                    wifiBoards = [ "BRD4161A", "BRD4187C", "BRD4325B", "BRD4338A" ]
                 }
             }
 
@@ -574,7 +575,8 @@ def buildWiFiExample(app, buildCustom, ota_automation=false, config_args='')
                                 {
                                     sh 'echo Building 917'
                                     radioName = "917_soc"
-                                    if(board == "BRD4325C") {
+                                    if(board != "BRD4325B") {
+                                        // adding this arg for common flash board
                                         args = args + " is_debug=false"
                                     }
                                     executeWifiBuild(exampleType, app, relPath, radioName, board, args, ota_automation, sleepyBoard)
@@ -1184,6 +1186,7 @@ def utfThreadTestSuite(nomadNode,deviceGroup,testBedName,appName,matterType,boar
 
 def utfWiFiTestSuite(nomadNode,deviceGroup,testBedName,appName,matterType,board,wifi_module,testSuite,manifestYaml,testSequenceYaml)
 {
+    def wifiSoCBoards = ["BRD4325B", "BRD4325C", "BRD4338A"]
     globalLock(credentialsId: 'hwmux_token_matterci', deviceGroup: deviceGroup) {
        node(nomadNode)
        {
@@ -1221,7 +1224,14 @@ def utfWiFiTestSuite(nomadNode,deviceGroup,testBedName,appName,matterType,board,
                                 chiptoolPath = sh(script: "find " + pwd() + " -name 'chip-tool' -print",returnStdout: true).trim()
                                 echo chiptoolPath
 
-                               sh "cp out/${appName}_wifi_${wifi_module}/${board}/*.s37 ../manifest"
+                                if (wifiSoCBoards.contains(board)){
+                                    stashFolder = 'WiFiRPSExample-'+appName+'-'+board+'-'+wifi_module
+                                    unstash stashFolder
+
+                                    sh "cp saved_workspace/out/standard/${board}/WiFi/*.rps ../manifest"
+                                } else {
+                                    sh "cp out/${appName}_wifi_${wifi_module}/${board}/*.s37 ../manifest"
+                                }
 
                             }
 
@@ -1377,16 +1387,19 @@ def generateRpsFiles()
     actionWithRetry {
         node(buildFarmLabel)
         {
-            def boards = "BRD4325B,BRD4325C"
+            def boards = "BRD4325B,BRD4338A"
+            if (env.BRANCH_NAME.startsWith('RC_')){
+                boards = boards + ",BRD4325C"
+            }
             def wifiPlatforms = "917_soc"
-            // TODO Matter-1925
             def appName = "lighting,lock,light-switch,onoff-plug,window"
+            def stashExample = "lighting-app"
             def workspaceTmpDir = createWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
                                                             buildOverlayDir)
             def dirPath = workspaceTmpDir + createWorkspaceOverlay.overlayMatterPath
             def saveDir = 'matter/'
 
-            def image = "artifactory.silabs.net/gsdk-docker-production/gsdk_nomad_containers/matter_23q2_commander_1v15:latest"
+            def image = "artifactory.silabs.net/gsdk-docker-production/gsdk_nomad_containers/gsdk_23q2:latest"
 
             // Closure to generate the rps files
             def genRpsFiles = {app, board, radioName ->
@@ -1435,6 +1448,8 @@ def generateRpsFiles()
                                         genRpsFiles.call(app, brd, platform)
                                     }
                                 }
+                                // stashing the lighting rps file which will be used later in the utf
+                                stash name : 'WiFiRPSExample-' + stashExample + '-' + brd + '-917_soc', includes: "saved_workspace/out/standard/" + "${brd}" + "/WiFi/*lighting*.rps"
                             }
                         }
                     }
@@ -1771,6 +1786,7 @@ def pipeline()
         //                                                                         "/manifest-2703-thread",
         //                                                                         "--tmconfig tests/.sequence_manager/test_execution_definitions/matter_thread_ci_sequence.yaml") }
         parallelNodes['lighting Thread BRD4161A']   = { this.utfThreadTestSuite('gsdkMontrealNode','utf_matter_thread_4','matter_thread_4','lighting-app','thread','BRD4161A','',"/manifest-4161-thread","--tmconfig tests/.sequence_manager/test_execution_definitions/matter_thread_ci_sequence.yaml") }
+        parallelNodes['lighting 917-SoC BRD4338A']   = { this.utfWiFiTestSuite('gsdkMontrealNode','utf_matter_wifi_917soc_ci_2','matter_wifi_917soc_ci_2','lighting-app','wifi','BRD4338A','917_soc','',"/manifest-917soc","--tmconfig tests/.sequence_manager/test_execution_definitions/matter_wifi_ci_sequence.yaml") }        
         parallelNodes.failFast = false
         parallel parallelNodes
 
