@@ -487,21 +487,23 @@ def moveWifiBinaries(app, board, radioName, ota_automation, sleepyBoard)
                    if (board == "BRD4325B"){
                        sh """ cp third_party/silabs/wifi_sdk/connectivity_firmware/SiWG917-A.*.rps ${saved_workspace}/out/WiFi-Firmware/${board}/ """
                    }
-                   if(board == "BRD4325C"){
+                   else{
                        sh """ cp third_party/silabs/wifi_sdk/connectivity_firmware/SiWG917-B.*.rps ${saved_workspace}/out/WiFi-Firmware/${board}/ """
                    }
             }
 
             if (radioName == "rs9116"){
-                sh """
-                   mkdir -p ${saved_workspace}/out/WiFi-Firmware/${radioName}
-                   cp third_party/silabs/wiseconnect-wifi-bt-sdk/firmware/RS916W.2.*.rps ${saved_workspace}/out/WiFi-Firmware/${radioName}/ """
+                 sh """
+                   mkdir -p ${saved_workspace}/out/WiFi-Firmware/${radioName}/Evk_1.4
+                   cp third_party/silabs/wiseconnect-wifi-bt-sdk/firmware/RS9116W.2.*.rps ${saved_workspace}/out/WiFi-Firmware/${radioName}/Evk_1.4/
+                   mkdir -p ${saved_workspace}/out/WiFi-Firmware/${radioName}/Evk_1.5
+                   cp third_party/silabs/wiseconnect-wifi-bt-sdk/firmware/RS916W.2.*.rps ${saved_workspace}/out/WiFi-Firmware/${radioName}/Evk_1.5/ """
             }
 
             if (radioName == "91x"){
                 sh """
-                   mkdir -p ${saved_workspace}/out/WiFi-Firmware/SiWx917
-                   cp third_party/silabs/wifi_sdk/connectivity_firmware/SiWG917-A.*.rps ${saved_workspace}/out/WiFi-Firmware/SiWx917/ """
+                   mkdir -p ${saved_workspace}/out/WiFi-Firmware/917-ncp
+                   cp third_party/silabs/wifi_sdk/connectivity_firmware/SiWG917-A.*.rps ${saved_workspace}/out/WiFi-Firmware/917-ncp/ """
             }
 
              // TODO re-enable sleepy for 917 ncp when MATTER-2533 is fixed
