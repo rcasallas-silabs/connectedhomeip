@@ -1656,14 +1656,15 @@ def pipeline()
             {
                 this.buildUnifyARM("armhf","arm-linux-gnueabihf", "pc")
             }
-            parallelNodesBuild["Unify Matter Bridge AMD64"] = 
-            {
-                this.buildUnifyAMD("bridge")
-            }
-            parallelNodesBuild["Unify Matter PC AMD64"] = 
-            {
-                this.buildUnifyAMD("pc")
-            }
+            // TODO re-enable AMD build once fix for pigweed issue is found
+            // parallelNodesBuild["Unify Matter Bridge AMD64"] = 
+            // {
+            //     this.buildUnifyAMD("bridge")
+            // }
+            // parallelNodesBuild["Unify Matter PC AMD64"] = 
+            // {
+            //     this.buildUnifyAMD("pc")
+            // }
         }
 
         //---------------------------------------------------------------------
