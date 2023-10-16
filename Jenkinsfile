@@ -727,7 +727,8 @@ def buildUnifyARM(arch, triples, app)
             try {
 
                 withDockerRegistry([url: "https://artifactory.silabs.net ", credentialsId: 'svc_gsdk']) {
-                    def unify_matter_docker = docker.image('artifactory.silabs.net/gsdk-docker-production/unify-cache/unify-matter:1.1.3-' + arch)
+                    
+                    def unify_matter_docker = docker.image('artifactory.silabs.net/gsdk-docker-production/unify-cache/unify-matter:1.1.4-' + arch)
                     stage('unify ' + arch) {
                         dir(dirPath) {
                             unify_matter_docker.inside("-u root -v${unifyCheckoutDir}:/unify")
@@ -827,7 +828,7 @@ def buildUnifyAMD(app)
             try {
                 
                 withDockerRegistry([url: "https://artifactory.silabs.net ", credentialsId: 'svc_gsdk']) {
-                    def unify_matter_docker_amd64 = docker.image('artifactory.silabs.net/gsdk-docker-production/unify-cache/unify-matter:1.1.3-amd64')
+                    def unify_matter_docker_amd64 = docker.image('artifactory.silabs.net/gsdk-docker-production/unify-cache/unify-matter:1.1.4-amd64')
                     dir(dirPath)
                     {
                         stage('libunify amd64') {
