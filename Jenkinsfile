@@ -429,7 +429,7 @@ def buildSilabsSensorApp()
 def executeWifiBuild(exampleType, app, relPath, radioName, board, args, ota_automation, sleepyBoard )
 {
     // Boards for Code Size report
-    def codeSizeBoard = ["BRD4187C", "BRD4325B", "BRD4338A"]
+    def releaseBuildBoard = ["BRD4187C", "BRD4325B", "BRD4325C", "BRD4338A"]
     def mg12Board = ["BRD4161A", "BRD4163A", "BRD4164A", "BRD4170A"]
     def wifiSoCBoards = ["BRD4325B", "BRD4325C", "BRD4338A"]
 
@@ -447,7 +447,7 @@ def executeWifiBuild(exampleType, app, relPath, radioName, board, args, ota_auto
             // Enable matter shell, on standard builds, with chip_build_libshell=true argument for SQA tests
             sh "./scripts/examples/gn_silabs_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName} ${board} ${args} chip_build_libshell=true"
         }
-        if (codeSizeBoard.contains(board)){
+        if (releaseBuildBoard.contains(board)){
             sh "./scripts/examples/gn_silabs_example.sh ${exampleType}/${app}/${relPath}/ out/${app}_wifi_${radioName}/release ${board} ${args} --release"
         }
     }
@@ -468,7 +468,7 @@ def moveWifiBinaries(app, board, radioName, ota_automation, sleepyBoard)
     def fileTypesToMove = ["s37","map"]
     def wifiSoCBoards = ["BRD4325B", "BRD4325C", "BRD4338A"]
     // Boards for Code Size report
-    def codeSizeBoard = ["BRD4187C", "BRD4325B", "BRD4338A"]
+    def releaseBuildBoard = ["BRD4187C", "BRD4325B", "BRD4325C", "BRD4338A"]
 
     if (wifiSoCBoards.contains(board))
     {
@@ -491,7 +491,7 @@ def moveWifiBinaries(app, board, radioName, ota_automation, sleepyBoard)
             sh """
                 ls; pwd; mkdir -p ${saved_workspace}/out/standard/${board}/WiFi; mkdir -p ${saved_workspace}/out/release/${board}/WiFi
                 cp out/${app}_wifi_${radioName}/${board}/*.${fileType} ${saved_workspace}/out/standard/${board}/WiFi/${platformAndRadio}-${appNameOnly}-example.${fileType} """
-                if (codeSizeBoard.contains(board)){
+                if (releaseBuildBoard.contains(board)){
                     sh """ cp out/${app}_wifi_${radioName}/release/${board}/*.${fileType} ${saved_workspace}/out/release/${board}/WiFi/${platformAndRadio}-${appNameOnly}-example.${fileType} """
                 }
                 
