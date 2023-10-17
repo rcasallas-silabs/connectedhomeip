@@ -24,11 +24,16 @@ buildFarmLargeLabel = 'Build-Farm-Large'
 chipBuildEfr32Image = "artifactory.silabs.net/gsdk-dockerhub-proxy/connectedhomeip/chip-build-efr32:0.5.64"
 saved_workspace = 'saved_workspace'
 software_version = 'sl_matter_version_str=\\"2\\" sl_matter_version=2'
-commanderImage = "artifactory.silabs.net/gsdk-docker-production/sqa-testnode-lite:latest"
+gsdkImage = "artifactory.silabs.net/gsdk-docker-production/gsdk_nomad_containers/gsdk_23q2:latest"
+
+//This object will be populated by reading the pipeline_metadata.yml file
+pipelineMetadata = null
 
 secrets = [[path: 'teams/gecko-sdk/app/svc_gsdk', engineVersion: 2,
             secretValues: [[envVar: 'SL_PASSWORD', vaultKey: 'password'],
                            [envVar: 'SL_USERNAME', vaultKey: 'username']]]]
+
+
 // helpers
 def initWorkspaceAndScm()
 {
@@ -60,7 +65,16 @@ def initWorkspaceAndScm()
 
         // Matter Init --Checkout relevant submodule
         sh 'scripts/checkout_submodules.py --shallow --platform efr32 linux'
+        pipelineMetadata = readYaml(file: 'pipeline_metadata.yml')
 
+        dir('commander'){
+            checkout scm: [$class               : 'GitSCM', 
+                            branches            : [[name: pipelineMetadata.commander_info.commanderBranch]],
+                            browser             : [$class: 'Stash', repoUrl: pipelineMetadata.commander_info.browserUrl], 
+                            userRemoteConfigs   : [[credentialsId: 'svc_gsdk', url: pipelineMetadata.commander_info.gitUrl]]]
+
+            sh "git checkout ${pipelineMetadata.commander_info.commanderTag}"
+        }
     }
 
     dir(buildOverlayDir+'/matter-scripts'){
@@ -187,7 +201,7 @@ def buildOpenThreadExample(app, ota_automation=false, ecosystem_automation=false
                         withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
                         {
                             openThreadBoards.each { board ->
-
+                            
                                 if(ota_automation){
                                     // Move binaries to standardized output
                                     sh """ ./scripts/examples/gn_silabs_example.sh ./examples/${app}/silabs ./out/OTA/ota_automation_out/${app}/OpenThread/ ${board} ${config_args} chip_build_libshell=true
@@ -1212,6 +1226,17 @@ def utfWiFiTestSuite(nomadNode,deviceGroup,testBedName,appName,matterType,board,
                                 sh ''' git clean -ffdx
                                     git submodule foreach --recursive -q git reset --hard -q
                                     git submodule foreach --recursive -q git clean -ffdx -q '''
+
+                                dir('commander'){
+                                    checkout scm: [$class               : 'GitSCM', 
+                                                    branches            : [[name: pipelineMetadata.commander_info.commanderBranch]],
+                                                    browser             : [$class: 'Stash', repoUrl: pipelineMetadata.commander_info.browserUrl], 
+                                                    userRemoteConfigs   : [[credentialsId: 'svc_gsdk-ssh', url: pipelineMetadata.commander_info.gitUrl]]]
+
+                                    sh "git checkout ${pipelineMetadata.commander_info.commanderTag}"
+                                    commanderPath = sh(script: "find " + pwd() + " -name 'commander' -type f -print",returnStdout: true).trim()
+                                    echo commanderPath
+                                }
                             }
 
 
@@ -1266,7 +1291,10 @@ def utfWiFiTestSuite(nomadNode,deviceGroup,testBedName,appName,matterType,board,
                                     'PUBLISH_RESULTS=true', // unneeded?
                                     'RUN_TCM_SETUP=false',  // unneeded?
                                     "MATTER_CHIP_TOOL_PATH=${chiptoolPath}" ,
-                                    'DEBUG=true'
+                                    'DEBUG=true',
+                                    "UTF_COMMANDER_PATH=${commanderPath}",
+                                    "TCM_SIMPLICITYCOMMANDER=${commanderPath}",
+                                    "SECMGR_COMMANDER_PATH=${commanderPath}"
                                 ])
                                 {
                                     catchError(buildResult: 'UNSTABLE',
@@ -1275,9 +1303,14 @@ def utfWiFiTestSuite(nomadNode,deviceGroup,testBedName,appName,matterType,board,
                                                stageResult: 'UNSTABLE')
                                     {
 
+                                        sh 'printenv'
                                         sh """
                                             echo ${TESTBED_NAME}
+                                            ${commanderPath} --version
                                             ./workspace_setup.sh
+                                            pwd
+                                            ls
+                                            ${commanderPath} --version
                                             executor/launch_utf_tests.sh --publish_test_results true --harness  ${TESTBED_NAME}.yaml --executor_type local --pytest_command "pytest --tb=native tests${testSuite} --manifest manifest${manifestYaml}.yaml ${testSequenceYaml}"
                                         """
                                     }
@@ -1305,14 +1338,14 @@ def generateGblFileAndOTAfiles()
                                                             buildOverlayDir)
             def dirPath = workspaceTmpDir + createWorkspaceOverlay.overlayMatterPath
             def saveDir = 'matter/'
-
+            def commanderPath = dirPath + "/commander/commander"
             // Closure to generate the gbl and ota files
             def genFiles = {app, tech, board, radioName ->
 
                 sh """
-
-                        commander --version
+                        ls ${workspaceTmpDir}
                         pwd
+                        ${commanderPath} --version
 
                         if [ "${tech}" = "OpenThread" ] ; then
                             bin_path="${dirPath}/${saved_workspace}/out/OTA/ota_automation_out/${app}/${board}/OpenThread/"
@@ -1325,7 +1358,7 @@ def generateGblFileAndOTAfiles()
                         gbl_file="\$(basename \$file .s37).gbl"
                         ota_file="\$(basename \$file .s37).ota"
 
-                        commander gbl create \$bin_path/\$gbl_file --app \$bin_path/\$file
+                        ${commanderPath} gbl create \$bin_path/\$gbl_file --app \$bin_path/\$file
                         ${dirPath}/src/app/ota_image_tool.py create -v 0xFFF1 -p 0x8005 -vn 2 -vs 2.0 -da sha256 \$bin_path/\$gbl_file \$bin_path/\$ota_file
 
                         ls -al \$bin_path
@@ -1335,12 +1368,12 @@ def generateGblFileAndOTAfiles()
             }
 
             withDockerRegistry([url: "https://artifactory.silabs.net ", credentialsId: 'svc_gsdk']){
-                sh "docker pull $commanderImage"
+                sh "docker pull $gsdkImage"
             }
 
             dir(dirPath) {
                 try{
-                    withDockerContainer(image: commanderImage)
+                    withDockerContainer(image: gsdkImage)
                     {
                         withEnv(['file=""',
                                     'gbl_file=""',
@@ -1400,15 +1433,15 @@ def generateRpsFiles()
             def dirPath = workspaceTmpDir + createWorkspaceOverlay.overlayMatterPath
             def saveDir = 'matter/'
 
-            def image = "artifactory.silabs.net/gsdk-docker-production/gsdk_nomad_containers/gsdk_23q2:latest"
+            def commanderPath = dirPath + "/commander/commander"
 
             // Closure to generate the rps files
             def genRpsFiles = {app, board, radioName ->
 
                 sh """
-
-                        commander --version
+                        ls ${workspaceTmpDir}
                         pwd
+                        ${commanderPath} --version
 
                         bin_path_std="${dirPath}/${saved_workspace}/out/standard/${board}/WiFi/"
                         bin_path_release="${dirPath}/${saved_workspace}/out/release/${board}/WiFi/"
@@ -1418,8 +1451,8 @@ def generateRpsFiles()
                         rps_file_std="\$(basename \$file_std .s37).rps"
                         rps_file_release="\$(basename \$file_release .s37).rps"
 
-                        commander rps create \$bin_path_std/\$rps_file_std --app \$bin_path_std/\$file_std
-                        commander rps create \$bin_path_release/\$rps_file_release --app \$bin_path_release/\$file_release
+                        ${commanderPath} rps create \$bin_path_std/\$rps_file_std --app \$bin_path_std/\$file_std
+                        ${commanderPath} rps create \$bin_path_release/\$rps_file_release --app \$bin_path_release/\$file_release
 
                         ls -al \$bin_path_std
                         ls -al \$bin_path_release
@@ -1429,12 +1462,12 @@ def generateRpsFiles()
             }
 
             withDockerRegistry([url: "https://artifactory.silabs.net ", credentialsId: 'svc_gsdk']){
-                sh "docker pull $image"
+                sh "docker pull $gsdkImage"
             }
 
             dir(dirPath) {
                 try{
-                    withDockerContainer(image: image)
+                    withDockerContainer(image: gsdkImage)
                     {
                         withEnv(['file_std=""',
                                     'file_release=""',
