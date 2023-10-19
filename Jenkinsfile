@@ -297,6 +297,13 @@ def buildSilabsCustomOpenThreadExamples(app)
                 boardsForCustomOpenThread = ["BRD4161A", "BRD4186C", "BRD4166A"]
             }
 
+            // Once diswasher-app is moved to CSA and we remove this condition
+            def relPath = ''
+            if ( app == "dishwasher-app")
+            {
+                relPath = "silabs"
+            }
+
             def appNameOnly = app - '-app'
 
             dir(dirPath) {
@@ -308,7 +315,7 @@ def buildSilabsCustomOpenThreadExamples(app)
                         {
                             boardsForCustomOpenThread.each { board ->
                                 // Enable matter shell with chip_build_libshell=true argument for SQA tests
-                                sh "./scripts/examples/gn_silabs_example.sh ./silabs_examples/${app} ./out/silabs/${app}/OpenThread/ ${board} chip_build_libshell=true"
+                                sh "./scripts/examples/gn_silabs_example.sh ./silabs_examples/${app}/${relPath} ./out/silabs/${app}/OpenThread/ ${board} chip_build_libshell=true"
                             }
                         }
                     }
@@ -552,6 +559,11 @@ def buildWiFiExample(app, buildCustom, ota_automation=false, config_args='')
             if (buildCustom == true)
             {
                 exampleType = "silabs_examples"
+                // Once dishwasher app is moved to CSA, we can remove this condition.
+                if (app == "dishwasher-app")
+                { 
+                    relPath = "silabs"
+                }
             }
             else
             {
@@ -1724,8 +1736,8 @@ def pipeline()
         // Build Custom examples
         //---------------------------------------------------------------------
 
-        def silabsCustomExamplesOpenThread = ["onoff-plug-app", "template"]
-        def silabsCustomExamplesWifi = ["onoff-plug-app"]
+        def silabsCustomExamplesOpenThread = ["onoff-plug-app", "dishwasher-app", "template"]
+        def silabsCustomExamplesWifi = ["onoff-plug-app", "dishwasher-app"]
 
         // Openthread custom examples
         silabsCustomExamplesOpenThread.each { example ->
