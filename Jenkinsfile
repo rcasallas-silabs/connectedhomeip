@@ -6,10 +6,12 @@ properties([
     parameters([
         // Allows the building of additional binaries with different software version for OTA automation
         booleanParam(name: 'OTA_AUTOMATION_TEST', defaultValue: false, description: 'Set to true to generate additional SQA images for ota testing'),
-        // Allows the building of unify components in matter 
+        // Allows the building of unify components in matter
         booleanParam(name: 'BUILD_UNIFY_MATTER', defaultValue: false, description: 'Set to true to build and generate unify matter artifacts (UMB and UMPC)'),
         // Allows the building of additional binaries with different software version for ECOSYSTEM automation
-        booleanParam(name: 'ECOSYSTEM_AUTOMATION_TEST', defaultValue: false, description: 'Set to true to generate additional SQA images for ecosystem testing')
+        booleanParam(name: 'ECOSYSTEM_AUTOMATION_TEST', defaultValue: false, description: 'Set to true to generate additional SQA images for ecosystem testing'),
+        // Allows the building of everything
+        booleanParam(name: 'COMPLETE_BUILD', defaultValue: false, description: 'Set to true to build everything')
     ])
 ])
 
@@ -25,6 +27,9 @@ chipBuildEfr32Image = "artifactory.silabs.net/gsdk-dockerhub-proxy/connectedhome
 saved_workspace = 'saved_workspace'
 software_version = 'sl_matter_version_str=\\"2\\" sl_matter_version=2'
 gsdkImage = "artifactory.silabs.net/gsdk-docker-production/gsdk_nomad_containers/gsdk_23q2:latest"
+
+// Build everything
+completeBuild = false
 
 //This object will be populated by reading the pipeline_metadata.yml file
 pipelineMetadata = null
@@ -65,12 +70,15 @@ def initWorkspaceAndScm()
 
         // Matter Init --Checkout relevant submodule
         sh 'scripts/checkout_submodules.py --shallow --platform efr32 linux'
+
+        // Set Pipeline configuration
         pipelineMetadata = readYaml(file: 'pipeline_metadata.yml')
+        completeBuild = env.BRANCH_NAME.startsWith('RC_') || params.COMPLETE_BUILD
 
         dir('commander'){
-            checkout scm: [$class               : 'GitSCM', 
+            checkout scm: [$class               : 'GitSCM',
                             branches            : [[name: pipelineMetadata.commander_info.commanderBranch]],
-                            browser             : [$class: 'Stash', repoUrl: pipelineMetadata.commander_info.browserUrl], 
+                            browser             : [$class: 'Stash', repoUrl: pipelineMetadata.commander_info.browserUrl],
                             userRemoteConfigs   : [[credentialsId: 'svc_gsdk', url: pipelineMetadata.commander_info.gitUrl]]]
 
             sh "git checkout ${pipelineMetadata.commander_info.commanderTag}"
@@ -173,8 +181,8 @@ def buildOpenThreadExample(app, ota_automation=false, ecosystem_automation=false
             withDockerRegistry([url: "https://artifactory.silabs.net ", credentialsId: 'svc_gsdk']){
                 sh "docker pull $chipBuildEfr32Image"
             }
-            
-            if (ota_automation) { 
+
+            if (ota_automation) {
                 openThreadBoards = ["BRD4161A", "BRD4187C"]
                 sleepyBoard = [:]
                 buildRelease = false
@@ -184,7 +192,7 @@ def buildOpenThreadExample(app, ota_automation=false, ecosystem_automation=false
                 sleepyBoard = [:]
                 buildRelease = false
             }
-            else if (env.BRANCH_NAME.startsWith('RC_')) { // Build only for release candidate branch
+            else if (completeBuild) { // Build only for release candidate branch
                 // TODO MATTER-1900
                 openThreadBoards = ["BRD4161A", "BRD4162A", "BRD4163A", "BRD4164A", "BRD4166A", "BRD4186C", "BRD4187C", "BRD2703A", "BRD2601B", "BRD4316A", "BRD4317A"]
             } else {
@@ -201,7 +209,7 @@ def buildOpenThreadExample(app, ota_automation=false, ecosystem_automation=false
                         withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
                         {
                             openThreadBoards.each { board ->
-                            
+
                                 if(ota_automation){
                                     // Move binaries to standardized output
                                     sh """ ./scripts/examples/gn_silabs_example.sh ./examples/${app}/silabs ./out/OTA/ota_automation_out/${app}/OpenThread/ ${board} ${config_args} chip_build_libshell=true
@@ -215,7 +223,7 @@ def buildOpenThreadExample(app, ota_automation=false, ecosystem_automation=false
                                            cp ./out/ECOSYSTEM/ecosystem_automation_out/${app}/OpenThread/${board}/*.s37 ${saved_workspace}/out/ECOSYSTEM/ecosystem_automation_out/${app}/OpenThread/${board}/"""
                                 }
                                 else{
-                                    
+
                                         // Enable matter shell with chip_build_libshell=true argument for SQA tests
                                         sh """./scripts/examples/gn_silabs_example.sh ./examples/${app}/silabs ./out/CSA/${app}/OpenThread/standard ${board} chip_build_libshell=true
                                                 mkdir -p ${saved_workspace}/out/standard/${board}/OpenThread
@@ -291,7 +299,7 @@ def buildSilabsCustomOpenThreadExamples(app)
 
             def boardsForCustomOpenThread = [:]
 
-            if (env.BRANCH_NAME.startsWith('RC_')) {
+            if (completeBuild) {
                 boardsForCustomOpenThread = ["BRD4161A", "BRD4186C", "BRD4187C", "BRD4166A"]
             } else {
                 boardsForCustomOpenThread = ["BRD4161A", "BRD4186C", "BRD4166A"]
@@ -355,7 +363,7 @@ def buildSilabsSensorApp()
 
             def boardsForCustomOpenThread = [:]
 
-            if (env.BRANCH_NAME.startsWith('RC_')) {
+            if (completeBuild) {
                 boardsForCustomOpenThread = ["BRD4161A", "BRD4186C", "BRD4187C", "BRD4166A", "BRD4316A"]
             } else {
                 boardsForCustomOpenThread = ["BRD4161A", "BRD4186C", "BRD4166A", "BRD4316A"]
@@ -501,7 +509,7 @@ def moveWifiBinaries(app, board, radioName, ota_automation, sleepyBoard)
                 if (releaseBuildBoard.contains(board)){
                     sh """ cp out/${app}_wifi_${radioName}/release/${board}/*.${fileType} ${saved_workspace}/out/release/${board}/WiFi/${platformAndRadio}-${appNameOnly}-example.${fileType} """
                 }
-                
+
             if (wifiSoCBoards.contains(board)){
                 sh """
                    mkdir -p ${saved_workspace}/out/WiFi-Firmware/${board} """
@@ -561,7 +569,7 @@ def buildWiFiExample(app, buildCustom, ota_automation=false, config_args='')
                 exampleType = "silabs_examples"
                 // Once dishwasher app is moved to CSA, we can remove this condition.
                 if (app == "dishwasher-app")
-                { 
+                {
                     relPath = "silabs"
                 }
             }
@@ -575,7 +583,7 @@ def buildWiFiExample(app, buildCustom, ota_automation=false, config_args='')
                 wifiBoards = ["BRD4161A", "BRD4187C"]
             } else {
                 // Build only for release candidate branch
-                if (env.BRANCH_NAME.startsWith('RC_')) {
+                if (completeBuild) {
                     wifiBoards = [ "BRD4161A", "BRD4163A", "BRD4164A", "BRD4170A", "BRD4186C", "BRD4187C", "BRD4325B", "BRD4325C", "BRD4338A" ]
                 } else {
                     wifiBoards = [ "BRD4161A", "BRD4187C", "BRD4325B", "BRD4338A" ]
@@ -753,7 +761,7 @@ def buildUnifyARM(arch, triples, app)
             try {
 
                 withDockerRegistry([url: "https://artifactory.silabs.net ", credentialsId: 'svc_gsdk']) {
-                    
+
                     def unify_matter_docker = docker.image('artifactory.silabs.net/gsdk-docker-production/unify-cache/unify-matter:1.1.4-' + arch)
                     stage('unify ' + arch) {
                         dir(dirPath) {
@@ -761,7 +769,7 @@ def buildUnifyARM(arch, triples, app)
                             {
                                 withEnv(['PW_ENVIRONMENT_ROOT=' + dirPath])
                                 {
-                                    // Build libunify 
+                                    // Build libunify
                                     echo "Build libunify for " + arch
                                     sh 'cd /unify && cmake -DCMAKE_INSTALL_PREFIX=$PWD/stage_' + arch + ' -GNinja -DCMAKE_TOOLCHAIN_FILE=../cmake/' + arch + '_debian.cmake  -B build_unify_' + arch + '/ -S components -DBUILD_TESTING=OFF'
                                     sh 'cd /unify && cmake --build build_unify_' + arch
@@ -785,7 +793,7 @@ def buildUnifyARM(arch, triples, app)
 
                                 // Move binaries to standardized output
                                 sh """  mkdir -p ${saved_workspace}/out/""" + app + """/""" + arch + """_debian_bullseye
-                                            
+
                                         cp ./out/silabs_examples/unify-matter-""" + app + """/""" + arch + """_debian_bullseye/obj/bin/unify-matter-""" + app + """ ${saved_workspace}/out/""" + app + """/""" + arch + """_debian_bullseye/
                                 """
                                 if (fileExists("""./out/silabs_examples/unify-matter-""" + app + """/""" + arch + """_debian_bullseye/packages""")) {
@@ -820,7 +828,7 @@ def buildUnifyARM(arch, triples, app)
 
                                 // Move binaries to standardized output
                                 sh """  mkdir -p ${saved_workspace}/out/Chiptool/""" + arch + """_debian_bullseye
-                                            
+
                                         cp ./out/examples/chip-tool/""" + arch + """_debian_bullseye/chip-tool ${saved_workspace}/out/Chiptool/""" + arch + """_debian_bullseye/
                                 """
                             }
@@ -852,7 +860,7 @@ def buildUnifyAMD(app)
             def unifyCheckoutDir = workspaceTmpDir + "/overlay/unify"
             def saveDir = 'matter/out/'
             try {
-                
+
                 withDockerRegistry([url: "https://artifactory.silabs.net ", credentialsId: 'svc_gsdk']) {
                     def unify_matter_docker_amd64 = docker.image('artifactory.silabs.net/gsdk-docker-production/unify-cache/unify-matter:1.1.4-amd64')
                     dir(dirPath)
@@ -1240,9 +1248,9 @@ def utfWiFiTestSuite(nomadNode,deviceGroup,testBedName,appName,matterType,board,
                                     git submodule foreach --recursive -q git clean -ffdx -q '''
 
                                 dir('commander'){
-                                    checkout scm: [$class               : 'GitSCM', 
+                                    checkout scm: [$class               : 'GitSCM',
                                                     branches            : [[name: pipelineMetadata.commander_info.commanderBranch]],
-                                                    browser             : [$class: 'Stash', repoUrl: pipelineMetadata.commander_info.browserUrl], 
+                                                    browser             : [$class: 'Stash', repoUrl: pipelineMetadata.commander_info.browserUrl],
                                                     userRemoteConfigs   : [[credentialsId: 'svc_gsdk-ssh', url: pipelineMetadata.commander_info.gitUrl]]]
 
                                     sh "git checkout ${pipelineMetadata.commander_info.commanderTag}"
@@ -1434,7 +1442,7 @@ def generateRpsFiles()
         node(buildFarmLabel)
         {
             def boards = "BRD4325B,BRD4338A"
-            if (env.BRANCH_NAME.startsWith('RC_')){
+            if (completeBuild){
                 boards = boards + ",BRD4325C"
             }
             def wifiPlatforms = "917_soc"
@@ -1525,7 +1533,7 @@ def pushToArtifactoryAndUbai()
             def saveDir = 'matter/'
 
             def image = "artifactory.silabs.net/gsdk-docker-production/gsdk_nomad_containers/gsdk_ubai:latest"
-            
+
             withDockerRegistry([url: "https://artifactory.silabs.net ", credentialsId: 'svc_gsdk']){
                 sh "docker pull $image"
             }
@@ -1534,7 +1542,7 @@ def pushToArtifactoryAndUbai()
                 try{
                     //for RC_ branch, artifacts need push staging repos, otherwise push to development repos
                     def reposName = 'gsdk-generic-development'
-                    if (env.BRANCH_NAME.startsWith('RC_')){
+                    if (completeBuild){
                         reposName = 'gsdk-generic-staging'
                     }
                     echo reposName
@@ -1683,30 +1691,30 @@ def pipeline()
         //---------------------------------------------------------------------
         // Build Unify Matter Bridge and PC
         //---------------------------------------------------------------------
-        if(params.BUILD_UNIFY_MATTER == true || env.BRANCH_NAME.startsWith('RC_')) {
-            parallelNodesBuild["Unify Matter Bridge ARM64"] = 
-            { 
+        if(params.BUILD_UNIFY_MATTER == true || completeBuild) {
+            parallelNodesBuild["Unify Matter Bridge ARM64"] =
+            {
                 // Currently official supported platform
                 this.buildUnifyARM("arm64","aarch64-linux-gnu", "bridge")
             }
-            parallelNodesBuild["Unify Matter PC ARM64"] = 
-            { 
+            parallelNodesBuild["Unify Matter PC ARM64"] =
+            {
                 // Currently official supported platform
                 this.buildUnifyARM("arm64","aarch64-linux-gnu", "pc")
             }
-            parallelNodesBuild["Unify Matter Bridge ARMHF"] = 
+            parallelNodesBuild["Unify Matter Bridge ARMHF"] =
             {
                 this.buildUnifyARM("armhf","arm-linux-gnueabihf", "bridge")
             }
-            parallelNodesBuild["Unify Matter PC ARMHF"] = 
+            parallelNodesBuild["Unify Matter PC ARMHF"] =
             {
                 this.buildUnifyARM("armhf","arm-linux-gnueabihf", "pc")
             }
-            parallelNodesBuild["Unify Matter Bridge AMD64"] = 
+            parallelNodesBuild["Unify Matter Bridge AMD64"] =
             {
                 this.buildUnifyAMD("bridge")
             }
-            parallelNodesBuild["Unify Matter PC AMD64"] = 
+            parallelNodesBuild["Unify Matter PC AMD64"] =
             {
                 this.buildUnifyAMD("pc")
             }
@@ -1762,6 +1770,7 @@ def pipeline()
 
     }
 
+    // Code Size should only be on silabs branch and release candidate branch
     if (env.BRANCH_NAME.startsWith('silabs') || env.BRANCH_NAME.startsWith('RC_')) {
         stage("Code Size analysis")
         {
@@ -1771,7 +1780,7 @@ def pipeline()
     }
     def parallelNodesImages = [:]
 
-    if(params.OTA_AUTOMATION_TEST == true || env.BRANCH_NAME.startsWith('RC_')){
+    if(params.OTA_AUTOMATION_TEST == true || completeBuild){
         stage("Generate SQA images")
         {
             advanceStageMarker()
@@ -1793,7 +1802,7 @@ def pipeline()
 
     def parallelNodesEcosystemImages = [:]
 
-    if(params.ECOSYSTEM_AUTOMATION_TEST == true || env.BRANCH_NAME.startsWith('RC_')){
+    if(params.ECOSYSTEM_AUTOMATION_TEST == true || completeBuild){
         stage("Generate SQA ECOSYSTEM images")
         {
             advanceStageMarker()
@@ -1832,7 +1841,7 @@ def pipeline()
         //                                                                         "/manifest-2703-thread",
         //                                                                         "--tmconfig tests/.sequence_manager/test_execution_definitions/matter_thread_ci_sequence.yaml") }
         parallelNodes['lighting Thread BRD4161A']   = { this.utfThreadTestSuite('gsdkMontrealNode','utf_matter_thread_4','matter_thread_4','lighting-app','thread','BRD4161A','',"/manifest-4161-thread","--tmconfig tests/.sequence_manager/test_execution_definitions/matter_thread_ci_sequence.yaml") }
-        parallelNodes['lighting 917-SoC BRD4338A']   = { this.utfWiFiTestSuite('gsdkMontrealNode','utf_matter_wifi_917soc_ci_2','matter_wifi_917soc_ci_2','lighting-app','wifi','BRD4338A','917_soc','',"/manifest-917soc","--tmconfig tests/.sequence_manager/test_execution_definitions/matter_wifi_ci_sequence.yaml") }        
+        parallelNodes['lighting 917-SoC BRD4338A']   = { this.utfWiFiTestSuite('gsdkMontrealNode','utf_matter_wifi_917soc_ci_2','matter_wifi_917soc_ci_2','lighting-app','wifi','BRD4338A','917_soc','',"/manifest-917soc","--tmconfig tests/.sequence_manager/test_execution_definitions/matter_wifi_ci_sequence.yaml") }
         parallelNodes.failFast = false
         parallel parallelNodes
 
