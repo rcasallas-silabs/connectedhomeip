@@ -63,14 +63,23 @@ def initWorkspaceAndScm()
                  branches                         : scm.branches,
                  browser: [$class: 'Stash',
                             repoUrl: 'https://stash.silabs.com/projects/WMN_TOOLS/repos/matter/'],
-                 doGenerateSubmoduleConfigurations: scm.doGenerateSubmoduleConfigurations,
-                 extensions                       : scm.extensions << [$class: 'ScmName', name: 'matter'],
-                 userRemoteConfigs                : scm.userRemoteConfigs]
+                 extensions                       : scm.extensions +  [$class: 'ScmName', name: 'matter'] +
+                                                    // Shallow clone due to submodule URL conflicts
+                                                    // Commit IDs/refs within submodules are resolved when running checkout_submodule.py script below
+                                                    [cloneOption(honorRefspec: true, noTags: true, shallow: true)], 
+                 userRemoteConfigs                : scm.userRemoteConfigs]                                          
 
-        // Switch Origin for the gecko_sdk to reduce dowload and cost
+        // Sync all submodule and ensure they are in proper state
+        sh """
+            git fetch || true && git fetch --tags
+            git submodule sync --recursive
+            git submodule foreach --recursive -q git reset --hard -q
+        """
+        
         sh 'git --version'
         sh 'git submodule update --init third_party/openthread/ot-efr32/'
         sh 'cd ./third_party/openthread/ot-efr32'
+        // Switch Origin for the gecko_sdk to reduce dowload and cost
         sh 'git submodule set-url ./third_party/silabs/gecko_sdk https://stash.silabs.com/scm/embsw/gecko_sdk_release.git'
         sh 'cd ../../../'
         sh 'git submodule set-url ./third_party/silabs/gecko_sdk https://stash.silabs.com/scm/embsw/gecko_sdk_release.git'
