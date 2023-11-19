@@ -59,22 +59,19 @@ def initWorkspaceAndScm()
     // Get pipeline metadata
     dir(buildOverlayDir+createWorkspaceOverlay.overlayMatterPath)
     {
+        // Clean workspace and verify submodule URLs are pointed to correct path 
+        sh """
+            git submodule sync --recursive
+            git submodule foreach --recursive -q git reset --hard -q
+            git fetch || true && git fetch --tags
+        """
+        
         checkout scm: [$class                     : 'GitSCM',
                  branches                         : scm.branches,
                  browser: [$class: 'Stash',
                             repoUrl: 'https://stash.silabs.com/projects/WMN_TOOLS/repos/matter/'],
-                 extensions                       : scm.extensions +  [$class: 'ScmName', name: 'matter'] +
-                                                    // Shallow clone due to submodule URL conflicts
-                                                    // Commit IDs/refs within submodules are resolved when running checkout_submodule.py script below
-                                                    [cloneOption(honorRefspec: true, noTags: true, shallow: true)], 
+                 extensions                       : scm.extensions +  [$class: 'ScmName', name: 'matter'],
                  userRemoteConfigs                : scm.userRemoteConfigs]                                          
-
-        // Sync all submodule and ensure they are in proper state
-        sh """
-            git fetch || true && git fetch --tags
-            git submodule sync --recursive
-            git submodule foreach --recursive -q git reset --hard -q
-        """
         
         sh 'git --version'
         sh 'git submodule update --init third_party/openthread/ot-efr32/'
