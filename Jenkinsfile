@@ -76,7 +76,7 @@ def initWorkspaceAndScm()
         sh 'git --version'
         sh 'git submodule update --init third_party/openthread/ot-efr32/'
         sh 'cd ./third_party/openthread/ot-efr32'
-        // Switch Origin for the gecko_sdk to reduce dowload and cost
+        // Switch Origin for the gecko_sdk to reduce download and cost
         sh 'git submodule set-url ./third_party/silabs/gecko_sdk https://stash.silabs.com/scm/embsw/gecko_sdk_release.git'
         sh 'cd ../../../'
         sh 'git submodule set-url ./third_party/silabs/gecko_sdk https://stash.silabs.com/scm/embsw/gecko_sdk_release.git'

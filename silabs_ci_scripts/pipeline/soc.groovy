@@ -9,6 +9,7 @@ def genericSoCMatterBuild(app, supportedBoards, ota_automation=false, ecosystem_
             def saveDir = 'matter/'
             def out_dir = saved_workspace
             def transportType = "OpenThread"
+            def commanderPath = dirPath + "/commander/commander"
 
             withDockerRegistry([url: "https://artifactory.silabs.net ", credentialsId: 'svc_gsdk']){
                 sh "docker pull $chipBuildEfr32Image"
@@ -22,7 +23,9 @@ def genericSoCMatterBuild(app, supportedBoards, ota_automation=false, ecosystem_
                                 withDockerContainer(image: chipBuildEfr32Image, args: "-u root")
                                 {
                                     // CSA Examples build
-                                    withEnv(['PW_ENVIRONMENT_ROOT='+dirPath])
+                                    withEnv(['PW_ENVIRONMENT_ROOT='+dirPath,
+                                             'COMMANDER_PATH='+commanderPath,
+                                             'MATTER_ROOT='+dirPath])
                                     {
                                         app.appBuildArgs.each { appBuildArg ->
                                             family.boards.each { board ->
