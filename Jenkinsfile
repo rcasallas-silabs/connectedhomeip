@@ -199,16 +199,13 @@ def buildUnifyApp(arch, app, env_exports, buildDir, out_path)
     sh 'git config --global --add safe.directory $(pwd)/third_party/pigweed/repo'
 
     // Compile the Unify app
-    dir (buildDir)
-    {
-        def build_args = ""
-        def archname = arch - 'hf'
-        if(arch != "amd64") {
-            build_args = "--args='target_cpu=\"\\\"${archname}\\\"\"'"
-        }
-        sh "../../../scripts/run_in_build_env.sh \"${env_exports}; gn gen ${out_path} ${build_args}\""
-        sh "../../../scripts/run_in_build_env.sh \"${env_exports}; ninja -C ${out_path}\""
+    def build_args = ""
+    def archname = arch - 'hf'
+    if(arch != "amd64") {
+        build_args = "--args='target_cpu=\"\\\"${archname}\\\"\"'"
     }
+    sh "./scripts/run_in_build_env.sh \"${env_exports}; gn gen --root=${buildDir} ${out_path} ${build_args}\""
+    sh "./scripts/run_in_build_env.sh \"${env_exports}; ninja -C ${out_path}\""
 }
 
 def buildUnify(arch, triples, app, compile_tests)
@@ -254,14 +251,14 @@ def buildUnify(arch, triples, app, compile_tests)
                                     withEnv(['PW_ENVIRONMENT_ROOT=' + dirPath])
                                     {
                                         def pkg_config_export = "export PKG_CONFIG_PATH=:/unify/stage_" + arch + "/share/pkgconfig:/usr/lib/" + triples + "/pkgconfig"
-                                        buildUnifyApp(arch, app, pkg_config_export, "silabs_examples/unify-matter-" + app + "/linux", "../../../out/silabs_examples/unify-matter-" + app + "/" + arch + "_debian_bullseye")
+                                        buildUnifyApp(arch, app, pkg_config_export, "silabs_examples/unify-matter-" + app + "/linux", "out/silabs_examples/unify-matter-" + app + "/" + arch + "_debian_bullseye")
 
                                         // Complie and Execute Unit Tests
                                         if(compile_tests) {
                                             dir ("silabs_examples/unify-matter-" + app + "/linux")
                                             {
-                                                sh "../../../scripts/run_in_build_env.sh \"${pkg_config_export}; ../../unify-matter-common/scripts/compile_tests.sh -t amd64\""
-                                                sh "export LD_LIBRARY_PATH=/unify/stage_amd64/lib; ../../unify-matter-common/scripts/run_tests.sh -b out/amd64_test"
+                                                sh "./scripts/run_in_build_env.sh \"${pkg_config_export}; silabs_examples/unify-matter-common/scripts/compile_tests.sh -t amd64\""
+                                                sh "export LD_LIBRARY_PATH=/unify/stage_amd64/lib; silabs_examples/unify-matter-common/scripts/run_tests.sh -b out/amd64_test"
                                             }
                                         }
                                     }
@@ -292,17 +289,14 @@ def buildUnify(arch, triples, app, compile_tests)
                                         sh 'git config --global --add safe.directory $(pwd)/third_party/pigweed/repo'
 
                                         // Compile the Unify app
-                                        dir ("examples/chip-tool")
-                                        {
-                                            def out_path = "../../out/examples/chip-tool/" + arch + "_debian_bullseye"
-                                            def build_args = ""
-                                            def archname = arch - 'hf'
-                                            if(arch != "amd64") {
-                                                build_args = "--args='target_cpu=\"\\\"${archname}\\\"\"'"
-                                            }
-                                            sh "../../scripts/run_in_build_env.sh \"${pkg_config_export}; gn gen ${out_path} ${build_args}\""
-                                            sh "../../scripts/run_in_build_env.sh \"${pkg_config_export}; ninja -C ${out_path}\""
+                                        def out_path = "out/examples/chip-tool/" + arch + "_debian_bullseye"
+                                        def build_args = ""
+                                        def archname = arch - 'hf'
+                                        if(arch != "amd64") {
+                                            build_args = "--args='target_cpu=\"\\\"${archname}\\\"\"'"
                                         }
+                                        sh "./scripts/run_in_build_env.sh \"${pkg_config_export}; gn gen --root=examples/chip-tool ${out_path} ${build_args}\""
+                                        sh "./scripts/run_in_build_env.sh \"${pkg_config_export}; ninja -C ${out_path}\""
                                     }
                                 }
 
