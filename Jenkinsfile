@@ -1201,7 +1201,10 @@ def pipeline()
         //                                                                         "/manifest-2703-thread",
         //                                                                         "--tmconfig tests/.sequence_manager/test_execution_definitions/matter_thread_ci_sequence.yaml") }
         parallelNodes['lighting Thread BRD4161A']   = { this.utfThreadTestSuite('gsdkMontrealNode','utf_matter_thread_4','matter_thread_4','lighting','thread','BRD4161A','',"/manifest-4161-thread","--tmconfig tests/.sequence_manager/test_execution_definitions/matter_thread_ci_sequence.yaml") }
-        parallelNodes['lighting 917-SoC BRD4338A']   = { this.utfWiFiTestSuite('gsdkMontrealNode','utf_matter_wifi_917soc_ci_2','matter_wifi_917soc_ci_2','lighting-app','wifi','BRD4338A','917_soc','',"/manifest-917soc","--tmconfig tests/.sequence_manager/test_execution_definitions/matter_wifi_ci_sequence.yaml") }
+        
+        // TODO Re-enable 917 in SQA stage when 1.8MBR is supported in this branch
+        // parallelNodes['lighting 917-SoC BRD4338A']   = { this.utfWiFiTestSuite('gsdkMontrealNode','utf_matter_wifi_917soc_ci_2','matter_wifi_917soc_ci_2','lighting-app','wifi','BRD4338A','917_soc','',"/manifest-917soc","--tmconfig tests/.sequence_manager/test_execution_definitions/matter_wifi_ci_sequence.yaml") }
+        
         parallelNodes.failFast = false
         parallel parallelNodes
 
