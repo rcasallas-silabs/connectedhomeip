@@ -257,8 +257,8 @@ def buildUnify(arch, triples, app, compile_tests)
                                         if(compile_tests) {
                                             dir ("silabs_examples/unify-matter-" + app + "/linux")
                                             {
-                                                sh "./scripts/run_in_build_env.sh \"${pkg_config_export}; silabs_examples/unify-matter-common/scripts/compile_tests.sh -t amd64\""
-                                                sh "export LD_LIBRARY_PATH=/unify/stage_amd64/lib; silabs_examples/unify-matter-common/scripts/run_tests.sh -b out/amd64_test"
+                                                sh "../../../scripts/run_in_build_env.sh \"${pkg_config_export}; ../../unify-matter-common/scripts/compile_tests.sh -t amd64\""
+                                                sh "export LD_LIBRARY_PATH=/unify/stage_amd64/lib; ../../unify-matter-common/scripts/run_tests.sh -b out/amd64_test"
                                             }
                                         }
                                     }
