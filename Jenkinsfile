@@ -82,7 +82,7 @@ def initWorkspaceAndScm()
         sh 'git submodule set-url ./third_party/silabs/gecko_sdk https://stash.silabs.com/scm/embsw/gecko_sdk_release.git'
 
         // Matter Init --Checkout relevant submodule
-        sh 'scripts/checkout_submodules.py --shallow --platform efr32 linux'
+        sh 'scripts/checkout_submodules.py --shallow --platform silabs linux'
 
         // Set Pipeline configuration
         pipelineMetadata = readYaml(file: 'pipeline_metadata.yml')
