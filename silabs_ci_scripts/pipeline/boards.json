@@ -171,36 +171,6 @@
             "isWiFi": true,
             "boards" : [
                 {
-                    "name": "BRD4325B",
-                    "rcp": [""],
-                    "options": [
-                        {
-                            "name": "standard",
-                            "compilationFlags": "chip_build_libshell=true"
-                        },
-                        {
-                            "name": "release",
-                            "compilationFlags": "--release "
-                        }
-                        ],
-                    "isSQA": false
-                },
-                {
-                    "name": "BRD4325C",
-                    "rcp": [""],
-                    "options": [
-                        {
-                            "name": "standard",
-                            "compilationFlags": "chip_build_libshell=true"
-                        },
-                        {
-                            "name": "release",
-                            "compilationFlags": "--release "
-                        }
-                        ],
-                    "isSQA": false
-                },
-                {
                     "name": "BRD4338A",
                     "rcp": [""],
                     "options": [
