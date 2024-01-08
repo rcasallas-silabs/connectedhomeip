@@ -355,8 +355,8 @@ def exportIoTReports()
                         // Matter Thread MG24 (BRD4187C) – Window Shade
                         // Matter Wi-Fi 9116 (BRD4187C) – Lock
                         // Matter Wi-Fi 9116 (BRD4187C) – Thermostat
-                        // Matter Wi-Fi 917 (BRD4325B) – Lock
-                        // Matter Wi-Fi 917 (BRD4325B) – Thermostat
+                        // Matter Wi-Fi 917 (BRD4338A) – Lock
+                        // Matter Wi-Fi 917 (BRD4338A) – Thermostat
 
                         def wifiSizeTrackingApp = [ "lock-app", "thermostat"]
                         def openThreadMG24Apps = ["lighting-app", "lock-app", "window-app"]
@@ -405,16 +405,16 @@ def exportIoTReports()
                             """
                         }
 
-                        // Generate report for WiFi SOC (BRD4325B)s
+                        // Generate report for WiFi SOC (BRD4338A)s
                         wifiSizeTrackingApp.each { app ->
                             def appNameOnly = app - '-app'
                             sh """unset OTEL_EXPORTER_OTLP_ENDPOINT
                                 code_size_analyzer_cli \
-                                --map_file ${saved_workspace}/out/release/BRD4325B/WiFi/SiWx917-${appNameOnly}-example.map \
+                                --map_file ${saved_workspace}/out/release/BRD4338A/WiFi/SiWx917-${appNameOnly}-example.map \
                                 --stack_name matter \
-                                --target_part SiWG917M612LGTAA \
+                                --target_part SiWG917M111MGTBA \
                                 --compiler gcc \
-                                --target_board BRD4325B \
+                                --target_board BRD4338A \
                                 --app_name ${app}-WiFi-917 \
                                 --service_url https://code-size-analyzer.silabs.net \
                                 --branch_name ${env.BRANCH_NAME} \
@@ -630,7 +630,7 @@ def utfThreadTestSuite(nomadNode,deviceGroup,testBedName,appName,matterType,boar
 
 def utfWiFiTestSuite(nomadNode,deviceGroup,testBedName,appName,matterType,board,wifi_module,testSuite,manifestYaml,testSequenceYaml)
 {
-    def wifiSoCBoards = ["BRD4325B", "BRD4325C", "BRD4338A"]
+    def wifiSoCBoards = ["BRD4338A"]
     globalLock(credentialsId: 'hwmux_token_matterci', deviceGroup: deviceGroup) {
        node(nomadNode)
        {
@@ -841,92 +841,6 @@ def generateGblFileAndOTAfiles()
                 }
             }
             deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(), workspaceTmpDir, 'matter/'+ saved_workspace,'-name "*.gbl" -o -name "*.ota"')
-        }
-    }
-}
-
-def generateRpsFiles()
-{
-    actionWithRetry {
-        node(buildFarmLabel)
-        {
-            def boards = "BRD4325B,BRD4338A"
-            if (completeBuild){
-                boards = boards + ",BRD4325C"
-            }
-            def wifiPlatforms = "917_soc"
-            def appName = "lighting,lock,light-switch,onoff-plug,window"
-            def stashExample = "lighting-app"
-            def workspaceTmpDir = createWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
-                                                            buildOverlayDir)
-            def dirPath = workspaceTmpDir + createWorkspaceOverlay.overlayMatterPath
-            def saveDir = 'matter/'
-
-            def commanderPath = dirPath + "/commander/commander"
-
-            // Closure to generate the rps files
-            def genRpsFiles = {app, board, radioName ->
-
-                sh """
-                        ls ${workspaceTmpDir}
-                        pwd
-                        ${commanderPath} --version
-
-                        bin_path_std="${dirPath}/${saved_workspace}/out/standard/${board}/WiFi/"
-                        bin_path_release="${dirPath}/${saved_workspace}/out/release/${board}/WiFi/"
-                        file_std="\$(find \$bin_path_std/*${app}*.s37 | grep -o '[^/]*\$')"
-                        file_release="\$(find \$bin_path_release/*${app}*.s37 | grep -o '[^/]*\$')"
-
-                        rps_file_std="\$(basename \$file_std .s37).rps"
-                        rps_file_release="\$(basename \$file_release .s37).rps"
-
-                        ${commanderPath} rps create \$bin_path_std/\$rps_file_std --app \$bin_path_std/\$file_std
-                        ${commanderPath} rps create \$bin_path_release/\$rps_file_release --app \$bin_path_release/\$file_release
-
-                        ls -al \$bin_path_std
-                        ls -al \$bin_path_release
-
-                    """
-                return 0
-            }
-
-            withDockerRegistry([url: "https://artifactory.silabs.net ", credentialsId: 'svc_gsdk']){
-                sh "docker pull $gsdkImage"
-            }
-
-            dir(dirPath) {
-                try{
-                    withDockerContainer(image: gsdkImage)
-                    {
-                        withEnv(['file_std=""',
-                                    'file_release=""',
-                                    'rps_file_std=""',
-                                    'rps_file_release=""',
-                                    'bin_path_std=""',
-                                    'bin_path_release=""']){
-                            boards.tokenize(",").each{ brd ->
-                                wifiPlatforms.tokenize(",").each{ platform ->
-                                    appName.tokenize(",").each{ app ->
-                                        // generating the RPS file for 917 SoC
-                                        genRpsFiles.call(app, brd, platform)
-                                    }
-                                }
-                                // stashing the lighting rps file which will be used later in the utf
-                                stash name : 'WiFiExamples-' + stashExample + '-' + brd + '-917_soc', includes: "saved_workspace/out/standard/" + "${brd}" + "/WiFi/*lighting*.rps"
-                            }
-                        }
-                    }
-                }
-                catch (e)
-                {
-                        deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
-                                  workspaceTmpDir,
-                                  saveDir,
-                                  '-name no-files')
-                        throw e
-                }
-            }
-            deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(), workspaceTmpDir, 'matter/' + saved_workspace,'-name "*.rps"')
         }
     }
 }
@@ -1167,21 +1081,6 @@ def pipeline()
             advanceStageMarker()
             generateGblFileAndOTAfiles()
         }
-    }
-
-    // This stage can fail should the SiW917 builds fail.
-    // Do not stop the pipeline if this is the case.
-    // SQA test can still run on OpenThread boards.
-    stage("Generate RPS files")
-    {
-        // Generating the RPS file for 917 SoC
-        advanceStageMarker()
-        try {
-            generateRpsFiles()
-        } catch (err) {
-            unstable(message: "Some build failures occured")
-        }
-
     }
 
     stage("Push to Artifactory and UBAI")
