@@ -66,7 +66,15 @@ def genericSoCMatterBuild(app, supportedBoards, ota_automation=false, ecosystem_
                                                                 cp ./out/${app.name}/${transportType}/${option.name}/${board.name}/*.s37 ${saved_workspace}/out/${option.name}/${board.name}/${transportType}/
                                                                 cp ./out/${app.name}/${transportType}/${option.name}/${board.name}/*.map ${saved_workspace}/out/${option.name}/${board.name}/${transportType}/
                                                         """
-                                                        stash name: transportType + 'Examples-'+app.name+'-'+board.name, includes: 'out/**/*.s37 '
+                                                        
+                                                        if (family.isWiFi) // WiFi SoC generates as .rps file
+                                                        {
+                                                            sh """
+                                                            cp ./out/${app.name}/${transportType}/${option.name}/${board.name}/*.rps ${saved_workspace}/out/${option.name}/${board.name}/${transportType}/
+                                                            """
+                                                        }
+
+                                                        stash name: transportType + 'Examples-'+app.name+'-'+board.name, includes: 'out/**/*.s37,/out/**/*.rps '
                                                     }
                                                 }
                                             }
@@ -93,7 +101,7 @@ def genericSoCMatterBuild(app, supportedBoards, ota_automation=false, ecosystem_
             deactivateWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
                             workspaceTmpDir,
                             'matter/' + saved_workspace,
-                            '-name "*.s37" -o -name "*.map"')
+                            '-name "*.s37" -o -name "*.map" -o -name "*.rps"')
         }
     }
 }
