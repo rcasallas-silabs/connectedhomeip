@@ -46,39 +46,31 @@ def genericSoCMatterBuild(app, supportedBoards, ota_automation=false, ecosystem_
                                                     }
 
 
-                                                    board.rcp.each { rcp ->
-                                                        if (! app.rcp.contains(rcp) ) {
+                                                    board.rcp.each { brcp ->
+                                                        if (! app.rcp.contains(brcp) ) {
                                                             // RCP not targeted for the sample app
                                                             return
                                                         }
 
                                                         rcpString = ""
-                                                        if (family.isWiFi || rcp != "") {
+                                                        if (family.isWiFi  || brcp != "") {
                                                             transportType = "WiFi"
                                                         } else {
                                                             transportType = "OpenThread"
                                                         }
 
                                                         folderPath = transportType
-                                                        if (rcp != "") {
-                                                            rcpString = "--wifi " + rcp
-                                                            folderPath += "/${rcp}"
+                                                        if (brcp != "") {
+                                                            rcpString = "--wifi " + brcp
+                                                            folderPath += "/${brcp}"
                                                         }
 
-                                                        sh "echo Building ${board.name} type ${option.name}"
+                                                        sh "echo Building ${transportType} ${board.name} type ${option.name}"
 
                                                         sh """./scripts/examples/gn_silabs_example.sh ${app.path} ./out/${app.name}/${folderPath}/${option.name} ${board.name} ${appBuildArg.option} ${rcpString} ${option.compilationFlags}
                                                                 mkdir -p ${saved_workspace}/out/${option.name}/${board.name}/${folderPath}
-                                                                cp ./out/${app.name}/${folderPath}/${option.name}/${board.name}/*.s37 ${saved_workspace}/out/${option.name}/${board.name}/${folderPath}/
-                                                                cp ./out/${app.name}/${folderPath}/${option.name}/${board.name}/*.map ${saved_workspace}/out/${option.name}/${board.name}/${folderPath}/
+                                                                find out/${app.name}/${folderPath}/${option.name}/${board.name} \\( -name '*.map' -o -name '*.s37' -o -name '*.rps' \\) -exec cp {} ${saved_workspace}/out/${option.name}/${board.name}/${folderPath}/ \\;
                                                         """
-
-                                                        if (family.isWiFi) // WiFi SoC generates as .rps file
-                                                        {
-                                                            sh """
-                                                            cp ./out/${app.name}/${folderPath}/${option.name}/${board.name}/*.rps ${saved_workspace}/out/${option.name}/${board.name}/${folderPath}/
-                                                            """
-                                                        }
 
                                                         stash name: transportType + 'Examples-'+app.name+'-'+board.name, includes: 'out/**/*.s37,/out/**/*.rps '
                                                     }
