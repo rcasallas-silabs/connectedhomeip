@@ -980,11 +980,11 @@ def triggerSqaSmokeAndRegressionTest(buildTool)
                             if(sqaFunctions.isProductionJenkinsServer())
                             {
                                 echo 'in product jenkin.... '
-                                sqaFunctions.commitToMatterSqaPipelines(buildTool, 'smoke')
-                                sqaFunctions.commitToMatterSqaPipelines(buildTool, 'regression')
-                                sqaFunctions.commitToMatterSqaPipelines(buildTool, 'endurance-customers-issues')
-                                sqaFunctions.commitToMatterSqaPipelines(buildTool, 'regression-binding-enhanced')
-                                sqaFunctions.commitToMatterSqaPipelines(buildTool, 'regression-enhanced-groups')
+                                sqaFunctions.commitToMatterSqaPipelines(buildTool, 'smoke', env.BRANCH_NAME, env.BUILD_NUMBER)
+                                sqaFunctions.commitToMatterSqaPipelines(buildTool, 'regression', env.BRANCH_NAME, env.BUILD_NUMBER)
+                                sqaFunctions.commitToMatterSqaPipelines(buildTool, 'endurance-customers-issues', env.BRANCH_NAME, env.BUILD_NUMBER)
+                                sqaFunctions.commitToMatterSqaPipelines(buildTool, 'regression-binding-enhanced', env.BRANCH_NAME, env.BUILD_NUMBER)
+                                sqaFunctions.commitToMatterSqaPipelines(buildTool, 'regression-enhanced-groups', env.BRANCH_NAME, env.BUILD_NUMBER)
                             }
                 }
             }
