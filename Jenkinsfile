@@ -59,20 +59,20 @@ def initWorkspaceAndScm()
     // Get pipeline metadata
     dir(buildOverlayDir+createWorkspaceOverlay.overlayMatterPath)
     {
-        // Clean workspace and verify submodule URLs are pointed to correct path 
+        // Clean workspace and verify submodule URLs are pointed to correct path
         sh """
             git submodule sync --recursive
             git submodule foreach --recursive -q git reset --hard -q
             git fetch || true && git fetch --tags
         """
-        
+
         checkout scm: [$class                     : 'GitSCM',
                  branches                         : scm.branches,
                  browser: [$class: 'Stash',
                             repoUrl: 'https://stash.silabs.com/projects/WMN_TOOLS/repos/matter/'],
                  extensions                       : scm.extensions +  [$class: 'ScmName', name: 'matter'],
-                 userRemoteConfigs                : scm.userRemoteConfigs]                                          
-        
+                 userRemoteConfigs                : scm.userRemoteConfigs]
+
         sh 'git --version'
         sh 'git submodule update --init third_party/openthread/ot-efr32/'
         sh 'cd ./third_party/openthread/ot-efr32'
@@ -390,7 +390,7 @@ def exportIoTReports()
                             def appNameOnly = app - '-app'
                             sh """unset OTEL_EXPORTER_OTLP_ENDPOINT
                                 code_size_analyzer_cli \
-                                --map_file ${saved_workspace}/out/standard/BRD4187C/WiFi/efr32-91x-${appNameOnly}-example.map \
+                                --map_file ${saved_workspace}/out/standard/BRD4187C/WiFi/rs9116/matter-silabs-${appNameOnly}-example*.map \
                                 --stack_name matter \
                                 --target_part efr32mg24b210f1536im48 \
                                 --compiler gcc \
@@ -1100,10 +1100,10 @@ def pipeline()
         //                                                                         "/manifest-2703-thread",
         //                                                                         "--tmconfig tests/.sequence_manager/test_execution_definitions/matter_thread_ci_sequence.yaml") }
         parallelNodes['lighting Thread BRD4161A']   = { this.utfThreadTestSuite('gsdkMontrealNode','utf_matter_thread_4','matter_thread_4','lighting','thread','BRD4161A','',"/manifest-4161-thread","--tmconfig tests/.sequence_manager/test_execution_definitions/matter_thread_ci_sequence.yaml") }
-        
+
         // TODO Re-enable 917 in SQA stage when 1.8MBR is supported in this branch
         // parallelNodes['lighting 917-SoC BRD4338A']   = { this.utfWiFiTestSuite('gsdkMontrealNode','utf_matter_wifi_917soc_ci_2','matter_wifi_917soc_ci_2','lighting-app','wifi','BRD4338A','917_soc','',"/manifest-917soc","--tmconfig tests/.sequence_manager/test_execution_definitions/matter_wifi_ci_sequence.yaml") }
-        
+
         parallelNodes.failFast = false
         parallel parallelNodes
 

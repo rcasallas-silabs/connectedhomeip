@@ -52,25 +52,31 @@ def genericSoCMatterBuild(app, supportedBoards, ota_automation=false, ecosystem_
                                                             return
                                                         }
 
-
+                                                        rcpString = ""
                                                         if (family.isWiFi || rcp != "") {
                                                             transportType = "WiFi"
                                                         } else {
                                                             transportType = "OpenThread"
                                                         }
 
+                                                        folderPath = transportType
+                                                        if (rcp != "") {
+                                                            rcpString = "--wifi " + rcp
+                                                            folderPath += "/${rcp}"
+                                                        }
+
                                                         sh "echo Building ${board.name} type ${option.name}"
 
-                                                        sh """./scripts/examples/gn_silabs_example.sh ${app.path} ./out/${app.name}/${transportType}/${option.name} ${board.name} ${appBuildArg.option} ${option.compilationFlags}
-                                                                mkdir -p ${saved_workspace}/out/${option.name}/${board.name}/${transportType}
-                                                                cp ./out/${app.name}/${transportType}/${option.name}/${board.name}/*.s37 ${saved_workspace}/out/${option.name}/${board.name}/${transportType}/
-                                                                cp ./out/${app.name}/${transportType}/${option.name}/${board.name}/*.map ${saved_workspace}/out/${option.name}/${board.name}/${transportType}/
+                                                        sh """./scripts/examples/gn_silabs_example.sh ${app.path} ./out/${app.name}/${folderPath}/${option.name} ${board.name} ${appBuildArg.option} ${rcpString} ${option.compilationFlags}
+                                                                mkdir -p ${saved_workspace}/out/${option.name}/${board.name}/${folderPath}
+                                                                cp ./out/${app.name}/${folderPath}/${option.name}/${board.name}/*.s37 ${saved_workspace}/out/${option.name}/${board.name}/${folderPath}/
+                                                                cp ./out/${app.name}/${folderPath}/${option.name}/${board.name}/*.map ${saved_workspace}/out/${option.name}/${board.name}/${folderPath}/
                                                         """
-                                                        
+
                                                         if (family.isWiFi) // WiFi SoC generates as .rps file
                                                         {
                                                             sh """
-                                                            cp ./out/${app.name}/${transportType}/${option.name}/${board.name}/*.rps ${saved_workspace}/out/${option.name}/${board.name}/${transportType}/
+                                                            cp ./out/${app.name}/${folderPath}/${option.name}/${board.name}/*.rps ${saved_workspace}/out/${option.name}/${board.name}/${folderPath}/
                                                             """
                                                         }
 
