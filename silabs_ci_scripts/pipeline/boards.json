@@ -120,7 +120,7 @@
                         },
                         {
                             "name": "release",
-                            "compilationFlags": "--release --use_ot_lib"
+                            "compilationFlags": "--release"
                         }
                         ],
                     "isSQA": true

@@ -410,7 +410,7 @@ def exportIoTReports()
                             def appNameOnly = app - '-app'
                             sh """unset OTEL_EXPORTER_OTLP_ENDPOINT
                                 code_size_analyzer_cli \
-                                --map_file ${saved_workspace}/out/release/BRD4338A/WiFi/SiWx917-${appNameOnly}-example.map \
+                                --map_file ${saved_workspace}/out/release/BRD4338A/WiFi/matter-silabs-${appNameOnly}-example*.map \
                                 --stack_name matter \
                                 --target_part SiWG917M111MGTBA \
                                 --compiler gcc \
