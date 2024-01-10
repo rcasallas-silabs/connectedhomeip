@@ -966,7 +966,7 @@ def pushToArtifactoryAndUbai()
                                     file="provision.zip"
                                     cd ..
                                     rm -f "${file}"
-                                    zip -r "${file}" "provision" -x "provision/config/latest.json" -x "provision/support/*" -x "provision/modules/__pycache__/*" -x "provision/temp/*"
+                                    zip -r "${file}" "provision" -x "provision/config/latest.json" -x "provision/support/efr32*" -x "provision/support/si917" -x "provision/modules/__pycache__/*" -x "provision/temp/*"
 
                                     echo 'Uploading provisioning tool to UBAI... '
                                     ubai_upload_cli --client-id jenkins-gsdk-pipelines-Matter --file-path "${file}"  --metadata app_name matter_provision \
