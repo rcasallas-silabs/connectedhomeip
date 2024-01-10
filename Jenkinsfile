@@ -761,7 +761,7 @@ def generateGblFileAndOTAfiles()
 
             def boards = ["BRD4161A","BRD4187C"]
             def technology = ["OpenThread","WiFi"]
-            def wifiRCP = ["wf200","rs9116", "91x"]
+            def wifiRCP = ["wf200","rs9116"]
             def appName = "lighting-app"
             def workspaceTmpDir = createWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
                                                             buildOverlayDir)
@@ -777,11 +777,11 @@ def generateGblFileAndOTAfiles()
                         ${commanderPath} --version
 
                         if [ "${tech}" = "OpenThread" ] ; then
-                            bin_path="${dirPath}/${saved_workspace}/out/OTA/ota_automation_out/${app}/${board}/OpenThread/"
-                            file="\$(find \$bin_path/ -name \\*.s37 | grep -o '[^/]*\$')"
+                            bin_path="${dirPath}/${saved_workspace}/out/OTA/standard/${board}/OpenThread/"
+                            file="\$(find \$bin_path/ -name matter-silabs-lighting-example.s37 | grep -o '[^/]*\$')"
                         else
-                            bin_path="${dirPath}/${saved_workspace}/out/OTA/ota_automation_out/${app}/${board}/WiFi/"
-                            file="\$(find \$bin_path/ -name efr32-${radioName}-lighting-example.s37 | grep -o '[^/]*\$')"
+                            bin_path="${dirPath}/${saved_workspace}/out/OTA/standard/${board}/WiFi/${radioName}"
+                            file="\$(find \$bin_path/ -name matter-silabs-lighting-example.s37 | grep -o '[^/]*\$')"
                         fi
 
                         gbl_file="\$(basename \$file .s37).gbl"
@@ -814,10 +814,8 @@ def generateGblFileAndOTAfiles()
 
                                         if(tech_ == "WiFi"){
                                             wifiRCP.each{ radioName ->
-                                                if (brd == "BRD4161A" && radioName != "91x"){
-                                                    genFiles.call(appName, tech_, brd, radioName)
-                                                }
-                                                else if (brd == "BRD4187C"){
+                                                // RCP build only on MG24 boards
+                                                if (brd == "BRD4187C"){
                                                     genFiles.call(appName, tech_, brd, radioName)
                                                 }
                                             }
@@ -885,15 +883,15 @@ def pushToArtifactoryAndUbai()
                                     file="build-binaries.zip"
                                     cd saved_workspace
 
-                                    if [ -d "out/OTA/ota_automation_out" ]; then
-                                        if [ -d "out/ECOSYSTEM/ecosystem_automation_out" ]; then
-                                            zip -r "${file}" out -x out/OTA/ota_automation_out/\\* -x out/ECOSYSTEM/ecosystem_automation_out/\\*
+                                    if [ -d "out/OTA" ]; then
+                                        if [ -d "out/ECOSYSTEM" ]; then
+                                            zip -r "${file}" out -x out/OTA/\\* -x out/ECOSYSTEM/\\*
                                         else
-                                            zip -r "${file}" out -x out/OTA/ota_automation_out/\\*
+                                            zip -r "${file}" out -x out/OTA/\\*
                                         fi
                                     else
-                                        if [ -d "out/ECOSYSTEM/ecosystem_automation_out" ]; then
-                                            zip -r "${file}" out -x out/ECOSYSTEM/ecosystem_automation_out/\\*
+                                        if [ -d "out/ECOSYSTEM" ]; then
+                                            zip -r "${file}" out -x out/ECOSYSTEM/\\*
                                         else
                                             zip -r "${file}" out
                                         fi

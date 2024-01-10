@@ -6,6 +6,7 @@
             "boards": ["BRD2703A", "BRD2601B", "BRD4161A", "BRD4162A", "BRD4163A", "BRD4164A", "BRD4166A", "BRD4170A", "BRD4186C", "BRD4187C", "BRD4316A", "BRD4317A", "BRD4338A"],
             "rcp" : ["", "rs9116", "wf200"],
             "variants" : ["all"],
+            "automation" : "",
             "appBuildArgs" : [
                 {
                     "name" : "",
@@ -19,6 +20,7 @@
             "boards": ["BRD2703A", "BRD2601B", "BRD4161A", "BRD4162A", "BRD4163A", "BRD4164A", "BRD4166A", "BRD4170A", "BRD4186C", "BRD4187C", "BRD4316A", "BRD4317A", "BRD4338A"],
             "rcp" : ["", "rs9116", "wf200"],
             "variants" : ["all"],
+            "automation" : "",
             "appBuildArgs" : [
                 {
                     "name" : "",
@@ -32,6 +34,7 @@
             "boards": ["BRD2703A", "BRD2601B", "BRD4161A", "BRD4162A", "BRD4163A", "BRD4164A", "BRD4166A", "BRD4170A", "BRD4186C", "BRD4187C", "BRD4316A", "BRD4317A", "BRD4338A"],
             "rcp" : [""],
             "variants" : ["all"],
+            "automation" : "",
             "appBuildArgs" : [
                 {
                     "name" : "",
@@ -45,6 +48,7 @@
             "boards": ["BRD2703A", "BRD2601B", "BRD4161A", "BRD4162A", "BRD4163A", "BRD4164A", "BRD4166A", "BRD4170A", "BRD4186C", "BRD4187C", "BRD4316A", "BRD4317A", "BRD4338A"],
             "rcp" : ["", "rs9116", "wf200"],
             "variants" : ["all"],
+            "automation" : "",
             "appBuildArgs" : [
                 {
                     "name" : "",
@@ -58,6 +62,7 @@
             "boards": ["BRD2703A", "BRD2601B", "BRD4161A", "BRD4162A", "BRD4163A", "BRD4164A", "BRD4166A", "BRD4170A", "BRD4186C", "BRD4187C", "BRD4316A", "BRD4317A", "BRD4338A"],
             "rcp" : ["", "rs9116", "wf200"],
             "variants" : ["all"],
+            "automation" : "",
             "appBuildArgs" : [
                 {
                     "name" : "",
@@ -71,6 +76,7 @@
             "boards": ["BRD4161A", "BRD4166A", "BRD4186C", "BRD4187C", "BRD4338A"],
             "rcp" : ["", "rs9116", "wf200"],
             "variants" : ["all"],
+            "automation" : "",
             "appBuildArgs" : [
                 {
                     "name" : "",
@@ -84,6 +90,7 @@
             "boards": ["BRD4161A", "BRD4186C", "BRD4187C", "BRD4166A", "BRD4316A"],
             "rcp" : [""],
             "variants" : ["all"],
+            "automation" : "",
             "appBuildArgs" : [
                 {
                     "name" : "",
@@ -97,6 +104,7 @@
             "boards": ["BRD4161A", "BRD4166A", "BRD4186C", "BRD4187C", "BRD4338A"],
             "rcp" : [""],
             "variants" : ["all"],
+            "automation" : "",
             "appBuildArgs" : [
                 {
                     "name" : "temperature",
@@ -118,6 +126,7 @@
             "boards": ["BRD4161A", "BRD4187C"],
             "rcp" : ["", "rs9116", "wf200"],
             "variants" : ["all"],
+            "automation" : "OTA",
             "appBuildArgs" : [
                 {
                     "name": "ota_automation_out",
@@ -131,6 +140,7 @@
             "boards": ["BRD4187C"],
             "rcp" : [""],
             "variants" : ["standard"],
+            "automation" : "ECOSYSTEM",
             "appBuildArgs" : [
                 {
                     "name" : "ecosystem_automation_out",
