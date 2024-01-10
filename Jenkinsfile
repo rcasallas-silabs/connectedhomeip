@@ -843,6 +843,21 @@ def generateGblFileAndOTAfiles()
     }
 }
 
+def copyWiFiFirmwareRpsFile()
+{
+    // copy all wifi firmware rps that can be used to the saved_workpace
+    sh """
+    mkdir -p ${saved_workspace}/out/WiFi-Firmware/BRD4338A
+    cp third_party/silabs/wifi_sdk/connectivity_firmware/SiWG917-B.*.rps ${saved_workspace}/out/WiFi-Firmware/BRD4338A/
+    mkdir -p ${saved_workspace}/out/WiFi-Firmware/rs9116/Evk_1.4
+    cp third_party/silabs/wiseconnect-wifi-bt-sdk/firmware/RS9116W.2.*.rps ${saved_workspace}/out/WiFi-Firmware/rs9116/Evk_1.4/
+    mkdir -p ${saved_workspace}/out/WiFi-Firmware/rs9116/Evk_1.5
+    cp third_party/silabs/wiseconnect-wifi-bt-sdk/firmware/RS916W.2.*.rps ${saved_workspace}/out/WiFi-Firmware/rs9116/Evk_1.5/
+    mkdir -p ${saved_workspace}/out/WiFi-Firmware/917-ncp
+    cp third_party/silabs/wifi_sdk/connectivity_firmware/SiWG917-B.*.rps ${saved_workspace}/out/WiFi-Firmware/917-ncp/
+    """
+}
+
 def pushToArtifactoryAndUbai()
 {
     actionWithRetry {
@@ -861,6 +876,8 @@ def pushToArtifactoryAndUbai()
 
             dir(dirPath) {
                 try{
+                    copyWiFiFirmwareRpsFile()
+
                     //for RC_ branch, artifacts need push staging repos, otherwise push to development repos
                     def reposName = 'gsdk-generic-development'
                     if (completeBuild){
