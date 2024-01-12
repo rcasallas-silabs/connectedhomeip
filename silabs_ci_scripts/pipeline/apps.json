@@ -73,7 +73,21 @@
         {
             "name": "onoff-plug",
             "path": "./silabs_examples/onoff-plug-app/",
-            "boards": ["BRD4161A", "BRD4166A", "BRD4186C", "BRD4187C", "BRD4338A"],
+            "boards": ["BRD4161A", "BRD4166A", "BRD4186C", "BRD4187C", "BRD4338A", "BRD4316A"],
+            "rcp" : ["", "rs9116", "wf200"],
+            "variants" : ["all"],
+            "automation" : "",
+            "appBuildArgs" : [
+                {
+                    "name" : "",
+                    "option": ""
+                }
+            ]
+        },
+        {
+            "name": "dishwasher",
+            "path": "./silabs_examples/dishwasher-app/silabs/",
+            "boards": ["BRD4161A", "BRD4166A", "BRD4186C", "BRD4187C", "BRD4338A", "BRD4316A"],
             "rcp" : ["", "rs9116", "wf200"],
             "variants" : ["all"],
             "automation" : "",
@@ -101,7 +115,7 @@
         {
             "name": "sensors",
             "path": "./silabs_examples/silabs-sensors/",
-            "boards": ["BRD4161A", "BRD4166A", "BRD4186C", "BRD4187C", "BRD4338A"],
+            "boards": ["BRD4161A", "BRD4166A", "BRD4186C", "BRD4187C", "BRD4338A", "BRD4316A"],
             "rcp" : [""],
             "variants" : ["all"],
             "automation" : "",
