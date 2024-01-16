@@ -787,7 +787,7 @@ def generateGblFileAndOTAfiles()
                         gbl_file="\$(basename \$file .s37).gbl"
                         ota_file="\$(basename \$file .s37).ota"
 
-                        ${commanderPath} gbl create \$bin_path/\$gbl_file --app \$bin_path/\$file
+                        ${commanderPath} gbl create \$bin_path/\$gbl_file --compress lzma --app \$bin_path/\$file
                         ${dirPath}/src/app/ota_image_tool.py create -v 0xFFF1 -p 0x8005 -vn 2 -vs 2.0 -da sha256 \$bin_path/\$gbl_file \$bin_path/\$ota_file
 
                         ls -al \$bin_path
