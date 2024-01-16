@@ -19,7 +19,8 @@ in this release of the Silicon Labs Matter Out of Box Experience
 
 | Repo                                    |   Branch    | Commit Hash                              |
 | --------------------------------------- | ----------  | ---------------------------------------- |
-| https://github.com/openthread/openthread |    main      | 7074a43e4577d32d5535d52e7940ed2ea7e3a528 |
+| https://github.com/openthread/openthread|    main     | 7074a43e4577d32d5535d52e7940ed2ea7e3a528 |
+
 
 ## Connectivity Standards Alliance (CSA) connectedhomeip (Matter)
 
@@ -31,10 +32,11 @@ in this release of the Silicon Labs Matter Out of Box Experience
 
 | Repo                                            | Branch                     | Commit Hash       |
 | ----------------------------------------------- | ------------------------   | ----------------- |
-| https://github.com/SiliconLabs/matter           | release_2.3.0-1.3-alpha.1  | c36f4a7745ac0092982933987c694a6b605de35d |
+| https://github.com/SiliconLabs/matter           | release_2.3.0-1.3-alpha.1  | 5ec4196cc41f03fdb89e916297176394ba20c086 |
+
 
 ## Matter Accessory Device (MAD)
 
 | Repo                                            | Branch                     | Commit Hash           |
 | ----------------------------------------------- | ------------------------   | ----------------------|
-| https://github.com/SiliconLabs/matter           | release_2.3.0-1.3-alpha.1  | c36f4a7745ac0092982933987c694a6b605de35d|
+| https://github.com/SiliconLabs/matter           | release_2.3.0-1.3-alpha.1  | 5ec4196cc41f03fdb89e916297176394ba20c086     |
