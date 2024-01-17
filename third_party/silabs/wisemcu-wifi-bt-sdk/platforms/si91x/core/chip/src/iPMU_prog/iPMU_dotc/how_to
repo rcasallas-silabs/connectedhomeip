@@ -1,3 +1,0 @@
-
-Perl Script Usage:
-perl ipmu_config_gen.pl ipmu_Cfile.csv rsi_system_config.c
