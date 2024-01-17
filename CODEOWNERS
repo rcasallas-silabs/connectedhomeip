@@ -4,7 +4,7 @@ CODEOWNERS.source_branch_exclusion_pattern cherry-pick/**
 @@@MatterCSA @jumartin @jepenven @ricasall @makardou @selissia
 @@@MatterWatt @jumartin @jepenven @ricasall @makardou @selissia @rerasool
 @@@MatterWifi @mamehta
-@@@Documentation @wehale @caowens @rerasool
+@@@Documentation @rerasool @curahman @berush
 @@@Unify @sushanka @naagarwa @mamehta @sabollim
 @@@CICD @gbash @yushu @shmakdis @jepenven
 
