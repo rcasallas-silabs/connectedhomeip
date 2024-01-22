@@ -21,6 +21,6 @@
   </Device>
   <Device>
    <ChipInfo Vendor="Silicon Labs" Name="Si917" Core="JLINK_CORE_CORTEX_M4" WorkRAMAddr="0x400" WorkRAMSize="0x00030000" />
-   <FlashBankInfo Name="QSPI M4 Flash" BaseAddr="0x08202000" MaxSize="0x1ef000" Loader="Devices/SiliconLabs/RS9117_SF_4MB_42bsp.elf" LoaderType="FLASH_ALGO_TYPE_OPEN" />
+   <FlashBankInfo Name="QSPI M4 Flash" BaseAddr="0x08202000" MaxSize="0x1ef000" Loader="si917/RS9117_SF_4MB_42bsp.elf" LoaderType="FLASH_ALGO_TYPE_OPEN" />
   </Device>
 </Database>
