@@ -121,18 +121,10 @@
             "automation" : "",
             "appBuildArgs" : [
                 {
-                    "name" : "temperature",
-                    "option": "is_temperature_sensor=true"
-                },
-                {
-                    "name" : "contact",
-                    "option": "is_contact_sensor=true"
-                },
-                {
-                    "name" : "occupancy",
-                    "option": "is_occupancy_sensor=true"
+                    "name" : "",
+                    "option": ""
                 }
-             ]
+            ]
         },
         {
             "name": "OTA",
