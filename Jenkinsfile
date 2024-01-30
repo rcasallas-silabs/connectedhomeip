@@ -761,7 +761,7 @@ def generateGblFileAndOTAfiles()
 
             def boards = ["BRD4161A","BRD4187C"]
             def technology = ["OpenThread","WiFi"]
-            def wifiRCP = ["wf200","rs9116"]
+            def wifiRCP = ["wf200","rs9116", "SiWx917"]
             def appName = "lighting-app"
             def workspaceTmpDir = createWorkspaceOverlay(advanceStageMarker.getBuildStagesList(),
                                                             buildOverlayDir)
