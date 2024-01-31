@@ -205,7 +205,7 @@ def buildUnifyApp(arch, app, env_exports, buildDir, out_path)
         build_args = "--args='target_cpu=\"\\\"${archname}\\\"\"'"
     }
     sh "./scripts/run_in_build_env.sh \"${env_exports}; gn gen --root=${buildDir} ${out_path} ${build_args}\""
-    sh "./scripts/run_in_build_env.sh \"${env_exports}; ninja -C ${out_path}\""
+    sh "./scripts/run_in_build_env.sh \"${env_exports}; ninja -C ${out_path} unify-matter-${app}\""
 }
 
 def buildUnify(arch, triples, app, compile_tests)
