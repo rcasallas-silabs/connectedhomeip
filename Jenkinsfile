@@ -123,7 +123,7 @@ def initWorkspaceAndScm()
     }
     dir(buildOverlayDir+"/overlay/unify"){
         checkout scm: [$class: 'GitSCM',
-                 branches:   [[name: 'release/23q2']],
+                 branches:   [[name: 'release/23q4']],
                  extensions: [[$class: 'CloneOption', depth: 1, noTags: false, reference: '', shallow: true],
                                 [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true,
                                 recursiveSubmodules: true, reference: '', shallow: true, trackingSubmodules: false]],
