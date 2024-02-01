@@ -52,24 +52,24 @@ def genericSoCMatterBuild(app, supportedBoards, ota_automation=false, ecosystem_
                                                             return
                                                         }
 
-                                                        rcpString = ""
+                                                        def rcpString = ""
                                                         if (family.isWiFi  || brcp != "") {
                                                             transportType = "WiFi"
                                                         } else {
                                                             transportType = "OpenThread"
                                                         }
 
-                                                        folderPath = transportType
+                                                        def folderPath = transportType
                                                         if (brcp != "") {
                                                             rcpString = "--wifi " + brcp
                                                             folderPath += "/${brcp}"
                                                         }
 
-                                                        sh "echo Building ${transportType} ${board.name} type ${option.name}"
-
-                                                        sh """./scripts/examples/gn_silabs_example.sh ${app.path} ./out/${app.name}/${folderPath}/${option.name} ${board.name} ${appBuildArg.option} ${rcpString} ${option.compilationFlags}
-                                                                mkdir -p ${saved_workspace}/out/${app.automation}/${option.name}/${board.name}/${folderPath}
-                                                                find out/${app.name}/${folderPath}/${option.name}/${board.name} \\( -name '*.map' -o -name '*.s37' -o -name '*.rps' \\) -exec cp {} ${saved_workspace}/out/${app.automation}/${option.name}/${board.name}/${folderPath}/ \\;
+                                                        sh """
+                                                            echo Building ${transportType} ${board.name} ${brcp} type ${option.name}
+                                                            ./scripts/examples/gn_silabs_example.sh ${app.path} ./out/${app.name}/${folderPath}/${option.name} ${board.name} ${appBuildArg.option} ${rcpString} ${option.compilationFlags}
+                                                            mkdir -p ${saved_workspace}/out/${app.automation}/${option.name}/${board.name}/${folderPath}
+                                                            find out/${app.name}/${folderPath}/${option.name}/${board.name} \\( -name '*.map' -o -name '*.s37' -o -name '*.rps' \\) -exec cp {} ${saved_workspace}/out/${app.automation}/${option.name}/${board.name}/${folderPath}/ \\;
                                                         """
 
                                                         stash name: transportType + 'Examples-'+app.name+'-'+board.name, includes: 'out/**/*.s37,/out/**/*.rps '
