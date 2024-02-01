@@ -4,7 +4,7 @@
             "name": "lighting",
             "path": "./examples/lighting-app/silabs/",
             "boards": ["BRD2703A", "BRD2601B", "BRD4161A", "BRD4162A", "BRD4163A", "BRD4164A", "BRD4166A", "BRD4170A", "BRD4186C", "BRD4187C", "BRD4316A", "BRD4317A", "BRD4338A"],
-            "rcp" : ["", "rs9116", "wf200"],
+            "rcp" : ["", "rs9116", "SiWx917", "wf200"],
             "variants" : ["all"],
             "automation" : "",
             "appBuildArgs" : [
@@ -18,7 +18,7 @@
             "name": "lock",
             "path": "./examples/lock-app/silabs/",
             "boards": ["BRD2703A", "BRD2601B", "BRD4161A", "BRD4162A", "BRD4163A", "BRD4164A", "BRD4166A", "BRD4170A", "BRD4186C", "BRD4187C", "BRD4316A", "BRD4317A", "BRD4338A"],
-            "rcp" : ["", "rs9116", "wf200"],
+            "rcp" : ["", "rs9116", "SiWx917", "wf200"],
             "variants" : ["all"],
             "automation" : "",
             "appBuildArgs" : [
@@ -46,7 +46,7 @@
             "name": "thermostat",
             "path": "./examples/thermostat/silabs/",
             "boards": ["BRD2703A", "BRD2601B", "BRD4161A", "BRD4162A", "BRD4163A", "BRD4164A", "BRD4166A", "BRD4170A", "BRD4186C", "BRD4187C", "BRD4316A", "BRD4317A", "BRD4338A"],
-            "rcp" : ["", "rs9116", "wf200"],
+            "rcp" : ["", "rs9116", "SiWx917", "wf200"],
             "variants" : ["all"],
             "automation" : "",
             "appBuildArgs" : [
@@ -60,7 +60,7 @@
             "name": "window",
             "path": "./examples/window-app/silabs/",
             "boards": ["BRD2703A", "BRD2601B", "BRD4161A", "BRD4162A", "BRD4163A", "BRD4164A", "BRD4166A", "BRD4170A", "BRD4186C", "BRD4187C", "BRD4316A", "BRD4317A", "BRD4338A"],
-            "rcp" : ["", "rs9116", "wf200"],
+            "rcp" : ["", "rs9116", "SiWx917", "wf200"],
             "variants" : ["all"],
             "automation" : "",
             "appBuildArgs" : [
@@ -74,7 +74,7 @@
             "name": "onoff-plug",
             "path": "./silabs_examples/onoff-plug-app/",
             "boards": ["BRD4161A", "BRD4166A", "BRD4186C", "BRD4187C", "BRD4338A", "BRD4316A"],
-            "rcp" : ["", "rs9116", "wf200"],
+            "rcp" : ["", "rs9116", "SiWx917", "wf200"],
             "variants" : ["all"],
             "automation" : "",
             "appBuildArgs" : [
@@ -130,7 +130,7 @@
             "name": "OTA",
             "path": "./examples/lighting-app/silabs/",
             "boards": ["BRD4161A", "BRD4187C"],
-            "rcp" : ["", "rs9116", "wf200"],
+            "rcp" : ["", "rs9116", "SiWx917", "wf200"],
             "variants" : ["all"],
             "automation" : "OTA",
             "appBuildArgs" : [
