@@ -72,7 +72,7 @@ def genericSoCMatterBuild(app, supportedBoards, ota_automation=false, ecosystem_
                                                             find out/${app.name}/${folderPath}/${option.name}/${board.name} \\( -name '*.map' -o -name '*.s37' -o -name '*.rps' \\) -exec cp {} ${saved_workspace}/out/${app.automation}/${option.name}/${board.name}/${folderPath}/ \\;
                                                         """
 
-                                                        stash name: transportType + 'Examples-'+app.name+'-'+board.name, includes: 'out/**/*.s37,/out/**/*.rps '
+                                                        stash name: transportType + 'Examples-'+app.name+'-'+board.name, includes: 'out/**/*.s37,out/**/*.rps '
                                                     }
                                                 }
                                             }
