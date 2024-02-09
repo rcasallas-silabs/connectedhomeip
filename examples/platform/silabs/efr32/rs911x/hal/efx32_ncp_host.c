@@ -15,32 +15,35 @@
  *
  ******************************************************************************/
 
-#include "sl_wifi_constants.h"
-#include "sl_si91x_host_interface.h"
-#include "sl_status.h"
-#include "em_usart.h"
+#include "cmsis_os2.h"
+#include "dmadrv.h"
 #include "em_cmu.h"
 #include "em_core.h"
 #include "em_gpio.h"
-#include "cmsis_os2.h"
-#include "dmadrv.h"
+#include "em_usart.h"
 #include "gpiointerrupt.h"
 #include "sl_board_configuration_SiWx917.h"
-#include "sl_si91x_status.h"
-#include "sl_rsi_utility.h"
 #include "sl_constants.h"
+#include "sl_rsi_utility.h"
+#include "sl_si91x_host_interface.h"
+#include "sl_si91x_status.h"
+#include "sl_status.h"
+#include "sl_wifi_constants.h"
 #include <stdbool.h>
 #include <string.h>
+
 #if defined(SL_CATLOG_POWER_MANAGER_PRESENT)
 #include "sl_power_manager.h"
 #endif
 
-#define USART_INITSYNC_BAUDRATE 12500000
+#include "sl_board_control.h"
+#include "sl_si91x_ncp_utility.h"
+#include "spi_multiplex.h"
 
 static bool dma_callback(unsigned int channel, unsigned int sequenceNo, void * userParam);
 
-unsigned int rx_ldma_channel;
-unsigned int tx_ldma_channel;
+uint32_t rx_ldma_channel;
+uint32_t tx_ldma_channel;
 osMutexId_t ncp_transfer_mutex = 0;
 
 static uint32_t dummy_buffer;
@@ -72,10 +75,10 @@ static void gpio_interrupt(uint8_t interrupt_number)
 {
     UNUSED_PARAMETER(interrupt_number);
 
-    if (NULL != init_config.rx_irq) {
+    if (NULL != init_config.rx_irq)
+    {
         init_config.rx_irq();
     }
-
 }
 
 static void efx32_spi_init(void)
@@ -83,8 +86,8 @@ static void efx32_spi_init(void)
     // Default asynchronous initializer (master mode, 1 Mbps, 8-bit data)
     USART_InitSync_TypeDef init = USART_INITSYNC_DEFAULT;
 
-    init.msbf         = true; // MSB first transmission for SPI compatibility
-    init.autoCsEnable = true; // Allow the USART to assert CS
+    init.msbf         = true;  // MSB first transmission for SPI compatibility
+    init.autoCsEnable = false;
     init.baudrate     = USART_INITSYNC_BAUDRATE;
 
     // Configure SPI bus pins
@@ -96,23 +99,23 @@ static void efx32_spi_init(void)
     CMU_ClockEnable(SPI_USART_CMU_CLOCK, true);
 
     /*
-    * Route USART RX, TX, and CLK to the specified pins.  Note that CS is
-    * not controlled by USART so there is no write to the corresponding
-    * USARTROUTE register to do this.
-    */
-    GPIO->USARTROUTE[SPI_USART_ROUTE_INDEX].RXROUTE = (SPI_MISO_PIN.port << _GPIO_USART_RXROUTE_PORT_SHIFT)
-                                                        | (SPI_MISO_PIN.pin << _GPIO_USART_RXROUTE_PIN_SHIFT);
-    GPIO->USARTROUTE[SPI_USART_ROUTE_INDEX].TXROUTE = (SPI_MOSI_PIN.port << _GPIO_USART_TXROUTE_PORT_SHIFT)
-                                                        | (SPI_MOSI_PIN.pin << _GPIO_USART_TXROUTE_PIN_SHIFT);
-    GPIO->USARTROUTE[SPI_USART_ROUTE_INDEX].CLKROUTE = (SPI_CLOCK_PIN.port << _GPIO_USART_CLKROUTE_PORT_SHIFT)
-                                                        | (SPI_CLOCK_PIN.pin << _GPIO_USART_CLKROUTE_PIN_SHIFT);
-    GPIO->USARTROUTE[SPI_USART_ROUTE_INDEX].CSROUTE = (SPI_CS_PIN.port << _GPIO_USART_CSROUTE_PORT_SHIFT)
-                                                        | (SPI_CS_PIN.pin << _GPIO_USART_CSROUTE_PIN_SHIFT);
+     * Route USART RX, TX, and CLK to the specified pins.  Note that CS is
+     * not controlled by USART so there is no write to the corresponding
+     * USARTROUTE register to do this.
+     */
+    GPIO->USARTROUTE[SPI_USART_ROUTE_INDEX].RXROUTE =
+        (SPI_MISO_PIN.port << _GPIO_USART_RXROUTE_PORT_SHIFT) | (SPI_MISO_PIN.pin << _GPIO_USART_RXROUTE_PIN_SHIFT);
+    GPIO->USARTROUTE[SPI_USART_ROUTE_INDEX].TXROUTE =
+        (SPI_MOSI_PIN.port << _GPIO_USART_TXROUTE_PORT_SHIFT) | (SPI_MOSI_PIN.pin << _GPIO_USART_TXROUTE_PIN_SHIFT);
+    GPIO->USARTROUTE[SPI_USART_ROUTE_INDEX].CLKROUTE =
+        (SPI_CLOCK_PIN.port << _GPIO_USART_CLKROUTE_PORT_SHIFT) | (SPI_CLOCK_PIN.pin << _GPIO_USART_CLKROUTE_PIN_SHIFT);
+    GPIO->USARTROUTE[SPI_USART_ROUTE_INDEX].CSROUTE =
+        (SPI_CS_PIN.port << _GPIO_USART_CSROUTE_PORT_SHIFT) | (SPI_CS_PIN.pin << _GPIO_USART_CSROUTE_PIN_SHIFT);
 
     // Enable USART interface pins
     GPIO->USARTROUTE[SPI_USART_ROUTE_INDEX].ROUTEEN = GPIO_USART_ROUTEEN_RXPEN | // MISO
-                                                        GPIO_USART_ROUTEEN_TXPEN | // MOSI
-                                                        GPIO_USART_ROUTEEN_CLKPEN | GPIO_USART_ROUTEEN_CSPEN;
+        GPIO_USART_ROUTEEN_TXPEN |                                               // MOSI
+        GPIO_USART_ROUTEEN_CLKPEN;                                               //| GPIO_USART_ROUTEEN_CSPEN;
 
     // Set slew rate for alternate usage pins
     GPIO_SlewrateSet(SPI_CLOCK_PIN.port, 7, 7);
@@ -120,9 +123,9 @@ static void efx32_spi_init(void)
     // Configure and enable USART
     USART_InitSync(SPI_USART, &init);
 
-    SPI_USART->TIMING |= /*USART_TIMING_TXDELAY_ONE | USART_TIMING_CSSETUP_ONE |*/ USART_TIMING_CSHOLD_ONE;
+    SPI_USART->TIMING |= USART_TIMING_TXDELAY_ONE | USART_TIMING_CSSETUP_ONE | USART_TIMING_CSHOLD_ONE;
 
-    //SPI_USART->CTRL_SET |= USART_CTRL_SMSDELAY;
+    // SPI_USART->CTRL_SET |= USART_CTRL_SMSDELAY;
 
     // configure packet pending interrupt priority
     NVIC_SetPriority(GPIO_ODD_IRQn, PACKET_PENDING_INT_PRI);
@@ -146,8 +149,11 @@ uint32_t sl_si91x_host_get_wake_indicator(void)
     return GPIO_PinInGet(WAKE_INDICATOR_PIN.port, WAKE_INDICATOR_PIN.pin);
 }
 
-sl_status_t sl_si91x_host_init(sl_si91x_host_init_configuration *config)
+sl_status_t sl_si91x_host_init(sl_si91x_host_init_configuration * config)
 {
+#if SL_SPICTRL_MUX
+    sl_board_disable_display();
+#endif
     init_config.rx_irq  = config->rx_irq;
     init_config.rx_done = config->rx_done;
 
@@ -158,11 +164,13 @@ sl_status_t sl_si91x_host_init(sl_si91x_host_init_configuration *config)
     spi_board_init();
 #endif
 
-    if (transfer_done_semaphore == NULL) {
+    if (transfer_done_semaphore == NULL)
+    {
         transfer_done_semaphore = osSemaphoreNew(1, 0, NULL);
     }
 
-    if (ncp_transfer_mutex == 0) {
+    if (ncp_transfer_mutex == 0)
+    {
         ncp_transfer_mutex = osMutexNew(NULL);
     }
 
@@ -176,8 +184,8 @@ sl_status_t sl_si91x_host_init(sl_si91x_host_init_configuration *config)
     GPIO_PinModeSet(WAKE_INDICATOR_PIN.port, WAKE_INDICATOR_PIN.pin, gpioModeWiredOrPullDown, 0);
 
     DMADRV_Init();
-    DMADRV_AllocateChannel(&rx_ldma_channel, NULL);
-    DMADRV_AllocateChannel(&tx_ldma_channel, NULL);
+    DMADRV_AllocateChannel((unsigned int *)&rx_ldma_channel, NULL);
+    DMADRV_AllocateChannel((unsigned int *)&tx_ldma_channel, NULL);
 
     return SL_STATUS_OK;
 }
@@ -187,7 +195,7 @@ sl_status_t sl_si91x_host_deinit(void)
     return SL_STATUS_OK;
 }
 
-void sl_si91x_host_enable_high_speed_bus() { }
+void sl_si91x_host_enable_high_speed_bus() {}
 
 /*==================================================================*/
 /**
@@ -201,7 +209,7 @@ void sl_si91x_host_enable_high_speed_bus() { }
  * @section description
  * This API is used to transfer/receive data to the Wi-Fi module through the SPI interface.
  */
-sl_status_t sl_si91x_host_spi_transfer(const void *tx_buffer, void *rx_buffer, uint16_t buffer_length)
+sl_status_t sl_si91x_host_spi_transfer(const void * tx_buffer, void * rx_buffer, uint16_t buffer_length)
 {
     osMutexAcquire(ncp_transfer_mutex, 0xFFFFFFFFUL);
 
@@ -209,55 +217,59 @@ sl_status_t sl_si91x_host_spi_transfer(const void *tx_buffer, void *rx_buffer, u
     sl_wfx_host_spi_cs_assert();
 #endif // SL_SPICTRL_MUX
 
-    if (buffer_length < 16) {
-        uint8_t *tx = (tx_buffer != NULL) ? (uint8_t *)tx_buffer : (uint8_t *)&dummy_buffer;
-        uint8_t *rx = (rx_buffer != NULL) ? (uint8_t *)rx_buffer : (uint8_t *)&dummy_buffer;
-        while (buffer_length > 0) {
-        while (!(SPI_USART->STATUS & USART_STATUS_TXBL)) {
-        }
-        SPI_USART->TXDATA = (uint32_t)*tx;
-        while (!(SPI_USART->STATUS & USART_STATUS_TXC)) {
-        }
-        *rx = (uint8_t)SPI_USART->RXDATA;
-        if (tx_buffer != NULL) {
-            tx++;
-        }
-        if (rx_buffer != NULL) {
-            rx++;
-        }
-        buffer_length--;
-        }
-    } 
-    else 
+    if (buffer_length < 16)
     {
-        if (tx_buffer == NULL) 
+        uint8_t * tx = (tx_buffer != NULL) ? (uint8_t *) tx_buffer : (uint8_t *) &dummy_buffer;
+        uint8_t * rx = (rx_buffer != NULL) ? (uint8_t *) rx_buffer : (uint8_t *) &dummy_buffer;
+        while (buffer_length > 0)
+        {
+            while (!(SPI_USART->STATUS & USART_STATUS_TXBL))
+            {
+            }
+            SPI_USART->TXDATA = (uint32_t) *tx;
+            while (!(SPI_USART->STATUS & USART_STATUS_TXC))
+            {
+            }
+            *rx = (uint8_t) SPI_USART->RXDATA;
+            if (tx_buffer != NULL)
+            {
+                tx++;
+            }
+            if (rx_buffer != NULL)
+            {
+                rx++;
+            }
+            buffer_length--;
+        }
+    }
+    else
+    {
+        if (tx_buffer == NULL)
         {
             dummy_buffer = 0;
             ldmaTXDescriptor =
-                (LDMA_Descriptor_t)LDMA_DESCRIPTOR_SINGLE_P2P_BYTE(&dummy_buffer, &(SPI_USART->TXDATA), buffer_length);
-        } 
-        else 
+                (LDMA_Descriptor_t) LDMA_DESCRIPTOR_SINGLE_P2P_BYTE(&dummy_buffer, &(SPI_USART->TXDATA), buffer_length);
+        }
+        else
         {
-            ldmaTXDescriptor =
-                (LDMA_Descriptor_t)LDMA_DESCRIPTOR_SINGLE_M2P_BYTE(tx_buffer, &(SPI_USART->TXDATA), buffer_length);
+            ldmaTXDescriptor = (LDMA_Descriptor_t) LDMA_DESCRIPTOR_SINGLE_M2P_BYTE(tx_buffer, &(SPI_USART->TXDATA), buffer_length);
         }
 
-        if (rx_buffer == NULL) 
+        if (rx_buffer == NULL)
         {
             ldmaRXDescriptor =
-                (LDMA_Descriptor_t)LDMA_DESCRIPTOR_SINGLE_P2P_BYTE(&(SPI_USART->RXDATA), &dummy_buffer, buffer_length);
-        } 
-        else 
+                (LDMA_Descriptor_t) LDMA_DESCRIPTOR_SINGLE_P2P_BYTE(&(SPI_USART->RXDATA), &dummy_buffer, buffer_length);
+        }
+        else
         {
-            ldmaRXDescriptor =
-                (LDMA_Descriptor_t)LDMA_DESCRIPTOR_SINGLE_P2M_BYTE(&(SPI_USART->RXDATA), rx_buffer, buffer_length);
+            ldmaRXDescriptor = (LDMA_Descriptor_t) LDMA_DESCRIPTOR_SINGLE_P2M_BYTE(&(SPI_USART->RXDATA), rx_buffer, buffer_length);
         }
 
         // Transfer a byte on free space in the USART buffer
-        ldmaTXConfig = (LDMA_TransferCfg_t)LDMA_TRANSFER_CFG_PERIPHERAL(SPI_USART_LDMA_TX);
+        ldmaTXConfig = (LDMA_TransferCfg_t) LDMA_TRANSFER_CFG_PERIPHERAL(SPI_USART_LDMA_TX);
 
         // Transfer a byte on receive data valid
-        ldmaRXConfig = (LDMA_TransferCfg_t)LDMA_TRANSFER_CFG_PERIPHERAL(SPI_USART_LDMA_RX);
+        ldmaRXConfig = (LDMA_TransferCfg_t) LDMA_TRANSFER_CFG_PERIPHERAL(SPI_USART_LDMA_RX);
 
 #if defined(SL_CATLOG_POWER_MANAGER_PRESENT)
         sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
@@ -267,7 +279,7 @@ sl_status_t sl_si91x_host_spi_transfer(const void *tx_buffer, void *rx_buffer, u
         DMADRV_LdmaStartTransfer(rx_ldma_channel, &ldmaRXConfig, &ldmaRXDescriptor, dma_callback, NULL);
         DMADRV_LdmaStartTransfer(tx_ldma_channel, &ldmaTXConfig, &ldmaTXDescriptor, NULL, NULL);
 
-        if (osSemaphoreAcquire(transfer_done_semaphore, 1000) != osOK) 
+        if (osSemaphoreAcquire(transfer_done_semaphore, 1000) != osOK)
         {
             BREAKPOINT();
         }
