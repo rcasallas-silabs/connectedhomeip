@@ -150,7 +150,7 @@
             "appBuildArgs" : [
                 {
                     "name" : "ecosystem_automation_out",
-                    "option": "--use_pw_rpc "
+                    "option": "--use_pw_rpc chip_build_libshell=false"
                 }
              ]
         }
