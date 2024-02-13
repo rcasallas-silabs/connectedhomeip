@@ -13,7 +13,7 @@ in this release of the Silicon Labs Matter Out of Box Experience
 
 | Repo                                    |   Branch    | Commit Hash                              |
 | --------------------------------------- | ----------  | ---------------------------------------- |
-| https://github.com/SiliconLabs/ot-efr32 |    main     | e75c767374a6a6fccd62f024c7217762ae652891 |
+| https://github.com/SiliconLabs/ot-efr32 |    main     | 038475dcc21c51448d35309496a2f7401eb2ccfe |
 
 ## Openthread
 
@@ -26,17 +26,16 @@ in this release of the Silicon Labs Matter Out of Box Experience
 
 | Repo                                            | Branch | Commit Hash                              |
 | ----------------------------------------------- | ------ | ---------------------------------------- |
-| https://github.com/project-chip/connectedhomeip | master | c36f4a7745ac0092982933987c694a6b605de35d |
+| https://github.com/project-chip/connectedhomeip | master | 42c44d544b059a8f0d9e3b86e9a1f6cc94cd0ea9 |
 
 ## Matter chip-tool
 
 | Repo                                            | Branch                     | Commit Hash       |
 | ----------------------------------------------- | ------------------------   | ----------------- |
-| https://github.com/SiliconLabs/matter           | release_2.3.0-1.3-alpha.1  | 5ec4196cc41f03fdb89e916297176394ba20c086 |
-
+| https://github.com/SiliconLabs/matter           | release_2.3.0-1.3-alpha.2  | 42c44d544b059a8f0d9e3b86e9a1f6cc94cd0ea9 |
 
 ## Matter Accessory Device (MAD)
 
 | Repo                                            | Branch                     | Commit Hash           |
 | ----------------------------------------------- | ------------------------   | ----------------------|
-| https://github.com/SiliconLabs/matter           | release_2.3.0-1.3-alpha.1  | 5ec4196cc41f03fdb89e916297176394ba20c086     |
+| https://github.com/SiliconLabs/matter           | release_2.3.0-1.3-alpha.2  | 42c44d544b059a8f0d9e3b86e9a1f6cc94cd0ea9|

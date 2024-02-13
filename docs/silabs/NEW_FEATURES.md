@@ -1,5 +1,12 @@
 # Silicon Labs Matter New Features
 
+## New Features for v2.3.0-1.3-alpha.2
+
+- Update to use [Gecko SDK (GSDK) v4.4.1](https://docs.silabs.com/gecko-platform/4.4.1/platform-overview/)
+- Update to use [WiSeConnect 3 SDK (WiFi SDK) v3.1.3](https://docs.silabs.com/wiseconnect/3.1.3/wiseconnect-developing-with-wiseconnect-sdk/)
+- Enhanced 917 SoC OTA functionality
+- Enhanced 917 SoC sleep functionality
+
 ## New Features for v2.3.0-1.3-alpha.1
 
 - Update to use [Gecko SDK (GSDK) v4.4.0](https://docs.silabs.com/gecko-platform/4.4.0/platform-overview/)
