@@ -547,7 +547,7 @@ def utfThreadTestSuite(nomadNode,deviceGroup,testBedName,appName,matterType,boar
                         {
                             sshagent(['svc_gsdk-ssh']) {
                                 checkout scm: [$class                     : 'GitSCM',
-                                                branches                         : [[name: 'master']],
+                                                branches                         : [[name: 'silabs']],
                                                 browser                          : [$class: 'Stash',
                                                 repoUrl: 'https://stash.silabs.com/scm/utf/utf_app_matter.git/'],
                                                 userRemoteConfigs                : [[credentialsId: 'svc_gsdk-ssh',
@@ -642,7 +642,7 @@ def utfWiFiTestSuite(nomadNode,deviceGroup,testBedName,appName,matterType,board,
                         {
                             sshagent(['svc_gsdk-ssh']) {
                                 checkout scm: [$class                     : 'GitSCM',
-                                                branches                         : [[name: 'master']],
+                                                branches                         : [[name: 'silabs']],
                                                 browser                          : [$class: 'Stash',
                                                 repoUrl: 'https://stash.silabs.com/scm/utf/utf_app_matter.git/'],
                                                 userRemoteConfigs                : [[credentialsId: 'svc_gsdk-ssh',
