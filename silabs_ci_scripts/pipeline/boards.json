@@ -179,6 +179,10 @@
                             "compilationFlags": "chip_build_libshell=true"
                         },
                         {
+                            "name": "low_power_sleepy",
+                            "compilationFlags": "--icd --low-power"
+                        },
+                        {
                             "name": "release",
                             "compilationFlags": "--release "
                         }
