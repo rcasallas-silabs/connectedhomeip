@@ -222,7 +222,7 @@ def buildUnify(arch, triples, app, compile_tests)
 
                 withDockerRegistry([url: "https://artifactory.silabs.net ", credentialsId: 'svc_gsdk']) {
 
-                    def unify_matter_docker = docker.image('artifactory.silabs.net/gsdk-docker-production/unify-cache/unify-matter:1.1.4-' + arch)
+                    def unify_matter_docker = docker.image('artifactory.silabs.net/gsdk-docker-production/unify-cache/unify-matter:1.1.5-' + arch)
                     stage('unify ' + arch) {
                         dir(dirPath) {
                             unify_matter_docker.inside("-u root -v${unifyCheckoutDir}:/unify")
