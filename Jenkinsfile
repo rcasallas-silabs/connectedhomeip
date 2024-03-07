@@ -95,7 +95,7 @@ def initWorkspaceAndScm()
 
         dir('commander'){
             checkout scm: [$class               : 'GitSCM',
-                            branches            : [[name: pipelineMetadata.commander_info.commanderBranch]],
+                            branches            : [[name: pipelineMetadata.commander_info.commanderTag]],
                             browser             : [$class: 'Stash', repoUrl: pipelineMetadata.commander_info.browserUrl],
                             userRemoteConfigs   : [[credentialsId: 'svc_gsdk', url: pipelineMetadata.commander_info.gitUrl]]]
 
@@ -540,12 +540,12 @@ def utfThreadTestSuite(nomadNode,deviceGroup,testBedName,appName,matterType,boar
     globalLock(credentialsId: 'hwmux_token_matterci', deviceGroup: deviceGroup) {
        node(nomadNode)
        {
-                    sh 'printenv'
                     ws('/home/dockerUser/qaWorkspace/')
                     {
 
                         dir('utf_app_matter')
                         {
+                            def commanderDir = ""
                             sshagent(['svc_gsdk-ssh']) {
                                 checkout scm: [$class                     : 'GitSCM',
                                                 branches                         : [[name: 'RC_2.3.0-1.3']],
@@ -560,6 +560,19 @@ def utfThreadTestSuite(nomadNode,deviceGroup,testBedName,appName,matterType,boar
                                 sh ''' git clean -ffdx
                                     git submodule foreach --recursive -q git reset --hard -q
                                     git submodule foreach --recursive -q git clean -ffdx -q '''
+                                dir('commander'){
+                                    checkout scm: [$class               : 'GitSCM',
+                                                    branches            : [[name: pipelineMetadata.commander_info.commanderTag]],
+                                                    browser             : [$class: 'Stash', repoUrl: pipelineMetadata.commander_info.browserUrl],
+                                                    userRemoteConfigs   : [[credentialsId: 'svc_gsdk-ssh', url: pipelineMetadata.commander_info.gitUrl]]]
+
+                                    sh "git checkout ${pipelineMetadata.commander_info.commanderTag}"
+                                    commanderPath = sh(script: "find " + pwd() + " -name 'commander' -type f -print",returnStdout: true).trim()
+                                    echo commanderPath
+                                    sh "${commanderPath} -v"
+                                    commanderDir = commanderPath - "/commander"
+                                    echo commanderDir
+                                }
                             }
 
                             dir('matter')
@@ -603,7 +616,11 @@ def utfThreadTestSuite(nomadNode,deviceGroup,testBedName,appName,matterType,boar
                                     'PUBLISH_RESULTS=true', // unneeded?
                                     'RUN_TCM_SETUP=false',  // unneeded?
                                     "MATTER_CHIP_TOOL_PATH=${chiptoolPath}" ,
-                                    'DEBUG=true'
+                                    'DEBUG=true',
+                                    "UTF_COMMANDER_PATH=${commanderPath}",
+                                    "TCM_SIMPLICITYCOMMANDER=${commanderPath}",
+                                    "SECMGR_COMMANDER_PATH=${commanderPath}",
+                                    "PATH+COMMANDER_PATH=${commanderDir}"
                                 ])
                                 {
                                     catchError(buildResult: 'UNSTABLE',
@@ -611,6 +628,7 @@ def utfThreadTestSuite(nomadNode,deviceGroup,testBedName,appName,matterType,boar
                                                message: "[ERROR] One or more tests have failed",
                                                stageResult: 'UNSTABLE')
                                     {
+                                        sh 'printenv'
                                         sh """
                                             echo ${MATTER_CHIP_TOOL_PATH}
                                             ls -al ${MATTER_CHIP_TOOL_PATH}
@@ -635,12 +653,12 @@ def utfWiFiTestSuite(nomadNode,deviceGroup,testBedName,appName,matterType,board,
     globalLock(credentialsId: 'hwmux_token_matterci', deviceGroup: deviceGroup) {
        node(nomadNode)
        {
-                    sh 'printenv'
                     ws('/home/dockerUser/qaWorkspace/')
                     {
 
                         dir('utf_app_matter')
                         {
+                            def commanderDir = ""
                             sshagent(['svc_gsdk-ssh']) {
                                 checkout scm: [$class                     : 'GitSCM',
                                                 branches                         : [[name: 'RC_2.3.0-1.3']],
@@ -659,13 +677,16 @@ def utfWiFiTestSuite(nomadNode,deviceGroup,testBedName,appName,matterType,board,
 
                                 dir('commander'){
                                     checkout scm: [$class               : 'GitSCM',
-                                                    branches            : [[name: pipelineMetadata.commander_info.commanderBranch]],
+                                                    branches            : [[name: pipelineMetadata.commander_info.commanderTag]],
                                                     browser             : [$class: 'Stash', repoUrl: pipelineMetadata.commander_info.browserUrl],
                                                     userRemoteConfigs   : [[credentialsId: 'svc_gsdk-ssh', url: pipelineMetadata.commander_info.gitUrl]]]
 
                                     sh "git checkout ${pipelineMetadata.commander_info.commanderTag}"
                                     commanderPath = sh(script: "find " + pwd() + " -name 'commander' -type f -print",returnStdout: true).trim()
                                     echo commanderPath
+                                    sh "${commanderPath} -v"
+                                    commanderDir = commanderPath - "/commander"
+                                    echo commanderDir
                                 }
                             }
 
@@ -724,7 +745,8 @@ def utfWiFiTestSuite(nomadNode,deviceGroup,testBedName,appName,matterType,board,
                                     'DEBUG=true',
                                     "UTF_COMMANDER_PATH=${commanderPath}",
                                     "TCM_SIMPLICITYCOMMANDER=${commanderPath}",
-                                    "SECMGR_COMMANDER_PATH=${commanderPath}"
+                                    "SECMGR_COMMANDER_PATH=${commanderPath}",
+                                    "PATH+COMMANDER_PATH=${commanderDir}"
                                 ])
                                 {
                                     catchError(buildResult: 'UNSTABLE',
