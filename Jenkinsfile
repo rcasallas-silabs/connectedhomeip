@@ -80,8 +80,6 @@ def initWorkspaceAndScm()
         sh 'git submodule set-url ./third_party/silabs/gecko_sdk https://stash.silabs.com/scm/embsw/gecko_sdk_release.git'
         sh 'cd ../../../'
         sh 'git submodule set-url ./third_party/silabs/gecko_sdk https://stash.silabs.com/scm/embsw/gecko_sdk_release.git'
-        // Switch Origin for the wifi_sdk
-        sh 'git submodule set-url ./third_party/silabs/wifi_sdk https://stash.silabs.com/scm/redpine/wifi_sdk.git'
         // Matter Init --Checkout relevant submodule
         sh 'scripts/checkout_submodules.py --shallow --platform silabs linux'
 
