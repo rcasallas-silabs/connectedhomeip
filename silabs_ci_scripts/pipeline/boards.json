@@ -180,7 +180,7 @@
                         },
                         {
                             "name": "low_power_sleepy",
-                            "compilationFlags": "--icd --low-power"
+                            "compilationFlags": "si917_m4_sleep_enabled=true --icd --low-power"
                         },
                         {
                             "name": "release",
