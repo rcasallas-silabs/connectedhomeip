@@ -1,0 +1,34 @@
+# Avoid codeowners only for cherry-pick pull requests
+CODEOWNERS.source_branch_exclusion_pattern cherry-pick/**
+
+@@@MatterCSA @jumartin @jepenven @ricasall @makardou @lobelive @selissia
+@@@MatterWatt @jumartin @jepenven @ricasall @makardou @lobelive @selissia @curahman @mirupp
+
+
+# Pipeline rule
+Jenkinsfile @@MatterWatt
+silabs_ci_scripts/ @@MatterWatt
+
+# Documentation is everyone business
+**/*.md @@MatterWatt
+
+# Shared folder with CSA
+build/ @@MatterCSA
+build_overrides/ @@MatterCSA
+config/ @@MatterCSA
+credentials/ @@MatterCSA
+docs/ @@MatterWatt
+docs/silabs/ @@MatterWatt
+examples/ @@MatterWatt
+integrations/ @@MatterCSA
+scripts/ @@MatterCSA
+src/ @@MatterWatt
+third_party/ @@MatterWatt
+zzz_generated/ @@MatterCSA
+
+CODEOWNERS               @@MatterWatt
+
+
+# If a group is involved, at least one reviewer of the group must approve
+(Check(@@MatterWatt >= 1))
+OverallCheck(2)
