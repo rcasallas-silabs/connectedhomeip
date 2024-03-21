@@ -70,8 +70,6 @@ extern "C" {
 #define TRNGKEY_SIZE 4
 } // extern "C"
 
-WfxRsi_t wfx_rsi;
-
 /* Declare a variable to hold the data associated with the created event group. */
 StaticEventGroup_t rsiDriverEventGroup;
 
@@ -157,6 +155,7 @@ static void StartDHCPTimer(uint32_t timeout)
  *********************************************************************/
 int32_t wfx_rsi_get_ap_info(wfx_wifi_scan_result_t * ap)
 {
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     sl_status_t status = SL_STATUS_OK;
     int32_t rssi       = 0;
     ap->security       = wfx_rsi.sec.security;
@@ -230,6 +229,7 @@ int32_t wfx_rsi_disconnect()
 
 sl_status_t join_callback_handler(sl_wifi_event_t event, char * result, uint32_t result_length, void * arg)
 {
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     WfxEvent_t WfxEvent;
 
     wfx_rsi.dev_state &= ~(WFX_RSI_ST_STA_CONNECTING);
@@ -280,6 +280,7 @@ sl_status_t join_callback_handler(sl_wifi_event_t event, char * result, uint32_t
  *********************************************************************/
 void sl_wfx_host_si91x_sleep_wakeup()
 {
+
     if (wfx_rsi.dev_state & WFX_RSI_ST_SLEEP_READY)
     {
         // TODO: should be removed once we are getting the press interrupt for button 0 with sleep
@@ -317,6 +318,7 @@ void sl_wfx_host_si91x_sleep_wakeup()
  *********************************************************************/
 int32_t wfx_rsi_power_save(rsi_power_save_profile_mode_t sl_si91x_ble_state, sl_si91x_performance_profile_t sl_si91x_wifi_state)
 {
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     int32_t status;
 
     status = rsi_bt_power_save_profile(sl_si91x_ble_state, 0);
@@ -411,6 +413,7 @@ static void sl_print_firmware_version(sl_wifi_firmware_version_t * firmware_vers
  *****************************************************************************************/
 static sl_status_t wfx_rsi_init(void)
 {
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     sl_status_t status;
 
 #ifndef SLI_SI91X_MCU_INTERFACE
@@ -488,6 +491,7 @@ void wfx_show_err(char * msg)
 
 sl_status_t scan_callback_handler(sl_wifi_event_t event, sl_wifi_scan_result_t * scan_result, uint32_t result_length, void * arg)
 {
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     if (SL_WIFI_CHECK_IF_EVENT_FAILED(event))
     {
         callback_status       = *(sl_status_t *) scan_result;
@@ -541,6 +545,7 @@ sl_status_t scan_callback_handler(sl_wifi_event_t event, sl_wifi_scan_result_t *
 }
 sl_status_t show_scan_results(sl_wifi_scan_result_t * scan_result)
 {
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     SL_WIFI_ARGS_CHECK_NULL_POINTER(scan_result);
     int x;
     wfx_wifi_scan_result_t ap;
@@ -594,6 +599,7 @@ sl_status_t bg_scan_callback_handler(sl_wifi_event_t event, sl_wifi_scan_result_
  *******************************************************************************************/
 static void wfx_rsi_save_ap_info() // translation
 {
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     sl_status_t status = SL_STATUS_OK;
 #ifndef EXP_BOARD // TODO: this changes will be reverted back after the SDK team fix the scan API
     sl_wifi_scan_configuration_t wifi_scan_configuration = default_wifi_scan_configuration;
@@ -622,6 +628,7 @@ static void wfx_rsi_save_ap_info() // translation
  **********************************************************************************************/
 static sl_status_t wfx_rsi_do_join(void)
 {
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     sl_status_t status = SL_STATUS_OK;
     sl_wifi_security_t connect_security_mode;
     WfxEvent_t event;
@@ -735,6 +742,7 @@ static sl_status_t wfx_rsi_do_join(void)
 ///        Helper function for HandleDHCPPolling.
 void NotifyConnectivity()
 {
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     if (!hasNotifiedWifiConnectivity)
     {
         wfx_connected_notify(CONNECTION_STATUS_SUCCESS, &wfx_rsi.ap_mac);
@@ -797,6 +805,7 @@ void WfxPostEvent(WfxEvent_t * event)
 ///        and emits a WFX_EVT_STA_DO_DHCP event to trigger DHCP polling checks. Helper function for ProcessEvent.
 void ResetDHCPNotificationFlags()
 {
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     WfxEvent_t outEvent;
 
 #if (CHIP_DEVICE_CONFIG_ENABLE_IPV4)
@@ -811,6 +820,7 @@ void ResetDHCPNotificationFlags()
 
 void ProcessEvent(WfxEvent_t inEvent)
 {
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     // Process event
     switch (inEvent.eventType)
     {
@@ -961,6 +971,7 @@ void wfx_rsi_task(void * arg)
  **********************************************************************************************/
 void wfx_dhcp_got_ipv4(uint32_t ip)
 {
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     /*
      * Acquire the new IP address
      */
@@ -1020,3 +1031,12 @@ int32_t wfx_rsi_send_data(void * p, uint16_t len)
 }
 
 #endif
+
+namespace {
+WfxRsi sInstance;
+}
+
+WfxRsi & WfxRsi::Instance()
+{
+    return sInstance;
+}

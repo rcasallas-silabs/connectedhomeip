@@ -30,12 +30,15 @@
 
 // BLE include file to refer BLE APIs
 #include "FreeRTOS.h"
-#include "ble_config.h"
 #include "event_groups.h"
 #include "task.h"
 #include "timers.h"
 #include "wfx_host_events.h"
 #include "wfx_rsi.h"
+#include <stdbool.h>
+#include <string.h>
+extern "C" {
+#include "ble_config.h"
 #include <rsi_ble.h>
 #include <rsi_ble_apis.h>
 #include <rsi_ble_common_config.h>
@@ -49,8 +52,7 @@
 #include <rsi_bt_common.h>
 #include <rsi_bt_common_apis.h>
 #include <rsi_common_apis.h>
-#include <stdbool.h>
-#include <string.h>
+}
 
 typedef struct sl_wfx_msg_s
 {

@@ -88,6 +88,7 @@ void wfx_started_notify()
  *************************************************************************************/
 void wfx_connected_notify(int32_t status, sl_wfx_mac_address_t * ap)
 {
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     sl_wfx_connect_ind_t evt;
 
     SILABS_LOG("%s: started.", __func__);
