@@ -67,14 +67,12 @@ bool btn0_pressed = false;
 extern "C" {
 #include "sl_net.h"
 #include "sl_si91x_host_interface.h"
+#include "sl_si91x_trng.h"
 #include "sl_wifi.h"
 #include "sl_wifi_callback_framework.h"
 #include "wfx_host_events.h"
-#if SLI_SI91X_MCU_INTERFACE
-#include "sl_si91x_trng.h"
 #define TRNGKEY_SIZE 4
-#endif // SLI_SI91X_MCU_INTERFACE
-} // extern "C" {
+} // extern "C"
 
 WfxRsi_t wfx_rsi;
 
@@ -928,7 +926,6 @@ void ProcessEvent(WfxEvent_t inEvent)
 /* ARGSUSED */
 void wfx_rsi_task(void * arg)
 {
-    EventBits_t flags;
     (void) arg;
     sl_status_t status = wfx_rsi_init();
 
