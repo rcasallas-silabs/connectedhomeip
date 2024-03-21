@@ -74,7 +74,7 @@ typedef struct WfxEvent_s
 /// @param event The event that will be allocated to the event queue
 void WfxPostEvent(WfxEvent_t * event);
 
-typedef struct wfx_rsi_s
+struct WfxRsi
 {
     // TODO: Change tp WfxEventType_e once the event queue is implemented
     EventGroupHandle_t events;
@@ -99,9 +99,10 @@ typedef struct wfx_rsi_s
     sl_wfx_mac_address_t ap_bssid; /* To which our STA is connected */
     uint16_t join_retries;
     uint8_t ip4_addr[4]; /* Not sure if this is enough */
-} WfxRsi_t;
 
-extern WfxRsi_t wfx_rsi;
+    static WfxRsi & Instance();
+};
+
 
 #ifdef __cplusplus
 extern "C" {

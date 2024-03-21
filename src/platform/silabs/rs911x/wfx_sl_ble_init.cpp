@@ -21,9 +21,11 @@
  *    limitations under the License.
  */
 #include "wfx_sl_ble_init.h"
-#include "ble_config.h"
 #include "cmsis_os2.h"
 #include "silabs_utils.h"
+extern "C" {
+#include "ble_config.h"
+}
 // Global Variables
 rsi_ble_t att_list;
 sl_wfx_msg_t event_msg;
@@ -374,10 +376,12 @@ uint32_t rsi_ble_add_matter_service(void)
 
     static const uuid_t custom_characteristic_RX = { .size             = RSI_BLE_CUSTOM_CHARACTERISTIC_RX_SIZE,
                                                      .reserved         = { RSI_BLE_CUSTOM_CHARACTERISTIC_RX_RESERVED },
-                                                     .val.val128.data1 = RSI_BLE_CUSTOM_CHARACTERISTIC_RX_VALUE_128_DATA_1,
-                                                     .val.val128.data2 = RSI_BLE_CUSTOM_CHARACTERISTIC_RX_VALUE_128_DATA_2,
-                                                     .val.val128.data3 = RSI_BLE_CUSTOM_CHARACTERISTIC_RX_VALUE_128_DATA_3,
-                                                     .val.val128.data4 = { RSI_BLE_CUSTOM_CHARACTERISTIC_RX_VALUE_128_DATA_4 } };
+                                                     .val = { .val128 = {
+                                                            RSI_BLE_CUSTOM_CHARACTERISTIC_RX_VALUE_128_DATA_1,
+                                                            RSI_BLE_CUSTOM_CHARACTERISTIC_RX_VALUE_128_DATA_2,
+                                                            RSI_BLE_CUSTOM_CHARACTERISTIC_RX_VALUE_128_DATA_3,
+                                                            RSI_BLE_CUSTOM_CHARACTERISTIC_RX_VALUE_128_DATA_4,
+                                                        } } };
 
     rsi_ble_resp_add_serv_t new_serv_resp = { 0 };
     rsi_ble_add_service(custom_service, &new_serv_resp);
@@ -396,10 +400,12 @@ uint32_t rsi_ble_add_matter_service(void)
 
     static const uuid_t custom_characteristic_TX = { .size             = RSI_BLE_CUSTOM_CHARACTERISTIC_TX_SIZE,
                                                      .reserved         = { RSI_BLE_CUSTOM_CHARACTERISTIC_TX_RESERVED },
-                                                     .val.val128.data1 = RSI_BLE_CUSTOM_CHARACTERISTIC_TX_VALUE_128_DATA_1,
-                                                     .val.val128.data2 = RSI_BLE_CUSTOM_CHARACTERISTIC_TX_VALUE_128_DATA_2,
-                                                     .val.val128.data3 = RSI_BLE_CUSTOM_CHARACTERISTIC_TX_VALUE_128_DATA_3,
-                                                     .val.val128.data4 = { RSI_BLE_CUSTOM_CHARACTERISTIC_TX_VALUE_128_DATA_4 } };
+                                                     .val= { .val128 = {
+                                                        RSI_BLE_CUSTOM_CHARACTERISTIC_TX_VALUE_128_DATA_1,
+                                                        RSI_BLE_CUSTOM_CHARACTERISTIC_TX_VALUE_128_DATA_2,
+                                                        RSI_BLE_CUSTOM_CHARACTERISTIC_TX_VALUE_128_DATA_3,
+                                                        RSI_BLE_CUSTOM_CHARACTERISTIC_TX_VALUE_128_DATA_4,
+                                                     } } };
 
     // Adding custom characteristic declaration to the custom service
     rsi_ble_add_char_serv_att(

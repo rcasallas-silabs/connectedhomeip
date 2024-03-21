@@ -32,24 +32,20 @@
 #include "rail.h"
 #endif
 #include <crypto/RandUtils.h>
-#ifdef __cplusplus
+#include "wfx_sl_ble_init.h"
 extern "C" {
-#endif
 #include "FreeRTOS.h"
 #include "event_groups.h"
 #include "task.h"
 #include "timers.h"
 #include "wfx_host_events.h"
 #include "wfx_rsi.h"
-#include "wfx_sl_ble_init.h"
 #if !(SLI_SI91X_MCU_INTERFACE | EXP_BOARD)
 #include <rsi_driver.h>
 #endif
 #include <rsi_utils.h>
 #include <stdbool.h>
-#ifdef __cplusplus
 }
-#endif
 
 #include <ble/CHIPBleServiceData.h>
 #include <lib/support/CodeUtils.h>
@@ -264,6 +260,7 @@ BLEManagerImpl BLEManagerImpl::sInstance;
 
 CHIP_ERROR BLEManagerImpl::_Init()
 {
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     CHIP_ERROR err;
 
     sl_rs_ble_init_sem = osSemaphoreNew(1, 0, NULL);
