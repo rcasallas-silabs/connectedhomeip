@@ -25,10 +25,12 @@
 #include "FreeRTOS.h"
 #include "event_groups.h"
 #include "sl_board_configuration.h"
+extern "C" {
 #include "sl_si91x_types.h"
 #include "sl_wifi_constants.h"
 #include "sl_wifi_types.h"
 #include "sl_wlan_config.h"
+}
 #include "task.h"
 
 #if (EXP_BOARD)
@@ -40,8 +42,10 @@
 #if SL_ICD_ENABLED && SLI_SI91X_MCU_INTERFACE
 #include "rsi_rom_power_save.h"
 #include "sl_si91x_button_pin_config.h"
+extern "C" {
 #include "sl_si91x_driver.h"
 #include "sl_si91x_m4_ps.h"
+}
 
 // TODO: should be removed once we are getting the press interrupt for button 0 with sleep
 #define BUTTON_PRESSED 1
@@ -63,14 +67,12 @@ bool btn0_pressed = false;
 extern "C" {
 #include "sl_net.h"
 #include "sl_si91x_host_interface.h"
+#include "sl_si91x_trng.h"
 #include "sl_wifi.h"
 #include "sl_wifi_callback_framework.h"
 #include "wfx_host_events.h"
-#if SLI_SI91X_MCU_INTERFACE
-#include "sl_si91x_trng.h"
 #define TRNGKEY_SIZE 4
-#endif // SLI_SI91X_MCU_INTERFACE
-} // extern "C" {
+} // extern "C"
 
 WfxRsi_t wfx_rsi;
 
@@ -924,7 +926,6 @@ void ProcessEvent(WfxEvent_t inEvent)
 /* ARGSUSED */
 void wfx_rsi_task(void * arg)
 {
-    EventBits_t flags;
     (void) arg;
     sl_status_t status = wfx_rsi_init();
 
