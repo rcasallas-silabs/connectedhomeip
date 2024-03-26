@@ -66,8 +66,7 @@ if (chip_enable_wifi) {
     import("${examples_plat_dir}/wifi/rs911x/rs911x.gni")
   } else if (use_SiWx917) {
     import("${examples_plat_dir}/wifi/rs911x/rs9117.gni")
-  }
-  if (use_wf200) {
+  } else if (use_wf200) {
     import("${examples_plat_dir}/wifi/wf200/wf200.gni")
   }
 }
