@@ -32,15 +32,11 @@
 #endif
 
 #if SL_ICD_ENABLED
-#ifdef __cplusplus
 extern "C" {
-#endif
 #include "sl_si91x_m4_ps.h"
 extern "C" uint8_t m4_alarm_initialization_done;
 extern "C" void set_alarm_interrupt_timer(uint16_t interval);
-#ifdef __cplusplus
 }
-#endif
 #endif // SL_ICD_ENABLED
 
 #include <platform/CHIPDeviceLayer.h>
@@ -109,6 +105,7 @@ void wfx_connected_notify(int32_t status, sl_wfx_mac_address_t * ap)
     evt.header.length = sizeof evt;
 
 #ifdef RS911X_WIFI
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     evt.body.channel = wfx_rsi.ap_chan;
 #endif
     memcpy(&evt.body.mac[0], &ap->octet[0], MAC_ADDRESS_FIRST_OCTET);

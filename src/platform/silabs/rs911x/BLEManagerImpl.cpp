@@ -264,6 +264,7 @@ BLEManagerImpl BLEManagerImpl::sInstance;
 
 CHIP_ERROR BLEManagerImpl::_Init()
 {
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     CHIP_ERROR err;
 
     sl_rs_ble_init_sem = osSemaphoreNew(1, 0, NULL);

@@ -45,6 +45,7 @@ StaticTask_t wfxRsiTaskBuffer;
  ***********************************************************************/
 sl_status_t wfx_wifi_start(void)
 {
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     if (wfx_rsi.dev_state & WFX_RSI_ST_STARTED)
     {
         SILABS_LOG("%s: already started.", __func__);
@@ -75,6 +76,7 @@ sl_status_t wfx_wifi_start(void)
  ***********************************************************************/
 void wfx_enable_sta_mode(void)
 {
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     wfx_rsi.dev_state |= WFX_RSI_ST_STA_MODE;
 }
 
@@ -87,6 +89,7 @@ void wfx_enable_sta_mode(void)
  ***********************************************************************/
 bool wfx_is_sta_mode_enabled(void)
 {
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     bool mode;
     mode = !!(wfx_rsi.dev_state & WFX_RSI_ST_STA_MODE);
     return mode;
@@ -103,6 +106,7 @@ bool wfx_is_sta_mode_enabled(void)
  ***********************************************************************/
 void wfx_get_wifi_mac_addr(sl_wfx_interface_t interface, sl_wfx_mac_address_t * addr)
 {
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     if (addr)
     {
 #ifdef SL_WFX_CONFIG_SOFTAP
@@ -125,6 +129,7 @@ void wfx_set_wifi_provision(wfx_wifi_provision_t * cfg)
 {
     if (cfg)
     {
+        WfxRsi & wfx_rsi = WfxRsi::Instance();
         wfx_rsi.sec = *cfg;
         wfx_rsi.dev_state |= WFX_RSI_ST_STA_PROVISIONED;
     }
@@ -142,6 +147,7 @@ bool wfx_get_wifi_provision(wfx_wifi_provision_t * wifiConfig)
 {
     if (wifiConfig != NULL)
     {
+        WfxRsi & wfx_rsi = WfxRsi::Instance();
         if (wfx_rsi.dev_state & WFX_RSI_ST_STA_PROVISIONED)
         {
             *wifiConfig = wfx_rsi.sec;
@@ -160,6 +166,7 @@ bool wfx_get_wifi_provision(wfx_wifi_provision_t * wifiConfig)
  ***********************************************************************/
 void wfx_clear_wifi_provision(void)
 {
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     memset(&wfx_rsi.sec, 0, sizeof(wfx_rsi.sec));
     wfx_rsi.dev_state &= ~WFX_RSI_ST_STA_PROVISIONED;
     SILABS_LOG("%s: completed.", __func__);
@@ -175,12 +182,13 @@ void wfx_clear_wifi_provision(void)
  ****************************************************************************/
 sl_status_t wfx_connect_to_ap(void)
 {
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     WfxEvent_t event;
     if (wfx_rsi.dev_state & WFX_RSI_ST_STA_PROVISIONED)
     {
         SILABS_LOG("Connecting to access point -> SSID: %s", &wfx_rsi.sec.ssid[0]);
         event.eventType = WFX_EVT_STA_START_JOIN;
-        WfxPostEvent(&event);
+        wfx_rsi.PostEvent(&event);
     }
     else
     {
@@ -191,6 +199,7 @@ sl_status_t wfx_connect_to_ap(void)
 }
 
 #if SL_ICD_ENABLED
+#if SLI_SI917
 /*********************************************************************
  * @fn  sl_status_t wfx_power_save()
  * @brief
@@ -208,6 +217,21 @@ sl_status_t wfx_power_save(rsi_power_save_profile_mode_t sl_si91x_ble_state, sl_
     }
     return SL_STATUS_OK;
 }
+
+#else  // For RS9116
+/*********************************************************************
+ * @fn  sl_status_t wfx_power_save()
+ * @brief
+ *      Implements the power save in sleepy application
+ * @param[in]  None
+ * @return  SL_STATUS_OK if successful,
+ *          SL_STATUS_FAIL otherwise
+ ***********************************************************************/
+sl_status_t wfx_power_save()
+{
+    return (wfx_rsi_power_save() ? SL_STATUS_FAIL : SL_STATUS_OK);
+}
+#endif /* SLI_SI917 */
 #endif /* SL_ICD_ENABLED */
 
 /*********************************************************************
@@ -236,6 +260,7 @@ void wfx_setup_ip6_link_local(sl_wfx_interface_t whichif)
  ***********************************************************************/
 bool wfx_is_sta_connected(void)
 {
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     bool status = (wfx_rsi.dev_state & WFX_RSI_ST_STA_CONNECTED) > 0;
     SILABS_LOG("%s: %s", __func__, (status ? "Connected" : "Disconnected"));
     return status;
@@ -251,6 +276,7 @@ bool wfx_is_sta_connected(void)
  ***********************************************************************/
 wifi_mode_t wfx_get_wifi_mode()
 {
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     if (wfx_rsi.dev_state & WFX_RSI_ST_DEV_READY)
         return WIFI_MODE_STA;
     return WIFI_MODE_NULL;
@@ -266,6 +292,7 @@ wifi_mode_t wfx_get_wifi_mode()
  ***********************************************************************/
 sl_status_t wfx_sta_discon(void)
 {
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     SILABS_LOG("%s: started.", __func__);
     int32_t status;
     status = wfx_rsi_disconnect();
@@ -284,6 +311,7 @@ sl_status_t wfx_sta_discon(void)
  ***********************************************************************/
 bool wfx_have_ipv4_addr(sl_wfx_interface_t which_if)
 {
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     bool status = false;
     if (which_if == SL_WFX_STA_INTERFACE)
     {
@@ -308,6 +336,7 @@ bool wfx_have_ipv4_addr(sl_wfx_interface_t which_if)
  ***********************************************************************/
 bool wfx_have_ipv6_addr(sl_wfx_interface_t which_if)
 {
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     bool status = false;
     if (which_if == SL_WFX_STA_INTERFACE)
     {
@@ -331,6 +360,7 @@ bool wfx_have_ipv6_addr(sl_wfx_interface_t which_if)
  ***********************************************************************/
 bool wfx_hw_ready(void)
 {
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     return (wfx_rsi.dev_state & WFX_RSI_ST_DEV_READY) ? true : false;
 }
 
@@ -384,6 +414,7 @@ int32_t wfx_reset_counts()
  *******************************************************************************/
 bool wfx_start_scan(char * ssid, void (*callback)(wfx_wifi_scan_result_t *))
 {
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     int sz;
     WfxEvent_t event;
     if (wfx_rsi.scan_cb)
@@ -400,7 +431,7 @@ bool wfx_start_scan(char * ssid, void (*callback)(wfx_wifi_scan_result_t *))
     wfx_rsi.scan_cb = callback;
 
     event.eventType = WFX_EVT_SCAN;
-    WfxPostEvent(&event);
+    wfx_rsi.PostEvent(&event);
 
     return true;
 }

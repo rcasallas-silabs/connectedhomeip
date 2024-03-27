@@ -45,7 +45,6 @@
 #include "silabs_utils.h"
 #include "spi_multiplex.h"
 #include "wfx_host_events.h"
-#include "wfx_rsi.h"
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 #include "sl_power_manager.h"

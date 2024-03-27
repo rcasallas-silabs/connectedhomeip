@@ -35,7 +35,9 @@
 
 #include "wfx_host_events.h"
 
+extern "C" {
 #include "rsi_driver.h"
+}
 #include "rsi_wlan_non_rom.h"
 
 #include "rsi_bootup_config.h"
@@ -100,6 +102,7 @@ static wfx_wifi_scan_ext_t temp_reset;
  *********************************************************************/
 int32_t wfx_rsi_get_ap_info(wfx_wifi_scan_result_t * ap)
 {
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     int32_t status;
     uint8_t rssi;
     ap->security = wfx_rsi.sec.security;
@@ -234,6 +237,7 @@ int32_t wfx_rsi_power_save()
  *********************************************************************/
 static void wfx_rsi_join_cb(uint16_t status, const uint8_t * buf, const uint16_t len)
 {
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     SILABS_LOG("%s: status: %02x", __func__, status);
     wfx_rsi.dev_state &= ~WFX_RSI_ST_STA_CONNECTING;
     if (status != RSI_SUCCESS)
@@ -271,6 +275,7 @@ static void wfx_rsi_join_cb(uint16_t status, const uint8_t * buf, const uint16_t
  *********************************************************************/
 static void wfx_rsi_join_fail_cb(uint16_t status, uint8_t * buf, uint32_t len)
 {
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     SILABS_LOG("%s: error: failed status: %02x", __func__, status);
     wfx_rsi.join_retries += 1;
     wfx_rsi.dev_state &= ~(WFX_RSI_ST_STA_CONNECTING | WFX_RSI_ST_STA_CONNECTED);
@@ -306,6 +311,7 @@ static void wfx_rsi_wlan_pkt_cb(uint16_t status, uint8_t * buf, uint32_t len)
  *****************************************************************************************/
 static int32_t wfx_rsi_init(void)
 {
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     int32_t status;
     uint8_t buf[RSI_RESPONSE_HOLD_BUFF_SIZE];
     extern void rsi_hal_board_init(void);
@@ -414,6 +420,7 @@ static int32_t wfx_rsi_init(void)
  *******************************************************************************************/
 static void wfx_rsi_save_ap_info() // translation
 {
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     int32_t status;
     rsi_rsp_scan_t rsp;
 
@@ -477,6 +484,7 @@ static void wfx_rsi_save_ap_info() // translation
  **********************************************************************************************/
 static void wfx_rsi_do_join(void)
 {
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     int32_t status;
     rsi_security_mode_t connect_security_mode;
 
@@ -565,6 +573,7 @@ static void wfx_rsi_do_join(void)
 /* ARGSUSED */
 void wfx_rsi_task(void * arg)
 {
+    WfxRsi & wfx_rsi = WfxRsi::Instance();
     EventBits_t flags;
     TickType_t last_dhcp_poll, now;
     struct netif * sta_netif;
@@ -712,7 +721,7 @@ void wfx_rsi_task(void * arg)
                             (wfx_rsi.scan_ssid && strcmp(wfx_rsi.scan_ssid, (char *) scan->ssid) == CMP_SUCCESS))
                         {
                             strncpy(ap.ssid, (char *) scan->ssid, MIN(sizeof(ap.ssid), sizeof(scan->ssid)));
-                            ap.security = scan->security_mode;
+                            ap.security = static_cast<wfx_sec_t>(scan->security_mode);
                             ap.rssi     = (-1) * scan->rssi_val;
                             configASSERT(sizeof(ap.bssid) >= BSSID_MAX_STR_LEN);
                             configASSERT(sizeof(scan->bssid) >= BSSID_MAX_STR_LEN);
@@ -837,7 +846,7 @@ void wfx_rsi_pkt_add_data(void * p, uint8_t * buf, uint16_t len, uint16_t off)
 int32_t wfx_rsi_send_data(void * p, uint16_t len)
 {
     int32_t status;
-    register uint8_t * host_desc;
+    uint8_t * host_desc;
     rsi_pkt_t * pkt;
 
     pkt       = (rsi_pkt_t *) p;
@@ -866,4 +875,11 @@ int32_t wfx_rsi_send_data(void * p, uint16_t len)
     return status;
 }
 
-WfxRsi_t wfx_rsi;
+namespace {
+WfxRsi sInstance;
+}
+
+WfxRsi & WfxRsi::Instance()
+{
+    return sInstance;
+}

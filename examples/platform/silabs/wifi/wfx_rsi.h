@@ -16,7 +16,11 @@
  */
 #pragma once
 
+#include <FreeRTOS.h>
 #include <event_groups.h>
+#include <cmsis_os2.h>
+#include <wfx_host_events.h>
+#include <sl_status.h>
 
 #ifndef RSI_BLE_ENABLE
 #define RSI_BLE_ENABLE (1)
@@ -32,7 +36,6 @@
 #define WFX_RSI_CONFIG_MAX_JOIN (5)             /* Max join retries			*/
 // TODO: Default values are usually in minutes, but this is in ms. Confirm if this is correct
 #define WFX_RSI_DHCP_POLL_INTERVAL (250) /* Poll interval in ms for DHCP		*/
-#define WFX_RSI_NUM_TIMERS (2)           /* Number of RSI timers to alloc	*/
 
 typedef enum
 {
@@ -69,12 +72,8 @@ typedef struct WfxEvent_s
     void * eventData; // event data TODO: confirm needed
 } WfxEvent_t;
 
-/// WfxPostEvent
-/// @brief Allows to allocate an event to the WFX task event queue from outside of sl_wifi_if.c
-/// @param event The event that will be allocated to the event queue
-void WfxPostEvent(WfxEvent_t * event);
 
-typedef struct wfx_rsi_s
+struct WfxRsi
 {
     // TODO: Change tp WfxEventType_e once the event queue is implemented
     EventGroupHandle_t events;
@@ -99,9 +98,37 @@ typedef struct wfx_rsi_s
     sl_wfx_mac_address_t ap_bssid; /* To which our STA is connected */
     uint16_t join_retries;
     uint8_t ip4_addr[4]; /* Not sure if this is enough */
-} WfxRsi_t;
 
-extern WfxRsi_t wfx_rsi;
+    sl_status_t Init();
+
+    /// WfxPostEvent
+    /// @brief Allows to allocate an event to the WFX task event queue from outside of sl_wifi_if.c
+    /// @param event The event that will be allocated to the event queue
+    void PostEvent(WfxEvent_t * event);
+    sl_status_t GetNextEvent(WfxEvent_t & wfxEvent);
+    void StartDHCPTimer(uint32_t timeout);
+    void CancelDHCPTimer();
+    void BlockScan();
+    void ReleaseScan();
+    void NotifyConnectivity();
+    void HandleDHCPPolling();
+    void ResetDHCPNotificationFlags();
+
+    static void DHCPTimerEventHandler(void * arg);
+    static WfxRsi & Instance();
+
+private:
+    // Scan semaphore
+    osSemaphoreId_t mScanSemaphore;
+    osMessageQueueId_t mEventQueue = NULL;
+    // DHCP Poll timer
+    osTimerId_t mDHCPTimer;
+    bool mHasNotifiedWifiConnectivity = false;
+    bool mHasNotifiedIPV6 = false;
+    #if (CHIP_DEVICE_CONFIG_ENABLE_IPV4)
+    bool mHasNotifiedIPV4 = false;
+    #endif /* CHIP_DEVICE_CONFIG_ENABLE_IPV4 */
+};
 
 #ifdef __cplusplus
 extern "C" {
