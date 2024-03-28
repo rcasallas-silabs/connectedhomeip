@@ -874,12 +874,3 @@ int32_t wfx_rsi_send_data(void * p, uint16_t len)
 
     return status;
 }
-
-namespace {
-WfxRsi sInstance;
-}
-
-WfxRsi & WfxRsi::Instance()
-{
-    return sInstance;
-}

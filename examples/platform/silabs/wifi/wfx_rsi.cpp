@@ -6,7 +6,6 @@
 // TODO: Confirm that this value works for size and timing
 #define WFX_QUEUE_SIZE 10
 
-
 sl_status_t WfxRsi::Init()
 {
     sl_status_t status = SL_STATUS_OK;
@@ -35,7 +34,6 @@ sl_status_t WfxRsi::Init()
     return status;
 }
 
-
 void WfxRsi::PostEvent(WfxEvent_t * event)
 {
     sl_status_t status = osMessageQueuePut(mEventQueue, event, 0, 0);
@@ -47,21 +45,17 @@ void WfxRsi::PostEvent(WfxEvent_t * event)
     }
 }
 
-
 sl_status_t WfxRsi::GetNextEvent(WfxEvent_t & wfxEvent)
 {
-    return osMessageQueueGet(mEventQueue, &wfxEvent, NULL, osWaitForever);
+    return osMessageQueueGet(mEventQueue, &wfxEvent, NULL, osWaitForever) ? SL_STATUS_FAIL : SL_STATUS_OK;
 }
-
 
 void WfxRsi::DHCPTimerEventHandler(void * arg)
 {
-    WfxRsi & wfx_rsi = WfxRsi::Instance();
     WfxEvent_t event;
     event.eventType = WFX_EVT_DHCP_POLL;
-    wfx_rsi.PostEvent(&event);
+    WfxRsi::Instance().PostEvent(&event);
 }
-
 
 void WfxRsi::StartDHCPTimer(uint32_t timeout)
 {
@@ -76,7 +70,6 @@ void WfxRsi::StartDHCPTimer(uint32_t timeout)
         SILABS_LOG("StartDHCPTimer: failed to start timer with status: %d", status);
     }
 }
-
 
 void WfxRsi::CancelDHCPTimer()
 {
@@ -96,18 +89,15 @@ void WfxRsi::CancelDHCPTimer()
     }
 }
 
-
 void WfxRsi::BlockScan()
 {
     osSemaphoreAcquire(mScanSemaphore, WIFI_SCAN_TIMEOUT_TICK);
 }
 
-
 void WfxRsi::ReleaseScan()
 {
     osSemaphoreRelease(mScanSemaphore);
 }
-
 
 /// NotifyConnectivity
 /// @brief Notify the application about the connectivity status if it has not been notified yet.
@@ -120,7 +110,6 @@ void WfxRsi::NotifyConnectivity()
         mHasNotifiedWifiConnectivity = true;
     }
 }
-
 
 void WfxRsi::HandleDHCPPolling()
 {
@@ -155,7 +144,7 @@ void WfxRsi::HandleDHCPPolling()
     {
         wfx_ipv6_notify(GET_IPV6_SUCCESS);
         mHasNotifiedIPV6 = true;
-        event.eventType = WFX_EVT_STA_DHCP_DONE;
+        event.eventType  = WFX_EVT_STA_DHCP_DONE;
         PostEvent(&event);
         NotifyConnectivity();
     }
@@ -166,7 +155,6 @@ void WfxRsi::HandleDHCPPolling()
 ///        and emits a WFX_EVT_STA_DO_DHCP event to trigger DHCP polling checks. Helper function for ProcessEvent.
 void WfxRsi::ResetDHCPNotificationFlags()
 {
-    WfxRsi & wfx_rsi = WfxRsi::Instance();
     WfxEvent_t outEvent;
 
 #if (CHIP_DEVICE_CONFIG_ENABLE_IPV4)
@@ -176,5 +164,14 @@ void WfxRsi::ResetDHCPNotificationFlags()
     mHasNotifiedWifiConnectivity = false;
 
     outEvent.eventType = WFX_EVT_STA_DO_DHCP;
-    wfx_rsi.PostEvent(&outEvent);
+    PostEvent(&outEvent);
+}
+
+namespace {
+WfxRsi sInstance;
+}
+
+WfxRsi & WfxRsi::Instance()
+{
+    return sInstance;
 }

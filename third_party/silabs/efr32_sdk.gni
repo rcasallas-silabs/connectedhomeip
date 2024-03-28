@@ -82,6 +82,7 @@ declare_args() {
   chip_enable_multi_ota_requestor = false
 }
 examples_plat_dir = "${chip_root}/examples/platform/silabs"
+silabs_plat_dir = "${chip_root}/src/platform/silabs"
 silabs_plat_efr32_wifi_dir = "${chip_root}/src/platform/silabs/efr32/wifi"
 
 assert(efr32_sdk_root != "", "efr32_sdk_root must be specified")

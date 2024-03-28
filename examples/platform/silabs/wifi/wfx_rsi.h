@@ -17,10 +17,10 @@
 #pragma once
 
 #include <FreeRTOS.h>
-#include <event_groups.h>
 #include <cmsis_os2.h>
-#include <wfx_host_events.h>
+#include <event_groups.h>
 #include <sl_status.h>
+#include <wfx_host_events.h>
 
 #ifndef RSI_BLE_ENABLE
 #define RSI_BLE_ENABLE (1)
@@ -71,7 +71,6 @@ typedef struct WfxEvent_s
     WfxEventType_e eventType;
     void * eventData; // event data TODO: confirm needed
 } WfxEvent_t;
-
 
 struct WfxRsi
 {
@@ -124,10 +123,10 @@ private:
     // DHCP Poll timer
     osTimerId_t mDHCPTimer;
     bool mHasNotifiedWifiConnectivity = false;
-    bool mHasNotifiedIPV6 = false;
-    #if (CHIP_DEVICE_CONFIG_ENABLE_IPV4)
+    bool mHasNotifiedIPV6             = false;
+#if (CHIP_DEVICE_CONFIG_ENABLE_IPV4)
     bool mHasNotifiedIPV4 = false;
-    #endif /* CHIP_DEVICE_CONFIG_ENABLE_IPV4 */
+#endif /* CHIP_DEVICE_CONFIG_ENABLE_IPV4 */
 };
 
 #ifdef __cplusplus

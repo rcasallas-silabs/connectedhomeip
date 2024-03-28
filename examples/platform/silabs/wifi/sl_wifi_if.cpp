@@ -83,7 +83,6 @@ uint32_t retryInterval                 = WLAN_MIN_RETRY_TIMER_MS;
 volatile bool scan_results_complete    = false;
 volatile bool bg_scan_results_complete = false;
 
-
 extern osSemaphoreId_t sl_rs_ble_init_sem;
 
 /*
@@ -93,7 +92,6 @@ extern osSemaphoreId_t sl_rs_ble_init_sem;
 static wfx_wifi_scan_ext_t temp_reset;
 
 volatile sl_status_t callback_status = SL_STATUS_OK;
-
 
 /******************************************************************
  * @fn   int32_t wfx_rsi_get_ap_info(wfx_wifi_scan_result_t *ap)
@@ -105,7 +103,7 @@ volatile sl_status_t callback_status = SL_STATUS_OK;
  *********************************************************************/
 int32_t wfx_rsi_get_ap_info(wfx_wifi_scan_result_t * ap)
 {
-    WfxRsi & wfx_rsi = WfxRsi::Instance();
+    WfxRsi & wfx_rsi   = WfxRsi::Instance();
     sl_status_t status = SL_STATUS_OK;
     int32_t rssi       = 0;
     ap->security       = wfx_rsi.sec.security;
@@ -517,7 +515,7 @@ sl_status_t show_scan_results(sl_wifi_scan_result_t * scan_result)
 
 sl_status_t bg_scan_callback_handler(sl_wifi_event_t event, sl_wifi_scan_result_t * result, uint32_t result_length, void * arg)
 {
-    WfxRsi & wfx_rsi = WfxRsi::Instance();
+    WfxRsi & wfx_rsi         = WfxRsi::Instance();
     callback_status          = show_scan_results(result);
     bg_scan_results_complete = true;
     wfx_rsi.ReleaseScan();
@@ -534,7 +532,7 @@ sl_status_t bg_scan_callback_handler(sl_wifi_event_t event, sl_wifi_scan_result_
  *******************************************************************************************/
 static void wfx_rsi_save_ap_info() // translation
 {
-    WfxRsi & wfx_rsi = WfxRsi::Instance();
+    WfxRsi & wfx_rsi   = WfxRsi::Instance();
     sl_status_t status = SL_STATUS_OK;
 #ifndef EXP_BOARD // TODO: this changes will be reverted back after the SDK team fix the scan API
     sl_wifi_scan_configuration_t wifi_scan_configuration = default_wifi_scan_configuration;
@@ -563,7 +561,7 @@ static void wfx_rsi_save_ap_info() // translation
  **********************************************************************************************/
 static sl_status_t wfx_rsi_do_join(void)
 {
-    WfxRsi & wfx_rsi = WfxRsi::Instance();
+    WfxRsi & wfx_rsi   = WfxRsi::Instance();
     sl_status_t status = SL_STATUS_OK;
     sl_wifi_security_t connect_security_mode;
     WfxEvent_t event;
@@ -671,7 +669,6 @@ static sl_status_t wfx_rsi_do_join(void)
     }
     return status;
 }
-
 
 void ProcessEvent(WfxEvent_t inEvent)
 {
@@ -787,7 +784,7 @@ void ProcessEvent(WfxEvent_t inEvent)
 /* ARGSUSED */
 void wfx_rsi_task(void * arg)
 {
-    WfxRsi & wfx_rsi = WfxRsi::Instance();
+    WfxRsi & wfx_rsi   = WfxRsi::Instance();
     sl_status_t status = wfx_rsi_init();
     (void) arg;
 
@@ -887,12 +884,3 @@ int32_t wfx_rsi_send_data(void * p, uint16_t len)
 }
 
 #endif
-
-namespace {
-WfxRsi sInstance;
-}
-
-WfxRsi & WfxRsi::Instance()
-{
-    return sInstance;
-}

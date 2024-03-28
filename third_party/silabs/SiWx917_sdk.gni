@@ -23,6 +23,7 @@ import("${chip_root}/src/lib/lib.gni")
 import("silabs_board.gni")
 
 examples_plat_dir = "${chip_root}/examples/platform/silabs"
+silabs_plat_dir = "${chip_root}/src/platform/silabs"
 
 declare_args() {
   # Enable the Alarm Based Wakeup for 917 SoC when sleep is enabled
