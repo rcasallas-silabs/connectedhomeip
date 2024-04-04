@@ -14,7 +14,6 @@ class Protocol(_base.ProvisionProtocol):
         super().__init__()
 
     def execute(self, paths, args, chan):
-        chan.open()
         action = args.str(ID.kAction)
         if 'binary' == action:
             e = Exporter(paths, args)
@@ -25,7 +24,6 @@ class Protocol(_base.ProvisionProtocol):
             self.executeAuto(paths, args, chan)
         else:
             raise ValueError("Action not supported: \"{}\"".format(action))
-        chan.close()
 
     def executeAuto(self, paths, args, chan):
         # Initialize

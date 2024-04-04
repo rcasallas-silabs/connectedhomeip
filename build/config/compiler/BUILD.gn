@@ -164,7 +164,7 @@ config("optimize_zero") {
 }
 
 config("optimize_debug") {
-  cflags = [ "-O${optimize_debug_level}" ]
+  cflags = [ "-Og" ]
   ldflags = cflags
 }
 

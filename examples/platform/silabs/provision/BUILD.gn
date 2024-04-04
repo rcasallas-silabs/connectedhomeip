@@ -18,12 +18,16 @@ import("${efr32_sdk_build_root}/silabs_board.gni")
 
 silabs_common_plat_dir = "${chip_root}/examples/platform/silabs"
 
+declare_args() {
+  silabs_provision_channel = "ble"
+}
+
 
 config("provision-config") {
   include_dirs = [ "${chip_root}" ]
 
   defines = [ "CHIP_DEVICE_CONFIG_ENABLE_EXAMPLE_CREDENTIALS=1" ]
-  if (use_provision_channel) {
+  if ("" != silabs_provision_channel) {
     defines += [ "SL_PROVISION_CHANNEL_ENABLED=1" ]
   }
 }
@@ -69,9 +73,14 @@ static_library("provision-efr32") {
 
   sources = [
     "${silabs_common_plat_dir}/provision/AttestationKeyPSA.cpp",
-    "${silabs_common_plat_dir}/provision/ProvisionChannelEFR32BLE.cpp",
     "${silabs_common_plat_dir}/provision/ProvisionStorageDefault.cpp",
   ]
+  if("ble" == silabs_provision_channel) {
+    sources += [ "${silabs_common_plat_dir}/provision/ProvisionChannelEFR32BLE.cpp" ]
+  }
+  else {
+    sources += [ "${silabs_common_plat_dir}/provision/ProvisionChannelRTT.cpp" ]
+  }
 
   public_deps = [ ":provision-common" ]
 }
@@ -81,9 +90,14 @@ static_library("provision-siwx917") {
 
   sources = [
     "${silabs_common_plat_dir}/provision/AttestationKeyMbed.cpp",
-    "${silabs_common_plat_dir}/provision/ProvisionChannelSi917BLE.cpp",
     "${silabs_common_plat_dir}/provision/ProvisionStorageDefault.cpp",
   ]
+  if("ble" == silabs_provision_channel) {
+    sources += [ "${silabs_common_plat_dir}/provision/ProvisionChannelSi917BLE.cpp" ]
+  }
+  else {
+    sources += [ "${silabs_common_plat_dir}/provision/ProvisionChannelRTT.cpp" ]
+  }
 
   public_deps = [ ":provision-common" ]
 }

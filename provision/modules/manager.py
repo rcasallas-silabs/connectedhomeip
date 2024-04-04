@@ -43,12 +43,12 @@ class ProvisionManager:
         # Compute defaults
         if ('auto' == action) or ('binary' == action):
             self.computeDefaults(paths, args)
-        # Export arguments (including generated values)
-        args.export()
 
         # Stop
         if args.value(ID.kStop):
             _util.warn("Stop requested.")
+            # Export arguments (including generated values)
+            args.export()
             exit(0)
 
         # Connection string
@@ -62,7 +62,12 @@ class ProvisionManager:
             self.writeGeneratorFirmware(args, conn)
 
         # Exchange data
+        chan.open()
         self.protocol.execute(paths, args, chan)
+        chan.close()
+
+        # Export arguments (including returned values)
+        args.export()
 
         # Production Firmware
         if _chan.Channel.BLE != chan.type:
@@ -163,6 +168,7 @@ class ProvisionManager:
                 raise ValueError("Missing Generator firmware \"{}\"".format(gen_fw))
             # chan.flash(gen_fw, args.int(ID.kFlashAddress))
             comm.flash(gen_fw)
+
 
     def writeProductionFirmware(self, args, conn):
         prod_fw = args.str(ID.kProductionFW)

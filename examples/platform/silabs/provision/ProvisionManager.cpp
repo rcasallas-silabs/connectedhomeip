@@ -43,6 +43,8 @@ CHIP_ERROR Manager::Init()
         // Disable provision mode for next boot
         mStore.SetProvisionRequest(false);
     }
+
+    ReturnErrorOnFailure(mChannel.Init());
     return CHIP_NO_ERROR;
 }
 

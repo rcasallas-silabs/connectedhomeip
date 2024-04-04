@@ -30,3 +30,13 @@ class Channel(ABC):
     @staticmethod
     def create(paths, args, conn):
         return JLinkChannel(paths, args, conn)
+
+    @staticmethod
+    def flush(chan, size):
+        data_len = 0
+        print("*** FLUSHIG {} ***".format(size))
+        while(0 == data_len):
+            data = chan.read()
+            data_len = len(data)
+            print("FLUSH({}) {}".format(data_len, data))
+        print("*** FLUSHED ***")

@@ -22,7 +22,6 @@ class Protocol(_base.ProvisionProtocol):
         super().__init__()
 
     def execute(self, paths, args, chan):
-        chan.open()
         action = args.str(ID.kAction)
         # Binary export
         if 'binary' == action:
@@ -51,7 +50,6 @@ class Protocol(_base.ProvisionProtocol):
             read.execute(chan)
         else:
             raise ValueError("Action not supported: \"{}\"".format(action))
-        chan.close()
 
     def csr(self, paths, args, chan):
         base_dir = paths.base()
@@ -342,7 +340,8 @@ class AutoCommand(Command):
         ID.kDiscriminator,
         ID.kSpake2pPasscode,
         ID.kUniqueId,
-        ID.kSetupPayload
+        ID.kSetupPayload,
+        ID.kHwVersionStr
     ]
 
     def __init__(self, paths, args):

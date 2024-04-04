@@ -1,58 +1,63 @@
-/***************************************************************************//**
- * @file main.cpp
- * @brief main() function.
- *******************************************************************************
- * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
- *******************************************************************************
- *
- * The licensor of this software is Silicon Laboratories Inc. Your use of this
- * software is governed by the terms of Silicon Labs Master Software License
- * Agreement (MSLA) available at
- * www.silabs.com/about-us/legal/master-software-license-agreement. This
- * software is distributed to you in Source Code format and is governed by the
- * sections of the MSLA applicable to Source Code.
- *
- ******************************************************************************/
-#include "sl_component_catalog.h"
-#include "sl_system_init.h"
-#include "app.h"
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
-#include "sl_power_manager.h"
+#include <platform/silabs/SilabsConfig.h>
+#include <platform/silabs/platformAbstraction/SilabsPlatform.h>
+#include <provision/ProvisionManager.h>
+#include <lib/support/CHIPPlatformMemory.h>
+#include <lib/support/CHIPMem.h>
+#include <lib/support/CodeUtils.h>
+#include <lib/core/CHIPError.h>
+#include <sl_system_init.h>
+#include <MatterConfig.h>
+
+#include <mbedtls/platform.h>
+#include <FreeRTOS.h>
+#include <task.h>
+#include <nvm3.h>
+#include <nvm3_default.h>
+#include <nvm3_hal_flash.h>
+#include <nvm3_lock.h>
+#include <string.h>
+
+#define MAIN_TASK_STACK_SIZE (1024 * 5)
+#define MAIN_TASK_PRIORITY (configMAX_PRIORITIES - 1)
+
+using namespace chip::DeviceLayer::Silabs;
+
+/**********************************************************
+ * Defines
+ *********************************************************/
+
+#define MAIN_TASK_STACK_SIZE (1024 * 5)
+#define MAIN_TASK_PRIORITY (configMAX_PRIORITIES - 1)
+
+namespace {
+
+static TaskHandle_t _task;
+
+void taskMain(void *data)
+{
+    // Initialization
+    chip::Platform::MemoryInit();
+#ifdef SL_WIFI
+    SilabsMatterConfig::InitWiFi();
 #endif
-#if defined(SL_CATALOG_KERNEL_PRESENT)
-#include "sl_system_kernel.h"
-#else // SL_CATALOG_KERNEL_PRESENT
-#include "sl_system_process_action.h"
-#endif // SL_CATALOG_KERNEL_PRESENT
+    nvm3_open(nvm3_defaultHandle, nvm3_defaultInit);
+
+    // Provision
+    Provision::Manager &man = Provision::Manager::GetInstance();
+    man.Init();
+    while(true) man.Step();
+}
+
+} // namespace
+
+// ================================================================================
+// Main Code
+// ================================================================================
 
 int main(void)
 {
-  // Initialize Silicon Labs device, system, service(s) and protocol stack(s).
-  // Note that if the kernel is present, processing task(s) will be created by
-  // this call.
-  sl_system_init();
-
-  // Initialize the application. For example, create periodic timer(s) or
-  // task(s) if the kernel is present.
-  app_init();
-
-#if defined(SL_CATALOG_KERNEL_PRESENT)
-  // Start the kernel. Task(s) created in app_init() will start running.
-  sl_system_kernel_start();
-#else // SL_CATALOG_KERNEL_PRESENT
-  while (1) {
-    // Do not remove this call: Silicon Labs components process action routine
-    // must be called from the super loop.
-    sl_system_process_action();
-
-    // Application process.
-    app_process_action();
-
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
-    // Let the CPU go to sleep if the system allows it.
-    sl_power_manager_sleep();
-#endif
-  }
-#endif // SL_CATALOG_KERNEL_PRESENT
+    sl_system_init();
+    xTaskCreate(taskMain, "Main Task", MAIN_TASK_STACK_SIZE, nullptr, MAIN_TASK_PRIORITY, &_task);
+    vTaskStartScheduler();
+    while(true);
 }
