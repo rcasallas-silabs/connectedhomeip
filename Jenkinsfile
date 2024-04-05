@@ -979,6 +979,21 @@ def pushToArtifactoryAndUbai()
                                         echo FAIL
                                     fi
 
+                                    # Upload OTA testing files
+
+                                    ota_file="ota-scripts.zip"
+                                    zip -r "${ota_file}" "scripts/tools/silabs" "src/app/ota_image_tool.py" "src/controller/python/chip/tlv/_init_.py" "src/controller/python/chip/tlv/tlvlist.py" -x "*.md"
+
+                                    echo 'Uploading OTA testing files to UBAI... '
+                                    ubai_upload_cli --client-id jenkins-gsdk-pipelines-Matter --file-path "${ota_file}"  --metadata app_name matter_ota_scripts \
+                                            --metadata branch ${JOB_BASE_NAME} --metadata build_number ${BUILD_NUMBER} --metadata stack matter --metadata target matter  --username ${SL_USERNAME} --password ${SL_PASSWORD}
+
+                                    if [ $? -eq 0 ]; then
+                                        echo 'OTA testing files successfully uploaded to UBAI... '
+                                    else
+                                        echo FAIL
+                                    fi
+
                             '''
                             }
                     }
