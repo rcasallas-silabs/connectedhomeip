@@ -45,8 +45,8 @@ class File:
     def __init__(self, path) -> None:
         self.path = path
 
-    def read(self):
-        with open(self.path, 'r') as f:
+    def read(self, is_binary = False):
+        with open(self.path, is_binary and 'rb' or 'r') as f:
             return f.read()
 
     def write(self, data):

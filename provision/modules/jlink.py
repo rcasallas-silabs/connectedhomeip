@@ -80,3 +80,10 @@ class JLinkChannel(_base.Channel):
         self.link.flash_file(firmware_path, address)
         self.reset()
         self.close()
+
+    def ram(self, ram_addr, sp_addr, pc_addr, img):
+        print("∙ ram: {}\n∙ sp:  {}\n∙ pc:  {}\n∙ image size: {} ({})".format(hex(ram_addr), hex(sp_addr), hex(pc_addr), len(img), type(img)))
+        self.link.memory_write8(addr=ram_addr, data=list(img))
+        self.link.register_write(reg_index=13, value=sp_addr) # SP
+        self.link.register_write(reg_index=15, value=pc_addr) # PC
+        self.link.restart(num_instructions=0, skip_breakpoints=False)

@@ -2,8 +2,8 @@
 import os
 import sys
 import argparse
+import shutil
 import modules.util as _util
-from shutil import copyfile
 
 class PatchingFile:
 
@@ -83,23 +83,28 @@ class Updater:
             self.generate()
         # Restore previous patches
         self.restore()
+        silabs_config_patch = 'silabs_config'
         # Make
         if (self.do_patch is None) or ('psa3' == self.do_patch):
             # PSAv3 + NVM3k2 (already generated)
+            self.patch(silabs_config_patch)
             self.make('psa3_nvm3k2')
 
         if (self.do_patch is None) or ('psa123' == self.do_patch):
             # PSAv123 + NVM3k2 (add v1 and v2)
+            self.patch(silabs_config_patch)
             self.patch("{}-psa123".format(self.part.family))
             self.make('psa123_nvm3k2')
 
         if (self.do_patch is None) or ('psa12' == self.do_patch):
             # PSAv12 + NVM3k2 (-v3 +v1 +v2)
             psa12_patch = "{}-psa12".format(self.part.family)
+            self.patch(silabs_config_patch)
             self.patch(psa12_patch)
             self.make('psa12_nvm3k2')
             # PSAv12 + NVM3k1 (-v3 +v1 +v2 +nvm3k1)
             nvm3k1_patch = 'nvm3k1'
+            self.patch(silabs_config_patch)
             self.patch(psa12_patch)
             self.patch(nvm3k1_patch)
             self.make('psa12_nvm3k1')
@@ -107,12 +112,16 @@ class Updater:
     def generate(self):
         # Generate
         print("{}+ Generate".format(_util.MARGIN))
-        slcp_path = self.paths.base("generator/generator_{}.slcp".format(self.part.suffix))
+        slcp_path = self.paths.base("generator/{}.slcp".format(self.part.suffix))
         _util.execute([ 'slc', 'signature', 'trust', '--sdk', self.gsdk_dir ])
         _util.execute([ 'slc', 'generate', '-p', slcp_path, '-d', self.part_dir, '--with', self.part.reference, '--sdk', self.gsdk_dir ])
-        # Patch
+        # Makefile
         patcher = MakefilePatcher("{}/generator.project.mak".format(self.part_dir))
         patcher.patch(self.paths)
+        # Linker file
+        linkerfile_from = self.paths.support("patch/{}.ld".format(self.part.family))
+        linkerfile_into = "{}/autogen/linkerfile.ld".format(self.part_dir)
+        shutil.copyfile(linkerfile_from, linkerfile_into)
         # Stage the newly generated code
         _util.execute([ 'git', 'add', self.part_dir ])
 

@@ -45,7 +45,8 @@ class Commander:
             time.sleep(1)
         else:
             self.execute(['flash' , image_path], False, True)
-            self.execute(['device', 'reset'], False, True)
+            # Do not reset if running on RAM!
+            # self.execute(['device', 'reset'], False, True)
 
 
 class DeviceInfo:

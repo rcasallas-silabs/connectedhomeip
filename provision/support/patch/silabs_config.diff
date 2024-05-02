@@ -1,0 +1,57 @@
+diff --git a/src/platform/silabs/SilabsConfig.cpp b/src/platform/silabs/SilabsConfig.cpp
+index 2e9f83b671..9e7792930d 100644
+--- a/src/platform/silabs/SilabsConfig.cpp
++++ b/src/platform/silabs/SilabsConfig.cpp
+@@ -33,29 +33,29 @@
+ #include <nvm3_hal_flash.h>
+ #include <nvm3_lock.h>
+ 
+-#include <FreeRTOS.h>
+-#include <semphr.h>
++// #include <FreeRTOS.h>
++// #include <semphr.h>
+ // Substitute the GSDK weak nvm3_lockBegin and nvm3_lockEnd
+ // for an application controlled re-entrance protection
+-static SemaphoreHandle_t nvm3_Sem;
+-static StaticSemaphore_t nvm3_SemStruct;
++// static SemaphoreHandle_t nvm3_Sem;
++// static StaticSemaphore_t nvm3_SemStruct;
+ 
+ void nvm3_lockBegin(void)
+ {
+-    if (nvm3_Sem == NULL)
+-    {
+-        nvm3_Sem = xSemaphoreCreateBinaryStatic(&nvm3_SemStruct);
+-        xSemaphoreGive(nvm3_Sem);
+-    }
+-
+-    VerifyOrDie(nvm3_Sem != NULL);
+-    xSemaphoreTake(nvm3_Sem, portMAX_DELAY);
++    // if (nvm3_Sem == NULL)
++    // {
++    //     nvm3_Sem = xSemaphoreCreateBinaryStatic(&nvm3_SemStruct);
++    //     xSemaphoreGive(nvm3_Sem);
++    // }
++
++    // VerifyOrDie(nvm3_Sem != NULL);
++    // xSemaphoreTake(nvm3_Sem, portMAX_DELAY);
+ }
+ 
+ void nvm3_lockEnd(void)
+ {
+-    VerifyOrDie(nvm3_Sem != NULL);
+-    xSemaphoreGive(nvm3_Sem);
++    // VerifyOrDie(nvm3_Sem != NULL);
++    // xSemaphoreGive(nvm3_Sem);
+ }
+ 
+ namespace chip {
+@@ -76,7 +76,7 @@ CHIP_ERROR SilabsConfig::Init()
+ 
+ void SilabsConfig::DeInit()
+ {
+-    vSemaphoreDelete(nvm3_Sem);
++    // vSemaphoreDelete(nvm3_Sem);
+     nvm3_close(nvm3_defaultHandle);
+ }
+ 
