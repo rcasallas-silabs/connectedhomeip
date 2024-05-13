@@ -237,8 +237,10 @@ struct InitCommand: public Command
 {
     InitCommand(Storage & store): Command(kCommand_Init, store)
     {
+        _incoming.Init(rx_buffer, sizeof(rx_buffer));
         _incoming.Reset();
-        _outgoing.Clear();
+        _outgoing.Init(tx_buffer, sizeof(tx_buffer));
+        // _outgoing.Clear();
         _feedback_list.Clear();
     }
 

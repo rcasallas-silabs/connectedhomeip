@@ -1,0 +1,47 @@
+# Silicon Labs Project Configuration Tools: slcp, v0, Component selection file.
+project_name: blinky
+label: Example
+description: |
+  Empty example
+category: Example|Platform
+package: platform
+quality: production
+filter:
+  - { name: Device Type,  value: [SoC] }
+  - { name: MCU,  value: [32-bit MCU] }
+  - { name: Project Difficulty,  value: [Beginner] }
+ui_hints:
+  highlight:
+  - { path: README.md, focus: true }
+readme:
+  - { path: README.md }
+
+sdk: { id: gecko_sdk, version: 4.4.1 }
+
+component:
+  - { id: cpp_support }
+  - { id: sl_system }
+  - { id: device_init }
+  - { id: freertos }
+  - { id: sleeptimer }
+  - { id: iostream }
+  - { id: iostream_rtt }
+  - { id: simple_led, instance: [led0, led1] }
+  - { id: simple_button, instance: [btn0, btn1 ] }
+include:
+  - path: '.'
+    file_list:
+    - { path: app.h }
+
+source:
+  - { path: app.cpp }
+  - { path: main.cpp }
+  - { path: efr32.cpp }
+
+define:
+  - { name: DEBUG_EFM }
+
+toolchain_settings:
+  - { option: optimize, value: debug }
+  - { option: cxx_standard, value: c++17 }
+  - { option: gcc_compiler_option, value: -Wno-unused-parameter }

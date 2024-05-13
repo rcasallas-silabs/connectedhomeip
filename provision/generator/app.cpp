@@ -15,12 +15,12 @@
  *
  ******************************************************************************/
 
+#include "app.h"
 #include <provision/ProvisionManager.h>
-#include <lib/support/CHIPPlatformMemory.h>
-#include <lib/support/CHIPMem.h>
-#include <mbedtls/platform.h>
+#include <platform/silabs/SilabsConfig.h>
 
 using namespace chip::DeviceLayer::Silabs;
+using namespace chip::DeviceLayer::Internal;
 
 /*******************************************************************************
  * Initialize application.
@@ -28,10 +28,8 @@ using namespace chip::DeviceLayer::Silabs;
 
 void app_init(void)
 {
-#if !defined(MBEDTLS_PLATFORM_CALLOC_MACRO) ||  !defined(MBEDTLS_PLATFORM_FREE_MACRO)
-    mbedtls_platform_set_calloc_free(CHIPPlatformMemoryCalloc, CHIPPlatformMemoryFree);
-    ReturnOnFailure(chip::Platform::MemoryInit());
-#endif
+    app_platform_init();
+    SilabsConfig::Init();
 }
 
 /*******************************************************************************

@@ -1,5 +1,5 @@
 # Silicon Labs Project Configuration Tools: slcp, v0, Component selection file.
-project_name: generator
+project_name: blinky
 label: Example
 description: |
   Blinky example

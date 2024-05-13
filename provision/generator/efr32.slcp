@@ -50,7 +50,7 @@ source:
   - { path: app.h }
   - { path: app.cpp }
   - { path: main.cpp }
-  - { path: efr32.c }
+  - { path: efr32.cpp }
   - { path: ../../examples/platform/silabs/provision/AttestationKey.h }
   - { path: ../../examples/platform/silabs/provision/AttestationKeyPSA.cpp }
   - { path: ../../examples/platform/silabs/provision/ProvisionChannel.h }
