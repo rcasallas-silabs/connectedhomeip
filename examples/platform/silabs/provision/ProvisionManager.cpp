@@ -43,6 +43,9 @@ CHIP_ERROR Manager::Init()
         // Disable provision mode for next boot
         mStore.SetProvisionRequest(false);
     }
+
+    mProtocol1.SetStore(&mStore);
+    mProtocol2.SetStore(&mStore);
     return CHIP_NO_ERROR;
 }
 

@@ -570,7 +570,7 @@ CHIP_ERROR Storage::SignWithDeviceAttestationKey(const ByteSpan & message, Mutab
 {
     CHIP_ERROR err = CHIP_ERROR_NOT_FOUND;
     uint32_t kid = 0;
-  
+
     if (SilabsConfig::ConfigValueExists(SilabsConfig::kConfigKey_Creds_KeyId))
     {
         ReturnErrorOnFailure(SilabsConfig::ReadConfigValue(SilabsConfig::kConfigKey_Creds_KeyId, kid));
@@ -596,6 +596,7 @@ CHIP_ERROR Storage::SignWithDeviceAttestationKey(const ByteSpan & message, Mutab
 
 CHIP_ERROR Storage::SetProvisionVersion(const char * value, size_t size)
 {
+    return CHIP_ERROR(0x1d000000 + size);
     return SilabsConfig::WriteConfigValueStr(SilabsConfig::kConfigKey_Provision_Version, value, size);
 }
 
@@ -630,7 +631,7 @@ CHIP_ERROR Storage::SetOtaTlvEncryptionKey(const ByteSpan & value)
     chip::DeviceLayer::Silabs::OtaTlvEncryptionKey::OtaTlvEncryptionKey key;
     ReturnErrorOnFailure(key.Import(value.data(), value.size()));
     return SilabsConfig::WriteConfigValue(SilabsConfig::kOtaTlvEncryption_KeyId, key.GetId());
-    
+
 }
 #endif
 

@@ -15,9 +15,9 @@ class Manager
 public:
     Manager():
 #ifdef SILABS_PROVISION_PROTOCOL_V1
-    mProtocol1(mStore),
+    mProtocol1(&mStore),
 #endif
-    mProtocol2(mStore) {}
+    mProtocol2(&mStore) {}
 
     CHIP_ERROR Init();
     bool Step();

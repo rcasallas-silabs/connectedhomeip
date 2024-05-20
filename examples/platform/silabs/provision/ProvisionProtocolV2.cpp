@@ -103,7 +103,7 @@ enum CommandIds: uint8_t
 
 struct Command
 {
-    Command(uint8_t id, Storage & store): mId(id), mStore(store)  {}
+    Command(uint8_t id, Storage * store): mId(id), mStore(store)  {}
     virtual ~Command() = default;
 
     CHIP_ERROR Execute(Encoding::Buffer & in, Encoding::Buffer & out)
@@ -180,7 +180,7 @@ struct Command
 
     virtual CHIP_ERROR EncodeOutgoing(ReadEntry &arg, Argument &out)
     {
-        GenericStorage &store = (arg.is_known ? (GenericStorage &)mStore : (GenericStorage &)mStore.mCustom);
+        GenericStorage *stx = (arg.is_known ? (GenericStorage *)mStore : (GenericStorage *)&mStore->mCustom);
         CHIP_ERROR err = CHIP_NO_ERROR;
 
         switch(arg.type)
@@ -188,7 +188,7 @@ struct Command
         case Type_Int8u:
         {
             uint8_t value = 0;
-            err = store.Get(arg.id, value);
+            err = mStore->Get(arg.id, value);
             VerifyOrReturnError((CHIP_ERROR_NOT_FOUND == err) || (CHIP_NO_ERROR == err), err);
             uint8_t *x = (CHIP_ERROR_NOT_FOUND == err) ? nullptr : &value;
             ReturnErrorOnFailure(Encode(arg.id, x, out));
@@ -197,7 +197,7 @@ struct Command
         case Type_Int16u:
         {
             uint16_t value = 0;
-            err = store.Get(arg.id, value);
+            err = mStore->Get(arg.id, value);
             VerifyOrReturnError((CHIP_ERROR_NOT_FOUND == err) || (CHIP_NO_ERROR == err), err);
             uint16_t *x = (CHIP_ERROR_NOT_FOUND == err) ? nullptr : &value;
             ReturnErrorOnFailure(Encode(arg.id, x, out));
@@ -206,7 +206,7 @@ struct Command
         case Type_Int32u:
         {
             uint32_t value = 0;
-            err = store.Get(arg.id, value);
+            err = mStore->Get(arg.id, value);
             VerifyOrReturnError((CHIP_ERROR_NOT_FOUND == err) || (CHIP_NO_ERROR == err), err);
             uint32_t *x = (CHIP_ERROR_NOT_FOUND == err) ? nullptr : &value;
             ReturnErrorOnFailure(Encode(arg.id, x, out));
@@ -216,7 +216,7 @@ struct Command
         {
             uint8_t *value = Storage::aux_buffer;
             size_t size = 0;
-            err = store.Get(arg.id, value, Storage::kArgumentSizeMax, size);
+            err = mStore->Get(arg.id, value, Storage::kArgumentSizeMax, size);
             VerifyOrReturnError((CHIP_ERROR_NOT_FOUND == err) || (CHIP_NO_ERROR == err), err);
             uint8_t *x = (CHIP_ERROR_NOT_FOUND == err) ? nullptr : value;
             ReturnErrorOnFailure(Encode(arg.id, x, size, out));
@@ -230,12 +230,12 @@ struct Command
     }
 
     uint8_t mId;
-    Storage & mStore;
+    Storage * mStore;
 };
 
 struct InitCommand: public Command
 {
-    InitCommand(Storage & store): Command(kCommand_Init, store)
+    InitCommand(Storage * store): Command(kCommand_Init, store)
     {
         _incoming.Init(rx_buffer, sizeof(rx_buffer));
         _incoming.Reset();
@@ -277,7 +277,7 @@ struct InitCommand: public Command
         case Parameters::kBaseAddress:
         {
             uint32_t creds_base_addr = 0;
-            ReturnErrorOnFailure(mStore.GetBaseAddress(creds_base_addr));
+            ReturnErrorOnFailure(mStore->GetBaseAddress(creds_base_addr));
             ReturnErrorOnFailure(Encode(arg.id, &creds_base_addr, out));
             break;
         }
@@ -289,7 +289,7 @@ struct InitCommand: public Command
 
     CHIP_ERROR OnPayloadDecoded() override
     {
-        return mStore.Initialize(mFlashAddress, mFlashSize);
+        return mStore->Initialize(mFlashAddress, mFlashSize);
     }
 
 private:
@@ -299,7 +299,7 @@ private:
 
 struct CsrCommand: public Command
 {
-    CsrCommand(Storage & store): Command(kCommand_Init, store)
+    CsrCommand(Storage * store): Command(kCommand_Init, store)
     {
         // Always return CSR file
         _feedback_list.Add(Parameters::kCsrFile, Type_Binary);
@@ -311,10 +311,10 @@ struct CsrCommand: public Command
         {
         case Parameters::kVendorId:
         case Parameters::kProductId:
-            return mStore.Set(arg.id, &arg.value.u16);
+            return mStore->Set(arg.id, &arg.value.u16);
 
         case Parameters::kCommonName:
-            return mStore.Set(arg.id, arg.value.b, arg.size);
+            return mStore->Set(arg.id, arg.value.b, arg.size);
 
         default:
             return CHIP_ERROR_UNKNOWN_RESOURCE_ID;
@@ -322,13 +322,15 @@ struct CsrCommand: public Command
     }
 };
 
+static size_t _debug = 0;
+
 struct WriteCommand: public Command
 {
-    WriteCommand(Storage & store): Command(kCommand_Write, store) {}
+    WriteCommand(Storage * store): Command(kCommand_Write, store) {}
 
     CHIP_ERROR ProcessIncoming(Argument &arg) override
     {
-        GenericStorage &store = (arg.is_known ? (GenericStorage &)mStore : (GenericStorage &)mStore.mCustom);
+        GenericStorage *stx = (arg.is_known ? (GenericStorage *)mStore : (GenericStorage *)&mStore->mCustom);
 
         if(arg.feedback)
         {
@@ -339,17 +341,19 @@ struct WriteCommand: public Command
         switch(arg.type)
         {
         case Type_Int8u:
-            return store.Set(arg.id, arg.is_null ? nullptr : &arg.value.u8);
+            return mStore->Set(arg.id, arg.is_null ? nullptr : &arg.value.u8);
 
         case Type_Int16u:
-            return store.Set(arg.id, arg.is_null ? nullptr : &arg.value.u16);
+            return mStore->Set(arg.id, arg.is_null ? nullptr : &arg.value.u16);
 
         case Type_Int32u:
-            return store.Set(arg.id, arg.is_null ? nullptr : &arg.value.u32);
+            return mStore->Set(arg.id, arg.is_null ? nullptr : &arg.value.u32);
 
         case Type_Binary:
         {
-            return store.Set(arg.id, arg.is_null ? nullptr : arg.value.b, arg.size);
+            // if(++_debug == 1) return CHIP_ERROR(0x2d000000 + arg.id);
+            return mStore->Set(arg.id, arg.is_null ? nullptr : arg.value.b, arg.size);
+            // return CHIP_ERROR(0x3d000000 + (e.AsInteger() & 0xffffff));
         }
 
         default:
@@ -360,7 +364,7 @@ struct WriteCommand: public Command
 
     CHIP_ERROR OnPayloadDecoded() override
     {
-        return this->mStore.Commit();
+        return this->mStore->Commit();
     }
 
 };
@@ -368,7 +372,7 @@ struct WriteCommand: public Command
 
 struct ReadCommand: public Command
 {
-    ReadCommand(Storage & store): Command(kCommand_Read, store) {}
+    ReadCommand(Storage * store): Command(kCommand_Read, store) {}
 
     CHIP_ERROR ProcessIncoming(Argument &arg) override
     {

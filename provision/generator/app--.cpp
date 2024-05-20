@@ -22,23 +22,22 @@
 #include <provision/ProvisionManager.h>
 #include <platform/silabs/SilabsConfig.h>
 
-#define MAIN_TASK_STACK_SIZE    (1024)
-#define MAIN_TASK_PRIORITY      (configMAX_PRIORITIES - 1)
+#define MAIN_TASK_STACK_SIZE (1024)
+#define MAIN_TASK_PRIORITY (configMAX_PRIORITIES - 1)
+#define TIMER_TIMEOUT_MS 500
 
 using namespace chip::DeviceLayer::Silabs;
 using namespace chip::DeviceLayer::Internal;
 
 namespace {
 
-TaskHandle_t main_Task;
+TaskHandle_t _task;
 
-void taskMain(void * pvParameter)
+void task_main(void * pvParameter)
 {
-    app_platform_init();
-    SilabsConfig::Init();
-
     // Run manager
     Provision::Manager &man = Provision::Manager::GetInstance();
+    man.Init();
     while (true)
     {
         man.Step();
@@ -56,11 +55,10 @@ void taskMain(void * pvParameter)
 
 void app_init(void)
 {
-// #if !defined(MBEDTLS_PLATFORM_CALLOC_MACRO) ||  !defined(MBEDTLS_PLATFORM_FREE_MACRO)
-//     mbedtls_platform_set_calloc_free(CHIPPlatformMemoryCalloc, CHIPPlatformMemoryFree);
-//     ReturnOnFailure(chip::Platform::MemoryInit());
-// #endif
-    xTaskCreate(taskMain, "Provision Task", MAIN_TASK_STACK_SIZE, nullptr, MAIN_TASK_PRIORITY, &main_Task);
+    app_platform_init();
+    SilabsConfig::Init();
+
+    xTaskCreate(task_main, "Provision Task", MAIN_TASK_STACK_SIZE, nullptr, MAIN_TASK_PRIORITY, &_task);
 }
 
 /*******************************************************************************

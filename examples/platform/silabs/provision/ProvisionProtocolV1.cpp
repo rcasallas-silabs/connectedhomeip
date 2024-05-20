@@ -97,9 +97,9 @@ CHIP_ERROR Protocol1::Init(Encoding::Buffer &in, Encoding::Buffer &out)
     ReturnErrorOnFailure(Encoding::Version1::Decode(in, flash_size));
 
     // Execute
-    ReturnErrorOnFailure(mStore.Initialize(flash_addr, flash_size));
-    ReturnErrorOnFailure(mStore.Commit());
-    ReturnErrorOnFailure(mStore.GetBaseAddress(creds_base_addr));
+    ReturnErrorOnFailure(mStore->Initialize(flash_addr, flash_size));
+    ReturnErrorOnFailure(mStore->Commit());
+    ReturnErrorOnFailure(mStore->GetBaseAddress(creds_base_addr));
 
     // Encode response
     Encoding::Version1::Encode(out, (uint32_t)creds_base_addr);
@@ -126,7 +126,7 @@ CHIP_ERROR Protocol1::GenerateCSR(Encoding::Buffer &in, Encoding::Buffer &out)
     // Execute
     MutableCharSpan span(csr, sizeof(csr));
     CharSpan cn(common_name, common_name_len);
-    ReturnErrorOnFailure(mStore.GetDeviceAttestationCSR(vendor_id, product_id, cn, span));
+    ReturnErrorOnFailure(mStore->GetDeviceAttestationCSR(vendor_id, product_id, cn, span));
 
     // Encode response
     Encoding::Version1::Encode(out, key_id);
@@ -159,27 +159,27 @@ CHIP_ERROR Protocol1::Import(Encoding::Buffer &in, Encoding::Buffer &out)
     switch(file_id)
     {
     case kFile_Key:
-        ReturnErrorOnFailure(mStore.Set(Parameters::ID::kDacKey, data, size));
+        ReturnErrorOnFailure(mStore->Set(Parameters::ID::kDacKey, data, size));
         break;
 
     case kFile_DAC:
     {
-        ReturnErrorOnFailure(mStore.Set(Parameters::ID::kDacCert, data, size));
+        ReturnErrorOnFailure(mStore->Set(Parameters::ID::kDacCert, data, size));
         break;
     }
     case kFile_PAI:
-        ReturnErrorOnFailure(mStore.Set(Parameters::ID::kPaiCert, data, size));
+        ReturnErrorOnFailure(mStore->Set(Parameters::ID::kPaiCert, data, size));
         break;
 
     case kFile_CD:
-        ReturnErrorOnFailure(mStore.Set(Parameters::ID::kCertification, data, size));
+        ReturnErrorOnFailure(mStore->Set(Parameters::ID::kCertification, data, size));
         break;;
 
     default:
         // Unknown file
         return CHIP_ERROR_INVALID_ARGUMENT;
     }
-    ReturnErrorOnFailure(mStore.Commit());
+    ReturnErrorOnFailure(mStore->Commit());
 
     //
     // Encode response
@@ -251,34 +251,34 @@ CHIP_ERROR Protocol1::Setup(Encoding::Buffer &in, Encoding::Buffer &out)
     // Execute
     //
 
-    ReturnErrorOnFailure(mStore.Set(Parameters::ID::kVendorId, (uint16_t*)&vendor_id));
-    ReturnErrorOnFailure(mStore.Set(Parameters::ID::kVendorName, (uint8_t*)vendor_name, vendor_name_size));
-    ReturnErrorOnFailure(mStore.Set(Parameters::ID::kProductId, (uint16_t*)&product_id));
-    ReturnErrorOnFailure(mStore.Set(Parameters::ID::kProductName, (uint8_t*)product_name, product_name_size));
-    ReturnErrorOnFailure(mStore.Set(Parameters::ID::kProductLabel, (uint8_t*)product_label, product_label_size));
-    ReturnErrorOnFailure(mStore.Set(Parameters::ID::kProductUrl, (uint8_t*)product_url, product_url_size));
-    ReturnErrorOnFailure(mStore.Set(Parameters::ID::kPartNumber, (uint8_t*)part_number, part_number_size));
-    ReturnErrorOnFailure(mStore.Set(Parameters::ID::kHwVersion, &hw_version));
-    ReturnErrorOnFailure(mStore.Set(Parameters::ID::kHwVersionStr, (uint8_t*)hw_version_string, hw_version_string_size));
-    ReturnErrorOnFailure(mStore.Set(Parameters::ID::kManufacturingDate, (uint8_t*)manufacturing_date, manufacturing_date_size));
-    ReturnErrorOnFailure(mStore.Set(Parameters::ID::kUniqueId, unique_id, unique_size));
-    ReturnErrorOnFailure(mStore.Set(Parameters::ID::kDiscriminator, discriminator > 0 ? &discriminator : nullptr));
-    ReturnErrorOnFailure(mStore.Set(Parameters::ID::kSpake2pVerifier, (uint8_t*)spake2p_verifier, spake2p_verifier_size));
-    ReturnErrorOnFailure(mStore.Set(Parameters::ID::kSpake2pPasscode, passcode > 0 ? &passcode : nullptr));
-    ReturnErrorOnFailure(mStore.Set(Parameters::ID::kCommissioningFlow, (uint8_t*)&commissioning_flow));
-    ReturnErrorOnFailure(mStore.Set(Parameters::ID::kRendezvousFlags, (uint8_t*)&rendezvous_flags));
-    ReturnErrorOnFailure(mStore.Set(Parameters::ID::kSpake2pIterations, &spake2p_iterations));
-    ReturnErrorOnFailure(mStore.Set(Parameters::ID::kSpake2pSalt, (uint8_t*)spake2p_salt, spake2p_salt_size));
-    ReturnErrorOnFailure(mStore.Set(Parameters::ID::kSetupPayload, nullptr, 0));
-    ReturnErrorOnFailure(mStore.Commit());
+    ReturnErrorOnFailure(mStore->Set(Parameters::ID::kVendorId, (uint16_t*)&vendor_id));
+    ReturnErrorOnFailure(mStore->Set(Parameters::ID::kVendorName, (uint8_t*)vendor_name, vendor_name_size));
+    ReturnErrorOnFailure(mStore->Set(Parameters::ID::kProductId, (uint16_t*)&product_id));
+    ReturnErrorOnFailure(mStore->Set(Parameters::ID::kProductName, (uint8_t*)product_name, product_name_size));
+    ReturnErrorOnFailure(mStore->Set(Parameters::ID::kProductLabel, (uint8_t*)product_label, product_label_size));
+    ReturnErrorOnFailure(mStore->Set(Parameters::ID::kProductUrl, (uint8_t*)product_url, product_url_size));
+    ReturnErrorOnFailure(mStore->Set(Parameters::ID::kPartNumber, (uint8_t*)part_number, part_number_size));
+    ReturnErrorOnFailure(mStore->Set(Parameters::ID::kHwVersion, &hw_version));
+    ReturnErrorOnFailure(mStore->Set(Parameters::ID::kHwVersionStr, (uint8_t*)hw_version_string, hw_version_string_size));
+    ReturnErrorOnFailure(mStore->Set(Parameters::ID::kManufacturingDate, (uint8_t*)manufacturing_date, manufacturing_date_size));
+    ReturnErrorOnFailure(mStore->Set(Parameters::ID::kUniqueId, unique_id, unique_size));
+    ReturnErrorOnFailure(mStore->Set(Parameters::ID::kDiscriminator, discriminator > 0 ? &discriminator : nullptr));
+    ReturnErrorOnFailure(mStore->Set(Parameters::ID::kSpake2pVerifier, (uint8_t*)spake2p_verifier, spake2p_verifier_size));
+    ReturnErrorOnFailure(mStore->Set(Parameters::ID::kSpake2pPasscode, passcode > 0 ? &passcode : nullptr));
+    ReturnErrorOnFailure(mStore->Set(Parameters::ID::kCommissioningFlow, (uint8_t*)&commissioning_flow));
+    ReturnErrorOnFailure(mStore->Set(Parameters::ID::kRendezvousFlags, (uint8_t*)&rendezvous_flags));
+    ReturnErrorOnFailure(mStore->Set(Parameters::ID::kSpake2pIterations, &spake2p_iterations));
+    ReturnErrorOnFailure(mStore->Set(Parameters::ID::kSpake2pSalt, (uint8_t*)spake2p_salt, spake2p_salt_size));
+    ReturnErrorOnFailure(mStore->Set(Parameters::ID::kSetupPayload, nullptr, 0));
+    ReturnErrorOnFailure(mStore->Commit());
 
     //
     // Encode response
     //
-    ReturnErrorOnFailure(mStore.Get(Parameters::ID::kSpake2pPasscode, passcode));
-    ReturnErrorOnFailure(mStore.Get(Parameters::ID::kDiscriminator, discriminator));
-    ReturnErrorOnFailure(mStore.Get(Parameters::ID::kUniqueId, unique_id, sizeof(unique_id), unique_size));
-    ReturnErrorOnFailure(mStore.Get(Parameters::ID::kSetupPayload, setup_payload, sizeof(setup_payload), setup_payload_size));
+    ReturnErrorOnFailure(mStore->Get(Parameters::ID::kSpake2pPasscode, passcode));
+    ReturnErrorOnFailure(mStore->Get(Parameters::ID::kDiscriminator, discriminator));
+    ReturnErrorOnFailure(mStore->Get(Parameters::ID::kUniqueId, unique_id, sizeof(unique_id), unique_size));
+    ReturnErrorOnFailure(mStore->Get(Parameters::ID::kSetupPayload, setup_payload, sizeof(setup_payload), setup_payload_size));
     Encoding::Version1::Encode(out, passcode);
     Encoding::Version1::Encode(out, discriminator);
     Encoding::Version1::Encode(out, unique_id, unique_size);
@@ -308,7 +308,7 @@ CHIP_ERROR Protocol1::Read(Encoding::Buffer &in, Encoding::Buffer &out)
         case Encoding::Version1::Type_Int8u:
         {
             uint8_t value = 0;
-            err = mStore.Get(id, value);
+            err = mStore->Get(id, value);
             VerifyOrReturnError((CHIP_ERROR_NOT_FOUND == err) || (CHIP_NO_ERROR == err), err);
             ReturnErrorOnFailure(Encoding::Version1::Encode(out, value));
             break;
@@ -316,7 +316,7 @@ CHIP_ERROR Protocol1::Read(Encoding::Buffer &in, Encoding::Buffer &out)
         case Encoding::Version1::Type_Int16u:
         {
             uint16_t value = 0;
-            err = mStore.Get(id, value);
+            err = mStore->Get(id, value);
             VerifyOrReturnError((CHIP_ERROR_NOT_FOUND == err) || (CHIP_NO_ERROR == err), err);
             ReturnErrorOnFailure(Encoding::Version1::Encode(out, value));
             break;
@@ -324,7 +324,7 @@ CHIP_ERROR Protocol1::Read(Encoding::Buffer &in, Encoding::Buffer &out)
         case Encoding::Version1::Type_Int32u:
         {
             uint32_t value = 0;
-            err = mStore.Get(id, value);
+            err = mStore->Get(id, value);
             VerifyOrReturnError((CHIP_ERROR_NOT_FOUND == err) || (CHIP_NO_ERROR == err), err);
             ReturnErrorOnFailure(Encoding::Version1::Encode(out, value));
             break;
@@ -333,7 +333,7 @@ CHIP_ERROR Protocol1::Read(Encoding::Buffer &in, Encoding::Buffer &out)
         {
             uint8_t *value = Storage::aux_buffer;
             size_t size = 0;
-            err = mStore.Get(id, value, Storage::kArgumentSizeMax, size);
+            err = mStore->Get(id, value, Storage::kArgumentSizeMax, size);
             VerifyOrReturnError((CHIP_ERROR_NOT_FOUND == err) || (CHIP_NO_ERROR == err), err);
             ReturnErrorOnFailure(Encoding::Version1::Encode(out, value, size));
             break;

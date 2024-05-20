@@ -16,10 +16,10 @@ ui_hints:
 readme:
   - { path: README.md }
 
-sdk: { id: gecko_sdk, version: 4.4.2 }
+sdk: { id: gecko_sdk, version: 4.4.3 }
 
 sdk_extension:
-  - { id: wiseconnect3_sdk, version: 3.1.3 }
+  - { id: wiseconnect3_sdk, version: 3.3.0 }
 
 component:
 # Provision

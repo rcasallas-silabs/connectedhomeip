@@ -171,7 +171,7 @@ class ProvisionManager:
             elif not os.path.exists(gen_fw) or not os.path.isfile(gen_fw):
                 raise ValueError("Missing Generator firmware \"{}\"".format(gen_fw))
             # chan.flash(gen_fw, args.int(ID.kFlashAddress))
-            comm.flash(gen_fw)
+            # comm.flash(gen_fw)
 
     def writeProductionFirmware(self, args, conn):
         prod_fw = args.str(ID.kProductionFW)

@@ -135,6 +135,8 @@ void ExampleApp::Run(void *data)
 
     CHIP_ERROR err = SilabsConfig::Init();
     app->Print("NVM3 Open: #%08x\n",  (unsigned)err.AsInteger());
+
+    Provision::Manager::GetInstance().Init();
     while (app) {
         app->Step();
         Provision::Manager::GetInstance().Step();

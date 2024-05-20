@@ -21,12 +21,13 @@ public:
     /**
      * Must hold the header plus complete argument value
      */
-    Protocol(Storage & store): mStore(store) {}
+    Protocol(Storage * store): mStore(store) {}
     virtual ~Protocol() = default;
     virtual bool Execute(ByteSpan & request, MutableByteSpan & response) = 0;
+    void SetStore(Storage * store) { mStore = store; }
 
 protected:
-    Storage & mStore;
+    Storage * mStore = nullptr;
 };
 
 //------------------------------------------------------------------------------
@@ -39,7 +40,7 @@ class Protocol1: public Protocol
 public:
     static constexpr size_t kVersion        = 1;
 
-    Protocol1(Storage & store): Protocol(store) {}
+    Protocol1(Storage * store): Protocol(store) {}
     virtual bool Execute(ByteSpan & request, MutableByteSpan & response);
 private:
     CHIP_ERROR Init(Encoding::Buffer &in, Encoding::Buffer &out);
@@ -80,7 +81,7 @@ public:
     static constexpr size_t kResponseHeaderSize = 8; // version(1) + command(1) + count(1) + error(4) + size(1)
     static_assert(kPackageSizeMax > (kResponseHeaderSize + kChecksumSize));
 
-    Protocol2(Storage & store): Protocol(store) {}
+    Protocol2(Storage * store): Protocol(store) {}
     virtual bool Execute(ByteSpan & request, MutableByteSpan & response);
 };
 
