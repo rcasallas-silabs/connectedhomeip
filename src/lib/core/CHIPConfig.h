@@ -1063,7 +1063,7 @@ extern const char CHIP_NON_PRODUCTION_MARKER[];
  * Binds to number of GroupMapping entries per fabric
  */
 #ifndef CHIP_CONFIG_MAX_GROUP_ENDPOINTS_PER_FABRIC
-#define CHIP_CONFIG_MAX_GROUP_ENDPOINTS_PER_FABRIC 1
+#define CHIP_CONFIG_MAX_GROUP_ENDPOINTS_PER_FABRIC 4
 #endif
 
 /**

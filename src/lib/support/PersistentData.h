@@ -49,13 +49,25 @@ struct PersistentData
         TLV::TLVWriter writer;
         writer.Init(mBuffer, sizeof(mBuffer));
 
-        ReturnErrorOnFailure(Serialize(writer));
+        CHIP_ERROR err = Serialize(writer);
+        if(CHIP_NO_ERROR != err)
+        {
+            ChipLogProgress(DeviceLayer, "~~~ S!\"%s\"(%u)", key.KeyName(), (unsigned)writer.GetLengthWritten());    
+        }
+        ReturnErrorOnFailure(err);
+        ChipLogProgress(DeviceLayer, "~~~ S:\"%s\"(%u)", key.KeyName(), (unsigned)writer.GetLengthWritten());
 
         // Save serialized data
         return storage->SyncSetKeyValue(key.KeyName(), mBuffer, static_cast<uint16_t>(writer.GetLengthWritten()));
     }
 
-    virtual CHIP_ERROR Load() { return this->Load(this->mStorage); }
+    virtual CHIP_ERROR Load(bool force = false)
+    {
+        VerifyOrReturnError(!mLoaded || (mLoaded && force), CHIP_NO_ERROR);
+        CHIP_ERROR err = this->Load(this->mStorage);
+        mLoaded = (CHIP_NO_ERROR == err);
+        return err;
+    }
 
     virtual CHIP_ERROR Load(PersistentStorageDelegate * storage)
     {
@@ -73,12 +85,14 @@ struct PersistentData
         uint16_t size  = static_cast<uint16_t>(sizeof(mBuffer));
         CHIP_ERROR err = storage->SyncGetKeyValue(key.KeyName(), mBuffer, size);
         VerifyOrReturnError(CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND != err, CHIP_ERROR_NOT_FOUND);
-        ReturnErrorOnFailure(err);
-
-        // Decode serialized data
-        TLV::TLVReader reader;
-        reader.Init(mBuffer, size);
-        return Deserialize(reader);
+        if(CHIP_NO_ERROR == err)
+        {
+            // Decode serialized data
+            TLV::TLVReader reader;
+            reader.Init(mBuffer, size);
+            err = Deserialize(reader);
+        }
+        return err;
     }
 
     virtual CHIP_ERROR Delete(PersistentStorageDelegate * storage)
@@ -93,6 +107,7 @@ struct PersistentData
 
     PersistentStorageDelegate * mStorage = nullptr;
     uint8_t mBuffer[kMaxSerializedSize]  = { 0 };
+    bool mLoaded = false;
 };
 
 } // namespace chip

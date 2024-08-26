@@ -175,6 +175,8 @@ bool emberAfGroupsClusterViewGroupCallback(app::CommandHandler * commandObj, con
     CHIP_ERROR err = CHIP_NO_ERROR;
     Status status  = Status::NotFound;
 
+    provider->Debug();
+
     VerifyOrExit(IsValidGroupId(groupId), status = Status::ConstraintError);
     VerifyOrExit(nullptr != provider, status = Status::Failure);
     VerifyOrExit(provider->HasEndpoint(fabricIndex, groupId, commandPath.mEndpointId), status = Status::NotFound);

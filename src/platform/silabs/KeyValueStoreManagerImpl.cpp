@@ -90,6 +90,16 @@ CHIP_ERROR KeyValueStoreManagerImpl::MapKvsKeyToNvm3(const char * key, uint16_t 
     CHIP_ERROR err;
     char * strPrefix          = nullptr;
     uint8_t firstEmptyKeySlot = kMaxEntries;
+    if(isSlotNeeded)
+    {
+        unsigned used_count = 0;
+        for (uint8_t keyIndex = 0; keyIndex < kMaxEntries; keyIndex++)
+        {
+            if (mKvsKeyMap[keyIndex]) used_count++;
+        }
+        ChipLogProgress(DeviceLayer, "~~~ K:\"%s\"(%u/%u)", key, used_count, (unsigned)kMaxEntries);
+    }
+
     for (uint8_t keyIndex = 0; keyIndex < kMaxEntries; keyIndex++)
     {
         if (mKvsKeyMap[keyIndex] == hash)

@@ -166,6 +166,15 @@ public:
         return StorageKeyName::Formatted("f/%x/k/%x", fabric, keyset);
     }
 
+    // Group Data Provider v2
+
+    static StorageKeyName GroupFabricList2() { return StorageKeyName::FromConst("!g/gf"); }
+    static StorageKeyName FabricGroups2(chip::FabricIndex fabric) { return StorageKeyName::Formatted("!f/%x/g", fabric); }
+    static StorageKeyName FabricGroupEndpoints(chip::FabricIndex fabric) { return StorageKeyName::Formatted("!f/%x/ge", fabric); }
+    static StorageKeyName FabricGroupKeys(chip::FabricIndex fabric) { return StorageKeyName::Formatted("!f/%x/gk", fabric); }
+    static StorageKeyName FabricKeysets(chip::FabricIndex fabric) { return StorageKeyName::Formatted("!f/%x/ks", fabric); }
+
+
     static StorageKeyName AttributeValue(EndpointId endpointId, ClusterId clusterId, AttributeId attributeId)
     {
         // Needs at most 26 chars: 6 for "g/a///", 4 for the endpoint id, 8 each
