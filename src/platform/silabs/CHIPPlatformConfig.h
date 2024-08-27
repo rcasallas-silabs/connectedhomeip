@@ -97,7 +97,7 @@
  *    its own access control lists.
  */
 #ifndef CHIP_CONFIG_MAX_FABRICS
-#define CHIP_CONFIG_MAX_FABRICS 5 // 4 fabrics + 1 for rotation slack
+#define CHIP_CONFIG_MAX_FABRICS 9 // 4 fabrics + 1 for rotation slack
 #endif
 
 #if defined(CHIP_CONFIG_ENABLE_ICD_SERVER) && CHIP_CONFIG_ENABLE_ICD_SERVER

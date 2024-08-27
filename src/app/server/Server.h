@@ -35,8 +35,7 @@
 #include <app/server/DefaultAclStorage.h>
 #include <credentials/CertificateValidityPolicy.h>
 #include <credentials/FabricTable.h>
-#include <credentials/GroupDataProvider.h>
-#include <credentials/GroupDataProviderImpl.h>
+#include <credentials/GroupDataProviderV2.h>
 #include <credentials/OperationalCertificateStore.h>
 #include <credentials/PersistentStorageOpCertStore.h>
 #include <crypto/DefaultSessionKeystore.h>
@@ -307,7 +306,7 @@ private:
     static KvsPersistentStorageDelegate sKvsPersistenStorageDelegate;
     static PersistentStorageOperationalKeystore sPersistentStorageOperationalKeystore;
     static Credentials::PersistentStorageOpCertStore sPersistentStorageOpCertStore;
-    static Credentials::GroupDataProviderImpl sGroupDataProvider;
+    static Credentials::GroupDataProviderV2 sGroupDataProvider;
     static chip::app::DefaultTimerDelegate sTimerDelegate;
     static app::reporting::ReportSchedulerImpl sReportScheduler;
 

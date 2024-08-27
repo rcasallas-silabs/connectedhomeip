@@ -85,6 +85,8 @@ uint16_t KeyValueStoreManagerImpl::hashKvsKeyString(const char * key) const
     return hash16;
 }
 
+static unsigned _max_count = 0;
+
 CHIP_ERROR KeyValueStoreManagerImpl::MapKvsKeyToNvm3(const char * key, uint16_t hash, uint32_t & nvm3Key, bool isSlotNeeded) const
 {
     CHIP_ERROR err;
@@ -97,7 +99,11 @@ CHIP_ERROR KeyValueStoreManagerImpl::MapKvsKeyToNvm3(const char * key, uint16_t 
         {
             if (mKvsKeyMap[keyIndex]) used_count++;
         }
-        ChipLogProgress(DeviceLayer, "~~~ K:\"%s\"(%u/%u)", key, used_count, (unsigned)kMaxEntries);
+        if(used_count > _max_count)
+        {
+            _max_count = used_count;
+            ChipLogProgress(DeviceLayer, "~~~ K:\"%s\"(%u/%u)", key, used_count, (unsigned)kMaxEntries);
+        }
     }
 
     for (uint8_t keyIndex = 0; keyIndex < kMaxEntries; keyIndex++)
@@ -147,6 +153,7 @@ CHIP_ERROR KeyValueStoreManagerImpl::MapKvsKeyToNvm3(const char * key, uint16_t 
         }
         else
         {
+            ChipLogProgress(DeviceLayer, "~~~ K!\"%s\"(%u/%u)", key, (unsigned)firstEmptyKeySlot, (unsigned)kMaxEntries);
             err = CHIP_ERROR_PERSISTED_STORAGE_FAILED;
         }
     }

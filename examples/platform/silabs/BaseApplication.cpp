@@ -512,6 +512,8 @@ void BaseApplication::ButtonHandler(AppEvent * aEvent)
     // start blinking within the FACTORY_RESET_CANCEL_WINDOW_TIMEOUT
     if (aEvent->ButtonEvent.Action == static_cast<uint8_t>(SilabsPlatform::ButtonAction::ButtonPressed))
     {
+        chip::Credentials::GroupDataProvider *groups = chip::Credentials::GetGroupDataProvider();
+        groups->Debug();
         StartFunctionTimer(FACTORY_RESET_TRIGGER_TIMEOUT);
     }
     else
@@ -797,7 +799,8 @@ void BaseApplication::ScheduleFactoryReset()
         // Press both buttons to request provisioning
         if (GetPlatform().GetButtonState(APP_ACTION_BUTTON))
         {
-            Provision::Manager::GetInstance().SetProvisionRequired(true);
+            chip::Credentials::GroupDataProvider *groups = chip::Credentials::GetGroupDataProvider();
+            groups->Reset();
         }
         PlatformMgr().HandleServerShuttingDown(); // HandleServerShuttingDown calls OnShutdown() which is only implemented for the
                                                   // basic information cluster it seems. And triggers and Event flush, which is not

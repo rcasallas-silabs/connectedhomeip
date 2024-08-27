@@ -100,6 +100,7 @@ public:
     Crypto::SymmetricKeyContext * GetKeyContext(FabricIndex fabric_index, GroupId group_id) override;
     GroupSessionIterator * IterateGroupSessions(uint16_t session_id) override;
 
+    void Reset() override;
     void Debug() override;
 
 protected:

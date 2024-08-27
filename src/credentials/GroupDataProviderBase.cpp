@@ -21,7 +21,6 @@
 #include <lib/support/CommonPersistentData.h>
 #include <lib/support/DefaultStorageKeyAllocator.h>
 #include <lib/support/PersistentData.h>
-#include <lib/support/PersistentArray.h>
 #include <lib/support/Pool.h>
 #include <stdlib.h>
 

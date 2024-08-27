@@ -554,6 +554,7 @@ GroupDataProvider::EndpointIterator * GroupDataProviderV2::IterateEndpoints(chip
 GroupDataProviderV2::EndpointIteratorImpl::EndpointIteratorImpl(GroupDataProviderV2 & provider, chip::FabricIndex fabric_index,
                                                                   std::optional<GroupId> group_id) :
     mProvider(provider),
+    mGroupId(group_id),
     mFabrics(provider.mStorage),
     mEndpoints(provider.mStorage, fabric_index),
     mIndex(0)
@@ -567,13 +568,43 @@ GroupDataProviderV2::EndpointIteratorImpl::EndpointIteratorImpl(GroupDataProvide
 
 size_t GroupDataProviderV2::EndpointIteratorImpl::Count()
 {
+    if(mGroupId.has_value())
+    {
+        // Endpoints for a given group
+        size_t count = 0;
+        for(size_t i = 0; i < mEndpoints.Count(); ++i)
+        {
+            if(mEndpoints.At(i).group_id == mGroupId.value())
+            {
+                count++;
+            }
+        }
+        return count;
+    }
+    // Endpoints for any group
     return mEndpoints.Count();
 }
 
 bool GroupDataProviderV2::EndpointIteratorImpl::Next(GroupEndpoint & output)
 {
     VerifyOrReturnError(mIndex < mEndpoints.Count(), false);
-    return CHIP_NO_ERROR == mEndpoints.Get(mIndex++, output);
+    if(mGroupId.has_value())
+    {
+        // Endpoints for a given group
+        while(mIndex < mEndpoints.Count())
+        {
+            GroupEndpoint & temp = mEndpoints.At(mIndex++);
+            if(temp.group_id == mGroupId.value())
+            {
+                output = temp;
+                return true;
+            }
+        }
+        return false;
+    }
+    // Endpoints for any group
+    output = mEndpoints.At(mIndex++);
+    return true;
 }
 
 void GroupDataProviderV2::EndpointIteratorImpl::Release()
@@ -828,6 +859,8 @@ void GroupDataProviderV2::KeySetIteratorImpl::Release()
 
 CHIP_ERROR GroupDataProviderV2::RemoveFabric(chip::FabricIndex fabric_index)
 {
+    ChipLogProgress(Zcl, "~~~ GroupDataProviderV2::RemoveFabric(%u)", (unsigned)fabric_index);
+
     VerifyOrReturnError(IsInitialized(), CHIP_ERROR_INTERNAL);
     VerifyOrReturnError(kUndefinedFabricIndex != fabric_index, CHIP_ERROR_INVALID_FABRIC_INDEX);
 
@@ -1052,11 +1085,23 @@ void GroupDataProviderV2::GroupSessionIteratorImpl::Release()
     mProvider.mGroupSessionsIterator.ReleaseObject(this);
 }
 
-void GroupDataProviderV2::Debug()
+void GroupDataProviderV2::Reset()
 {
     FabricList fabrics(mStorage);
     fabrics.Load();
-    ChipLogProgress(Zcl, "~~~ GROUP FABRICS+(%u)", (unsigned) fabrics.Count());
+    ChipLogProgress(Zcl, "~~~ RESET FABRICS+(%u)", (unsigned) fabrics.Count());
+    for (size_t i = 0; i < fabrics.Count(); i++)
+    {
+        RemoveFabric(fabrics.At(i));
+    }
+}
+
+void GroupDataProviderV2::Debug()
+{
+    ChipLogProgress(Zcl, "~~~ GROUPS DEBUG");
+    FabricList fabrics(mStorage);
+    fabrics.Load();
+    ChipLogProgress(Zcl, "~~~ FABRICS+(%u)", (unsigned) fabrics.Count());
     for (size_t i = 0; i < fabrics.Count(); i++)
     {
         DebugFabric(fabrics.At(i));

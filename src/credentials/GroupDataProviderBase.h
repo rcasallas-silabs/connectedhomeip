@@ -20,7 +20,6 @@
 #include <crypto/SessionKeystore.h>
 #include <lib/core/CHIPPersistentStorageDelegate.h>
 #include <lib/core/DataModelTypes.h>
-#include <lib/support/PersistentArray.h>
 #include <lib/support/Pool.h>
 
 namespace chip {

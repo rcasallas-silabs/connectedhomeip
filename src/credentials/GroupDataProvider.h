@@ -316,6 +316,7 @@ public:
     void SetListener(GroupListener * listener) { mListener = listener; };
     void RemoveListener() { mListener = nullptr; };
 
+    virtual void Reset() = 0;
     virtual void Debug() = 0;
     virtual void DebugFabric(FabricIndex fabric) = 0;
 

@@ -922,6 +922,8 @@ void GroupDataProviderImpl::KeySetIteratorImpl::Release()
 
 CHIP_ERROR GroupDataProviderImpl::RemoveFabric(chip::FabricIndex fabric_index)
 {
+    ChipLogProgress(Zcl, "~~~ GroupDataProviderImpl::RemoveFabric(%u)", (unsigned)fabric_index);
+
     FabricData fabric(fabric_index);
 
     // Fabric data defaults to zero, so if not entry is found, no mappings, or keys are removed
@@ -1183,11 +1185,35 @@ void GroupDataProviderImpl::GroupSessionIteratorImpl::Release()
     mProvider.mGroupSessionsIterator.ReleaseObject(this);
 }
 
-void GroupDataProviderImpl::Debug()
+void GroupDataProviderImpl::Reset()
 {
+    FabricIndex indexes[32];
     FabricList fabric_list;
     ReturnOnFailure(fabric_list.Load(mStorage));
-    ChipLogProgress(Zcl, "~~~ GROUP FABRICS(%u)", (unsigned) fabric_list.entry_count);
+    ChipLogProgress(Zcl, "~~~ RESET FABRICS(%u)", (unsigned) fabric_list.entry_count);
+    FabricIndex fabric_index = fabric_list.first_entry;
+
+    // Compile list
+    for (size_t i = 0; i < fabric_list.entry_count; i++)
+    {
+        FabricData fabric(fabric_index);
+        fabric.Load(mStorage);
+        indexes[i] = fabric_index;
+        fabric_index = fabric.next;
+    }
+    // Remove all
+    for (size_t i = 0; i < fabric_list.entry_count; i++)
+    {
+        RemoveFabric(indexes[i]);
+    }
+}
+
+void GroupDataProviderImpl::Debug()
+{
+    ChipLogProgress(Zcl, "~~~ GROUPS DEBUG");
+    FabricList fabric_list;
+    ReturnOnFailure(fabric_list.Load(mStorage));
+    ChipLogProgress(Zcl, "~~~ FABRICS(%u)", (unsigned) fabric_list.entry_count);
     FabricIndex fabric_index = fabric_list.first_entry;
 
     for (size_t i = 0; i < fabric_list.entry_count; i++)

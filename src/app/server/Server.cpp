@@ -773,7 +773,7 @@ Credentials::IgnoreCertificateValidityPeriodPolicy Server::sDefaultCertValidityP
 KvsPersistentStorageDelegate CommonCaseDeviceServerInitParams::sKvsPersistenStorageDelegate;
 PersistentStorageOperationalKeystore CommonCaseDeviceServerInitParams::sPersistentStorageOperationalKeystore;
 Credentials::PersistentStorageOpCertStore CommonCaseDeviceServerInitParams::sPersistentStorageOpCertStore;
-Credentials::GroupDataProviderImpl CommonCaseDeviceServerInitParams::sGroupDataProvider;
+Credentials::GroupDataProviderV2 CommonCaseDeviceServerInitParams::sGroupDataProvider;
 app::DefaultTimerDelegate CommonCaseDeviceServerInitParams::sTimerDelegate;
 app::reporting::ReportSchedulerImpl
     CommonCaseDeviceServerInitParams::sReportScheduler(&CommonCaseDeviceServerInitParams::sTimerDelegate);
