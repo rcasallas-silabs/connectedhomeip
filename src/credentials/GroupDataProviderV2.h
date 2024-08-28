@@ -156,7 +156,7 @@ protected:
     };
 
 
-    static constexpr size_t kKeymapListMax = CHIP_CONFIG_MAX_GROUP_KEYS_PER_FABRIC * CHIP_CONFIG_MAX_FABRICS;
+    static constexpr size_t kKeymapListMax = CHIP_CONFIG_MAX_GROUPS_PER_FABRIC;
     static constexpr size_t kKeymapSerializedMax = 2 + sizeof(GroupDataProvider::GroupKey); // GroupIdTag(1) + KeysetIdTag(1) + sizeof(GroupKey)
 
     struct KeysetMap: public PersistentArray<kKeymapListMax, kKeymapSerializedMax, GroupDataProvider::GroupKey>

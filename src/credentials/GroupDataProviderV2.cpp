@@ -616,7 +616,7 @@ CHIP_ERROR GroupDataProviderV2::SetGroupKeyAt(chip::FabricIndex fabric_index, si
     GroupKey temp = in_map;
     bool found = CHIP_NO_ERROR == keysets.Find(temp, found_index);
     VerifyOrReturnError(!found || (found_index == index), CHIP_ERROR_DUPLICATE_KEY_ID);
-
+    VerifyOrReturnError(index < mMaxGroupsPerFabric, CHIP_ERROR_INVALID_ARGUMENT);
     return keysets.Set(index, in_map);
 }
 
