@@ -379,7 +379,8 @@ CHIP_ERROR GroupDataProviderV2::RemoveGroupInfo(chip::FabricIndex fabric_index, 
 
     GroupList groups(mStorage, mListener, fabric_index);
     GroupInfo info(group_id, nullptr);
-    return groups.Remove(info);
+    ReturnErrorOnFailure(groups.Remove(info));
+    return groups.Save();
 }
 
 CHIP_ERROR GroupDataProviderV2::SetGroupInfoAt(chip::FabricIndex fabric_index, size_t index, const GroupInfo & info)
@@ -423,7 +424,8 @@ CHIP_ERROR GroupDataProviderV2::RemoveGroupInfoAt(chip::FabricIndex fabric_index
     ReturnErrorOnFailure(fabrics.Find(fabric_index, found_index));
 
     GroupList groups(mStorage, mListener, fabric_index);
-    return groups.Remove(index);
+    ReturnErrorOnFailure(groups.Remove(index));
+    return groups.Save();
 }
 
 bool GroupDataProviderV2::HasEndpoint(chip::FabricIndex fabric_index, chip::GroupId group_id, chip::EndpointId endpoint_id)
@@ -465,10 +467,29 @@ CHIP_ERROR GroupDataProviderV2::RemoveEndpoint(chip::FabricIndex fabric_index, c
     FabricList fabrics(mStorage);
     ReturnErrorOnFailure(fabrics.Find(fabric_index, found_index, true));
 
+    // Remove endpoint
     EndpointMap endpoints(mStorage, fabric_index);
-    GroupEndpoint mapping = { group_id, endpoint_id };
+    GroupEndpoint mapping(group_id, endpoint_id);
     ReturnErrorOnFailure(endpoints.Find(mapping, found_index));
-    return endpoints.Remove(found_index);
+    ReturnErrorOnFailure(endpoints.Remove(found_index));
+    ReturnErrorOnFailure(endpoints.Save());
+    bool found = false;
+    for(size_t i = 0; !found && i < endpoints.Count(); i++)
+    {
+        found = (endpoints.At(i).group_id == group_id);
+    }
+    if(!found)
+    {
+        // The Group has no more endpoints, remove it
+        GroupList groups(mStorage, mListener, fabric_index);
+        GroupInfo info(group_id, nullptr);
+        if(CHIP_NO_ERROR == groups.Find(info, found_index))
+        {
+            ReturnErrorOnFailure(groups.Remove(found_index));
+            ReturnErrorOnFailure(groups.Save());
+        }
+    }
+    return CHIP_NO_ERROR;
 }
 
 CHIP_ERROR GroupDataProviderV2::RemoveEndpoint(chip::FabricIndex fabric_index, chip::EndpointId endpoint_id)
@@ -480,18 +501,22 @@ CHIP_ERROR GroupDataProviderV2::RemoveEndpoint(chip::FabricIndex fabric_index, c
     FabricList fabrics(mStorage);
     ReturnErrorOnFailure(fabrics.Find(fabric_index, found_index, true));
 
+    GroupList groups(mStorage, mListener, fabric_index);
     EndpointMap endpoints(mStorage, fabric_index);
-    GroupEndpoint mapping;
+    ReturnErrorOnFailure(groups.Load());
     ReturnErrorOnFailure(endpoints.Load());
-    for(uint16_t i = endpoints.Count(); i > 0; i--)
+    for(size_t i = endpoints.Count(); i > 0; i--)
     {
-        ReturnErrorOnFailure(endpoints.Get(i - 1, mapping));
-        if(endpoint_id == mapping.endpoint_id)
+        GroupEndpoint mapping = endpoints.At(i - 1);
+        if(mapping.endpoint_id == endpoint_id)
         {
-            ReturnErrorOnFailure(endpoints.Remove(i - 1));
+            GroupInfo info(mapping.group_id, nullptr);
+            groups.Remove(info);
+            endpoints.Remove(i - 1);
         }
     }
-    return CHIP_NO_ERROR;
+    ReturnErrorOnFailure(groups.Save());
+    return endpoints.Save();
 }
 
 GroupDataProvider::GroupInfoIterator * GroupDataProviderV2::IterateGroupInfo(chip::FabricIndex fabric_index)
@@ -643,7 +668,8 @@ CHIP_ERROR GroupDataProviderV2::RemoveGroupKeyAt(chip::FabricIndex fabric_index,
     ReturnErrorOnFailure(fabrics.Find(fabric_index, found_index));
 
     KeysetMap keysets(mStorage, fabric_index);
-    return keysets.Remove(index);
+    ReturnErrorOnFailure(keysets.Remove(index));
+    return keysets.Save();
 }
 
 CHIP_ERROR GroupDataProviderV2::RemoveGroupKeys(chip::FabricIndex fabric_index)
@@ -705,10 +731,6 @@ constexpr size_t GroupDataProvider::EpochKey::kLengthBytes;
 CHIP_ERROR GroupDataProviderV2::SetKeySet(chip::FabricIndex fabric_index, const ByteSpan & compressed_fabric_id,
                                             const KeySet & in_keyset)
 {
-    if(6 == fabric_index)
-    {
-        ChipLogDetail(DeviceLayer, "GroupDataProviderV2::SetKeySet");
-    }
     VerifyOrReturnError(IsInitialized(), CHIP_ERROR_INTERNAL);
     VerifyOrReturnError(kUndefinedFabricIndex != fabric_index, CHIP_ERROR_INVALID_FABRIC_INDEX);
 
@@ -785,13 +807,25 @@ CHIP_ERROR GroupDataProviderV2::RemoveKeySet(chip::FabricIndex fabric_index, uin
     size_t found_index = 0;
     FabricList fabrics(mStorage);
     ReturnErrorOnFailure(fabrics.Find(fabric_index, found_index));
-
+    // Remove group mappings
+    KeysetMap mappings(mStorage, fabric_index);
+    ReturnErrorOnFailure(mappings.Load());
+    for(size_t i = mappings.Count(); i > 0; i--)
+    {
+        GroupKey mapping = mappings.At(i - 1);
+        if(mapping.keyset_id == target_id)
+        {
+            mappings.Remove(i - 1);
+        }
+    }
+    ReturnErrorOnFailure(mappings.Save());
+    // Remove the Keyset
     KeysetList keysets(mStorage, fabric_index);
     KeysetData keyset;
     keyset.keyset_id = target_id;
     ReturnErrorOnFailure(keysets.Find(keyset, found_index));
-    keysets.Remove(found_index);
-    return CHIP_NO_ERROR;
+    ReturnErrorOnFailure(keysets.Remove(found_index));
+    return keysets.Save();
 }
 
 GroupDataProvider::KeySetIterator * GroupDataProviderV2::IterateKeySets(chip::FabricIndex fabric_index)
@@ -845,8 +879,6 @@ void GroupDataProviderV2::KeySetIteratorImpl::Release()
 
 CHIP_ERROR GroupDataProviderV2::RemoveFabric(chip::FabricIndex fabric_index)
 {
-    ChipLogProgress(Zcl, "~~~ GroupDataProviderV2::RemoveFabric(%u)", (unsigned)fabric_index);
-
     VerifyOrReturnError(IsInitialized(), CHIP_ERROR_INTERNAL);
     VerifyOrReturnError(kUndefinedFabricIndex != fabric_index, CHIP_ERROR_INVALID_FABRIC_INDEX);
 
@@ -860,6 +892,7 @@ CHIP_ERROR GroupDataProviderV2::RemoveFabric(chip::FabricIndex fabric_index)
     {
         groups.Remove(i - 1);
     }
+    groups.Save();
     // Group Endpoints
     EndpointMap endpoints(mStorage, fabric_index);
     ReturnErrorOnFailure(endpoints.Load());
@@ -867,6 +900,7 @@ CHIP_ERROR GroupDataProviderV2::RemoveFabric(chip::FabricIndex fabric_index)
     {
         endpoints.Remove(i - 1);
     }
+    endpoints.Save();
     // Keyset Map
     KeysetMap keysmap(mStorage, fabric_index);
     ReturnErrorOnFailure(keysmap.Load());
@@ -874,6 +908,7 @@ CHIP_ERROR GroupDataProviderV2::RemoveFabric(chip::FabricIndex fabric_index)
     {
         keysmap.Remove(i - 1);
     }
+    keysmap.Save();
     // Keyset List
     KeysetList keysets(mStorage, fabric_index);
     ReturnErrorOnFailure(keysets.Load());
@@ -881,7 +916,9 @@ CHIP_ERROR GroupDataProviderV2::RemoveFabric(chip::FabricIndex fabric_index)
     {
         keysets.Remove(i - 1);
     }
+    keysets.Save();
     fabrics.Remove(found_index);
+    fabrics.Save();
     return CHIP_NO_ERROR;
 }
 

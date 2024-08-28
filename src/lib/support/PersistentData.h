@@ -48,14 +48,7 @@ struct PersistentData
         // Serialize the data
         TLV::TLVWriter writer;
         writer.Init(mBuffer, sizeof(mBuffer));
-
-        CHIP_ERROR err = Serialize(writer);
-        if(CHIP_NO_ERROR != err)
-        {
-            ChipLogProgress(DeviceLayer, "~~~ S!\"%s\"(%u)", key.KeyName(), (unsigned)writer.GetLengthWritten());    
-        }
-        ReturnErrorOnFailure(err);
-        ChipLogProgress(DeviceLayer, "~~~ S:\"%s\"(%u)", key.KeyName(), (unsigned)writer.GetLengthWritten());
+        ReturnErrorOnFailure(Serialize(writer));
 
         // Save serialized data
         return storage->SyncSetKeyValue(key.KeyName(), mBuffer, static_cast<uint16_t>(writer.GetLengthWritten()));

@@ -213,7 +213,7 @@ protected:
         Crypto::GroupOperationalCredentials operational_keys[GroupDataProvider::KeySet::kEpochKeysMax];
     };
 
-    static constexpr size_t kKeysetListMax = CHIP_CONFIG_MAX_GROUP_KEYS_PER_FABRIC;
+    static constexpr size_t kKeysetListMax = CHIP_CONFIG_MAX_GROUPS_PER_FABRIC;
     static constexpr size_t kKeysetSerializedMax = 5 + 3 * sizeof(uint16_t) + GroupDataProvider::KeySet::kEpochKeysMax * (5 + sizeof(uint64_t) +  sizeof(uint16_t) + Crypto::CHIP_CRYPTO_SYMMETRIC_KEY_LENGTH_BYTES);
     // KeysetIdTag(1) + sizeof(uint16_t) + TagPolicy(1) + sizeof(uint16_t) + NumKeysTag(1) + sizeof(uint16_t) +
     // GroupCredentialsTag(1) + GroupDataProvider::KeySet::kEpochKeysMax * [ AnonymousTag(1)

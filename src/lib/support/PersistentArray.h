@@ -207,7 +207,7 @@ struct PersistentArray : public PersistentData<kPersistentArraySerializedMinSize
      */
     CHIP_ERROR Remove(size_t index)
     {
-        ReturnErrorOnFailure(this->Load(true));
+        ReturnErrorOnFailure(this->Load());
         VerifyOrReturnError(index < this->mLimit, CHIP_ERROR_NOT_FOUND);
         VerifyOrReturnError(index < this->mCount, CHIP_ERROR_NOT_FOUND);
         EntryType old;
@@ -218,7 +218,6 @@ struct PersistentArray : public PersistentData<kPersistentArraySerializedMinSize
             Copy(mEntries[i], mEntries[i + 1]);
         }
         ClearEntry(mEntries[this->mCount]);
-        ReturnErrorOnFailure(this->Save());
         OnEntryRemoved(old);
         return CHIP_NO_ERROR;
     }
@@ -232,7 +231,7 @@ struct PersistentArray : public PersistentData<kPersistentArraySerializedMinSize
      */
     CHIP_ERROR Remove(const EntryType & value)
     {
-        ReturnErrorOnFailure(this->Load(true));
+        ReturnErrorOnFailure(this->Load());
         for (size_t i = 0; i < this->mCount; ++i)
         {
             if (Compare(mEntries[i], value))
