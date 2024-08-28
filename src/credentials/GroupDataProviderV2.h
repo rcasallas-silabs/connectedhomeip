@@ -56,7 +56,6 @@ public:
     CHIP_ERROR AddEndpoint(FabricIndex fabric_index, GroupId group_id, EndpointId endpoint_id) override;
     CHIP_ERROR RemoveEndpoint(FabricIndex fabric_index, GroupId group_id, EndpointId endpoint_id) override;
     CHIP_ERROR RemoveEndpoint(FabricIndex fabric_index, EndpointId endpoint_id) override;
-    CHIP_ERROR RemoveEndpoints(FabricIndex fabric_index, GroupId group_id) override;
     // Iterators
     GroupInfoIterator * IterateGroupInfo(FabricIndex fabric_index) override;
     EndpointIterator * IterateEndpoints(FabricIndex fabric_index, std::optional<GroupId> group_id = std::nullopt) override;

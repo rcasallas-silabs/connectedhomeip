@@ -46,9 +46,6 @@ public:
      */
     void SetStorageDelegate(PersistentStorageDelegate * storage);
 
-    void SetSessionKeystore(Crypto::SessionKeystore * keystore) { mSessionKeystore = keystore; }
-    Crypto::SessionKeystore * GetSessionKeystore() const { return mSessionKeystore; }
-
     CHIP_ERROR Init() override;
     void Finish() override;
 
@@ -105,7 +102,6 @@ public:
 
 protected:
 
-    bool IsInitialized() { return (mStorage != nullptr); }
     CHIP_ERROR RemoveEndpoints(FabricIndex fabric_index, GroupId group_id);
 
     class GroupInfoIteratorImpl : public GroupInfoIterator
@@ -1029,8 +1025,6 @@ protected:
         }
     };
 
-    PersistentStorageDelegate * mStorage       = nullptr;
-    Crypto::SessionKeystore * mSessionKeystore = nullptr;
     ObjectPool<GroupInfoIteratorImpl, kIteratorsMax> mGroupInfoIterators;
     ObjectPool<GroupKeyIteratorImpl, kIteratorsMax> mGroupKeyIterators;
     ObjectPool<EndpointIteratorImpl, kIteratorsMax> mEndpointIterators;

@@ -494,20 +494,6 @@ CHIP_ERROR GroupDataProviderV2::RemoveEndpoint(chip::FabricIndex fabric_index, c
     return CHIP_NO_ERROR;
 }
 
-CHIP_ERROR GroupDataProviderV2::RemoveEndpoints(chip::FabricIndex fabric_index, chip::GroupId group_id)
-{
-    VerifyOrReturnError(IsInitialized(), CHIP_ERROR_INTERNAL);
-    VerifyOrReturnError(kUndefinedFabricIndex != fabric_index, CHIP_ERROR_INVALID_FABRIC_INDEX);
-
-    size_t found_index = 0;
-    FabricList fabrics(mStorage);
-    ReturnErrorOnFailure(fabrics.Find(fabric_index, found_index, true));
-
-    EndpointMap endpoints(mStorage, fabric_index);
-    endpoints.Clear();
-    return endpoints.Save();
-}
-
 GroupDataProvider::GroupInfoIterator * GroupDataProviderV2::IterateGroupInfo(chip::FabricIndex fabric_index)
 {
     VerifyOrReturnError(IsInitialized(), nullptr);

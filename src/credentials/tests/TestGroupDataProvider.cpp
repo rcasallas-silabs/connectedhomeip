@@ -23,7 +23,7 @@
 
 #include <pw_unit_test/framework.h>
 
-#include <credentials/GroupDataProviderImpl.h>
+#include <credentials/GroupDataProviderV2.h>
 #include <crypto/DefaultSessionKeystore.h>
 #include <lib/core/StringBuilderAdapters.h>
 #include <lib/core/TLV.h>
@@ -194,7 +194,7 @@ struct TestGroupDataProvider : public ::testing::Test
 
     static chip::TestPersistentStorageDelegate sDelegate;
     static chip::Crypto::DefaultSessionKeystore sSessionKeystore;
-    static GroupDataProviderImpl sProvider;
+    static GroupDataProviderV2 sProvider;
 
     constexpr static EpochKey kEpochKeys0[] = {
         { 0x0000000000000000, { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } },
@@ -246,7 +246,7 @@ struct TestGroupDataProvider : public ::testing::Test
 
 chip::TestPersistentStorageDelegate TestGroupDataProvider::sDelegate;
 chip::Crypto::DefaultSessionKeystore TestGroupDataProvider::sSessionKeystore;
-GroupDataProviderImpl TestGroupDataProvider::sProvider(kMaxGroupsPerFabric, kMaxGroupKeysPerFabric);
+GroupDataProviderV2 TestGroupDataProvider::sProvider(kMaxGroupsPerFabric, kMaxGroupKeysPerFabric);
 
 TEST_F(TestGroupDataProvider, TestStorageDelegate)
 {

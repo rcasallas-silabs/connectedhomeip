@@ -47,15 +47,13 @@ public:
         mStorage = storage;
     }
 
-    bool IsInitialized() { return (mStorage != nullptr); }
     void SetSessionKeystore(Crypto::SessionKeystore * keystore) { mSessionKeystore = keystore; }
     Crypto::SessionKeystore * GetSessionKeystore() const { return mSessionKeystore; }
-    virtual CHIP_ERROR RemoveEndpoints(FabricIndex fabric_index, GroupId group_id) = 0;
-
-    void DebugFabric(FabricIndex fabric) override;
-    
-
+   
 protected:
+
+    bool IsInitialized() { return (mStorage != nullptr); }
+    void DebugFabric(FabricIndex fabric) override;
 
     class GroupKeyContext : public Crypto::SymmetricKeyContext
     {
