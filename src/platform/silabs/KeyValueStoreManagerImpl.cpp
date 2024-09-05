@@ -85,7 +85,9 @@ uint16_t KeyValueStoreManagerImpl::hashKvsKeyString(const char * key) const
     return hash16;
 }
 
-CHIP_ERROR KeyValueStoreManagerImpl::MapKvsKeyToNvm3(const char * key, uint16_t hash, uint32_t & nvm3Key, bool isSlotNeeded) const
+static unsigned _max_count = 0;
+
+CHIP_ERROR KeyValueStoreManagerImpl::MapKvsKeyToNvm3(const char * key, uint16_t hash, uint32_t & nvm3Key, uint16_t & watermark, bool isSlotNeeded) const
 {
     CHIP_ERROR err;
     char * strPrefix           = nullptr;
@@ -115,6 +117,7 @@ CHIP_ERROR KeyValueStoreManagerImpl::MapKvsKeyToNvm3(const char * key, uint16_t 
                 // String matches we have confirmed the hash pointed us the right key data
                 nvm3Key = tempNvm3key;
                 Platform::MemoryFree(strPrefix);
+                watermark = keyIndex;
                 return CHIP_NO_ERROR;
             }
         }
@@ -126,9 +129,15 @@ CHIP_ERROR KeyValueStoreManagerImpl::MapKvsKeyToNvm3(const char * key, uint16_t 
     }
 
     Platform::MemoryFree(strPrefix);
+    watermark = firstEmptyKeySlot;
 
     if (isSlotNeeded)
     {
+        if(firstEmptyKeySlot > _max_count)
+        {
+            _max_count = firstEmptyKeySlot;
+            ChipLogProgress(Test, "~~~ K:\"%s\"(%u/%u)", key, (unsigned)firstEmptyKeySlot, (unsigned)kMaxEntries);
+        }
         if (firstEmptyKeySlot != kMaxEntries)
         {
             nvm3Key = CONVERT_KEYMAP_INDEX_TO_NVM3KEY(firstEmptyKeySlot);
@@ -137,6 +146,7 @@ CHIP_ERROR KeyValueStoreManagerImpl::MapKvsKeyToNvm3(const char * key, uint16_t 
         }
         else
         {
+            ChipLogProgress(Test, "~~~ K!\"%s\"(%u/%u)", key, (unsigned)firstEmptyKeySlot, (unsigned)kMaxEntries);
             err = CHIP_ERROR_PERSISTED_STORAGE_FAILED;
         }
     }
@@ -169,6 +179,12 @@ void KeyValueStoreManagerImpl::ScheduleKeyMapSave(void)
         KeyValueStoreManagerImpl::OnScheduledKeyMapSave, NULL);
 }
 
+
+uint64_t _max_write_time = 0;
+uint64_t _max_read_time = 0;
+
+// static_assert(NVM3_DEFAULT_MAX_OBJECT_SIZE==123, "NVM!");
+
 CHIP_ERROR KeyValueStoreManagerImpl::_Get(const char * key, void * value, size_t value_size, size_t * read_bytes_size,
                                           size_t offset_bytes) const
 {
@@ -176,14 +192,24 @@ CHIP_ERROR KeyValueStoreManagerImpl::_Get(const char * key, void * value, size_t
 
     uint32_t nvm3Key;
     uint16_t hash  = hashKvsKeyString(key);
-    CHIP_ERROR err = MapKvsKeyToNvm3(key, hash, nvm3Key);
+    uint16_t watermark = 0;
+    CHIP_ERROR err = MapKvsKeyToNvm3(key, hash, nvm3Key, watermark);
     VerifyOrReturnError(err == CHIP_NO_ERROR, err);
 
     size_t outLen;
     // The user doesn't need the KeyString prefix, Read data after it
+    uint64_t time1 = chip::System::SystemClock().GetMonotonicMilliseconds64().count();
     size_t KeyStringLen = strlen(key);
     err                 = SilabsConfig::ReadConfigValueBin(nvm3Key, reinterpret_cast<uint8_t *>(value), value_size, outLen,
                                                            (offset_bytes + KeyStringLen));
+    uint64_t time2 = chip::System::SystemClock().GetMonotonicMilliseconds64().count();
+    uint64_t delta = (time2 > time1) ? time2 - time1 : 0;
+    if((delta > _max_write_time) || (delta > 1000))
+    {
+        if(delta > _max_write_time) { _max_write_time = delta; }
+        ChipLogProgress(Test, "~~~ Get(%s, %u, %lu) #%x", key, (unsigned)watermark, (unsigned long)delta, (unsigned)err.AsInteger());
+    }
+
     if (read_bytes_size)
     {
         *read_bytes_size = outLen;
@@ -203,7 +229,8 @@ CHIP_ERROR KeyValueStoreManagerImpl::_Put(const char * key, const void * value, 
 
     uint32_t nvm3Key;
     uint16_t hash  = hashKvsKeyString(key);
-    CHIP_ERROR err = MapKvsKeyToNvm3(key, hash, nvm3Key, /* isSlotNeeded */ true);
+    uint16_t watermark = 0;
+    CHIP_ERROR err = MapKvsKeyToNvm3(key, hash, nvm3Key, watermark, /* isSlotNeeded */ true);
     VerifyOrReturnError(err == CHIP_NO_ERROR, err);
 
     // add the string Key as prefix to the stored data as a collision prevention mechanism.
@@ -213,7 +240,16 @@ CHIP_ERROR KeyValueStoreManagerImpl::_Put(const char * key, const void * value, 
     memcpy(prefixedData, key, keyStringLen);
     memcpy(prefixedData + keyStringLen, value, value_size);
 
+    uint64_t time1 = chip::System::SystemClock().GetMonotonicMilliseconds64().count();
     err = SilabsConfig::WriteConfigValueBin(nvm3Key, prefixedData, keyStringLen + value_size);
+    uint64_t time2 = chip::System::SystemClock().GetMonotonicMilliseconds64().count();
+    uint64_t delta = (time2 > time1) ? time2 - time1 : 0;
+    if((delta > _max_write_time) || (delta > 1000))
+    {
+        if(delta > _max_write_time) { _max_write_time = delta; }
+        ChipLogProgress(Test, "~~~ Put(%s, %u, %lu) #%x", key, (unsigned)watermark, (unsigned long)delta, (unsigned)err.AsInteger());
+    }
+
     if (err == CHIP_NO_ERROR)
     {
         uint32_t keyIndex    = CONVERT_NVM3KEY_TO_KEYMAP_INDEX(nvm3Key);
@@ -230,7 +266,8 @@ CHIP_ERROR KeyValueStoreManagerImpl::_Delete(const char * key)
 
     uint32_t nvm3Key;
     uint16_t hash  = hashKvsKeyString(key);
-    CHIP_ERROR err = MapKvsKeyToNvm3(key, hash, nvm3Key);
+    uint16_t watermark = 0;
+    CHIP_ERROR err = MapKvsKeyToNvm3(key, hash, nvm3Key, watermark);
     VerifyOrReturnError(err == CHIP_NO_ERROR, err);
 
     err = SilabsConfig::ClearConfigValue(nvm3Key);

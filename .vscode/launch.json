@@ -5,6 +5,80 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "TEST",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/out/debug/lib/TestGroupDataProvider",
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "BRD4186C",
+            "type": "cortex-debug",
+            "cwd": "${workspaceFolder}",
+            "request": "launch",
+            "servertype": "jlink",
+            "showDevDebugOutput": true,
+            "runToEntryPoint": "main",
+            "rttConfig": {
+                "enabled": true,
+                "address": "auto",
+                "decoders": [
+                {
+                    "port": 0, // In RTT lingo, this is the buffer index (or channel)
+                    "type": "console"
+                }
+                ]
+            },
+            "executable": "${workspaceFolder}/out/light/BRD4186C/matter-silabs-lit-icd-example.out",
+            "device": "EFR32MG24B210F1536IM48",
+            "serialNumber": "440144100",
+        },
+        {
+            "name": "BRD4187C",
+            "type": "cortex-debug",
+            "cwd": "${workspaceFolder}",
+            "request": "launch",
+            "servertype": "jlink",
+            "showDevDebugOutput": true,
+            "runToEntryPoint": "main",
+            "rttConfig": {
+                "enabled": true,
+                "address": "auto",
+                "decoders": [
+                {
+                    "port": 0, // In RTT lingo, this is the buffer index (or channel)
+                    "type": "console"
+                }
+                ]
+            },
+            "executable": "${workspaceFolder}/out/light/BRD4187C/matter-silabs-lighting-example.out",
+            "device": "EFR32MG24B220F1536IM48",
+            "serialNumber": "440219709",
+        },
+        {
+            "name": "BRD4116A",
+            "type": "cortex-debug",
+            "cwd": "${workspaceFolder}",
+            "request": "launch",
+            "servertype": "jlink",
+            "showDevDebugOutput": true,
+            "runToEntryPoint": "main",
+            "rttConfig": {
+                "enabled": true,
+                "address": "auto",
+                "decoders": [
+                {
+                    "port": 0, // In RTT lingo, this is the buffer index (or channel)
+                    "type": "console"
+                }
+                ]
+            },
+            "executable": "${workspaceFolder}/out/light/BRD4116A/matter-silabs-lighting-example.out",
+            "device": "EFR32MG26B410F3200IM48",
+            "serialNumber": "440266330",
+        },
+        {
             "name": "Attach to running process",
             "type": "lldb",
             "request": "attach",

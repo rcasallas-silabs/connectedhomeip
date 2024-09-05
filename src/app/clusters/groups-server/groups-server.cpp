@@ -163,6 +163,8 @@ bool emberAfGroupsClusterAddGroupCallback(app::CommandHandler * commandObj, cons
     return true;
 }
 
+extern void GroupDataProviderTest();
+
 bool emberAfGroupsClusterViewGroupCallback(app::CommandHandler * commandObj, const app::ConcreteCommandPath & commandPath,
                                            const Commands::ViewGroup::DecodableType & commandData)
 {
@@ -174,6 +176,8 @@ bool emberAfGroupsClusterViewGroupCallback(app::CommandHandler * commandObj, con
     Groups::Commands::ViewGroupResponse::Type response;
     CHIP_ERROR err = CHIP_NO_ERROR;
     Status status  = Status::NotFound;
+
+    GroupDataProviderTest();
 
     VerifyOrExit(IsValidGroupId(groupId), status = Status::ConstraintError);
     VerifyOrExit(nullptr != provider, status = Status::Failure);

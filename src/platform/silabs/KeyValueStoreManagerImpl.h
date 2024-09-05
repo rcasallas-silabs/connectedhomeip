@@ -51,7 +51,7 @@ private:
     void ScheduleKeyMapSave(void);
     bool IsValidKvsNvm3Key(const uint32_t nvm3Key) const;
     uint16_t hashKvsKeyString(const char * key) const;
-    CHIP_ERROR MapKvsKeyToNvm3(const char * key, uint16_t hash, uint32_t & nvm3Key, bool isSlotNeeded = false) const;
+    CHIP_ERROR MapKvsKeyToNvm3(const char * key, uint16_t hash, uint32_t & nvm3Key, uint16_t & firstEmptyKeySlot, bool isSlotNeeded = false) const;
 
     //  ===== Members for internal use by the following friends.
     friend KeyValueStoreManager & KeyValueStoreMgr();

@@ -376,6 +376,9 @@ exit:
     return err;
 }
 
+static size_t _max_size = 0;
+static uint64_t _max_write_time = 0;
+
 CHIP_ERROR SilabsConfig::WriteConfigValueBin(Key key, const uint8_t * data, size_t dataLen)
 {
     CHIP_ERROR err = CHIP_ERROR_INVALID_ARGUMENT;
@@ -386,7 +389,16 @@ CHIP_ERROR SilabsConfig::WriteConfigValueBin(Key key, const uint8_t * data, size
     if ((data != NULL) || (dataLen == 0))
     {
         // Write the binary data to nvm3.
+        uint64_t time1 = chip::System::SystemClock().GetMonotonicMilliseconds64().count();
         err = MapNvm3Error(nvm3_writeData(nvm3_defaultHandle, key, data, dataLen));
+        uint64_t time2 = chip::System::SystemClock().GetMonotonicMilliseconds64().count();
+        uint64_t delta = (time2 > time1) ? time2 - time1 : 0;
+        if((dataLen > _max_size) || (delta > _max_write_time) || (delta > 1000))
+        {
+            if(dataLen > _max_size) { _max_size = dataLen; }
+            if(delta > _max_write_time) { _max_write_time = delta; }
+            ChipLogProgress(Test, "~~~ WRITE\t0x%04x\t%u\t%lu\t#%x", (unsigned)key, (unsigned)dataLen, (unsigned long)delta, (unsigned)err.AsInteger());
+        }
         SuccessOrExit(err);
     }
 

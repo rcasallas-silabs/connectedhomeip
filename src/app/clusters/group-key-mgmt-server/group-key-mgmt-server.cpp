@@ -707,3 +707,57 @@ bool emberAfGroupKeyManagementClusterKeySetReadAllIndicesCallback(
     keysIt->Release();
     return true;
 }
+
+CHIP_ERROR GroupDataProviderTest()
+{
+    ChipLogProgress(Zcl, "~~~ GROUPS TEST");
+    uint16_t n_fabrics = 5;
+    uint16_t n_groups = 16;
+    uint16_t n_endpoints = 3;
+    uint16_t n_keysets = 2;
+    uint8_t n_keys = 3;
+    char name[32];
+
+    Credentials::GroupDataProvider * provider = GetGroupDataProvider();
+    for(FabricIndex f = 1; f <= n_fabrics; f++)
+    {
+        const FabricInfo *fabric = chip::Server::GetInstance().GetFabricTable().FindFabricWithIndex(f);
+        VerifyOrReturnLogError(nullptr != fabric, CHIP_ERROR_INTERNAL);
+
+        uint8_t compressed_fabric_id_buffer[sizeof(uint64_t)];
+        MutableByteSpan compressed_fabric_id(compressed_fabric_id_buffer);
+        ReturnLogErrorOnFailure(fabric->GetCompressedFabricIdBytes(compressed_fabric_id));
+
+        for(uint16_t s = 0; s < n_keysets; s++)
+        {
+            uint16_t keyset_id = 1001 + s;
+            auto policy_id = app::Clusters::GroupKeyManagement::GroupKeySecurityPolicyEnum::kCacheAndSync;
+            chip::Credentials::GroupDataProvider::KeySet keyset(keyset_id, policy_id, n_keys);
+
+            for(uint16_t k = 0; k < keyset.num_keys_used; k++)
+            {
+                chip::Crypto::DRBG_get_bytes(keyset.epoch_keys[k].key, sizeof(keyset.epoch_keys[k].key));
+            }
+            ReturnLogErrorOnFailure(provider->SetKeySet(f, compressed_fabric_id, keyset));
+        }
+
+        for(uint16_t g = 0; g < n_groups; g++)
+        {
+            GroupId group_id = 101 + g;
+            uint16_t i = 0;
+            for(uint16_t s = 0; s < n_keysets; s++)
+            {
+                uint16_t keyset_id = 1001 + s;
+                ReturnLogErrorOnFailure(provider->SetGroupKeyAt(f, i++, chip::Credentials::GroupDataProvider::GroupKey(g, keyset_id)));
+            }
+
+            snprintf(name, sizeof(name), "group-%u.%u", (unsigned)f, (unsigned)g);
+            ReturnLogErrorOnFailure(provider->SetGroupInfoAt(f, g, chip::Credentials::GroupDataProvider::GroupInfo(group_id, name)));
+            for(uint16_t e = 1; e <= n_endpoints; e++)
+            {
+                ReturnLogErrorOnFailure(provider->AddEndpoint(f, group_id, e));
+            }
+        }
+    }
+    return CHIP_NO_ERROR;
+}

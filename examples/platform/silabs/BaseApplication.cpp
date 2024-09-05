@@ -512,6 +512,8 @@ void BaseApplication::ButtonHandler(AppEvent * aEvent)
     // start blinking within the FACTORY_RESET_CANCEL_WINDOW_TIMEOUT
     if (aEvent->ButtonEvent.Action == static_cast<uint8_t>(SilabsPlatform::ButtonAction::ButtonPressed))
     {
+        chip::Credentials::GroupDataProvider *groups = chip::Credentials::GetGroupDataProvider();
+        groups->Debug();
         StartFunctionTimer(FACTORY_RESET_TRIGGER_TIMEOUT);
     }
     else

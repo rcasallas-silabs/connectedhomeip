@@ -2638,27 +2638,6 @@ endpoint 1 {
     handle command AddGroupIfIdentifying;
   }
 
-  server cluster OnOff {
-    persist  attribute onOff default = 0x00;
-    ram      attribute globalSceneControl default = 0x01;
-    ram      attribute onTime default = 0x0000;
-    ram      attribute offWaitTime default = 0x0000;
-    persist  attribute startUpOnOff default = 0xFF;
-    callback attribute generatedCommandList;
-    callback attribute acceptedCommandList;
-    callback attribute eventList;
-    callback attribute attributeList;
-    ram      attribute featureMap default = 1;
-    ram      attribute clusterRevision default = 6;
-
-    handle command Off;
-    handle command On;
-    handle command Toggle;
-    handle command OffWithEffect;
-    handle command OnWithRecallGlobalScene;
-    handle command OnWithTimedOff;
-  }
-
   server cluster LevelControl {
     persist  attribute currentLevel default = 0x01;
     ram      attribute remainingTime default = 0x0000;
@@ -2748,10 +2727,10 @@ endpoint 1 {
     ram      attribute colorLoopStartEnhancedHue default = 0x2300;
     ram      attribute colorLoopStoredEnhancedHue default = 0x0000;
     ram      attribute colorCapabilities default = 0x1F;
-    ram      attribute colorTempPhysicalMinMireds default = 0x009A;
-    ram      attribute colorTempPhysicalMaxMireds default = 0x01C6;
+    ram      attribute colorTempPhysicalMinMireds default = 0x0000;
+    ram      attribute colorTempPhysicalMaxMireds default = 0xFEFF;
     ram      attribute coupleColorTempToLevelMinMireds;
-    persist  attribute startUpColorTemperatureMireds default = 0x00FA;
+    persist  attribute startUpColorTemperatureMireds;
     callback attribute generatedCommandList;
     callback attribute acceptedCommandList;
     callback attribute eventList;
@@ -2778,6 +2757,262 @@ endpoint 1 {
     handle command StopMoveStep;
     handle command MoveColorTemperature;
     handle command StepColorTemperature;
+  }
+}
+endpoint 2 {
+  device type ma_extendedcolorlight = 269, version 1;
+
+
+  server cluster Identify {
+    ram      attribute identifyTime default = 0x0000;
+    ram      attribute identifyType default = 0x0;
+    callback attribute generatedCommandList;
+    callback attribute acceptedCommandList;
+    callback attribute eventList;
+    callback attribute attributeList;
+    ram      attribute featureMap default = 0;
+    ram      attribute clusterRevision default = 4;
+  }
+
+  server cluster Groups {
+    ram      attribute nameSupport;
+    callback attribute generatedCommandList;
+    callback attribute acceptedCommandList;
+    callback attribute eventList;
+    callback attribute attributeList;
+    ram      attribute featureMap default = 0;
+    ram      attribute clusterRevision default = 4;
+
+    handle command AddGroup;
+    handle command AddGroupResponse;
+    handle command ViewGroup;
+    handle command ViewGroupResponse;
+    handle command GetGroupMembership;
+    handle command GetGroupMembershipResponse;
+    handle command RemoveGroup;
+    handle command RemoveGroupResponse;
+    handle command RemoveAllGroups;
+    handle command AddGroupIfIdentifying;
+  }
+
+  server cluster OnOff {
+    persist  attribute onOff default = 0x00;
+    ram      attribute globalSceneControl default = 0x01;
+    ram      attribute onTime default = 0x0000;
+    ram      attribute offWaitTime default = 0x0000;
+    persist  attribute startUpOnOff default = 0xFF;
+    callback attribute generatedCommandList;
+    callback attribute acceptedCommandList;
+    callback attribute eventList;
+    callback attribute attributeList;
+    ram      attribute featureMap default = 1;
+    ram      attribute clusterRevision default = 6;
+  }
+
+  server cluster LevelControl {
+    persist  attribute currentLevel default = 0x01;
+    ram      attribute remainingTime default = 0x0000;
+    ram      attribute minLevel default = 0x01;
+    ram      attribute maxLevel default = 0xFE;
+    ram      attribute currentFrequency default = 0x0000;
+    ram      attribute minFrequency default = 0x0000;
+    ram      attribute maxFrequency default = 0x0000;
+    ram      attribute options default = 0x00;
+    ram      attribute onOffTransitionTime default = 0x0000;
+    ram      attribute onLevel default = 0xFF;
+    ram      attribute onTransitionTime;
+    ram      attribute offTransitionTime;
+    ram      attribute defaultMoveRate default = 50;
+    persist  attribute startUpCurrentLevel default = 255;
+    callback attribute generatedCommandList;
+    callback attribute acceptedCommandList;
+    callback attribute eventList;
+    callback attribute attributeList;
+    ram      attribute featureMap default = 3;
+    ram      attribute clusterRevision default = 6;
+  }
+
+  server cluster Descriptor {
+    callback attribute deviceTypeList;
+    callback attribute serverList;
+    callback attribute clientList;
+    callback attribute partsList;
+    callback attribute generatedCommandList;
+    callback attribute acceptedCommandList;
+    callback attribute eventList;
+    callback attribute attributeList;
+    callback attribute featureMap;
+    callback attribute clusterRevision;
+  }
+
+  server cluster ScenesManagement {
+    ram      attribute lastConfiguredBy;
+    ram      attribute sceneTableSize default = 16;
+    callback attribute fabricSceneInfo;
+    callback attribute generatedCommandList;
+    callback attribute acceptedCommandList;
+    callback attribute eventList;
+    callback attribute attributeList;
+    ram      attribute featureMap default = 1;
+    ram      attribute clusterRevision default = 1;
+  }
+
+  server cluster ColorControl {
+    persist  attribute currentHue default = 0x00;
+    persist  attribute currentSaturation default = 0x00;
+    ram      attribute remainingTime default = 0x0000;
+    persist  attribute currentX default = 0x616B;
+    persist  attribute currentY default = 0x607D;
+    persist  attribute colorTemperatureMireds default = 0x00FA;
+    persist  attribute colorMode default = 0x01;
+    ram      attribute options default = 0x00;
+    ram      attribute numberOfPrimaries;
+    persist  attribute enhancedCurrentHue default = 0x0000;
+    persist  attribute enhancedColorMode default = 0x01;
+    persist  attribute colorLoopActive default = 0x00;
+    persist  attribute colorLoopDirection default = 0x00;
+    persist  attribute colorLoopTime default = 0x0019;
+    ram      attribute colorLoopStartEnhancedHue default = 0x2300;
+    ram      attribute colorLoopStoredEnhancedHue default = 0x0000;
+    ram      attribute colorCapabilities default = 0x1F;
+    ram      attribute colorTempPhysicalMinMireds default = 0x0000;
+    ram      attribute colorTempPhysicalMaxMireds default = 0xFEFF;
+    ram      attribute coupleColorTempToLevelMinMireds;
+    persist  attribute startUpColorTemperatureMireds;
+    callback attribute generatedCommandList;
+    callback attribute acceptedCommandList;
+    callback attribute eventList;
+    callback attribute attributeList;
+    ram      attribute featureMap default = 0x1F;
+    ram      attribute clusterRevision default = 7;
+  }
+}
+endpoint 3 {
+  device type ma_extendedcolorlight = 269, version 1;
+
+
+  server cluster Identify {
+    ram      attribute identifyTime default = 0x0000;
+    ram      attribute identifyType default = 0x0;
+    callback attribute generatedCommandList;
+    callback attribute acceptedCommandList;
+    callback attribute eventList;
+    callback attribute attributeList;
+    ram      attribute featureMap default = 0;
+    ram      attribute clusterRevision default = 4;
+  }
+
+  server cluster Groups {
+    ram      attribute nameSupport;
+    callback attribute generatedCommandList;
+    callback attribute acceptedCommandList;
+    callback attribute eventList;
+    callback attribute attributeList;
+    ram      attribute featureMap default = 0;
+    ram      attribute clusterRevision default = 4;
+
+    handle command AddGroup;
+    handle command AddGroupResponse;
+    handle command ViewGroup;
+    handle command ViewGroupResponse;
+    handle command GetGroupMembership;
+    handle command GetGroupMembershipResponse;
+    handle command RemoveGroup;
+    handle command RemoveGroupResponse;
+    handle command RemoveAllGroups;
+    handle command AddGroupIfIdentifying;
+  }
+
+  server cluster OnOff {
+    persist  attribute onOff default = 0x00;
+    ram      attribute globalSceneControl default = 0x01;
+    ram      attribute onTime default = 0x0000;
+    ram      attribute offWaitTime default = 0x0000;
+    persist  attribute startUpOnOff default = 0xFF;
+    callback attribute generatedCommandList;
+    callback attribute acceptedCommandList;
+    callback attribute eventList;
+    callback attribute attributeList;
+    ram      attribute featureMap default = 1;
+    ram      attribute clusterRevision default = 6;
+  }
+
+  server cluster LevelControl {
+    persist  attribute currentLevel default = 0x01;
+    ram      attribute remainingTime default = 0x0000;
+    ram      attribute minLevel default = 0x01;
+    ram      attribute maxLevel default = 0xFE;
+    ram      attribute currentFrequency default = 0x0000;
+    ram      attribute minFrequency default = 0x0000;
+    ram      attribute maxFrequency default = 0x0000;
+    ram      attribute options default = 0x00;
+    ram      attribute onOffTransitionTime default = 0x0000;
+    ram      attribute onLevel default = 0xFF;
+    ram      attribute onTransitionTime;
+    ram      attribute offTransitionTime;
+    ram      attribute defaultMoveRate default = 50;
+    persist  attribute startUpCurrentLevel default = 255;
+    callback attribute generatedCommandList;
+    callback attribute acceptedCommandList;
+    callback attribute eventList;
+    callback attribute attributeList;
+    ram      attribute featureMap default = 3;
+    ram      attribute clusterRevision default = 6;
+  }
+
+  server cluster Descriptor {
+    callback attribute deviceTypeList;
+    callback attribute serverList;
+    callback attribute clientList;
+    callback attribute partsList;
+    callback attribute generatedCommandList;
+    callback attribute acceptedCommandList;
+    callback attribute eventList;
+    callback attribute attributeList;
+    callback attribute featureMap;
+    callback attribute clusterRevision;
+  }
+
+  server cluster ScenesManagement {
+    ram      attribute lastConfiguredBy;
+    ram      attribute sceneTableSize default = 16;
+    callback attribute fabricSceneInfo;
+    callback attribute generatedCommandList;
+    callback attribute acceptedCommandList;
+    callback attribute eventList;
+    callback attribute attributeList;
+    ram      attribute featureMap default = 1;
+    ram      attribute clusterRevision default = 1;
+  }
+
+  server cluster ColorControl {
+    persist  attribute currentHue default = 0x00;
+    persist  attribute currentSaturation default = 0x00;
+    ram      attribute remainingTime default = 0x0000;
+    persist  attribute currentX default = 0x616B;
+    persist  attribute currentY default = 0x607D;
+    persist  attribute colorTemperatureMireds default = 0x00FA;
+    persist  attribute colorMode default = 0x01;
+    ram      attribute options default = 0x00;
+    ram      attribute numberOfPrimaries;
+    persist  attribute enhancedCurrentHue default = 0x0000;
+    persist  attribute enhancedColorMode default = 0x01;
+    persist  attribute colorLoopActive default = 0x00;
+    persist  attribute colorLoopDirection default = 0x00;
+    persist  attribute colorLoopTime default = 0x0019;
+    ram      attribute colorLoopStartEnhancedHue default = 0x2300;
+    ram      attribute colorLoopStoredEnhancedHue default = 0x0000;
+    ram      attribute colorCapabilities default = 0x1F;
+    ram      attribute colorTempPhysicalMinMireds default = 0x0000;
+    ram      attribute colorTempPhysicalMaxMireds default = 0xFEFF;
+    ram      attribute coupleColorTempToLevelMinMireds;
+    persist  attribute startUpColorTemperatureMireds;
+    callback attribute generatedCommandList;
+    callback attribute acceptedCommandList;
+    callback attribute eventList;
+    callback attribute attributeList;
+    ram      attribute featureMap default = 0x1F;
+    ram      attribute clusterRevision default = 7;
   }
 }
 

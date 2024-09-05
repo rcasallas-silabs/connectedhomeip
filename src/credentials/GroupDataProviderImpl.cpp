@@ -1956,6 +1956,90 @@ void GroupDataProviderImpl::GroupSessionIteratorImpl::Release()
     mProvider.mGroupSessionsIterator.ReleaseObject(this);
 }
 
+void GroupDataProviderImpl::Debug()
+{
+    ChipLogProgress(Zcl, "~~~ GROUPS DEBUG");
+    FabricList fabric_list;
+    ReturnOnFailure(fabric_list.Load(mStorage));
+    ChipLogProgress(Zcl, "~~~ FABRICS(%u)", (unsigned) fabric_list.entry_count);
+    FabricIndex fabric_index = fabric_list.first_entry;
+
+    for (size_t i = 0; i < fabric_list.entry_count; i++)
+    {
+        FabricData fabric(fabric_index);
+        fabric.Load(mStorage);
+        DebugFabric(fabric_index);
+        fabric_index = fabric.next;
+    }
+}
+
+void GroupDataProviderImpl::DebugFabric(FabricIndex fabric_index)
+{
+    ChipLogProgress(Zcl, "~~~ FABRIC-[%u]", (unsigned) fabric_index);
+
+    // GroupInfo
+    size_t index = 0;
+    GroupInfo group;
+    auto it  = this->IterateGroupInfo(fabric_index);
+    ChipLogProgress(Zcl, "~~~   GROUPS(%u)", (unsigned) it->Count());
+    while (it->Next(group))
+    {
+        ChipLogProgress(Zcl, "~~~     GROUP[%u] gid:%u, name:\"%s\"", (unsigned)index++, (unsigned) group.group_id, group.name);
+    }
+    it->Release();
+
+    // Endpoints
+    index = 0;
+    GroupEndpoint endpoint;
+    auto it2  = this->IterateEndpoints(fabric_index);
+    ChipLogProgress(Zcl, "~~~   ENDPOINTS(%u)", (unsigned) it2->Count());
+    while (it2->Next(endpoint))
+    {
+        ChipLogProgress(Zcl, "~~~     END[%u] gid:%u, end:%u", (unsigned)index++, (unsigned)endpoint.group_id, (unsigned) endpoint.endpoint_id);
+    }
+    it2->Release();
+
+    // GroupKeys
+    index = 0;
+    GroupKey pair;
+    auto it3  = this->IterateGroupKeys(fabric_index);
+    ChipLogProgress(Zcl, "~~~   MAPPINGS(%u)", (unsigned) it3->Count());
+    while (it3->Next(pair))
+    {
+        ChipLogProgress(Zcl, "~~~     MAP[%u] gid:%u, kid:%u", (unsigned)index++, (unsigned) pair.group_id, (unsigned) pair.keyset_id);
+    }
+    it3->Release();
+
+    // KeySets
+    index = 0;
+    // FabricList fabric_list;
+    // CHIP_ERROR err = fabric_list.Load(&mStorage);
+    FabricData fabric(fabric_index);
+    CHIP_ERROR err = fabric.Load(mStorage);
+
+    uint16_t next_keyset = fabric.first_keyset;
+    ChipLogProgress(Zcl, "~~~   KEYSETS(%u)", (unsigned) fabric.keyset_count);
+    while((index < fabric.keyset_count) && (CHIP_NO_ERROR == err))
+    {
+        KeySetData keyset(fabric_index, next_keyset);
+        err = keyset.Load(mStorage);
+        if(CHIP_NO_ERROR == err)
+        {
+            ChipLogProgress(Zcl, "~~~     KEYSET[%u] id:%u, n:%u", (unsigned)index++, (unsigned)keyset.keyset_id, (unsigned) keyset.keys_count);
+            for(size_t i = 0; i < keyset.keys_count; ++i)
+            {
+                Crypto::GroupOperationalCredentials &key = keyset.operational_keys[i];
+                ChipLogProgress(Zcl, "~~~       KEY[%u] t:%u, ek:[%02x %02x...], pk:[%02x %02x...]",
+                    (unsigned)i, (unsigned)key.start_time,
+                    key.encryption_key[0], key.encryption_key[1],
+                    key.privacy_key[0], key.privacy_key[1]);
+            }
+            next_keyset = keyset.next;
+        }
+    }
+}
+
+
 namespace {
 
 GroupDataProvider * gGroupsProvider = nullptr;

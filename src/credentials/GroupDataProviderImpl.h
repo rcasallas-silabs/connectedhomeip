@@ -97,6 +97,10 @@ public:
     Crypto::SymmetricKeyContext * GetKeyContext(FabricIndex fabric_index, GroupId group_id) override;
     GroupSessionIterator * IterateGroupSessions(uint16_t session_id) override;
 
+    // DEBUG
+    void Debug() override;
+    void DebugFabric(FabricIndex fabric) override;
+
 protected:
     class GroupInfoIteratorImpl : public GroupInfoIterator
     {

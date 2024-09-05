@@ -1063,7 +1063,7 @@ extern const char CHIP_NON_PRODUCTION_MARKER[];
  * Binds to number of GroupMapping entries per fabric
  */
 #ifndef CHIP_CONFIG_MAX_GROUP_ENDPOINTS_PER_FABRIC
-#define CHIP_CONFIG_MAX_GROUP_ENDPOINTS_PER_FABRIC 1
+#define CHIP_CONFIG_MAX_GROUP_ENDPOINTS_PER_FABRIC 4
 #endif
 
 /**
@@ -1074,10 +1074,10 @@ extern const char CHIP_NON_PRODUCTION_MARKER[];
  * Binds to number of GroupState entries to support per fabric
  */
 #ifndef CHIP_CONFIG_MAX_GROUPS_PER_FABRIC
-#define CHIP_CONFIG_MAX_GROUPS_PER_FABRIC (4 * CHIP_CONFIG_MAX_GROUP_ENDPOINTS_PER_FABRIC)
+#define CHIP_CONFIG_MAX_GROUPS_PER_FABRIC 16
 #endif
 
-#if CHIP_CONFIG_MAX_GROUPS_PER_FABRIC < (4 * CHIP_CONFIG_MAX_GROUP_ENDPOINTS_PER_FABRIC)
+#if CHIP_CONFIG_MAX_GROUPS_PER_FABRIC < 8
 #error "Please ensure CHIP_CONFIG_MAX_GROUPS_PER_FABRIC meets minimum requirements. See Group Limits in the specification."
 #endif
 
