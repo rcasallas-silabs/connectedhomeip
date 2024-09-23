@@ -207,6 +207,7 @@ public:
     static CHIP_ERROR WriteConfigValueStr(Key key, const char * str);
     static CHIP_ERROR WriteConfigValueStr(Key key, const char * str, size_t strLen);
     static CHIP_ERROR WriteConfigValueBin(Key key, const uint8_t * data, size_t dataLen);
+    static CHIP_ERROR WriteConfigValueBinDebug(Key key, const uint8_t * data, size_t dataLen, uint64_t &delta);
     static CHIP_ERROR WriteConfigValueCounter(uint8_t counterIdx, uint32_t val);
     static CHIP_ERROR ClearConfigValue(Key key);
     static bool ConfigValueExists(Key key);

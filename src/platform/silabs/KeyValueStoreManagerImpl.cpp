@@ -182,6 +182,8 @@ void KeyValueStoreManagerImpl::ScheduleKeyMapSave(void)
 
 uint64_t _max_write_time = 0;
 uint64_t _max_read_time = 0;
+uint16_t _read_watermark = 0;
+uint16_t _write_watermark = 0;
 
 // static_assert(NVM3_DEFAULT_MAX_OBJECT_SIZE==123, "NVM!");
 
@@ -204,10 +206,11 @@ CHIP_ERROR KeyValueStoreManagerImpl::_Get(const char * key, void * value, size_t
                                                            (offset_bytes + KeyStringLen));
     uint64_t time2 = chip::System::SystemClock().GetMonotonicMilliseconds64().count();
     uint64_t delta = (time2 > time1) ? time2 - time1 : 0;
-    if((delta > _max_write_time) || (delta > 1000))
+    if((watermark > _read_watermark) || (delta > 1000))
     {
+        _read_watermark = watermark;
         if(delta > _max_write_time) { _max_write_time = delta; }
-        ChipLogProgress(Test, "~~~ Get(%s, %u, %lu) #%x", key, (unsigned)watermark, (unsigned long)delta, (unsigned)err.AsInteger());
+        ChipLogProgress(Test, "~~~ GET\t%s\t%u\t%lu\t#%x", key, (unsigned)watermark, (unsigned long)delta, (unsigned)err.AsInteger());
     }
 
     if (read_bytes_size)
@@ -240,14 +243,13 @@ CHIP_ERROR KeyValueStoreManagerImpl::_Put(const char * key, const void * value, 
     memcpy(prefixedData, key, keyStringLen);
     memcpy(prefixedData + keyStringLen, value, value_size);
 
-    uint64_t time1 = chip::System::SystemClock().GetMonotonicMilliseconds64().count();
-    err = SilabsConfig::WriteConfigValueBin(nvm3Key, prefixedData, keyStringLen + value_size);
-    uint64_t time2 = chip::System::SystemClock().GetMonotonicMilliseconds64().count();
-    uint64_t delta = (time2 > time1) ? time2 - time1 : 0;
-    if((delta > _max_write_time) || (delta > 1000))
+    uint64_t delta = 0;
+    err = SilabsConfig::WriteConfigValueBinDebug(nvm3Key, prefixedData, keyStringLen + value_size, delta);
+    if(watermark > _write_watermark)
     {
+        _write_watermark = watermark;
         if(delta > _max_write_time) { _max_write_time = delta; }
-        ChipLogProgress(Test, "~~~ Put(%s, %u, %lu) #%x", key, (unsigned)watermark, (unsigned long)delta, (unsigned)err.AsInteger());
+        ChipLogProgress(Test, "~~~ PUT\t%s\t%u\t%lu\t#%x", key, (unsigned)watermark, (unsigned long)delta, (unsigned)err.AsInteger());
     }
 
     if (err == CHIP_NO_ERROR)

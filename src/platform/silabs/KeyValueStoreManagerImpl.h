@@ -41,6 +41,7 @@ public:
     void ErasePartition(void);
 
     static constexpr size_t kMaxEntries = KVS_MAX_ENTRIES;
+// static_assert(KVS_MAX_ENTRIES == 123, "KVS_MAX_ENTRIES!!!");
 
     static void ForceKeyMapSave();
     static void KvsMapMigration();
