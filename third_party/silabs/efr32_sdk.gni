@@ -419,23 +419,26 @@ template("efr32_sdk") {
     # To fix this, these files are also manually depended upon in the source set
     # declared in efr32_mbedtls_config further down this file.
     defines += [
+      "CHIP_CRYPTO_PLATFORM=1",
       "MBEDTLS_CONFIG_FILE=\"efr32-chip-mbedtls-config.h\"",
-      "MBEDTLS_PSA_CRYPTO_CONFIG_FILE=\"efr32-psa-crypto-config.h\"",
+      "MBEDTLS_PSA_CRYPTO_CONFIG_FILE=\"efr32-psa-crypto-config2.h\"",
       "__STARTUP_CLEAR_BSS",
       "HARD_FAULT_LOG_ENABLE",
       "CORTEXM3_EFM32_MICRO",
       "NVM3_DEFAULT_NVM_SIZE=40960",
       "NVM3_DEFAULT_MAX_OBJECT_SIZE=${sl_nvm3_max_object_size}",
       "KVS_MAX_ENTRIES=${kvs_max_entries}",
-      "CORTEXM3=1",
-      "MICRO=EMBER_MICRO_CORTEXM3_EFR32",
-      "PLAT=EMBER_PLATFORM_CORTEXM3",
+
+      # "CORTEXM3=1",
+      # "MICRO=EMBER_MICRO_CORTEXM3_EFR32",
+      # "PLAT=EMBER_PLATFORM_CORTEXM3",
       "${silabs_mcu}=1",
       "${silabs_board}=1",
       "SL_BOARD_NAME=${silabs_board}",
-      "__HEAP_SIZE=0",
-      "__STACK_SIZE=0",
-      "SL_THREADING_ALT=1",
+
+      # "__HEAP_SIZE=0",
+      # "__STACK_SIZE=0",
+      # "SL_THREADING_ALT=1",
       "SL_COMPONENT_CATALOG_PRESENT=1",
       "SL_CODE_COMPONENT_CORE=core",
       "SL_CODE_COMPONENT_PERIPHERAL_SYSRTC=hal_sysrtc",
@@ -454,6 +457,7 @@ template("efr32_sdk") {
       "SL_OPENTHREAD_STACK_FEATURES_CONFIG_FILE=\"sl_openthread_features_config.h\"",
       "SL_CSL_TIMEOUT=${sl_ot_csl_timeout_sec}",
       "CIRCULAR_QUEUE_USE_LOCAL_CONFIG_HEADER=1",
+      "MBEDTLS_USER_CONFIG_FILE=<sli_psa_builtin_config.h>",
     ]
 
     if (silabs_log_enabled && chip_logging) {
@@ -691,8 +695,8 @@ template("efr32_sdk") {
     # system to recompile mbedTLS (= the SDK) when the mbedTLS config gets
     # edited.
     sources = [
-      "${chip_root}/src/platform/silabs/efr32/efr32-chip-mbedtls-config.h",
-      "${chip_root}/src/platform/silabs/efr32/efr32-psa-crypto-config.h",
+      "${chip_root}/src/platform/silabs/efr32/efr32-chip-mbedtls-config2.h",
+      "${chip_root}/src/platform/silabs/efr32/efr32-psa-crypto-config2.h",
     ]
 
     public_configs = [ "${chip_root}/src:includes" ]

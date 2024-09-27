@@ -5,6 +5,50 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "BRD4187C",
+            "type": "cortex-debug",
+            "cwd": "${workspaceFolder}",
+            "request": "launch",
+            "servertype": "jlink",
+            "showDevDebugOutput": true,
+            "runToEntryPoint": "main",
+            "rttConfig": {
+                "enabled": true,
+                "address": "auto",
+                "decoders": [
+                    {
+                        "port": 0, // In RTT lingo, this is the buffer index (or channel)
+                        "type": "console"
+                    }
+                ]
+            },
+            "executable": "${workspaceFolder}/out/light/BRD4187C/matter-silabs-lighting-example.s37",
+            "device": "EFR32MG24B220F1536IM48",
+            "serialNumber": "440266330",
+        },
+        {
+            "name": "BRD4317A",
+            "type": "cortex-debug",
+            "cwd": "${workspaceFolder}",
+            "request": "launch",
+            "servertype": "jlink",
+            "showDevDebugOutput": true,
+            "runToEntryPoint": "main",
+            "rttConfig": {
+                "enabled": true,
+                "address": "auto",
+                "decoders": [
+                {
+                    "port": 0, // In RTT lingo, this is the buffer index (or channel)
+                    "type": "console"
+                }
+                ]
+            },
+            "executable": "${workspaceFolder}/out/light/BRD4317A/matter-silabs-lighting-example.out",
+            "device": "MGM240PB32VNA1",
+            "serialNumber": "440219709",
+        },
+        {
             "name": "Attach to running process",
             "type": "lldb",
             "request": "attach",
