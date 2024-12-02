@@ -47,6 +47,7 @@
 #include <system/TLVPacketBufferBackingStore.h>
 #include <tracing/macros.h>
 #include <transport/SessionManager.h>
+#include <lib/support/Chronometer.h>
 
 namespace chip {
 
@@ -607,12 +608,17 @@ CHIP_ERROR PASESession::HandleMsg1_and_SendMsg2(System::PacketBufferHandle && ms
     VerifyOrExit(TLV::TagNumFromTag(tlvReader.GetTag()) == 1, err = CHIP_ERROR_INVALID_TLV_TAG);
     X_len = tlvReader.GetLength();
     SuccessOrExit(err = tlvReader.GetDataPtr(X));
-    SuccessOrExit(err = mSpake2p.BeginVerifier(nullptr, 0, nullptr, 0, mPASEVerifier.mW0, kP256_FE_Length, mPASEVerifier.mL,
-                                               kP256_Point_Length));
-
-    SuccessOrExit(err = mSpake2p.ComputeRoundOne(X, X_len, Y, &Y_len));
-    VerifyOrReturnError(Y_len == sizeof(Y), CHIP_ERROR_INTERNAL);
-    SuccessOrExit(err = mSpake2p.ComputeRoundTwo(X, X_len, verifier, &verifier_len));
+    {
+        silabs::Chronometer chrono("SPAKE2+: Start");
+        SuccessOrExit(err = mSpake2p.BeginVerifier(nullptr, 0, nullptr, 0, mPASEVerifier.mW0, kP256_FE_Length, mPASEVerifier.mL,
+                                                kP256_Point_Length));
+        chrono.mark("SPAKE2+: Begin");
+        SuccessOrExit(err = mSpake2p.ComputeRoundOne(X, X_len, Y, &Y_len));
+        chrono.mark("SPAKE2+: Round One");
+        VerifyOrReturnError(Y_len == sizeof(Y), CHIP_ERROR_INTERNAL);
+        SuccessOrExit(err = mSpake2p.ComputeRoundTwo(X, X_len, verifier, &verifier_len));
+        chrono.mark("SPAKE2+: Round Two");
+    }
     msg1 = nullptr;
 
     {
