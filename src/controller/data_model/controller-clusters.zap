@@ -1638,6 +1638,24 @@
           ]
         },
         {
+          "name": "Multicast",
+          "code": 100,
+          "mfgCode": null,
+          "define": "MULTICAST_CLUSTER",
+          "side": "client",
+          "enabled": 1,
+          "commands": [
+            {
+              "name": "AddTarget",
+              "code": 0,
+              "mfgCode": null,
+              "source": "client",
+              "isIncoming": 0,
+              "isEnabled": 1
+            }
+          ]
+        },
+        {
           "name": "HEPA Filter Monitoring",
           "code": 113,
           "mfgCode": null,
@@ -2466,7 +2484,6 @@
           "define": "THREAD_BORDER_ROUTER_MANAGEMENT_CLUSTER",
           "side": "client",
           "enabled": 1,
-          "apiMaturity": "provisional",
           "commands": [
             {
               "name": "GetActiveDatasetRequest",
@@ -2501,7 +2518,6 @@
           "define": "THREAD_NETWORK_DIRECTORY_CLUSTER",
           "side": "client",
           "enabled": 1,
-          "apiMaturity": "provisional",
           "commands": [
             {
               "name": "AddNetwork",
