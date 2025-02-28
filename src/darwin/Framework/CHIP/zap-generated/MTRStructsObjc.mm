@@ -4411,6 +4411,72 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
+@implementation MTRMulticastClusterMulticastAddStruct
+- (instancetype)init
+{
+    if (self = [super init]) {
+
+        _targetId = @(0);
+
+        _endpoints = [NSArray array];
+
+        _key = [NSData data];
+    }
+    return self;
+}
+
+- (id)copyWithZone:(NSZone * _Nullable)zone
+{
+    auto other = [[MTRMulticastClusterMulticastAddStruct alloc] init];
+
+    other.targetId = self.targetId;
+    other.endpoints = self.endpoints;
+    other.key = self.key;
+
+    return other;
+}
+
+- (NSString *)description
+{
+    NSString * descriptionString = [NSString stringWithFormat:@"<%@: targetId:%@; endpoints:%@; key:%@; >", NSStringFromClass([self class]), _targetId, _endpoints, [_key base64EncodedStringWithOptions:0]];
+    return descriptionString;
+}
+
+@end
+
+@implementation MTRMulticastClusterMulticastTargetStruct
+- (instancetype)init
+{
+    if (self = [super init]) {
+
+        _targetId = @(0);
+
+        _endpoints = [NSArray array];
+
+        _fabricIndex = @(0);
+    }
+    return self;
+}
+
+- (id)copyWithZone:(NSZone * _Nullable)zone
+{
+    auto other = [[MTRMulticastClusterMulticastTargetStruct alloc] init];
+
+    other.targetId = self.targetId;
+    other.endpoints = self.endpoints;
+    other.fabricIndex = self.fabricIndex;
+
+    return other;
+}
+
+- (NSString *)description
+{
+    NSString * descriptionString = [NSString stringWithFormat:@"<%@: targetId:%@; endpoints:%@; fabricIndex:%@; >", NSStringFromClass([self class]), _targetId, _endpoints, _fabricIndex];
+    return descriptionString;
+}
+
+@end
+
 @implementation MTRHEPAFilterMonitoringClusterReplacementProductStruct
 - (instancetype)init
 {

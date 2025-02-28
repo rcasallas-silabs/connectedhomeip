@@ -253,6 +253,7 @@ CHIP_ERROR SessionManager::PrepareMessage(const SessionHandle & sessionHandle, P
 
         CHIP_TRACE_MESSAGE_SENT(payloadHeader, packetHeader, destination_address, message->Start(), message->TotalLength());
 
+        // HERE! GROUP KEY
         Crypto::SymmetricKeyContext * keyContext =
             groups->GetKeyContext(groupSession->GetFabricIndex(), groupSession->GetGroupId());
         VerifyOrReturnError(nullptr != keyContext, CHIP_ERROR_INTERNAL);

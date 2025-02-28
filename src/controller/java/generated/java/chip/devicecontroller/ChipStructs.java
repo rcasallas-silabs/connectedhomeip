@@ -5684,6 +5684,158 @@ public static class ScenesManagementClusterSceneInfoStruct {
     return output.toString();
   }
 }
+public static class MulticastClusterMulticastAddStruct {
+  public Integer targetId;
+  public ArrayList<Integer> endpoints;
+  public byte[] key;
+  private static final long TARGET_ID_ID = 1L;
+  private static final long ENDPOINTS_ID = 2L;
+  private static final long KEY_ID = 3L;
+
+  public MulticastClusterMulticastAddStruct(
+    Integer targetId,
+    ArrayList<Integer> endpoints,
+    byte[] key
+  ) {
+    this.targetId = targetId;
+    this.endpoints = endpoints;
+    this.key = key;
+  }
+
+  public StructType encodeTlv() {
+    ArrayList<StructElement> values = new ArrayList<>();
+    values.add(new StructElement(TARGET_ID_ID, new UIntType(targetId)));
+    values.add(new StructElement(ENDPOINTS_ID, ArrayType.generateArrayType(endpoints, (elementendpoints) -> new UIntType(elementendpoints))));
+    values.add(new StructElement(KEY_ID, new ByteArrayType(key)));
+
+    return new StructType(values);
+  }
+
+  public static MulticastClusterMulticastAddStruct decodeTlv(BaseTLVType tlvValue) {
+    if (tlvValue == null || tlvValue.type() != TLVType.Struct) {
+      return null;
+    }
+    Integer targetId = null;
+    ArrayList<Integer> endpoints = null;
+    byte[] key = null;
+    for (StructElement element: ((StructType)tlvValue).value()) {
+      if (element.contextTagNum() == TARGET_ID_ID) {
+        if (element.value(BaseTLVType.class).type() == TLVType.UInt) {
+          UIntType castingValue = element.value(UIntType.class);
+          targetId = castingValue.value(Integer.class);
+        }
+      } else if (element.contextTagNum() == ENDPOINTS_ID) {
+        if (element.value(BaseTLVType.class).type() == TLVType.Array) {
+          ArrayType castingValue = element.value(ArrayType.class);
+          endpoints = castingValue.map((elementcastingValue) -> elementcastingValue.value(Integer.class));
+        }
+      } else if (element.contextTagNum() == KEY_ID) {
+        if (element.value(BaseTLVType.class).type() == TLVType.ByteArray) {
+          ByteArrayType castingValue = element.value(ByteArrayType.class);
+          key = castingValue.value(byte[].class);
+        }
+      }
+    }
+    return new MulticastClusterMulticastAddStruct(
+      targetId,
+      endpoints,
+      key
+    );
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder output = new StringBuilder();
+    output.append("MulticastClusterMulticastAddStruct {\n");
+    output.append("\ttargetId: ");
+    output.append(targetId);
+    output.append("\n");
+    output.append("\tendpoints: ");
+    output.append(endpoints);
+    output.append("\n");
+    output.append("\tkey: ");
+    output.append(Arrays.toString(key));
+    output.append("\n");
+    output.append("}\n");
+    return output.toString();
+  }
+}
+public static class MulticastClusterMulticastTargetStruct {
+  public Integer targetId;
+  public ArrayList<Integer> endpoints;
+  public Integer fabricIndex;
+  private static final long TARGET_ID_ID = 1L;
+  private static final long ENDPOINTS_ID = 2L;
+  private static final long FABRIC_INDEX_ID = 254L;
+
+  public MulticastClusterMulticastTargetStruct(
+    Integer targetId,
+    ArrayList<Integer> endpoints,
+    Integer fabricIndex
+  ) {
+    this.targetId = targetId;
+    this.endpoints = endpoints;
+    this.fabricIndex = fabricIndex;
+  }
+
+  public StructType encodeTlv() {
+    ArrayList<StructElement> values = new ArrayList<>();
+    values.add(new StructElement(TARGET_ID_ID, new UIntType(targetId)));
+    values.add(new StructElement(ENDPOINTS_ID, ArrayType.generateArrayType(endpoints, (elementendpoints) -> new UIntType(elementendpoints))));
+    values.add(new StructElement(FABRIC_INDEX_ID, new UIntType(fabricIndex)));
+
+    return new StructType(values);
+  }
+
+  public static MulticastClusterMulticastTargetStruct decodeTlv(BaseTLVType tlvValue) {
+    if (tlvValue == null || tlvValue.type() != TLVType.Struct) {
+      return null;
+    }
+    Integer targetId = null;
+    ArrayList<Integer> endpoints = null;
+    Integer fabricIndex = null;
+    for (StructElement element: ((StructType)tlvValue).value()) {
+      if (element.contextTagNum() == TARGET_ID_ID) {
+        if (element.value(BaseTLVType.class).type() == TLVType.UInt) {
+          UIntType castingValue = element.value(UIntType.class);
+          targetId = castingValue.value(Integer.class);
+        }
+      } else if (element.contextTagNum() == ENDPOINTS_ID) {
+        if (element.value(BaseTLVType.class).type() == TLVType.Array) {
+          ArrayType castingValue = element.value(ArrayType.class);
+          endpoints = castingValue.map((elementcastingValue) -> elementcastingValue.value(Integer.class));
+        }
+      } else if (element.contextTagNum() == FABRIC_INDEX_ID) {
+        if (element.value(BaseTLVType.class).type() == TLVType.UInt) {
+          UIntType castingValue = element.value(UIntType.class);
+          fabricIndex = castingValue.value(Integer.class);
+        }
+      }
+    }
+    return new MulticastClusterMulticastTargetStruct(
+      targetId,
+      endpoints,
+      fabricIndex
+    );
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder output = new StringBuilder();
+    output.append("MulticastClusterMulticastTargetStruct {\n");
+    output.append("\ttargetId: ");
+    output.append(targetId);
+    output.append("\n");
+    output.append("\tendpoints: ");
+    output.append(endpoints);
+    output.append("\n");
+    output.append("\tfabricIndex: ");
+    output.append(fabricIndex);
+    output.append("\n");
+    output.append("}\n");
+    return output.toString();
+  }
+}
 public static class HepaFilterMonitoringClusterReplacementProductStruct {
   public Integer productIdentifierType;
   public String productIdentifierValue;

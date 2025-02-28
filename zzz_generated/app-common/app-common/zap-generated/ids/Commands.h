@@ -925,6 +925,16 @@ static constexpr CommandId Id = 0x00000040;
 } // namespace Commands
 } // namespace ScenesManagement
 
+namespace Multicast {
+namespace Commands {
+
+namespace AddTarget {
+static constexpr CommandId Id = 0x00000000;
+} // namespace AddTarget
+
+} // namespace Commands
+} // namespace Multicast
+
 namespace HepaFilterMonitoring {
 namespace Commands {
 

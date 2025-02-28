@@ -312,9 +312,6 @@
             "MaxGroupKeysPerFabric",
             "FeatureMap"
         ],
-        "Multicast": [
-            "FeatureMap"
-        ],
         "ICD Management": [
             "IdleModeDuration",
             "ActiveModeDuration",

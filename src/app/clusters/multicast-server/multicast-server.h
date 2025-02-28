@@ -20,13 +20,44 @@
 #include <app/util/basic-types.h>
 #include <lib/support/Span.h>
 
-/** @brief Groups Cluster Endpoint In Group
- *
- * This function is called by the framework when it needs to determine if an
- * endpoint is a member of a group.  The application should return true if the
- * endpoint is a member of the group and false otherwise.
- *
- * @param endpoint The endpoint.  Ver.: always
- * @param groupId The group identifier.  Ver.: always
- */
-bool emberAfGroupsClusterEndpointInGroupCallback(chip::FabricIndex fabricIndex, chip::EndpointId endpoint, chip::GroupId groupId);
+#include <credentials/PersistentData.h>
+#include <lib/support/DefaultStorageKeyAllocator.h>
+
+namespace chip {
+namespace Multicast {
+
+constexpr size_t kPersistentBufferMax = 1024;
+
+struct Target
+{
+    Target() = default;
+    Target(FabricIndex fabric, GroupId id, const ByteSpan &key):
+        mFabric(fabric), mTargetId(id), mKey(key) {}
+    
+    FabricIndex mFabric;
+    GroupId mTargetId = kUndefinedGroupId;
+    const ByteSpan mKey;
+
+    bool operator==(const Target & other) const
+    {
+        return this->mTargetId == other.mTargetId;
+    }
+};
+
+struct MulticastTargetList: public PersistentArray<kPersistentBufferMax, CHIP_CONFIG_MAX_FABRICS, Target> {
+
+    MulticastTargetList(FabricIndex fabric, PersistentStorageDelegate * storage):
+        PersistentArray<kPersistentBufferMax, CHIP_CONFIG_MAX_FABRICS, Target>(storage),
+        mFabric(fabric) {}
+
+    CHIP_ERROR UpdateKey(StorageKeyName & key) override;
+    void Clear(Target & entry) override;
+    CHIP_ERROR Serialize(TLV::TLVWriter & writer, const Target & entry) const override;
+    CHIP_ERROR Deserialize(TLV::TLVReader & reader, Target & entry) override;
+
+private:
+    FabricIndex mFabric;
+};
+
+} // namespace chip
+} // namespace Multicast
