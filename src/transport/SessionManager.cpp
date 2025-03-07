@@ -1073,7 +1073,7 @@ void SessionManager::SecureUnicastMessageDispatch(const PacketHeader & partialPa
  * @param[in] applyPrivacy Whether to apply privacy deobfuscation
  * @param[out] msgCopy A copy of the message, to be filled with the decrypted message
  * @param[in] mac The MAC of the message
- * @param[in] groupContext The group context to use for decryption key material
+ * @param[in] session The group context to use for decryption key material
  *
  * @return true if the message was decrypted successfully
  * @return false if the message could not be decrypted
@@ -1081,10 +1081,10 @@ void SessionManager::SecureUnicastMessageDispatch(const PacketHeader & partialPa
 static bool GroupKeyDecryptAttempt(const PacketHeader & partialPacketHeader, PacketHeader & packetHeaderCopy,
                                    PayloadHeader & payloadHeader, bool applyPrivacy, System::PacketBufferHandle & msgCopy,
                                    const MessageAuthenticationCode & mac,
-                                   const Credentials::GroupDataProvider::GroupSession & groupContext)
+                                   const Credentials::GroupDataProvider::GroupSession & session)
 {
     bool decrypted = false;
-    CryptoContext context(groupContext.keyContext);
+    CryptoContext context(session.keyContext);
 
     if (applyPrivacy)
     {
@@ -1105,7 +1105,7 @@ static bool GroupKeyDecryptAttempt(const PacketHeader & partialPacketHeader, Pac
 
     // Optimization to reduce number of decryption attempts
     GroupId groupId = packetHeaderCopy.GetDestinationGroupId().Value();
-    if (groupId != groupContext.group_id)
+    if (groupId != session.group_id)
     {
         return false;
     }
@@ -1122,7 +1122,7 @@ static bool GroupKeyDecryptAttempt(const PacketHeader & partialPacketHeader, Pac
 bool GroupDecrypt(const PacketHeader & partialPacketHeader,
                   PacketHeader & packetHeader,
                   PayloadHeader & payloadHeader,
-                  Credentials::GroupDataProvider::GroupSession & groupContext,
+                  Credentials::GroupDataProvider::GroupSession & session,
                   System::PacketBufferHandle && msg)
 {
     System::PacketBufferHandle msgCopy;
@@ -1160,9 +1160,8 @@ bool GroupDecrypt(const PacketHeader & partialPacketHeader,
     VerifyOrReturnValue(taglen == footerLen, false);
 
     bool decrypted = false;
-    while (!decrypted && iter->Next(groupContext))
+    while (!decrypted && iter->Next(session))
     {
-        CryptoContext context(groupContext.keyContext);
         msgCopy = msg.CloneData();
         if (msgCopy.IsNull())
         {
@@ -1172,7 +1171,7 @@ bool GroupDecrypt(const PacketHeader & partialPacketHeader,
 
         bool privacy = partialPacketHeader.HasPrivacyFlag();
         decrypted =
-            GroupKeyDecryptAttempt(partialPacketHeader, packetHeader, payloadHeader, privacy, msgCopy, mac, groupContext);
+            GroupKeyDecryptAttempt(partialPacketHeader, packetHeader, payloadHeader, privacy, msgCopy, mac, session);
 
 #if CHIP_CONFIG_PRIVACY_ACCEPT_NONSPEC_SVE2
         if (privacy && !decrypted)
@@ -1185,7 +1184,7 @@ bool GroupDecrypt(const PacketHeader & partialPacketHeader,
                 return false;
             }
             decrypted =
-                GroupKeyDecryptAttempt(partialPacketHeader, packetHeader, payloadHeader, false, msgCopy, mac, groupContext);
+                GroupKeyDecryptAttempt(partialPacketHeader, packetHeader, payloadHeader, false, msgCopy, mac, session);
         }
 #endif // CHIP_CONFIG_PRIVACY_ACCEPT_NONSPEC_SVE2
     }
@@ -1195,19 +1194,21 @@ bool GroupDecrypt(const PacketHeader & partialPacketHeader,
     return decrypted;
 }
 
-bool GroupDecryptMulticast(const PacketHeader & partialPacketHeader,
+bool MulticastDecrypt(const PacketHeader & partialPacketHeader,
     PacketHeader & packetHeader,
     PayloadHeader & payloadHeader,
-    Credentials::GroupDataProvider::GroupSession & groupContext,
+    Credentials::GroupDataProvider::GroupSession & session,
     System::PacketBufferHandle && msg)
 {
     System::PacketBufferHandle msgCopy;
     VerifyOrReturnValue(partialPacketHeader.IsValidMulticastMsg(), false);
 
-    groupContext.fabric_index = partialPacketHeader.GetFabricIndex().HasValue() ? partialPacketHeader.GetFabricIndex().Value() : 0;
-    groupContext.group_id = partialPacketHeader.GetDestinationGroupId().HasValue() ? partialPacketHeader.GetDestinationGroupId().Value() : 0;
-    groupContext.security_policy = Credentials::GroupDataProvider::SecurityPolicy::kTrustFirst;
-    bool privacy = partialPacketHeader.HasPrivacyFlag();
+    chip::Multicast::DataProvider &multicast = chip::Multicast::DataProvider::Instance();
+    session.fabric_index = partialPacketHeader.GetFabricIndex().HasValue() ? partialPacketHeader.GetFabricIndex().Value() : 0;
+    session.group_id = partialPacketHeader.GetDestinationGroupId().HasValue() ? partialPacketHeader.GetDestinationGroupId().Value() : 0;
+    session.security_policy = Credentials::GroupDataProvider::SecurityPolicy::kTrustFirst;
+    session.keyContext = multicast.CreateKeyContext(session.fabric_index, session.group_id); // FIXME: RELEASE!
+    VerifyOrReturnError(nullptr != session.keyContext, false);
 
     // Extract MIC from the end of the message.
     uint8_t * data     = msg->Start();
@@ -1227,7 +1228,11 @@ bool GroupDecryptMulticast(const PacketHeader & partialPacketHeader,
         return false;
     }
 
-    return GroupKeyDecryptAttempt(partialPacketHeader, packetHeader, payloadHeader, privacy, msgCopy, mac, groupContext);
+    bool privacy = partialPacketHeader.HasPrivacyFlag();
+    bool decrypted = GroupKeyDecryptAttempt(partialPacketHeader, packetHeader, payloadHeader, privacy, msgCopy, mac, session);
+
+    msg = std::move(msgCopy);
+    return decrypted;
 }
 
 void SessionManager::SecureGroupMessageDispatch(const PacketHeader & partialPacketHeader,
@@ -1238,17 +1243,17 @@ void SessionManager::SecureGroupMessageDispatch(const PacketHeader & partialPack
 
     PacketHeader packetHeaderCopy; /// Packet header decoded per group key, with privacy decrypted fields
     PayloadHeader payloadHeader;
-    Credentials::GroupDataProvider::GroupSession groupContext;
+    Credentials::GroupDataProvider::GroupSession session;
     bool decrypted = false;
     CHIP_ERROR err = CHIP_NO_ERROR;
 
     if(partialPacketHeader.IsValidMulticastMsg())
     {
-        decrypted = GroupDecrypt(partialPacketHeader, packetHeaderCopy, payloadHeader, groupContext, std::move(msg));
+        decrypted = MulticastDecrypt(partialPacketHeader, packetHeaderCopy, payloadHeader, session, std::move(msg));
     }
     else
     {
-        decrypted = GroupDecryptMulticast(partialPacketHeader, packetHeaderCopy, payloadHeader, groupContext, std::move(msg));
+        decrypted = GroupDecrypt(partialPacketHeader, packetHeaderCopy, payloadHeader, session, std::move(msg));
     }
     if(!decrypted)
     {
@@ -1282,10 +1287,10 @@ void SessionManager::SecureGroupMessageDispatch(const PacketHeader & partialPack
     Transport::PeerMessageCounter * counter = nullptr;
 
     if (CHIP_NO_ERROR ==
-        gGroupPeerTable->FindOrAddPeer(groupContext.fabric_index, packetHeaderCopy.GetSourceNodeId().Value(),
+        gGroupPeerTable->FindOrAddPeer(session.fabric_index, packetHeaderCopy.GetSourceNodeId().Value(),
                                        packetHeaderCopy.IsSecureSessionControlMsg(), counter))
     {
-        if (Credentials::GroupDataProvider::SecurityPolicy::kTrustFirst == groupContext.security_policy)
+        if (Credentials::GroupDataProvider::SecurityPolicy::kTrustFirst == session.security_policy)
         {
             err = counter->VerifyOrTrustFirstGroup(packetHeaderCopy.GetMessageCounter());
         }
@@ -1319,7 +1324,7 @@ void SessionManager::SecureGroupMessageDispatch(const PacketHeader & partialPack
     if (mCB != nullptr)
     {
         // TODO : When MCSP is done, clean up session creation logic
-        Transport::IncomingGroupSession groupSession(groupContext.group_id, groupContext.fabric_index,
+        Transport::IncomingGroupSession groupSession(session.group_id, session.fabric_index,
                                                      packetHeaderCopy.GetSourceNodeId().Value());
 
         MATTER_LOG_MESSAGE_RECEIVED(chip::Tracing::IncomingMessageType::kGroupMessage, &payloadHeader, &packetHeaderCopy,
