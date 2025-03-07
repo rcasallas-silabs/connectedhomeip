@@ -155,6 +155,8 @@ enum SecFlagMask
     kSessionTypeMask = 0b00000011, ///< Mask to extract sessionType
 };
 
+constexpr uint16_t kMulticastGroupMask = 0x8000;
+
 using MsgFlags = BitFlags<MsgFlagValues>;
 using SecFlags = BitFlags<SecFlagValues>;
 
@@ -207,6 +209,8 @@ public:
      */
     const Optional<GroupId> & GetDestinationGroupId() const { return mDestinationGroupId; }
 
+    const Optional<FabricIndex> & GetFabricIndex() const { return mFabricIndex; }
+
     uint16_t GetSessionId() const { return mSessionId; }
     Header::SessionType GetSessionType() const { return mSessionType; }
 
@@ -251,6 +255,11 @@ public:
     {
         // Check is based on spec 4.11.2
         return (IsGroupSession() && HasSourceNodeId() && HasDestinationGroupId() && !IsSecureSessionControlMsg());
+    }
+
+    bool IsValidMulticastMsg() const
+    {
+        return (IsGroupSession() && HasSourceNodeId() && HasDestinationNodeId() && !IsSecureSessionControlMsg());
     }
 
     bool IsValidMCSPMsg() const
@@ -311,6 +320,15 @@ public:
     {
         mDestinationNodeId.ClearValue();
         mMsgFlags.Clear(Header::MsgFlagValues::kDestinationNodeIdPresent);
+        return *this;
+    }
+
+    PacketHeader & SetDestinationMulticastId(FabricIndex fabric_index, GroupId group_id)
+    {
+        uint64_t value = static_cast<uint64_t>((fabric_index & 0xffff) << 16) + static_cast<uint64_t>(group_id & 0xffff);
+        mDestinationNodeId.SetValue(value);
+        mDestinationGroupId.SetValue(group_id);
+        mMsgFlags.Set(Header::MsgFlagValues::kDestinationNodeIdPresent);
         return *this;
     }
 
@@ -508,6 +526,7 @@ private:
     Optional<NodeId> mSourceNodeId;
 
     /// Intended recipient of the message.
+    Optional<FabricIndex> mFabricIndex;
     Optional<NodeId> mDestinationNodeId;
     Optional<GroupId> mDestinationGroupId;
 

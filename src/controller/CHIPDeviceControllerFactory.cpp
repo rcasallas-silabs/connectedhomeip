@@ -41,6 +41,8 @@
 #include <protocols/secure_channel/CASEServer.h>
 #include <protocols/secure_channel/SimpleSessionResumptionStorage.h>
 
+#include <credentials/MulticastDataProvider.h>
+
 using namespace chip::Inet;
 using namespace chip::System;
 using namespace chip::Credentials;
@@ -328,6 +330,22 @@ CHIP_ERROR DeviceControllerFactory::InitSystemState(FactoryInitParams params)
     mSystemState = chip::Platform::New<DeviceControllerSystemState>(std::move(stateParams));
     mSystemState->SetTempFabricTable(tempFabricTable, params.enableServerInteractions);
     ChipLogDetail(Controller, "System State Initialized...");
+
+    // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+    // ADD COMMAND TO SETUP CLIENT MULTICAST TARGETS
+    const chip::FabricInfo *fabric = stateParams.fabricTable->FindFabricWithIndex(1);
+    if(fabric)
+    {
+        uint8_t debug_key[] = {0xa0, 0xa1, 0xa2, 0xa3, 0xa4, 0xa5, 0xa6, 0xa7, 0xa8, 0xa9, 0xaa, 0xab, 0xac, 0xad, 0xae, 0xaf};
+        chip::Multicast::DataProvider &multicast = chip::Multicast::DataProvider::Instance();
+        chip::Multicast::Target target;
+        target.mTargetId = 0x8101;
+        target.mEndpointCount = 1;
+        target.mEndpoints[0] = 1;
+        multicast.SetTarget(fabric, ByteSpan(debug_key), target);
+    }
+    // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+
     return CHIP_NO_ERROR;
 }
 
