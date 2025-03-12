@@ -29,6 +29,7 @@
 #include <lib/support/ScopedBuffer.h>
 #include <lib/support/TestGroupData.h>
 #include <platform/LockTracker.h>
+#include <credentials/MulticastDataProvider.h>
 
 #include <string>
 
@@ -150,6 +151,7 @@ CHIP_ERROR CHIPCommand::MaybeSetUpStack()
     ReturnLogErrorOnFailure(sGroupDataProvider.Init());
     chip::Credentials::SetGroupDataProvider(&sGroupDataProvider);
     factoryInitParams.groupDataProvider = &sGroupDataProvider;
+    chip::Multicast::DataProvider::Instance().Initialize(&mDefaultStorage, factoryInitParams.sessionKeystore);
 
     uint16_t port = mDefaultStorage.GetListenPort();
     if (port != 0)
