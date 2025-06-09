@@ -64,6 +64,8 @@ source_set("commands") {
     sources += [ "Stat.cpp" ]
   }
 
+  sources += [ "Debug.cpp" ]
+
   if (chip_device_platform != "none") {
     deps = [ "${chip_root}/src/setup_payload:onboarding-codes-utils" ]
   }

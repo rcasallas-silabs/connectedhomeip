@@ -86,5 +86,12 @@ void RegisterNFCCommands();
  */
 void RegisterDnsCommands();
 
+
+/**
+ * This function registers the BLE commands.
+ *
+ */
+void RegisterDebugCommands();
+
 } // namespace Shell
 } // namespace chip

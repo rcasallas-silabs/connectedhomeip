@@ -129,6 +129,7 @@ void Engine::RegisterDefaultCommands()
 #if CHIP_SYSTEM_CONFIG_PROVIDE_STATISTICS
     RegisterStatCommands();
 #endif
+    RegisterDebugCommands();
 }
 
 } // namespace Shell
