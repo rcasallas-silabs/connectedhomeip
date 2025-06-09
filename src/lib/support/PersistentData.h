@@ -96,7 +96,7 @@ struct PersistentStore
 
 /// @brief Combines PersistentStore and DataAccessor
 template <size_t kMaxSerializedSize>
-struct PersistentData : PersistentStore<kMaxSerializedSize>, DataAccessor
+struct PersistentData : public PersistentStore<kMaxSerializedSize>, DataAccessor
 {
     using SizedStore = PersistentStore<kMaxSerializedSize>;
 

@@ -205,6 +205,9 @@ public class ClusterIDMapping {
         if (clusterId == ScenesManagement.ID) {
             return new ScenesManagement();
         }
+        if (clusterId == Multicast.ID) {
+            return new Multicast();
+        }
         if (clusterId == HepaFilterMonitoring.ID) {
             return new HepaFilterMonitoring();
         }
@@ -8426,6 +8429,142 @@ public class ClusterIDMapping {
                     }
                     public static CopySceneCommandField value(int id) throws NoSuchFieldError {
                         for (CopySceneCommandField field : CopySceneCommandField.values()) {
+                        if (field.getID() == id) {
+                            return field;
+                        }
+                        }
+                        throw new NoSuchFieldError();
+                    }
+                }@Override
+        public String getAttributeName(long id) throws NoSuchFieldError {
+            return Attribute.value(id).toString();
+        }
+
+        @Override
+        public String getEventName(long id) throws NoSuchFieldError {
+            return Event.value(id).toString();
+        }
+
+        @Override
+        public String getCommandName(long id) throws NoSuchFieldError {
+            return Command.value(id).toString();
+        }
+
+        @Override
+        public long getAttributeID(String name) throws IllegalArgumentException {
+            return Attribute.valueOf(name).getID();
+        }
+
+        @Override
+        public long getEventID(String name) throws IllegalArgumentException {
+            return Event.valueOf(name).getID();
+        }
+
+        @Override
+        public long getCommandID(String name) throws IllegalArgumentException {
+            return Command.valueOf(name).getID();
+        }
+    }
+    public static class Multicast implements BaseCluster {
+        public static final long ID = 100L;
+        public long getID() {
+            return ID;
+        }
+
+        public enum Attribute {
+            Groups(0L),
+            GeneratedCommandList(65528L),
+            AcceptedCommandList(65529L),
+            AttributeList(65531L),
+            FeatureMap(65532L),
+            ClusterRevision(65533L),;
+            private final long id;
+            Attribute(long id) {
+                this.id = id;
+            }
+
+            public long getID() {
+                return id;
+            }
+
+            public static Attribute value(long id) throws NoSuchFieldError {
+                for (Attribute attribute : Attribute.values()) {
+                    if (attribute.getID() == id) {
+                        return attribute;
+                    }
+                }
+                throw new NoSuchFieldError();
+            }
+        }
+
+        public enum Event {;
+            private final long id;
+            Event(long id) {
+                this.id = id;
+            }
+
+            public long getID() {
+                return id;
+            }
+
+            public static Event value(long id) throws NoSuchFieldError {
+                for (Event event : Event.values()) {
+                    if (event.getID() == id) {
+                        return event;
+                    }
+                }
+                throw new NoSuchFieldError();
+            }
+        }
+
+        public enum Command {
+            SetGroup(0L),
+            RemoveGroup(1L),;
+            private final long id;
+            Command(long id) {
+                this.id = id;
+            }
+
+            public long getID() {
+                return id;
+            }
+
+            public static Command value(long id) throws NoSuchFieldError {
+                for (Command command : Command.values()) {
+                    if (command.getID() == id) {
+                        return command;
+                    }
+                }
+                throw new NoSuchFieldError();
+            }
+        }public enum SetGroupCommandField {GroupId(0),Endpoints(1),Key(2),GracePeriod(3),;
+                    private final int id;
+                    SetGroupCommandField(int id) {
+                        this.id = id;
+                    }
+
+                    public int getID() {
+                        return id;
+                    }
+                    public static SetGroupCommandField value(int id) throws NoSuchFieldError {
+                        for (SetGroupCommandField field : SetGroupCommandField.values()) {
+                        if (field.getID() == id) {
+                            return field;
+                        }
+                        }
+                        throw new NoSuchFieldError();
+                    }
+                }public enum RemoveGroupCommandField {GroupId(0),Endpoints(1),GracePeriod(2),;
+                    private final int id;
+                    RemoveGroupCommandField(int id) {
+                        this.id = id;
+                    }
+
+                    public int getID() {
+                        return id;
+                    }
+                    public static RemoveGroupCommandField value(int id) throws NoSuchFieldError {
+                        for (RemoveGroupCommandField field : RemoveGroupCommandField.values()) {
                         if (field.getID() == id) {
                             return field;
                         }

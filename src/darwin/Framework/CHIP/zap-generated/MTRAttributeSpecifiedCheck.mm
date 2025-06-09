@@ -2548,6 +2548,34 @@ static BOOL AttributeIsSpecifiedInScenesManagementCluster(AttributeId aAttribute
     }
     }
 }
+static BOOL AttributeIsSpecifiedInMulticastCluster(AttributeId aAttributeId)
+{
+    using namespace Clusters::Multicast;
+    switch (aAttributeId) {
+    case Attributes::Groups::Id: {
+        return YES;
+    }
+    case Attributes::GeneratedCommandList::Id: {
+        return YES;
+    }
+    case Attributes::AcceptedCommandList::Id: {
+        return YES;
+    }
+    case Attributes::AttributeList::Id: {
+        return YES;
+    }
+    case Attributes::FeatureMap::Id: {
+        return YES;
+    }
+    case Attributes::ClusterRevision::Id: {
+        return YES;
+    }
+    default: {
+        // Not a known Multicast attribute.
+        return NO;
+    }
+    }
+}
 static BOOL AttributeIsSpecifiedInHEPAFilterMonitoringCluster(AttributeId aAttributeId)
 {
     using namespace Clusters::HepaFilterMonitoring;
@@ -7053,6 +7081,9 @@ BOOL MTRAttributeIsSpecified(ClusterId aClusterId, AttributeId aAttributeId)
     }
     case Clusters::ScenesManagement::Id: {
         return AttributeIsSpecifiedInScenesManagementCluster(aAttributeId);
+    }
+    case Clusters::Multicast::Id: {
+        return AttributeIsSpecifiedInMulticastCluster(aAttributeId);
     }
     case Clusters::HepaFilterMonitoring::Id: {
         return AttributeIsSpecifiedInHEPAFilterMonitoringCluster(aAttributeId);

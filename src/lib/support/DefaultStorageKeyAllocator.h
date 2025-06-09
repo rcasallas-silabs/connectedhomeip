@@ -171,6 +171,10 @@ public:
         return StorageKeyName::Formatted("f/%x/k/%x", fabric, keyset);
     }
 
+    // Multicast
+
+    static StorageKeyName MulticastGroups(chip::FabricIndex fabric) { return StorageKeyName::Formatted("f/%x/mc", fabric); }
+
     static StorageKeyName AttributeValue(EndpointId endpointId, ClusterId clusterId, AttributeId attributeId)
     {
         // Needs at most 26 chars: 6 for "g/a///", 4 for the endpoint id, 8 each
@@ -213,7 +217,7 @@ public:
     static StorageKeyName OTACurrentProvider() { return StorageKeyName::FromConst("g/o/cp"); }
     static StorageKeyName OTAUpdateToken() { return StorageKeyName::FromConst("g/o/ut"); }
     static StorageKeyName OTACurrentUpdateState() { return StorageKeyName::FromConst("g/o/us"); }
-    static StorageKeyName OTATargetVersion() { return StorageKeyName::FromConst("g/o/tv"); }
+    static StorageKeyName OTAGroupVersion() { return StorageKeyName::FromConst("g/o/tv"); }
 
     // Event number counter.
     static StorageKeyName IMEventNumber() { return StorageKeyName::FromConst("g/im/ec"); }
