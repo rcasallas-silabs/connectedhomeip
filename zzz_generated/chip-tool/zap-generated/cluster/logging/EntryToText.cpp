@@ -143,6 +143,8 @@ char const * ClusterIdToText(chip::ClusterId id)
         return "RvcOperationalState";
     case chip::app::Clusters::ScenesManagement::Id:
         return "ScenesManagement";
+    case chip::app::Clusters::Groupcast::Id:
+        return "Groupcast";
     case chip::app::Clusters::HepaFilterMonitoring::Id:
         return "HepaFilterMonitoring";
     case chip::app::Clusters::ActivatedCarbonFilterMonitoring::Id:
@@ -2064,6 +2066,27 @@ char const * AttributeIdToText(chip::ClusterId cluster, chip::AttributeId id)
         case chip::app::Clusters::ScenesManagement::Attributes::FeatureMap::Id:
             return "FeatureMap";
         case chip::app::Clusters::ScenesManagement::Attributes::ClusterRevision::Id:
+            return "ClusterRevision";
+        default:
+            return "Unknown";
+        }
+    }
+    case chip::app::Clusters::Groupcast::Id: {
+        switch (id)
+        {
+        case chip::app::Clusters::Groupcast::Attributes::Membership::Id:
+            return "Membership";
+        case chip::app::Clusters::Groupcast::Attributes::MaxMembershipCount::Id:
+            return "MaxMembershipCount";
+        case chip::app::Clusters::Groupcast::Attributes::GeneratedCommandList::Id:
+            return "GeneratedCommandList";
+        case chip::app::Clusters::Groupcast::Attributes::AcceptedCommandList::Id:
+            return "AcceptedCommandList";
+        case chip::app::Clusters::Groupcast::Attributes::AttributeList::Id:
+            return "AttributeList";
+        case chip::app::Clusters::Groupcast::Attributes::FeatureMap::Id:
+            return "FeatureMap";
+        case chip::app::Clusters::Groupcast::Attributes::ClusterRevision::Id:
             return "ClusterRevision";
         default:
             return "Unknown";
@@ -5540,6 +5563,19 @@ char const * AcceptedCommandIdToText(chip::ClusterId cluster, chip::CommandId id
             return "Unknown";
         }
     }
+    case chip::app::Clusters::Groupcast::Id: {
+        switch (id)
+        {
+        case chip::app::Clusters::Groupcast::Commands::JoinGroup::Id:
+            return "JoinGroup";
+        case chip::app::Clusters::Groupcast::Commands::LeaveGroup::Id:
+            return "LeaveGroup";
+        case chip::app::Clusters::Groupcast::Commands::LeaveAllGroups::Id:
+            return "LeaveAllGroups";
+        default:
+            return "Unknown";
+        }
+    }
     case chip::app::Clusters::HepaFilterMonitoring::Id: {
         switch (id)
         {
@@ -6661,6 +6697,15 @@ char const * GeneratedCommandIdToText(chip::ClusterId cluster, chip::CommandId i
             return "GetSceneMembershipResponse";
         case chip::app::Clusters::ScenesManagement::Commands::CopySceneResponse::Id:
             return "CopySceneResponse";
+        default:
+            return "Unknown";
+        }
+    }
+    case chip::app::Clusters::Groupcast::Id: {
+        switch (id)
+        {
+        case chip::app::Clusters::Groupcast::Commands::JoinGroupResponse::Id:
+            return "JoinGroupResponse";
         default:
             return "Unknown";
         }
