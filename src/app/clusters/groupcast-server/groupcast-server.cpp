@@ -15,7 +15,6 @@
  *    limitations under the License.
  */
 
-// #include "groupcast-server.h"
 #include <app-common/zap-generated/attributes/Accessors.h>
 #include <app-common/zap-generated/cluster-objects.h>
 #include <app-common/zap-generated/ids/Clusters.h>
@@ -72,14 +71,15 @@ private:
 
     CHIP_ERROR ReadMembership(EndpointId endpoint, AttributeValueEncoder & aEncoder)
     {
-        chip::Groupcast::DataProvider & groupcast = chip::Groupcast::DataProvider::Instance();
+        chip::Groupcast::DataProvider * provider = Server::GetInstance().GetGroupcastDataProvider();
+        VerifyOrReturnError(nullptr != provider, CHIP_ERROR_INCORRECT_STATE);
 
-        CHIP_ERROR err = aEncoder.EncodeList([&groupcast](const auto & encoder) -> CHIP_ERROR {
+        CHIP_ERROR err = aEncoder.EncodeList([provider](const auto & encoder) -> CHIP_ERROR {
             CHIP_ERROR status = CHIP_NO_ERROR;
             for (auto & fabric : Server::GetInstance().GetFabricTable())
             {
                 auto fabric_index = fabric.GetFabricIndex();
-                auto iter         = groupcast.IterateGroups(fabric_index);
+                auto iter         = provider->IterateGroups(fabric_index);
                 VerifyOrReturnError(nullptr != iter, CHIP_ERROR_NO_MEMORY);
                 chip::Groupcast::Group entry;
                 while (iter->Next(entry))
@@ -109,8 +109,9 @@ private:
 
     CHIP_ERROR ReadMaxMembershipCount(EndpointId endpoint, AttributeValueEncoder & aEncoder)
     {
-        chip::Groupcast::DataProvider & groupcast = chip::Groupcast::DataProvider::Instance();
-        return aEncoder.Encode(groupcast.GetMaxMembershipCount());
+        chip::Groupcast::DataProvider * provider = Server::GetInstance().GetGroupcastDataProvider();
+        VerifyOrReturnError(nullptr != provider, CHIP_ERROR_INCORRECT_STATE);
+        return aEncoder.Encode(provider->GetMaxMembershipCount());
     }
 };
 
@@ -129,25 +130,28 @@ bool emberAfGroupcastClusterJoinGroupCallback(
     chip::app::CommandHandler * commandObj, const chip::app::ConcreteCommandPath & commandPath,
     const chip::app::Clusters::Groupcast::Commands::JoinGroup::DecodableType & commandData)
 {
-    Server & server                           = Server::GetInstance();
-    const FabricInfo * fabric                 = server.GetFabricTable().FindFabricWithIndex(commandObj->GetAccessingFabricIndex());
-    chip::Groupcast::DataProvider & groupcast = chip::Groupcast::DataProvider::Instance();
-    CHIP_ERROR err                            = CHIP_NO_ERROR;
-
-    // Collect arguments
+    Server & server                          = Server::GetInstance();
+    const FabricInfo * fabric                = server.GetFabricTable().FindFabricWithIndex(commandObj->GetAccessingFabricIndex());
+    chip::Groupcast::DataProvider * provider = server.GetGroupcastDataProvider();
     chip::Groupcast::Group target;
     uint8_t key[chip::Crypto::CHIP_CRYPTO_SYMMETRIC_KEY_LENGTH_BYTES] = { 0 };
     size_t key_size                                                   = 0;
+    CHIP_ERROR err                           = CHIP_NO_ERROR;
+
+    // Collect arguments
+    VerifyOrExit(nullptr != provider, err = CHIP_ERROR_INCORRECT_STATE);
 
     // Group
     target.group_id = commandData.groupId;
 
     // Endpoints
     target.endpoint_count = 0;
-    auto iter             = commandData.endpoints.begin();
-    while (iter.Next() && (target.endpoint_count < chip::Groupcast::kEndpointsMax))
     {
-        target.endpoints[target.endpoint_count++] = iter.GetValue();
+        auto iter             = commandData.endpoints.begin();
+        while (iter.Next() && (target.endpoint_count < chip::Groupcast::kEndpointsMax))
+        {
+            target.endpoints[target.endpoint_count++] = iter.GetValue();
+        }
     }
 
     // Parse Key
@@ -155,11 +159,14 @@ bool emberAfGroupcastClusterJoinGroupCallback(
     key_size = chip::Encoding::HexToBytes((char *) commandData.key.data(), commandData.key.size(), key, sizeof(key));
     VerifyOrExit(key_size == sizeof(key), err = CHIP_ERROR_INVALID_LIST_LENGTH);
 
-    // Store groupcast configuration
-    err = groupcast.JoinGroup(fabric, target, ByteSpan(key), commandData.gracePeriod);
+    // Store provider configuration
+    err = provider->JoinGroup(fabric, target, ByteSpan(key), commandData.gracePeriod);
     ChipLogProgress(Crypto, "~~~ Groupcast::Set: #%02x", (unsigned) err.AsInteger());
+    VerifyOrExit(CHIP_NO_ERROR == err,);
 
+    server.GetTransportManager().MulticastGroupJoinLeave(Transport::PeerAddress::Groupcast(), true);
 exit:
+
     // Send response
     commandObj->AddStatus(commandPath, chip::app::StatusIB(err).mStatus);
     return true;

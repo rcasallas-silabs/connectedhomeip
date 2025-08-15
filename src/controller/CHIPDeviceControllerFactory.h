@@ -35,6 +35,7 @@
 #include <credentials/OperationalCertificateStore.h>
 #include <credentials/attestation_verifier/DeviceAttestationVerifier.h>
 #include <protocols/secure_channel/SessionResumptionStorage.h>
+#include <credentials/GroupcastDataProvider.h>
 
 namespace chip {
 
@@ -134,6 +135,7 @@ struct FactoryInitParams
     PersistentStorageDelegate * fabricIndependentStorage               = nullptr;
     Credentials::CertificateValidityPolicy * certificateValidityPolicy = nullptr;
     Credentials::GroupDataProvider * groupDataProvider                 = nullptr;
+    chip::Groupcast::DataProvider * groupcastDataProvider              = nullptr;
     app::reporting::ReportScheduler::TimerDelegate * timerDelegate     = nullptr;
     Crypto::SessionKeystore * sessionKeystore                          = nullptr;
     Inet::EndPointManager<Inet::TCPEndPoint> * tcpEndPointManager      = nullptr;

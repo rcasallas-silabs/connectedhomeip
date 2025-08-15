@@ -212,6 +212,22 @@ CHIP_ERROR AES_CCM_decrypt(const uint8_t * ciphertext, size_t ciphertext_length,
     psa_status_t status             = PSA_SUCCESS;
     size_t out_length               = 0;
 
+    // {
+    //     ByteSpan cipher_(ciphertext, (ciphertext_length > 16) ? 16 : ciphertext_length);
+    //     ByteSpan aad_(aad, aad_length);
+    //     ByteSpan nonce_(nonce, nonce_length);
+    //     ByteSpan tag_(tag, tag_length);
+    //     ChipLogDetail(DeviceLayer, "~~~ Cipher(%u)", (unsigned)ciphertext_length);
+    //     ChipLogByteSpan(DeviceLayer, cipher_);
+    //     ChipLogDetail(DeviceLayer, "~~~ AAD(%u)", (unsigned)aad_length);
+    //     ChipLogByteSpan(DeviceLayer, aad_);
+    //     ChipLogDetail(DeviceLayer, "~~~ Nonce(%u)", (unsigned)nonce_length);
+    //     ChipLogByteSpan(DeviceLayer, nonce_);
+    //     ChipLogDetail(DeviceLayer, "~~~ Tag(%u)", (unsigned)tag_length);
+    //     ChipLogByteSpan(DeviceLayer, tag_);
+    //     ChipLogDetail(DeviceLayer, "~~~ Key: %08x", (unsigned)key.As<psa_key_id_t>());
+    // }
+
     status = psa_aead_decrypt_setup(&operation, key.As<psa_key_id_t>(), algorithm);
     VerifyOrReturnError(status == PSA_SUCCESS, CHIP_ERROR_INTERNAL);
 

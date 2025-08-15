@@ -160,6 +160,10 @@ using SecFlags = BitFlags<SecFlagValues>;
 
 using ExFlags = BitFlags<ExFlagValues>;
 
+// Use a subset of GroupID range for multicast
+// Old groups may be replaced completely
+constexpr uint16_t kGroupcastMask = 0x8000;
+
 } // namespace Header
 
 /**
@@ -225,6 +229,8 @@ public:
 
     void SetMessageFlags(uint8_t flags) { mMsgFlags.SetRaw(flags); }
 
+    void Debug();
+
     void SetSecurityFlags(uint8_t securityFlags)
     {
         mSecFlags.SetRaw(securityFlags);
@@ -251,6 +257,11 @@ public:
     {
         // Check is based on spec 4.11.2
         return (IsGroupSession() && HasSourceNodeId() && HasDestinationGroupId() && !IsSecureSessionControlMsg());
+    }
+
+    bool IsValidGroupcastMsg() const
+    {
+        return (IsGroupSession() && HasSourceNodeId() && !HasDestinationGroupId() && HasDestinationNodeId() && !IsSecureSessionControlMsg());
     }
 
     bool IsValidMCSPMsg() const

@@ -25,9 +25,6 @@
 
 using namespace chip;
 
-namespace {
-chip::Groupcast::DataProvider sInstance;
-}
 namespace chip {
 namespace Groupcast {
 
@@ -304,6 +301,12 @@ DataProvider::KeyContextIterator::KeyContextIterator(DataProvider & provider, Fa
     size_t index = 0;
     chip::Groupcast::TargetList list(fabric, provider.mStorage);
     list.Find(mEntry, index);
+    // for (size_t i = 0; i < kGroupKeyCount; ++i)
+    // {
+    //     ChipLogDetail(DeviceLayer, "~~~ KeyContextIterator[%u] %u", (unsigned)i, (unsigned)mEntry.keys[i].IsActive());
+    //     ByteSpan span(mEntry.keys[i].encryption.As<Crypto::Symmetric128BitsKeyByteArray>());
+    //     ChipLogByteSpan(DeviceLayer, span);
+    // }
 }
 
 size_t DataProvider::KeyContextIterator::Count()
@@ -374,6 +377,10 @@ void DataProvider::GroupIterator::Release()
 //
 // DataProvider
 //
+
+namespace {
+DataProvider sInstance;
+}
 
 DataProvider & DataProvider::DataProvider::Instance()
 {

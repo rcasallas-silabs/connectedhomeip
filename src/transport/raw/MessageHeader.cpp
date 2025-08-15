@@ -32,6 +32,10 @@
 #include <lib/core/CHIPError.h>
 #include <lib/support/BufferReader.h>
 #include <lib/support/CodeUtils.h>
+#include <lib/support/logging/CHIPLogging.h>
+
+
+size_t _debug_count = 0;
 
 /**********************************************
  * Header format (little endian):
@@ -131,30 +135,76 @@ uint16_t PayloadHeader::EncodeSizeBytes() const
     return static_cast<uint16_t>(size);
 }
 
+void PacketHeader::Debug() {
+
+    uint8_t mflags = static_cast<uint8_t>(mMsgFlags.Raw());
+    uint8_t sflags = static_cast<uint8_t>(mSecFlags.Raw());
+    uint64_t nv = mDestinationNodeId.HasValue() ? mDestinationNodeId.Value() : 0;
+    const uint8_t *n = (const uint8_t *)&nv;
+    ChipLogDetail(Zcl, "~~~ mFLAGS: #%02x, sFLAGS: #%02x, NID:[%02x%02x%02x%02x%02x%02x%02x%02x], GID:#%02x, COUNT:%u",
+        mflags, sflags,
+        n[0], n[1], n[2], n[3], n[4], n[5], n[6], n[7],
+        mDestinationGroupId.HasValue() ? mDestinationGroupId.Value() : 0,
+        (unsigned)mMessageCounter);
+}
+
 CHIP_ERROR PacketHeader::DecodeFixedCommon(Encoding::LittleEndian::Reader & reader)
 {
-    CHIP_ERROR err = CHIP_NO_ERROR;
-    int version;
-
-    uint8_t msgFlags;
-    SuccessOrExit(err = reader.Read8(&msgFlags).StatusCode());
-    version = ((msgFlags & kVersionMask) >> kVersionShift);
-    VerifyOrExit(version == kMsgHeaderVersion, err = CHIP_ERROR_VERSION_MISMATCH);
-    SetMessageFlags(msgFlags);
-
-    SuccessOrExit(err = reader.Read16(&mSessionId).StatusCode());
-
-    uint8_t securityFlags;
-    SuccessOrExit(err = reader.Read8(&securityFlags).StatusCode());
-    SetSecurityFlags(securityFlags);
-
-exit:
-
-    return err;
+    // Message Flags
+    uint8_t version = 0;
+    {
+        uint8_t msg_flags = 0;
+        ReturnErrorOnFailure(reader.Read8(&msg_flags).StatusCode());
+        version = ((msg_flags & kVersionMask) >> kVersionShift);
+        VerifyOrReturnError(version == kMsgHeaderVersion, CHIP_ERROR_VERSION_MISMATCH);
+        SetMessageFlags(msg_flags);
+    }
+    // Session ID
+    ReturnErrorOnFailure(reader.Read16(&mSessionId).StatusCode());
+    VerifyOrReturnError(IsSessionTypeValid(), CHIP_ERROR_INTERNAL);
+    // Security Flags
+    {
+        uint8_t sec_flags = 0;
+        ReturnErrorOnFailure(reader.Read8(&sec_flags).StatusCode());
+        SetSecurityFlags(sec_flags);
+    }
+    // Message Counter
+    ReturnErrorOnFailure(reader.Read32(&mMessageCounter).StatusCode());
+    // Source Node ID
+    if (HasSourceNodeId())
+    {
+        uint64_t source_id;
+        ReturnErrorOnFailure(reader.Read64(&source_id).StatusCode());
+        mSourceNodeId.SetValue(source_id);
+    }
+    else
+    {
+        mSourceNodeId.ClearValue();
+    }
+    // Destination Node ID
+    mDestinationNodeId.ClearValue();
+    mDestinationGroupId.ClearValue();
+    if (HasDestinationNodeId())
+    {
+        uint64_t destination_id;
+        ReturnErrorOnFailure(reader.Read64(&destination_id).StatusCode());
+        mDestinationNodeId.SetValue(destination_id);
+    }
+    // Destination Group ID
+    else if (HasDestinationGroupId())
+    {
+        uint16_t destination_id = 0;
+        ReturnErrorOnFailure(reader.Read16(&destination_id).StatusCode());
+        mDestinationGroupId.SetValue(destination_id);
+    }
+    return CHIP_NO_ERROR;
 }
 
 CHIP_ERROR PacketHeader::DecodeFixed(const System::PacketBufferHandle & buf)
 {
+    ByteSpan span(buf->Start(), buf->DataLength());
+    // ChipLogDetail(DeviceLayer, "~~~ PacketHeader::DecodeFixed(%u)", (unsigned)buf->DataLength());
+    // ChipLogByteSpan(DeviceLayer, span);
     const uint8_t * const data = buf->Start();
     size_t size                = buf->DataLength();
     LittleEndian::Reader reader(data, size);
@@ -163,63 +213,72 @@ CHIP_ERROR PacketHeader::DecodeFixed(const System::PacketBufferHandle & buf)
 
 CHIP_ERROR PacketHeader::Decode(const uint8_t * const data, size_t size, uint16_t * decode_len)
 {
+    ByteSpan span(data, size);
+    // ChipLogDetail(DeviceLayer, "~~~ PacketHeader::Decode(%u)", (unsigned)size);
+    // ChipLogByteSpan(DeviceLayer, span);
     CHIP_ERROR err = CHIP_NO_ERROR;
     LittleEndian::Reader reader(data, size);
     // TODO: De-uint16-ify everything related to this library
     uint16_t octets_read;
 
+    // err = DecodeFixedCommon(reader);
+    // Debug();
+    // if(CHIP_NO_ERROR != err) {
+    //     ChipLogProgress(Zcl, "~~~ DECODE ERROR: #%04x", (unsigned)err.AsInteger());
+    //     return err;
+    // }
+    // ChipLogProgress(Zcl, "~~~ Decoded: #%04x", (unsigned)err.AsInteger());
     SuccessOrExit(err = DecodeFixedCommon(reader));
+    // SuccessOrExit(err = reader.Read32(&mMessageCounter).StatusCode());
 
-    SuccessOrExit(err = reader.Read32(&mMessageCounter).StatusCode());
+    // if (mMsgFlags.Has(Header::MsgFlagValues::kSourceNodeIdPresent))
+    // {
+    //     uint64_t sourceNodeId;
+    //     SuccessOrExit(err = reader.Read64(&sourceNodeId).StatusCode());
+    //     mSourceNodeId.SetValue(sourceNodeId);
+    // }
+    // else
+    // {
+    //     mSourceNodeId.ClearValue();
+    // }
 
-    if (mMsgFlags.Has(Header::MsgFlagValues::kSourceNodeIdPresent))
-    {
-        uint64_t sourceNodeId;
-        SuccessOrExit(err = reader.Read64(&sourceNodeId).StatusCode());
-        mSourceNodeId.SetValue(sourceNodeId);
-    }
-    else
-    {
-        mSourceNodeId.ClearValue();
-    }
+    // if (!IsSessionTypeValid())
+    // {
+    //     // Reserved.
+    //     SuccessOrExit(err = CHIP_ERROR_INTERNAL);
+    // }
 
-    if (!IsSessionTypeValid())
-    {
-        // Reserved.
-        SuccessOrExit(err = CHIP_ERROR_INTERNAL);
-    }
-
-    if (mMsgFlags.HasAll(Header::MsgFlagValues::kDestinationNodeIdPresent, Header::MsgFlagValues::kDestinationGroupIdPresent))
-    {
-        // Reserved.
-        SuccessOrExit(err = CHIP_ERROR_INTERNAL);
-    }
-    else if (mMsgFlags.Has(Header::MsgFlagValues::kDestinationNodeIdPresent))
-    {
-        // No need to check if session is Unicast because for MCSP
-        // a destination node ID is present with a group session ID.
-        // Spec 4.9.2.4
-        uint64_t destinationNodeId;
-        SuccessOrExit(err = reader.Read64(&destinationNodeId).StatusCode());
-        mDestinationNodeId.SetValue(destinationNodeId);
-        mDestinationGroupId.ClearValue();
-    }
-    else if (mMsgFlags.Has(Header::MsgFlagValues::kDestinationGroupIdPresent))
-    {
-        if (mSessionType != Header::SessionType::kGroupSession)
-        {
-            SuccessOrExit(err = CHIP_ERROR_INTERNAL);
-        }
-        uint16_t destinationGroupId;
-        SuccessOrExit(err = reader.Read16(&destinationGroupId).StatusCode());
-        mDestinationGroupId.SetValue(destinationGroupId);
-        mDestinationNodeId.ClearValue();
-    }
-    else
-    {
-        mDestinationNodeId.ClearValue();
-        mDestinationGroupId.ClearValue();
-    }
+    // if (mMsgFlags.HasAll(Header::MsgFlagValues::kDestinationNodeIdPresent, Header::MsgFlagValues::kDestinationGroupIdPresent))
+    // {
+    //     // Reserved.
+    //     SuccessOrExit(err = CHIP_ERROR_INTERNAL);
+    // }
+    // else if (mMsgFlags.Has(Header::MsgFlagValues::kDestinationNodeIdPresent))
+    // {
+    //     // No need to check if session is Unicast because for MCSP
+    //     // a destination node ID is present with a group session ID.
+    //     // Spec 4.9.2.4
+    //     uint64_t destinationNodeId;
+    //     SuccessOrExit(err = reader.Read64(&destinationNodeId).StatusCode());
+    //     mDestinationNodeId.SetValue(destinationNodeId);
+    //     mDestinationGroupId.ClearValue();
+    // }
+    // else if (mMsgFlags.Has(Header::MsgFlagValues::kDestinationGroupIdPresent))
+    // {
+    //     if (mSessionType != Header::SessionType::kGroupSession)
+    //     {
+    //         SuccessOrExit(err = CHIP_ERROR_INTERNAL);
+    //     }
+    //     uint16_t destinationGroupId;
+    //     SuccessOrExit(err = reader.Read16(&destinationGroupId).StatusCode());
+    //     mDestinationGroupId.SetValue(destinationGroupId);
+    //     mDestinationNodeId.ClearValue();
+    // }
+    // else
+    // {
+    //     mDestinationNodeId.ClearValue();
+    //     mDestinationGroupId.ClearValue();
+    // }
 
     if (mSecFlags.Has(Header::SecFlagValues::kMsgExtensionFlag))
     {
@@ -315,7 +374,7 @@ CHIP_ERROR PayloadHeader::DecodeAndConsume(const System::PacketBufferHandle & bu
 CHIP_ERROR PacketHeader::Encode(uint8_t * data, size_t size, uint16_t * encode_size) const
 {
     VerifyOrReturnError(size >= EncodeSizeBytes(), CHIP_ERROR_INVALID_ARGUMENT);
-    VerifyOrReturnError(!(mDestinationNodeId.HasValue() && mDestinationGroupId.HasValue()), CHIP_ERROR_INTERNAL);
+    // VerifyOrReturnError(!(mDestinationNodeId.HasValue() && mDestinationGroupId.HasValue()), CHIP_ERROR_INTERNAL);
     VerifyOrReturnError(encode_size != nullptr, CHIP_ERROR_INTERNAL);
     VerifyOrReturnError(IsSessionTypeValid(), CHIP_ERROR_INTERNAL);
 

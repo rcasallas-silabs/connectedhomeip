@@ -38,6 +38,7 @@
 #include <lib/support/TypeTraits.h>
 #include <stdint.h>
 #include <string.h>
+#include <lib/support/logging/CHIPLogging.h>
 
 using chip::ByteSpan;
 using chip::MutableByteSpan;
@@ -922,6 +923,9 @@ CHIP_ERROR DeriveGroupOperationalCredentials(const ByteSpan & epoch_key, const B
     ReturnErrorOnFailure(Crypto::DeriveGroupOperationalKey(epoch_key, compressed_fabric_id, encryption_key));
     ReturnErrorOnFailure(Crypto::DeriveGroupSessionId(encryption_key, operational_credentials.hash));
     ReturnErrorOnFailure(Crypto::DeriveGroupPrivacyKey(encryption_key, privacy_key));
+
+    // ChipLogDetail(DeviceLayer, "~~~ DeriveGroupOperationalCredentials(%u) #%04x", (unsigned)encryption_key.size(), operational_credentials.hash);
+    // ChipLogByteSpan(DeviceLayer, encryption_key);
 
     return CHIP_NO_ERROR;
 }

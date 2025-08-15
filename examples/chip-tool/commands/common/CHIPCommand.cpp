@@ -29,6 +29,7 @@
 #include <lib/support/ScopedBuffer.h>
 #include <lib/support/TestGroupData.h>
 #include <platform/LockTracker.h>
+#include <credentials/GroupcastDataProvider.h>
 
 #include <string>
 
@@ -54,6 +55,8 @@ const chip::Credentials::AttestationTrustStore * CHIPCommand::sTrustStore       
 chip::Credentials::DeviceAttestationRevocationDelegate * CHIPCommand::sRevocationDelegate = nullptr;
 
 chip::Credentials::GroupDataProviderImpl CHIPCommand::sGroupDataProvider{ kMaxGroupsPerFabric, kMaxGroupKeysPerFabric };
+// chip::Groupcast::DataProvider sGroupcastProvider;
+
 // All fabrics share the same ICD client storage.
 chip::app::DefaultICDClientStorage CHIPCommand::sICDClientStorage;
 chip::Crypto::RawKeySessionKeystore CHIPCommand::sSessionKeystore;
@@ -149,7 +152,9 @@ CHIP_ERROR CHIPCommand::MaybeSetUpStack()
     sGroupDataProvider.SetSessionKeystore(factoryInitParams.sessionKeystore);
     ReturnLogErrorOnFailure(sGroupDataProvider.Init());
     chip::Credentials::SetGroupDataProvider(&sGroupDataProvider);
+    chip::Groupcast::DataProvider::Instance().Initialize(&mDefaultStorage, factoryInitParams.sessionKeystore);
     factoryInitParams.groupDataProvider = &sGroupDataProvider;
+    // factoryInitParams.groupcastDataProvider = &sGroupcastProvider;
 
     uint16_t port = mDefaultStorage.GetListenPort();
     if (port != 0)

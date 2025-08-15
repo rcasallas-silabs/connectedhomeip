@@ -104,6 +104,10 @@ CHIP_ERROR UDP::SendMessage(const Transport::PeerAddress & address, System::Pack
     VerifyOrReturnError(mState == State::kInitialized, CHIP_ERROR_INCORRECT_STATE);
     VerifyOrReturnError(mUDPEndPoint != nullptr, CHIP_ERROR_INCORRECT_STATE);
 
+    char temp[Transport::PeerAddress::kMaxToStringSize];
+    address.ToString(temp, Transport::PeerAddress::kMaxToStringSize);
+    ChipLogProgress(Inet, "~~~ SEND %s", temp);
+
     Inet::IPPacketInfo addrInfo;
     addrInfo.Clear();
 

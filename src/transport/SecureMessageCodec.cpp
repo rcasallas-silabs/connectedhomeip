@@ -55,6 +55,8 @@ CHIP_ERROR Encrypt(const CryptoContext & context, CryptoContext::ConstNonceView 
 
     msgBuf->SetDataLength(totalLen + taglen);
 
+    packetHeader.Debug();
+
     return CHIP_NO_ERROR;
 }
 

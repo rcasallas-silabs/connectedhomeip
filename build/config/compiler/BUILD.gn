@@ -198,31 +198,12 @@ config("optimize_zero") {
 }
 
 config("optimize_debug") {
-  cflags = [ "-O${optimize_debug_level}" ]
+  cflags = [ "-Og" ]
   ldflags = cflags
 }
 
 config("optimize_default") {
-  if (is_debug) {
-    if (optimize_debug) {
-      configs = [ ":optimize_debug" ]
-    } else {
-      configs = [ ":optimize_zero" ]
-    }
-  } else {
-    if (optimize_for_size) {
-      configs = [ "$dir_pw_build:optimize_size" ]
-    } else {
-      configs = [ "$dir_pw_build:optimize_speed" ]
-    }
-
-    if (current_os != "mac") {
-      ldflags = [
-        "-Wl,-O2",
-        "-Wl,--gc-sections",
-      ]
-    }
-  }
+    configs = [ ":optimize_debug" ]
 }
 
 config("disabled_warnings") {

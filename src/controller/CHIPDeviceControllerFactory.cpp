@@ -41,6 +41,8 @@
 #include <protocols/secure_channel/CASEServer.h>
 #include <protocols/secure_channel/SimpleSessionResumptionStorage.h>
 
+#include <credentials/GroupcastDataProvider.h>
+
 using namespace chip::Inet;
 using namespace chip::System;
 using namespace chip::Credentials;
@@ -210,6 +212,7 @@ CHIP_ERROR DeviceControllerFactory::InitSystemState(FactoryInitParams params)
     stateParams.exchangeMgr               = chip::Platform::New<Messaging::ExchangeManager>();
     stateParams.messageCounterManager     = chip::Platform::New<secure_channel::MessageCounterManager>();
     stateParams.groupDataProvider         = params.groupDataProvider;
+    stateParams.groupcastDataProvider     = params.groupcastDataProvider;
     stateParams.timerDelegate             = chip::Platform::New<chip::app::DefaultTimerDelegate>();
     stateParams.reportScheduler           = chip::Platform::New<app::reporting::ReportSchedulerImpl>(stateParams.timerDelegate);
     stateParams.sessionKeystore           = params.sessionKeystore;
@@ -339,6 +342,27 @@ CHIP_ERROR DeviceControllerFactory::InitSystemState(FactoryInitParams params)
     mSystemState = chip::Platform::New<DeviceControllerSystemState>(std::move(stateParams));
     mSystemState->SetTempFabricTable(tempFabricTable, params.enableServerInteractions);
     ChipLogDetail(Controller, "System State Initialized...");
+
+    // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+    // ADD COMMAND TO SETUP CLIENT MULTICAST TARGETS
+
+    const chip::FabricInfo * fabric = stateParams.fabricTable->FindFabricWithIndex(1);
+    if (fabric)
+    {
+        uint8_t debug_key[] = { 0xa0, 0xa1, 0xa2, 0xa3, 0xa4, 0xa5, 0xa6, 0xa7, 0xa8, 0xa9, 0xaa, 0xab, 0xac, 0xad, 0xae, 0xaf };
+        chip::Groupcast::DataProvider & provider = chip::Groupcast::DataProvider::Instance();
+        chip::Groupcast::Group target;
+        target.group_id       = 0x8100;
+        target.endpoint_count = 1;
+        target.endpoints[0]   = 1;
+        for (size_t i = 0; i < 2; ++i)
+        {
+            target.group_id++;
+            provider.JoinGroup(fabric, target, ByteSpan(debug_key), 0);
+        }
+    }
+    // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+
     return CHIP_NO_ERROR;
 }
 

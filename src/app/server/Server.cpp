@@ -134,6 +134,7 @@ CHIP_ERROR Server::Init(const ServerInitParams & initParams)
     VerifyOrExit(initParams.accessDelegate != nullptr, err = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(initParams.aclStorage != nullptr, err = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(initParams.groupDataProvider != nullptr, err = CHIP_ERROR_INVALID_ARGUMENT);
+    VerifyOrExit(initParams.groupcastDataProvider != nullptr, err = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(initParams.sessionKeystore != nullptr, err = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(initParams.operationalKeystore != nullptr, err = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(initParams.opCertStore != nullptr, err = CHIP_ERROR_INVALID_ARGUMENT);
@@ -206,6 +207,7 @@ CHIP_ERROR Server::Init(const ServerInitParams & initParams)
 
     mGroupsProvider = initParams.groupDataProvider;
     SetGroupDataProvider(mGroupsProvider);
+    mGroupcastProvider = initParams.groupcastDataProvider;
 
     mReportScheduler = initParams.reportScheduler;
 
@@ -582,6 +584,10 @@ void Server::RejoinExistingMulticastGroups()
 {
     ChipLogProgress(AppServer, "Joining Multicast groups");
     CHIP_ERROR err = CHIP_NO_ERROR;
+
+    // TODO: Only when groups
+    mTransports.MulticastGroupJoinLeave(Transport::PeerAddress::Groupcast(), true);
+
     for (const FabricInfo & fabric : mFabrics)
     {
         Credentials::GroupDataProvider::GroupInfo groupInfo;
@@ -837,6 +843,7 @@ KvsPersistentStorageDelegate CommonCaseDeviceServerInitParams::sKvsPersistenStor
 PersistentStorageOperationalKeystore CommonCaseDeviceServerInitParams::sPersistentStorageOperationalKeystore;
 Credentials::PersistentStorageOpCertStore CommonCaseDeviceServerInitParams::sPersistentStorageOpCertStore;
 Credentials::GroupDataProviderImpl CommonCaseDeviceServerInitParams::sGroupDataProvider;
+// chip::Groupcast::DataProvider CommonCaseDeviceServerInitParams::sGroupcastDataProvider;
 app::DefaultTimerDelegate CommonCaseDeviceServerInitParams::sTimerDelegate;
 app::reporting::ReportSchedulerImpl
     CommonCaseDeviceServerInitParams::sReportScheduler(&CommonCaseDeviceServerInitParams::sTimerDelegate);

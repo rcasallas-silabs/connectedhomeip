@@ -4,6 +4,67 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+    {
+        "name": "CT: Keysets",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "${workspaceFolder}/out/debug/chip-tool",
+        "args": [
+            "groupsettings", "add-keysets", "1001", "0", "1110000", "hex:c0c1c2c3c4c5c6c7c8c9cacbcccdcecf"
+        ],
+        "stopAtEntry": false,
+        "cwd": "${workspaceFolder}",
+        "environment": [],
+        "externalConsole": false
+    },
+    {
+        "name": "CT: Toggle+",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "${workspaceFolder}/out/debug/chip-tool",
+        "args": [
+            "onoff", "toggle", "0xffffffffffff0101", "0"
+        ],
+        "stopAtEntry": false,
+        "cwd": "${workspaceFolder}",
+        "environment": [],
+        "externalConsole": false
+    },
+    {
+        "name": "CT: Toggle++",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "${workspaceFolder}/out/debug/chip-tool",
+        "args": [
+            "onoff", "toggle", "0xffffffffffff8101", "0"
+        ],
+        "stopAtEntry": false,
+        "cwd": "${workspaceFolder}",
+        "environment": [],
+        "externalConsole": false
+    },
+    {
+        "name": "BRD4118A",
+        "type": "cortex-debug",
+        "cwd": "${workspaceFolder}",
+        "request": "attach",
+        "servertype": "jlink",
+        "showDevDebugOutput": true,
+        "runToEntryPoint": "main",
+        "rttConfig": {
+            "enabled": true,
+            "address": "auto",
+            "decoders": [
+                {
+                    "port": 0, // In RTT lingo, this is the buffer index (or channel)
+                    "type": "console"
+                }
+            ]
+        },
+        "executable": "${workspaceFolder}/out/thread/BRD4118A/matter-silabs-lighting-example.out",
+        "device": "EFR32MG26B510F3200IL136",
+        "serialNumber": "440219709",
+    },
         {
             "name": "Python Debugger: Current File with Arguments",
             "type": "debugpy",

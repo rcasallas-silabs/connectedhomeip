@@ -22,6 +22,7 @@
 #include <lib/support/DefaultStorageKeyAllocator.h>
 #include <lib/support/PersistentData.h>
 #include <lib/support/Pool.h>
+#include <lib/support/logging/CHIPLogging.h>
 #include <stdlib.h>
 
 namespace chip {
@@ -1938,6 +1939,10 @@ bool GroupDataProviderImpl::GroupSessionIteratorImpl::Next(GroupSession & output
         Crypto::GroupOperationalCredentials & creds = keyset.operational_keys[mKeyIndex++];
         if (creds.hash == mSessionId)
         {
+            ByteSpan key_(creds.privacy_key);
+            ChipLogDetail(DeviceLayer, "~~~ Key(%u)", (unsigned)key_.size());
+            ChipLogByteSpan(DeviceLayer, key_);
+
             mGroupKeyContext.Initialize(creds.encryption_key, mSessionId, creds.privacy_key);
             output.fabric_index    = fabric.fabric_index;
             output.group_id        = mapping.group_id;

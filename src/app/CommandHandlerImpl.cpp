@@ -35,6 +35,9 @@
 #include <protocols/interaction_model/StatusCode.h>
 #include <protocols/secure_channel/Constants.h>
 
+#include <credentials/GroupcastDataProvider.h>
+#include <transport/raw/MessageHeader.h>
+
 namespace chip {
 namespace app {
 using Status = Protocols::InteractionModel::Status;
@@ -478,10 +481,6 @@ Status CommandHandlerImpl::ProcessGroupCommandDataIB(CommandDataIB::Parser & aCo
     GroupId groupId;
     FabricIndex fabric;
 
-    Credentials::GroupDataProvider::GroupEndpoint mapping;
-    Credentials::GroupDataProvider * groupDataProvider = Credentials::GetGroupDataProvider();
-    Credentials::GroupDataProvider::EndpointIterator * iterator;
-
     err = aCommandElement.GetPath(&commandPath);
     VerifyOrReturnError(err == CHIP_NO_ERROR, Status::InvalidAction);
 
@@ -511,61 +510,81 @@ Status CommandHandlerImpl::ProcessGroupCommandDataIB(CommandDataIB::Parser & aCo
     // No check for `CommandIsFabricScoped` unlike in `ProcessCommandDataIB()` since group commands
     // always have an accessing fabric, by definition.
 
-    // Find which endpoints can process the command, and dispatch to them.
-    iterator = groupDataProvider->IterateEndpoints(fabric);
-    VerifyOrReturnError(iterator != nullptr, Status::Failure);
-
-    while (iterator->Next(mapping))
+    // FIXME: Without the session type, we need another mechanism to differentiate between group types.
+    if (groupId & Header::kGroupcastMask)
     {
-        if (groupId != mapping.group_id)
+        chip::Groupcast::DataProvider & provider = chip::Groupcast::DataProvider::Instance();
+        chip::Groupcast::Group group(groupId);
+        VerifyOrReturnValue(CHIP_NO_ERROR == provider.GetGroup(fabric, group), Status::Failure);
+
+        for (uint16_t i = 0; i < group.endpoint_count; ++i)
         {
-            continue;
-        }
-
-        ChipLogDetail(DataManagement,
-                      "Processing group command for Endpoint=%u Cluster=" ChipLogFormatMEI " Command=" ChipLogFormatMEI,
-                      mapping.endpoint_id, ChipLogValueMEI(clusterId), ChipLogValueMEI(commandId));
-
-        const ConcreteCommandPath concretePath(mapping.endpoint_id, clusterId, commandId);
-
-        {
-            Access::SubjectDescriptor subjectDescriptor = GetSubjectDescriptor();
-            DataModel::InvokeRequest request;
-
-            request.path              = concretePath;
-            request.subjectDescriptor = &subjectDescriptor;
-            request.invokeFlags.Set(DataModel::InvokeFlags::kTimed, IsTimedInvoke());
-
-            // SPEC-DIVERGENCE: The spec mandates only one ACL check after the existence check for non-concrete paths (Group
-            // Commands). However, calling ValidateCommandCanBeDispatched here introduces an additional ACL check before the
-            // existence check, because that function also performs an early access check (it is shared with the concrete path
-            // case). This results in two ACL checks for group commands. In practice, this divergence is not observable if all
-            // commands require at least Operate privilege.
-            Status preCheckStatus = mpCallback->ValidateCommandCanBeDispatched(request);
-            if (preCheckStatus != Status::Success)
-            {
-                // Command failed for a specific path, but keep trying the rest of the paths.
-                continue;
-            }
-        }
-
-        if ((err = DataModelCallbacks::GetInstance()->PreCommandReceived(concretePath, GetSubjectDescriptor())) == CHIP_NO_ERROR)
-        {
-            TLV::TLVReader dataReader(commandDataReader);
-            mpCallback->DispatchCommand(*this, concretePath, dataReader);
-            DataModelCallbacks::GetInstance()->PostCommandReceived(concretePath, GetSubjectDescriptor());
-        }
-        else
-        {
-            ChipLogError(DataManagement,
-                         "Error when calling PreCommandReceived for Endpoint=%u Cluster=" ChipLogFormatMEI
-                         " Command=" ChipLogFormatMEI " : %" CHIP_ERROR_FORMAT,
-                         mapping.endpoint_id, ChipLogValueMEI(clusterId), ChipLogValueMEI(commandId), err.Format());
-            continue;
+            EndpointId endpoint_id = group.endpoints[i];
+            ProcessGroupCommand(clusterId, commandId, endpoint_id, commandDataReader);
         }
     }
-    iterator->Release();
+    else
+    {
+        Credentials::GroupDataProvider * groupDataProvider = Credentials::GetGroupDataProvider();
+        Credentials::GroupDataProvider::EndpointIterator * iterator;
+        Credentials::GroupDataProvider::GroupEndpoint mapping;
+
+        // Find which endpoints can process the command, and dispatch to them.
+        iterator = groupDataProvider->IterateEndpoints(fabric);
+        VerifyOrReturnError(iterator != nullptr, Status::Failure);
+
+        while (iterator->Next(mapping))
+        {
+            if (groupId == mapping.group_id)
+            {
+                ProcessGroupCommand(clusterId, commandId, mapping.endpoint_id, commandDataReader);
+            }
+        }
+        iterator->Release();
+    }
     return Status::Success;
+}
+
+void CommandHandlerImpl::ProcessGroupCommand(ClusterId clusterId, CommandId commandId, EndpointId endpointId,
+                                             TLV::TLVReader & commandDataReader)
+{
+    CHIP_ERROR err = CHIP_NO_ERROR;
+
+    ChipLogDetail(DataManagement, "Processing group command for Endpoint=%u Cluster=" ChipLogFormatMEI " Command=" ChipLogFormatMEI,
+                  endpointId, ChipLogValueMEI(clusterId), ChipLogValueMEI(commandId));
+
+    const ConcreteCommandPath concretePath(endpointId, clusterId, commandId);
+
+    {
+        Access::SubjectDescriptor subjectDescriptor = GetSubjectDescriptor();
+        DataModel::InvokeRequest request;
+
+        request.path              = concretePath;
+        request.subjectDescriptor = &subjectDescriptor;
+        request.invokeFlags.Set(DataModel::InvokeFlags::kTimed, IsTimedInvoke());
+
+        Status preCheckStatus = mpCallback->ValidateCommandCanBeDispatched(request);
+        if (preCheckStatus != Status::Success)
+        {
+            // Command failed for a specific path, but keep trying the rest of the paths.
+            return;
+        }
+    }
+
+    if ((err = DataModelCallbacks::GetInstance()->PreCommandReceived(concretePath, GetSubjectDescriptor())) == CHIP_NO_ERROR)
+    {
+        TLV::TLVReader dataReader(commandDataReader);
+        mpCallback->DispatchCommand(*this, concretePath, dataReader);
+        DataModelCallbacks::GetInstance()->PostCommandReceived(concretePath, GetSubjectDescriptor());
+    }
+    else
+    {
+        ChipLogError(DataManagement,
+                     "Error when calling PreCommandReceived for Endpoint=%u Cluster=" ChipLogFormatMEI " Command=" ChipLogFormatMEI
+                     " : %" CHIP_ERROR_FORMAT,
+                     endpointId, ChipLogValueMEI(clusterId), ChipLogValueMEI(commandId), err.Format());
+        return;
+    }
 }
 
 CHIP_ERROR CommandHandlerImpl::TryAddStatusInternal(const ConcreteCommandPath & aCommandPath, const StatusIB & aStatus)

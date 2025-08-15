@@ -41,6 +41,7 @@
 #include <protocols/secure_channel/MessageCounterManager.h>
 #include <protocols/secure_channel/SimpleSessionResumptionStorage.h>
 #include <protocols/secure_channel/UnsolicitedStatusHandler.h>
+#include <credentials/GroupcastDataProvider.h>
 
 #include <transport/TransportMgr.h>
 #include <transport/raw/UDP.h>
@@ -115,6 +116,7 @@ struct DeviceControllerSystemStateParams
     WiFiPAF::WiFiPAFLayer * wifipaf_layer = nullptr;
 #endif
     Credentials::GroupDataProvider * groupDataProvider = nullptr;
+    chip::Groupcast::DataProvider * groupcastDataProvider = nullptr;
     Crypto::SessionKeystore * sessionKeystore          = nullptr;
 
     // NOTE: Exactly one of externalSessionResumptionStorage (externally provided,

@@ -150,6 +150,24 @@ CHIP_ERROR AES_CCM_encrypt(const uint8_t * plaintext, size_t plaintext_length, c
                            const Aes128KeyHandle & key, const uint8_t * nonce, size_t nonce_length, uint8_t * ciphertext,
                            uint8_t * tag, size_t tag_length)
 {
+    {
+//     ByteSpan plain_(plaintext, (plaintext_length > 16) ? 16 : plaintext_length);
+//     ByteSpan aad_(aad, aad_length);
+//     ByteSpan nonce_(nonce, nonce_length);
+//     ByteSpan tag_(tag, tag_length);
+//     ByteSpan key_(key.As<Symmetric128BitsKeyByteArray>());
+//     ChipLogDetail(DeviceLayer, "~~~ Plain(%u)", (unsigned)plaintext_length);
+//     ChipLogByteSpan(DeviceLayer, plain_);
+//     ChipLogDetail(DeviceLayer, "~~~ AAD(%u)", (unsigned)aad_length);
+//     ChipLogByteSpan(DeviceLayer, aad_);
+//     ChipLogDetail(DeviceLayer, "~~~ Nonce(%u)", (unsigned)nonce_length);
+//     ChipLogByteSpan(DeviceLayer, nonce_);
+//     ChipLogDetail(DeviceLayer, "~~~ Tag(%u)", (unsigned)tag_length);
+//     ChipLogByteSpan(DeviceLayer, tag_);
+//     ChipLogDetail(DeviceLayer, "~~~ Key(%u)", (unsigned)key_.size());
+//     ChipLogByteSpan(DeviceLayer, key_);
+    }
+
 #if CHIP_CRYPTO_BORINGSSL
     EVP_AEAD_CTX * context = nullptr;
     size_t written_tag_len = 0;
