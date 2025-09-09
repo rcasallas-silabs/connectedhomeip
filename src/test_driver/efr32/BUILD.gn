@@ -85,7 +85,6 @@ source_set("efr32_test_main") {
 
   deps = [
     ":nl_test_service.nanopb_rpc",
-    ":sdk",
     "$dir_pw_unit_test:rpc_service",
     "${chip_root}/config/efr32/lib/pw_rpc:pw_rpc",
     "${chip_root}/examples/common/pigweed:system_rpc_server",
@@ -115,7 +114,10 @@ source_set("efr32_test_main") {
 }
 
 # This target is referred to by BuildRoot in scripts/build/builders/efr32.py, as well as the example in README.md.
-# It builds the root target "src:tests", which builds the chip_test_suite target in each test directory, which builds a pw_test target for each test source file, which builds a silabs_executable, which includes the "efr32_test_main" target defined above.
+# It builds the root target "src:tests",
+#   which builds the chip_test_suite target in each test directory,
+#   which builds a pw_test target for each test source file,
+#   which builds a silabs_executable, which includes the "efr32_test_main" target defined above.
 group("efr32") {
   deps = [ "${chip_root}/src:tests" ]
 }
@@ -129,4 +131,43 @@ group("runner") {
 
 group("default") {
   deps = [ ":efr32" ]
+}
+
+print("")
+print(">>> ${matter_support_root}/board-support/efr32/${silabs_family}/${silabs_board}/autogen")
+print("")
+
+config("freertos_include") {
+  include_dirs = [
+    "${efr32_sdk_root}/util/third_party/freertos/kernel/include",
+    "${silabs_common_plat_dir}",
+    "${matter_support_root}/board-support/efr32/${silabs_family}/${silabs_board}/autogen",
+  ]
+}
+
+pw_source_set("freertos_config") {
+  public_deps = [ ":sdk" ]
+  public_configs = [ ":freertos_include" ]
+  public = [
+    "${efr32_sdk_root}/util/third_party/freertos/kernel/include/FreeRTOS.h",
+    "${efr32_sdk_root}/util/third_party/freertos/kernel/include/atomic.h",
+    "${efr32_sdk_root}/util/third_party/freertos/kernel/include/croutine.h",
+    "${efr32_sdk_root}/util/third_party/freertos/kernel/include/deprecated_definitions.h",
+    "${efr32_sdk_root}/util/third_party/freertos/kernel/include/event_groups.h",
+    "${efr32_sdk_root}/util/third_party/freertos/kernel/include/list.h",
+    "${efr32_sdk_root}/util/third_party/freertos/kernel/include/message_buffer.h",
+    "${efr32_sdk_root}/util/third_party/freertos/kernel/include/mpu_prototypes.h",
+    "${efr32_sdk_root}/util/third_party/freertos/kernel/include/mpu_wrappers.h",
+    "${efr32_sdk_root}/util/third_party/freertos/kernel/include/portable.h",
+    "${efr32_sdk_root}/util/third_party/freertos/kernel/include/projdefs.h",
+    "${efr32_sdk_root}/util/third_party/freertos/kernel/include/queue.h",
+    "${efr32_sdk_root}/util/third_party/freertos/kernel/include/semphr.h",
+    "${efr32_sdk_root}/util/third_party/freertos/kernel/include/stack_macros.h",
+    "${efr32_sdk_root}/util/third_party/freertos/kernel/include/stream_buffer.h",
+    "${efr32_sdk_root}/util/third_party/freertos/kernel/include/task.h",
+    "${efr32_sdk_root}/util/third_party/freertos/kernel/include/timers.h",
+    "${efr32_sdk_root}/util/third_party/freertos/kernel/portable/GCC/ARM_CM33_NTZ/non_secure/portasm.h",
+    "${efr32_sdk_root}/util/third_party/freertos/kernel/portable/GCC/ARM_CM33_NTZ/non_secure/portmacro.h",
+    "${examples_common_plat_dir}/FreeRTOSConfig.h",
+  ]
 }

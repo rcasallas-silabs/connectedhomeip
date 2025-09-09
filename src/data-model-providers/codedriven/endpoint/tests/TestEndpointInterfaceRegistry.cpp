@@ -1,14 +1,14 @@
-#include <pw_unit_test/framework.h>
-
-#include <app/data-model-provider/MetadataTypes.h>
-#include <data-model-providers/codedriven/endpoint/EndpointInterfaceRegistry.h>
-#include <data-model-providers/codedriven/endpoint/SpanEndpoint.h>
-
 #include <algorithm>
 #include <array>
 #include <list>
 #include <random>
 #include <vector>
+
+#include <pw_unit_test/framework.h>
+
+#include <app/data-model-provider/MetadataTypes.h>
+#include <data-model-providers/codedriven/endpoint/EndpointInterfaceRegistry.h>
+#include <data-model-providers/codedriven/endpoint/SpanEndpoint.h>
 
 using namespace chip;
 using namespace chip::app;

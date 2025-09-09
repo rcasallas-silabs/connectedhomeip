@@ -13,7 +13,9 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-#include <pw_unit_test/framework.h>
+#include <cmath>
+
+ #include <pw_unit_test/framework.h>
 
 #include <app/clusters/ethernet-network-diagnostics-server/ethernet-diagnostics-cluster.h>
 #include <app/clusters/testing/AttributeTesting.h>
@@ -25,8 +27,6 @@
 #include <lib/core/StringBuilderAdapters.h>
 #include <lib/support/ReadOnlyBuffer.h>
 #include <platform/DiagnosticDataProvider.h>
-
-#include <cmath>
 
 namespace {
 
