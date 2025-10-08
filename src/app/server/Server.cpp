@@ -850,5 +850,6 @@ Crypto::DefaultSessionKeystore CommonCaseDeviceServerInitParams::sSessionKeystor
 #if CHIP_CONFIG_ENABLE_ICD_CIP
 app::DefaultICDCheckInBackOffStrategy CommonCaseDeviceServerInitParams::sDefaultICDCheckInBackOffStrategy;
 #endif
+chip::Access::ExtendedAccessControlDelegate CommonCaseDeviceServerInitParams::sExtendedAccessControlDelegate;
 
 } // namespace chip

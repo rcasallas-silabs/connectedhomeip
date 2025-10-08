@@ -1,5 +1,8 @@
-#include "GroupcastServer.h"
-
+#include "GroupcastCluster.h"
+#include <clusters/Groupcast/Metadata.h>
+#include <clusters/Groupcast/Attributes.h>
+#include <clusters/Groupcast/AttributeIds.h>
+#include <app/server-cluster/AttributeListBuilder.h>
 
 using chip::Protocols::InteractionModel::Status;
 
@@ -7,26 +10,26 @@ namespace chip {
 namespace app {
 namespace Clusters {
 namespace {
-static GroupcastCluster sInstance;
+
+constexpr DataModel::AcceptedCommandEntry kAcceptedCommands[] = {
+    Groupcast::Commands::JoinGroup::kMetadataEntry,
+    Groupcast::Commands::LeaveGroup::kMetadataEntry,
+    Groupcast::Commands::UpdateGroupKey::kMetadataEntry,
+    Groupcast::Commands::ExpireGracePeriod::kMetadataEntry,
+    Groupcast::Commands::ConfigureAuxiliaryACL::kMetadataEntry,
+};
 } // namespace
 
-GroupcastCluster & GroupcastCluster::Instance()
-{
-    return sInstance;
-}
-
-GroupcastCluster::GroupcastCluster() : DefaultServerCluster({ kRootEndpointId, Groupcast::Id })
-{
-}
+GroupcastCluster::GroupcastCluster() : DefaultServerCluster({ kRootEndpointId, Groupcast::Id }) {}
 
 DataModel::ActionReturnStatus GroupcastCluster::ReadAttribute(const DataModel::ReadAttributeRequest & request, AttributeValueEncoder & encoder)
 {
     switch (request.path.mAttributeId)
     {
     case Groupcast::Attributes::FeatureMap::Id:
-        break;
+        return encoder.Encode(mLogic.Features());
     case Groupcast::Attributes::ClusterRevision::Id:
-        return aEncoder.Encode(Groupcast::kRevision);
+        return encoder.Encode(Groupcast::kRevision);
     case Groupcast::Attributes::Membership::Id:
         return mLogic.ReadMembership(request.path.mEndpointId, encoder);
     case Groupcast::Attributes::MaxMembershipCount::Id:
@@ -37,16 +40,8 @@ DataModel::ActionReturnStatus GroupcastCluster::ReadAttribute(const DataModel::R
 
 CHIP_ERROR GroupcastCluster::Attributes(const ConcreteClusterPath & path, ReadOnlyBufferBuilder<DataModel::AttributeEntry> & builder)
 {
-    using chip::app::Clusters::Groupcast::Attributes;
-    // Ensure space for all possible attributes (2 mandatory + global)
-    ReturnErrorOnFailure(builder.EnsureAppendCapacity(2 + DefaultServerCluster::GlobalAttributes().size()));
-    // Mandatory attributes
-    ReturnErrorOnFailure(builder.AppendElements({
-        Attributes::Membership::kMetadataEntry,
-        Attributes::MaxMembershipCount::kMetadataEntry,
-    }));
-    // Global attributes
-    return builder.AppendElements(DefaultServerCluster::GlobalAttributes());
+    AttributeListBuilder listBuilder(builder);
+    return listBuilder.Append(Span(Groupcast::Attributes::kMandatoryMetadata), {});
 }
 
 std::optional<DataModel::ActionReturnStatus> GroupcastCluster::InvokeCommand(const DataModel::InvokeRequest & request, chip::TLV::TLVReader & arguments, CommandHandler * handler)
@@ -63,10 +58,11 @@ std::optional<DataModel::ActionReturnStatus> GroupcastCluster::InvokeCommand(con
     }
     case Groupcast::Commands::LeaveGroup::Id:
     {
+        chip::Groupcast::Group group;
         Groupcast::Commands::LeaveGroup::DecodableType data;
         Groupcast::Commands::LeaveGroupResponse::Type response;
         ReturnErrorOnFailure(data.Decode(arguments, fabric_index));
-        mLogic.LeaveGroup(fabric_index, data, response);
+        mLogic.LeaveGroup(fabric_index, group, data, response);
         handler->AddResponse(request.path, response);
         return std::nullopt;
     }
@@ -92,6 +88,13 @@ std::optional<DataModel::ActionReturnStatus> GroupcastCluster::InvokeCommand(con
     return Protocols::InteractionModel::Status::UnsupportedCommand;
 }
 
+CHIP_ERROR GroupcastCluster::AcceptedCommands(const ConcreteClusterPath & path,
+                                              ReadOnlyBufferBuilder<DataModel::AcceptedCommandEntry> & builder)
+{
+    return builder.ReferenceExisting(kAcceptedCommands);
+}
+
 } // namespace Clusters
 } // namespace app
 } // namespace chip
+

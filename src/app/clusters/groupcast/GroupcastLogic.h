@@ -24,7 +24,9 @@
 #include <clusters/Groupcast/AttributeIds.h>
 #include <clusters/Groupcast/CommandIds.h>
 #include <clusters/Groupcast/Commands.h>
+#include <clusters/Groupcast/Enums.h>
 #include <app/data-model-provider/ActionReturnStatus.h>
+#include <credentials/GroupcastDataProvider.h>
 
 namespace chip {
 namespace app {
@@ -36,12 +38,16 @@ namespace Clusters {
 class GroupcastLogic
 {
 public:
+    GroupcastLogic(): mFeatures(Groupcast::Feature::kListener, Groupcast::Feature::kSender) {
+    }
+    const BitFlags<Groupcast::Feature> & Features() const { return mFeatures; }
+
     CHIP_ERROR ReadMembership(EndpointId endpoint, AttributeValueEncoder & aEncoder);
     CHIP_ERROR ReadMaxMembershipCount(EndpointId endpoint, AttributeValueEncoder & aEncoder);
-
     
     CHIP_ERROR JoinGroup(FabricIndex fabric_index, const Groupcast::Commands::JoinGroup::DecodableType & data);
     CHIP_ERROR LeaveGroup(FabricIndex fabric_index,
+                          chip::Groupcast::Group &group,
                           const Groupcast::Commands::LeaveGroup::DecodableType & data,
                           Groupcast::Commands::LeaveGroupResponse::Type &response);
     CHIP_ERROR UpdateGroupKey(FabricIndex fabric_index, const Groupcast::Commands::UpdateGroupKey::DecodableType & data);
@@ -51,6 +57,7 @@ public:
 private:
     CHIP_ERROR RegisterAccessControl(FabricIndex fabric_index, GroupId group_id);
 
+    const BitFlags<Groupcast::Feature> mFeatures;
 };
 
 } // namespace Clusters
