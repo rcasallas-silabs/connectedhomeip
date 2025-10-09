@@ -139,13 +139,13 @@ public:
         static constexpr size_t kEpochKeysMax = 3;
 
         KeySet() = default;
-        KeySet(uint16_t id, SecurityPolicy policy_id, uint8_t num_keys) : keyset_id(id), policy(policy_id), num_keys_used(num_keys)
+        KeySet(uint32_t id, SecurityPolicy policy_id, uint8_t num_keys) : keyset_id(id), policy(policy_id), num_keys_used(num_keys)
         {}
 
         // The actual keys for the group key set
         EpochKey epoch_keys[kEpochKeysMax];
         // Logical id provided by the Administrator that configured the entry
-        uint16_t keyset_id = 0;
+        uint32_t keyset_id = 0;
         // Security policy to use for groups that use this keyset
         SecurityPolicy policy = SecurityPolicy::kCacheAndSync;
         // Number of keys present
@@ -311,6 +311,7 @@ public:
     // Decryption
     virtual GroupSessionIterator * IterateGroupSessions(uint16_t session_id)                        = 0;
     virtual Crypto::SymmetricKeyContext * GetKeyContext(FabricIndex fabric_index, GroupId group_id) = 0;
+    virtual Crypto::SymmetricKeyContext * GetKeysetContext(FabricIndex fabric_index, KeysetId keyset_id) = 0;
 
     // Listener
     void SetListener(GroupListener * listener) { mListener = listener; };

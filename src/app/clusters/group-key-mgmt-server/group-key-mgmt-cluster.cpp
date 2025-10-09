@@ -154,7 +154,7 @@ CHIP_ERROR ReadGroupKeyMap(AttributeValueEncoder & aEncoder)
             {
                 GroupKeyManagement::Structs::GroupKeyMapStruct::Type key = {
                     .groupId       = mapping.group_id,
-                    .groupKeySetID = mapping.keyset_id,
+                    .groupKeySetID = static_cast<uint16_t>(mapping.keyset_id),
                     .fabricIndex   = fabric_index,
                 };
                 encodeStatus = encoder.Encode(key);

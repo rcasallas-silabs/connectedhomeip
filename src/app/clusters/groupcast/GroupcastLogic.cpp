@@ -1,11 +1,13 @@
 #include "GroupcastLogic.h"
 #include <app/server/Server.h>
+#include <credentials/GroupDataProvider.h>
 
 namespace chip {
 namespace app {
 namespace Clusters {
 
 using chip::Groupcast::DataProvider;
+using namespace chip::Credentials;
 
 CHIP_ERROR GroupcastLogic::ReadMembership(EndpointId endpoint, AttributeValueEncoder & aEncoder)
 {
@@ -42,21 +44,25 @@ CHIP_ERROR GroupcastLogic::ReadMaxMembershipCount(EndpointId endpoint, Attribute
 
 CHIP_ERROR GroupcastLogic::JoinGroup(FabricIndex fabric_index, const Groupcast::Commands::JoinGroup::DecodableType & data)
 {
+    // chip::GroupId groupID = static_cast<chip::GroupId>(0);
+    // DataModel::List<const chip::EndpointId> endpoints;
+    // uint32_t keyID = static_cast<uint32_t>(0);
+    // Optional<chip::ByteSpan> key;
+    // Optional<uint32_t> gracePeriod;
+    // Optional<bool> useAuxiliaryACL;
+
     Server & server                          = Server::GetInstance();
     const FabricInfo * fabric = Server::GetInstance().GetFabricTable().FindFabricWithIndex(fabric_index);
-    uint8_t compressed_fabric_id_buffer[sizeof(uint64_t)];
-    MutableByteSpan compressed_fabric_id(compressed_fabric_id_buffer);
+
     DataProvider &provider = DataProvider::Instance();
     chip::Groupcast::Group group;
-    uint8_t key[Crypto::CHIP_CRYPTO_SYMMETRIC_KEY_LENGTH_BYTES] = { 0 };
-    size_t key_size   = 0;
-    uint32_t grace_period = data.gracePeriod.HasValue() ?  data.gracePeriod.Value() : 0;
+    // uint8_t key[Crypto::CHIP_CRYPTO_SYMMETRIC_KEY_LENGTH_BYTES] = { 0 };
+    // size_t key_size   = 0;
 
     // Collect arguments
 
     // Compressed fabric Id
     VerifyOrReturnValue(nullptr != fabric, CHIP_ERROR_INTERNAL);
-    ReturnErrorOnFailure(fabric->GetCompressedFabricIdBytes(compressed_fabric_id));
 
     // Group
     group.group_id = data.groupID;
@@ -71,13 +77,50 @@ CHIP_ERROR GroupcastLogic::JoinGroup(FabricIndex fabric_index, const Groupcast::
         }
     }
 
-    // Parse Key
-    VerifyOrReturnValue(data.key.size() == 2 * sizeof(key), CHIP_ERROR_INTERNAL);
-    key_size = chip::Encoding::HexToBytes((char *) data.key.data(), data.key.size(), key, sizeof(key));
-    VerifyOrReturnValue(key_size == sizeof(key), CHIP_ERROR_INTERNAL);
+    // Key handing
+    {
+        GroupDataProvider *provider = GetGroupDataProvider();
+        VerifyOrReturnValue(nullptr != provider, CHIP_ERROR_INTERNAL);
 
-    // Store provider configuration
-    ReturnErrorOnFailure(provider.AddGroup(fabric->GetFabricIndex(), compressed_fabric_id, group, ByteSpan(key), grace_period));
+        // struct KeySet
+        //     static constexpr size_t kEpochKeysMax = 3;
+        //     KeySet() = default;
+        //     KeySet(uint16_t id, SecurityPolicy policy_id, uint8_t num_keys) : keyset_id(id), policy(policy_id), num_keys_used(num_keys)
+        //     EpochKey epoch_keys[kEpochKeysMax];
+        //     uint16_t keyset_id = 0;
+        //     uint8_t num_keys_used = 0;
+
+        GroupDataProvider::KeySet ks;
+        if(CHIP_NO_ERROR == provider->GetKeySet(fabric_index, data.keyID, ks)) {
+            // Existing key
+            VerifyOrReturnValue(!data.key.HasValue(), CHIP_ERROR_INTERNAL);
+        } else {
+            // New key
+            VerifyOrReturnValue(data.key.HasValue(), CHIP_ERROR_INTERNAL);
+            uint32_t grace_period = data.gracePeriod.HasValue() ?  data.gracePeriod.Value() : 0;
+            (void) grace_period; // TODO
+            ks.keyset_id = data.keyID;
+
+            // Translate HEX key to binary
+            const chip::ByteSpan &key = data.key.Value();
+            GroupDataProvider::EpochKey &epoch = ks.epoch_keys[0];
+            VerifyOrReturnValue(key.size() == 2 * GroupDataProvider::EpochKey::kLengthBytes, CHIP_ERROR_INTERNAL);
+            size_t key_size = chip::Encoding::HexToBytes((char *) key.data(), key.size(), epoch.key, GroupDataProvider::EpochKey::kLengthBytes);
+            VerifyOrReturnValue(key_size == GroupDataProvider::EpochKey::kLengthBytes, CHIP_ERROR_INTERNAL);
+            ks.num_keys_used = 1;
+            {
+                // Get compressed fabric
+                uint8_t compressed_fabric_id_buffer[sizeof(uint64_t)];
+                MutableByteSpan compressed_fabric_id(compressed_fabric_id_buffer);        
+                ReturnErrorOnFailure(fabric->GetCompressedFabricIdBytes(compressed_fabric_id));
+                // Set keys
+                ReturnErrorOnFailure(provider->SetKeySet(fabric_index, compressed_fabric_id, ks));
+            }
+        }
+    }
+
+    // Add group
+    ReturnErrorOnFailure(provider.AddGroup(fabric->GetFabricIndex(), group));
 
     // ACL
     ReturnErrorOnFailure(RegisterAccessControl(fabric->GetFabricIndex(), group.group_id));

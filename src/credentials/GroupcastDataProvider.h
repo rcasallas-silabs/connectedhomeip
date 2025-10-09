@@ -38,7 +38,8 @@ static constexpr size_t kKeyContextMax = CHIP_CONFIG_MAX_GROUP_CONCURRENT_ITERAT
 struct Group
 {
     Group() = default;
-    Group(GroupId id) : group_id(id) {}
+    Group(GroupId gid) : group_id(gid) {}
+    Group(GroupId gid, KeysetId kid) : group_id(gid), key_id(kid) {}
 
     Group & operator=(const Group & t)
     {
@@ -48,11 +49,18 @@ struct Group
         return *this;
     }
 
+    bool operator==(const Group & other) const
+    {
+        return this->group_id == other.group_id;
+    }
+
     GroupId group_id        = kUndefinedGroupId;
+    KeysetId key_id         = 0;
     uint16_t endpoint_count = 0;
     EndpointId endpoints[kEndpointsMax];
 };
 
+#if 0
 struct GroupKey
 {
     Crypto::Aes128KeyHandle encryption;
@@ -88,9 +96,12 @@ struct GroupEntry : Group
     CHIP_ERROR GetActiveKey(GroupKey & key);
     GroupKey keys[kGroupKeyCount];
 };
+#endif
 
 struct DataProvider
 {
+    using KeyContext = chip::Crypto::SymmetricKeyContext;
+#if 0
     struct KeyContext : chip::Crypto::SymmetricKeyContext
     {
         KeyContext(DataProvider & provider): mProvider(provider) {}
@@ -112,7 +123,6 @@ struct DataProvider
         Crypto::Aes128KeyHandle mEncryptionKey;
         Crypto::Aes128KeyHandle mPrivacyKey;
     };
-
     
     struct KeyIterator : CommonIterator<KeyContext*&>
     {
@@ -130,8 +140,9 @@ struct DataProvider
         uint8_t mFabricIndex = 0;
         size_t mKeyIndex = 0;
     };
+#endif
 
-    struct GroupIterator : CommonIterator<Group &>
+struct GroupIterator : CommonIterator<Group &>
     {
         GroupIterator(DataProvider & provider, FabricIndex fabric);
         size_t Count() override;
@@ -150,20 +161,19 @@ struct DataProvider
     static DataProvider & Instance();
     CHIP_ERROR Initialize(PersistentStorageDelegate * storage, chip::Crypto::SessionKeystore * keystore);
     uint8_t GetMaxMembershipCount();
-    CHIP_ERROR AddGroup(chip::FabricIndex fabric_idx, const ByteSpan & compressed_fabric_id,
-                        Group & target, const ByteSpan & key, uint32_t period);
-    CHIP_ERROR GetGroup(FabricIndex fabric_idx, Group & target);
+    CHIP_ERROR AddGroup(chip::FabricIndex fabric_idx, Group & grp);
+    CHIP_ERROR GetGroup(FabricIndex fabric_idx, Group & grp);
     CHIP_ERROR RemoveGroup(FabricIndex fabric_idx, GroupId group_id);
-    CHIP_ERROR SetEndpoints(FabricIndex fabric_idx, Group & group);
-    chip::Crypto::SymmetricKeyContext * CreateKeyContext(FabricIndex fabric, GroupId groupId);
-    KeyIterator * IterateKeys(FabricTable *fabrics, GroupId group_id, uint16_t session_id);
+    CHIP_ERROR SetEndpoints(FabricIndex fabric_idx, Group & grp);
+    // chip::Crypto::SymmetricKeyContext * CreateKeyContext(FabricIndex fabric, GroupId groupId);
+    // KeyIterator * IterateKeys(FabricTable *fabrics, GroupId group_id, uint16_t session_id);
     GroupIterator * IterateGroups(FabricIndex fabric);
 
 private:
     PersistentStorageDelegate * mStorage      = nullptr;
     chip::Crypto::SessionKeystore * mKeystore = nullptr;
-    ObjectPool<KeyContext, kKeyContextMax> mKeyContextPool;
-    ObjectPool<KeyIterator, kIteratorMax> mKeyIteratorPool;
+    // ObjectPool<KeyContext, kKeyContextMax> mKeyContextPool;
+    // ObjectPool<KeyIterator, kIteratorMax> mKeyIteratorPool;
     ObjectPool<GroupIterator, kIteratorMax> mGroupIteratorPool;
 };
 

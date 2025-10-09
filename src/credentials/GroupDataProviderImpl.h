@@ -95,6 +95,7 @@ public:
 
     // Decryption
     Crypto::SymmetricKeyContext * GetKeyContext(FabricIndex fabric_index, GroupId group_id) override;
+    Crypto::SymmetricKeyContext * GetKeysetContext(FabricIndex fabric_index, KeysetId keyset_id) override;
     GroupSessionIterator * IterateGroupSessions(uint16_t session_id) override;
 
 protected:
@@ -109,7 +110,7 @@ protected:
     protected:
         GroupDataProviderImpl & mProvider;
         FabricIndex mFabric = kUndefinedFabricIndex;
-        uint16_t mNextId    = 0;
+        GroupId mNextId    = 0;
         size_t mCount       = 0;
         size_t mTotal       = 0;
     };
@@ -125,7 +126,7 @@ protected:
     protected:
         GroupDataProviderImpl & mProvider;
         FabricIndex mFabric = kUndefinedFabricIndex;
-        uint16_t mNextId    = 0;
+        KeysetId mNextId    = 0;
         size_t mCount       = 0;
         size_t mTotal       = 0;
     };
@@ -216,7 +217,7 @@ protected:
     protected:
         GroupDataProviderImpl & mProvider;
         FabricIndex mFabric = kUndefinedFabricIndex;
-        uint16_t mNextId    = 0;
+        KeysetId mNextId    = 0;
         size_t mCount       = 0;
         size_t mTotal       = 0;
     };
@@ -234,12 +235,12 @@ protected:
         uint16_t mSessionId      = 0;
         FabricIndex mFirstFabric = kUndefinedFabricIndex;
         FabricIndex mFabric      = kUndefinedFabricIndex;
-        uint16_t mFabricCount    = 0;
-        uint16_t mFabricTotal    = 0;
-        uint16_t mMapping        = 0;
-        uint16_t mMapCount       = 0;
-        uint16_t mKeyIndex       = 0;
-        uint16_t mKeyCount       = 0;
+        uint32_t mFabricCount    = 0;
+        uint32_t mFabricTotal    = 0;
+        uint32_t mMapping        = 0;
+        uint32_t mMapCount       = 0;
+        uint32_t mKeyIndex       = 0;
+        uint32_t mKeyCount       = 0;
         bool mFirstMap           = true;
         GroupKeyContext mGroupKeyContext;
     };

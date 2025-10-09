@@ -46,7 +46,7 @@ typedef uint32_t FieldId;
 typedef uint16_t ListIndex;
 typedef uint16_t LocalizedStringIdentifier;
 typedef uint32_t TransactionId;
-typedef uint16_t KeysetId;
+typedef uint32_t KeysetId;
 typedef uint8_t InteractionModelRevision;
 typedef uint32_t SubscriptionId;
 typedef uint8_t SceneId;

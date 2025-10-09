@@ -47,15 +47,15 @@ constexpr size_t kPersistentBufferMax = 128;
 
 struct LinkedData : public PersistentData<kPersistentBufferMax>
 {
-    static constexpr uint16_t kMinLinkId = 1;
+    static constexpr uint32_t kMinLinkId = 1;
 
     LinkedData() = default;
-    LinkedData(uint16_t linked_id) : id(linked_id) {}
-    uint16_t id     = kMinLinkId;
-    uint16_t index  = 0;
-    uint16_t next   = 0;
-    uint16_t prev   = 0;
-    uint16_t max_id = 0;
+    LinkedData(uint32_t linked_id) : id(linked_id) {}
+    uint32_t id     = kMinLinkId;
+    uint32_t index  = 0;
+    uint32_t next   = 0;
+    uint32_t prev   = 0;
+    uint32_t max_id = 0;
     bool first      = true;
 };
 
@@ -71,11 +71,11 @@ struct FabricData : public PersistentData<kPersistentBufferMax>
 
     chip::FabricIndex fabric_index = kUndefinedFabricIndex;
     chip::GroupId first_group      = kUndefinedGroupId;
-    uint16_t group_count           = 0;
-    uint16_t first_map             = 0;
-    uint16_t map_count             = 0;
+    uint32_t group_count           = 0;
+    uint32_t first_map             = 0;
+    uint32_t map_count             = 0;
     chip::KeysetId first_keyset    = kInvalidKeysetId;
-    uint16_t keyset_count          = 0;
+    uint32_t keyset_count          = 0;
     chip::FabricIndex next         = kUndefinedFabricIndex;
 
     FabricData() = default;
@@ -399,7 +399,7 @@ struct KeyMapData : public GroupDataProvider::GroupKey, LinkedData
     chip::KeysetId keyset_id       = 0;
 
     KeyMapData(){};
-    KeyMapData(chip::FabricIndex fabric, uint16_t link_id = 0, chip::GroupId group = kUndefinedGroupId, chip::KeysetId keyset = 0) :
+    KeyMapData(chip::FabricIndex fabric, uint32_t link_id = 0, chip::GroupId group = kUndefinedGroupId, chip::KeysetId keyset = 0) :
         GroupKey(group, keyset), LinkedData(link_id), fabric_index(fabric)
     {}
 
@@ -434,9 +434,11 @@ struct KeyMapData : public GroupDataProvider::GroupKey, LinkedData
         // first_endpoint
         ReturnErrorOnFailure(reader.Next(TagGroupId()));
         ReturnErrorOnFailure(reader.Get(group_id));
-        // endpoint_count
+        // keyset_id
+        uint16_t ksid;
         ReturnErrorOnFailure(reader.Next(TagKeysetId()));
-        ReturnErrorOnFailure(reader.Get(keyset_id));
+        ReturnErrorOnFailure(reader.Get(ksid));
+        keyset_id = ksid;
         // next
         ReturnErrorOnFailure(reader.Next(TagNext()));
         ReturnErrorOnFailure(reader.Get(next));
@@ -636,7 +638,7 @@ struct KeySetData : PersistentData<kPersistentBufferMax>
     chip::KeysetId prev            = kInvalidKeysetId;
     bool first                     = true;
 
-    uint16_t keyset_id                       = 0;
+    uint32_t keyset_id                       = 0;
     GroupDataProvider::SecurityPolicy policy = GroupDataProvider::SecurityPolicy::kCacheAndSync;
     uint8_t keys_count                       = 0;
     Crypto::GroupOperationalCredentials operational_keys[KeySet::kEpochKeysMax];
@@ -1568,7 +1570,7 @@ CHIP_ERROR GroupDataProviderImpl::SetKeySet(chip::FabricIndex fabric_index, cons
     return fabric.Save(mStorage);
 }
 
-CHIP_ERROR GroupDataProviderImpl::GetKeySet(chip::FabricIndex fabric_index, uint16_t target_id, KeySet & out_keyset)
+CHIP_ERROR GroupDataProviderImpl::GetKeySet(chip::FabricIndex fabric_index, chip::KeysetId target_id, KeySet & out_keyset)
 {
     VerifyOrReturnError(IsInitialized(), CHIP_ERROR_INTERNAL);
 
@@ -1591,7 +1593,7 @@ CHIP_ERROR GroupDataProviderImpl::GetKeySet(chip::FabricIndex fabric_index, uint
     return CHIP_NO_ERROR;
 }
 
-CHIP_ERROR GroupDataProviderImpl::RemoveKeySet(chip::FabricIndex fabric_index, uint16_t target_id)
+CHIP_ERROR GroupDataProviderImpl::RemoveKeySet(chip::FabricIndex fabric_index, chip::KeysetId target_id)
 {
     VerifyOrReturnError(IsInitialized(), CHIP_ERROR_INTERNAL);
 
@@ -1624,8 +1626,8 @@ CHIP_ERROR GroupDataProviderImpl::RemoveKeySet(chip::FabricIndex fabric_index, u
 
     // Removing a key set also removes the associated group mappings
     KeyMapData map;
-    uint16_t original_count = fabric.map_count;
-    for (uint16_t i = 0; i < original_count; ++i)
+    uint32_t original_count = fabric.map_count;
+    for (uint32_t i = 0; i < original_count; ++i)
     {
         fabric.Load(mStorage);
         size_t idx = map.Find(mStorage, fabric, target_id);
@@ -1765,6 +1767,21 @@ Crypto::SymmetricKeyContext * GroupDataProviderImpl::GetKeyContext(FabricIndex f
                 return mGroupKeyContexPool.CreateObject(*this, creds->encryption_key, creds->hash, creds->privacy_key);
             }
         }
+    }
+    return nullptr;
+}
+
+Crypto::SymmetricKeyContext * GroupDataProviderImpl::GetKeysetContext(FabricIndex fabric_index, KeysetId keyset_id)
+{
+    FabricData fabric(fabric_index);
+    VerifyOrReturnError(CHIP_NO_ERROR == fabric.Load(mStorage), nullptr);
+
+    KeySetData keyset;
+    VerifyOrReturnError(keyset.Find(mStorage, fabric, keyset_id), nullptr);
+    Crypto::GroupOperationalCredentials * creds = keyset.GetCurrentGroupCredentials();
+    if (nullptr != creds)
+    {
+        return mGroupKeyContexPool.CreateObject(*this, creds->encryption_key, creds->hash, creds->privacy_key);
     }
     return nullptr;
 }

@@ -158,17 +158,17 @@ public:
     {
         return StorageKeyName::Formatted("f/%x/g/%x", fabric, group);
     }
-    static StorageKeyName FabricGroupKey(chip::FabricIndex fabric, uint16_t index)
+    static StorageKeyName FabricGroupKey(chip::FabricIndex fabric, uint32_t index)
     {
-        return StorageKeyName::Formatted("f/%x/gk/%x", fabric, index);
+        return StorageKeyName::Formatted("f/%x/gk/%lx", fabric, index);
     }
     static StorageKeyName FabricGroupEndpoint(chip::FabricIndex fabric, chip::GroupId group, chip::EndpointId endpoint)
     {
         return StorageKeyName::Formatted("f/%x/g/%x/e/%x", fabric, group, endpoint);
     }
-    static StorageKeyName FabricKeyset(chip::FabricIndex fabric, uint16_t keyset)
+    static StorageKeyName FabricKeyset(chip::FabricIndex fabric, uint32_t keyset)
     {
-        return StorageKeyName::Formatted("f/%x/k/%x", fabric, keyset);
+        return StorageKeyName::Formatted("f/%x/k/%lx", fabric, keyset);
     }
 
     // Groupcast
