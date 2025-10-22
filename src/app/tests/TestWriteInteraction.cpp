@@ -49,6 +49,7 @@ constexpr uint16_t kMaxGroupKeysPerFabric        = 8;
 chip::TestPersistentStorageDelegate gTestStorage;
 chip::Crypto::DefaultSessionKeystore gSessionKeystore;
 chip::Credentials::GroupDataProviderImpl gGroupsProvider(kMaxGroupsPerFabric, kMaxGroupKeysPerFabric);
+chip::Groupcast::DataProvider sGroupcastDataProvider;
 
 } // namespace
 
@@ -134,11 +135,13 @@ public:
         gGroupsProvider.SetSessionKeystore(&gSessionKeystore);
         ASSERT_EQ(gGroupsProvider.Init(), CHIP_NO_ERROR);
         chip::Credentials::SetGroupDataProvider(&gGroupsProvider);
+        ASSERT_EQ(sGroupcastDataProvider.Initialize(&gTestStorage, &gSessionKeystore), CHIP_NO_ERROR);
+        chip::Groupcast::SetDataProvider(&sGroupcastDataProvider);
 
         uint8_t buf[sizeof(chip::CompressedFabricId)];
         chip::MutableByteSpan span(buf);
         ASSERT_EQ(GetBobFabric()->GetCompressedFabricIdBytes(span), CHIP_NO_ERROR);
-        ASSERT_EQ(chip::GroupTesting::InitData(&gGroupsProvider, GetBobFabricIndex(), span), CHIP_NO_ERROR);
+        ASSERT_EQ(chip::GroupTesting::InitData(&gGroupsProvider, &sGroupcastDataProvider, GetBobFabricIndex(), span), CHIP_NO_ERROR);
 
         mOldProvider = InteractionModelEngine::GetInstance()->SetDataModelProvider(&TestImCustomDataModel::Instance());
         chip::Test::SetMockNodeConfig(TestMockNodeConfig());

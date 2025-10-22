@@ -114,6 +114,7 @@ chip::Controller::CommissioningParameters sCommissioningParameters;
 chip::app::DefaultICDClientStorage sICDClientStorage;
 chip::Controller::ScriptPairingDeviceDiscoveryDelegate sPairingDeviceDiscoveryDelegate;
 chip::Credentials::GroupDataProviderImpl sGroupDataProvider;
+chip::Groupcast::DataProvider sGroupcastDataProvider;
 chip::Credentials::PersistentStorageOpCertStore sPersistentStorageOpCertStore;
 chip::Crypto::RawKeySessionKeystore sSessionKeystore;
 

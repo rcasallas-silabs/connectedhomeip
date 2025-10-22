@@ -124,6 +124,7 @@ private:
 } // namespace chip
 
 extern chip::Credentials::GroupDataProviderImpl sGroupDataProvider;
+extern chip::Groupcast::DataProvider sGroupcastDataProvider;
 extern chip::Controller::ScriptDevicePairingDelegate sPairingDelegate;
 extern chip::app::DefaultICDClientStorage sICDClientStorage;
 
@@ -653,7 +654,7 @@ PyChipError pychip_OpCreds_InitGroupTestingData(chip::Controller::DeviceCommissi
     CHIP_ERROR err = devCtrl->GetCompressedFabricIdBytes(compressedFabricIdSpan);
     VerifyOrReturnError(err == CHIP_NO_ERROR, ToPyChipError(err));
 
-    err = chip::GroupTesting::InitData(&sGroupDataProvider, devCtrl->GetFabricIndex(), compressedFabricIdSpan);
+    err = chip::GroupTesting::InitData(&sGroupDataProvider, &sGroupcastDataProvider, devCtrl->GetFabricIndex(), compressedFabricIdSpan);
 
     return ToPyChipError(err);
 }
