@@ -14,6 +14,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+#include <random>
 #include <app/server-cluster/ServerClusterInterface.h>
 #include <pw_unit_test/framework.h>
 
@@ -29,7 +30,6 @@
 
 #include <algorithm>
 #include <cstdlib>
-#include <random>
 
 using namespace chip;
 using namespace chip::Test;

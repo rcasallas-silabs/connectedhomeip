@@ -1,4 +1,5 @@
 #include <pw_unit_test/framework.h>
+#include <random>
 
 #include <app/data-model-provider/MetadataTypes.h>
 #include <data-model-providers/codedriven/endpoint/EndpointInterfaceRegistry.h>
@@ -7,7 +8,6 @@
 #include <algorithm>
 #include <array>
 #include <list>
-#include <random>
 #include <vector>
 
 using namespace chip;

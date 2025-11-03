@@ -41,6 +41,8 @@ source_set("interactions") {
   public_deps = [ "${chip_root}/src/app" ]
 }
 
+print("◆ src/controller/BUILD.gn")
+
 static_library("controller") {
   output_name = "libChipController"
 

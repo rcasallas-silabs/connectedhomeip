@@ -35,8 +35,6 @@
 #include <platform/KeyValueStoreManager.h>
 #include <platform/silabs/platformAbstraction/SilabsPlatform.h>
 #include <sl_cmsis_os2_common.h>
-#include <sl_system_init.h>
-#include <sl_system_kernel.h>
 
 using namespace chip;
 using namespace chip::DeviceLayer;
@@ -78,24 +76,23 @@ constexpr osThreadAttr_t kTestTaskAttr = { .name       = "TestDriver",
                                            .stack_size = kTestTaskStackSize,
                                            .priority   = osPriorityNormal };
 
-chip::rpc::NlTest nl_test_service;
-pw::unit_test::UnitTestService unit_test_service;
+// chip::rpc::NlTest nl_test_service;
+// pw::unit_test::UnitTestService unit_test_service;
 
-void RegisterServices(pw::rpc::Server & server)
-{
-    server.RegisterService(nl_test_service, unit_test_service);
-}
+// void RegisterServices(pw::rpc::Server & server)
+// {
+//     server.RegisterService(nl_test_service, unit_test_service);
+// }
 
 void RunRpcService(void *)
 {
-    Start(RegisterServices, &::chip::rpc::logger_mutex);
+    // Start(RegisterServices, &::chip::rpc::logger_mutex);
 }
 
 } // namespace
 
-int main(void)
+void app_init(void)
 {
-    sl_system_init();
     Silabs::GetPlatform().Init();
     PigweedLogger::init();
     mbedtls_platform_set_calloc_free(CHIPPlatformMemoryCalloc, CHIPPlatformMemoryFree);
@@ -114,9 +111,16 @@ int main(void)
     // Start RPC service which runs the tests.
     sTestTaskHandle = osThreadNew(RunRpcService, nullptr, &kTestTaskAttr);
     ChipLogProgress(AppServer, "Starting Kernel");
-    sl_system_kernel_start();
 
     // Should never get here.
-    ChipLogProgress(AppServer, "sl_system_kernel_start() failed");
-    return -1;
+    ChipLogProgress(AppServer, "sl_main_kernel_start() failed");
 }
+
+#if defined(SL_CATALOG_CUSTOM_MAIN_PRESENT)
+int main(void)
+{
+    app_init_early();
+    sl_system_init();
+    app_init();
+}
+#endif

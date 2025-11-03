@@ -13,6 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+#include <cmath>
 #include <pw_unit_test/framework.h>
 
 #include <app/ConcreteCommandPath.h>
@@ -28,7 +29,6 @@
 #include <lib/support/ReadOnlyBuffer.h>
 #include <platform/DiagnosticDataProvider.h>
 
-#include <cmath>
 
 namespace {
 

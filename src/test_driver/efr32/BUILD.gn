@@ -34,6 +34,9 @@ efr32_project_dir = "${chip_root}/src/test_driver/efr32"
 examples_plat_dir = "${chip_root}/examples/platform/silabs/efr32"
 examples_common_plat_dir = "${chip_root}/examples/platform/silabs"
 
+print("")
+print("◆ src/test_driver/efr32/BUILD.gn")
+print("∙ efr32_project_dir: ${efr32_project_dir}")
 pw_proto_library("nl_test_service") {
   sources = [ "${efr32_project_dir}/proto/nl_test.proto" ]
   inputs = [ "${efr32_project_dir}/proto/nl_test.options" ]
@@ -114,6 +117,40 @@ source_set("efr32_test_main") {
   public_configs = [ ":efr32_ldflags" ]
 }
 
+#================================================================
+#================================================================
+
+config("efr32_freertos_config") {
+
+  defines = [
+    "${silabs_mcu}=1",
+    "SL_COMPONENT_CATALOG_PRESENT=1",
+  ]
+
+  include_dirs = [
+    "${efr32_sdk_root}/util/third_party/freertos/kernel/include",
+    "${examples_plat_dir}",
+    "${examples_common_plat_dir}",
+    "${matter_support_root}/board-support/efr32/${silabs_family}/${silabs_board}/autogen",
+    "${efr32_sdk_root}/platform/CMSIS/Core/Include",
+    "${efr32_sdk_root}/platform/CMSIS/RTOS2/Include",
+    "${efr32_sdk_root}/platform/common/inc",
+  ]
+
+  if (silabs_family == "efr32mg24") {
+      include_dirs += [
+      "${efr32_sdk_root}/platform/Device/SiliconLabs/EFR32MG24/Include",
+    ]
+  }
+}
+
+pw_source_set("freertos_config") {
+  public_configs = [ ":efr32_freertos_config" ]
+}
+
+#================================================================
+#================================================================
+
 # This target is referred to by BuildRoot in scripts/build/builders/efr32.py, as well as the example in README.md.
 # It builds the root target "src:tests", which builds the chip_test_suite target in each test directory, which builds a pw_test target for each test source file, which builds a silabs_executable, which includes the "efr32_test_main" target defined above.
 group("efr32") {
@@ -130,3 +167,5 @@ group("runner") {
 group("default") {
   deps = [ ":efr32" ]
 }
+
+print("")
