@@ -80,15 +80,15 @@ public:
     CHIP_ERROR RemoveGroupKeys(FabricIndex fabric_index) override;
     GroupKeyIterator * IterateGroupKeys(FabricIndex fabric_index) override;
 
-    //
-    // Key Sets
-    //
+    // //
+    // // Key Sets
+    // //
 
-    CHIP_ERROR SetKeySet(FabricIndex fabric_index, const ByteSpan & compressed_fabric_id, const KeySet & keys) override;
-    CHIP_ERROR GetKeySet(FabricIndex fabric_index, chip::KeysetId keyset_id, KeySet & keys) override;
-    CHIP_ERROR RemoveKeySet(FabricIndex fabric_index, chip::KeysetId keyset_id) override;
-    CHIP_ERROR GetIpkKeySet(FabricIndex fabric_index, KeySet & out_keyset) override;
-    KeySetIterator * IterateKeySets(FabricIndex fabric_index) override;
+    // CHIP_ERROR SetKeySet(FabricIndex fabric_index, const ByteSpan & compressed_fabric_id, const KeySet & keys) override;
+    // CHIP_ERROR GetKeySet(FabricIndex fabric_index, chip::KeysetId keyset_id, KeySet & keys) override;
+    // CHIP_ERROR RemoveKeySet(FabricIndex fabric_index, chip::KeysetId keyset_id) override;
+    // CHIP_ERROR GetIpkKeySet(FabricIndex fabric_index, KeySet & out_keyset) override;
+    // KeySetIterator * IterateKeySets(FabricIndex fabric_index) override;
 
     // Fabrics
     CHIP_ERROR RemoveFabric(FabricIndex fabric_index) override;
@@ -151,75 +151,75 @@ protected:
         bool mFirstEndpoint   = true;
     };
 
-    class GroupKeyContext : public Crypto::SymmetricKeyContext
-    {
-    public:
-        GroupKeyContext(GroupDataProviderImpl & provider) : mProvider(provider) {}
+    // class GroupKeyContext : public Crypto::SymmetricKeyContext
+    // {
+    // public:
+    //     GroupKeyContext(GroupDataProviderImpl & provider) : mProvider(provider) {}
 
-        GroupKeyContext(GroupDataProviderImpl & provider, const Crypto::Symmetric128BitsKeyByteArray & encryptionKey, uint16_t hash,
-                        const Crypto::Symmetric128BitsKeyByteArray & privacyKey) :
-            mProvider(provider)
+    //     GroupKeyContext(GroupDataProviderImpl & provider, const Crypto::Symmetric128BitsKeyByteArray & encryptionKey, uint16_t hash,
+    //                     const Crypto::Symmetric128BitsKeyByteArray & privacyKey) :
+    //         mProvider(provider)
 
-        {
-            Initialize(encryptionKey, hash, privacyKey);
-        }
+    //     {
+    //         Initialize(encryptionKey, hash, privacyKey);
+    //     }
 
-        void Initialize(const Crypto::Symmetric128BitsKeyByteArray & encryptionKey, uint16_t hash,
-                        const Crypto::Symmetric128BitsKeyByteArray & privacyKey)
-        {
-            ReleaseKeys();
-            mKeyHash = hash;
-            // TODO: Load group keys to the session keystore upon loading from persistent storage
-            //
-            // Group keys should be transformed into a key handle as soon as possible or even
-            // the key storage should be taken over by SessionKeystore interface, but this looks
-            // like more work, so let's use the transitional code below for now.
+    //     void Initialize(const Crypto::Symmetric128BitsKeyByteArray & encryptionKey, uint16_t hash,
+    //                     const Crypto::Symmetric128BitsKeyByteArray & privacyKey)
+    //     {
+    //         ReleaseKeys();
+    //         mKeyHash = hash;
+    //         // TODO: Load group keys to the session keystore upon loading from persistent storage
+    //         //
+    //         // Group keys should be transformed into a key handle as soon as possible or even
+    //         // the key storage should be taken over by SessionKeystore interface, but this looks
+    //         // like more work, so let's use the transitional code below for now.
 
-            Crypto::SessionKeystore * keystore = mProvider.GetSessionKeystore();
-            keystore->CreateKey(encryptionKey, mEncryptionKey);
-            keystore->CreateKey(privacyKey, mPrivacyKey);
-        }
+    //         Crypto::SessionKeystore * keystore = mProvider.GetSessionKeystore();
+    //         keystore->CreateKey(encryptionKey, mEncryptionKey);
+    //         keystore->CreateKey(privacyKey, mPrivacyKey);
+    //     }
 
-        void ReleaseKeys()
-        {
-            Crypto::SessionKeystore * keystore = mProvider.GetSessionKeystore();
-            keystore->DestroyKey(mEncryptionKey);
-            keystore->DestroyKey(mPrivacyKey);
-        }
+    //     void ReleaseKeys()
+    //     {
+    //         Crypto::SessionKeystore * keystore = mProvider.GetSessionKeystore();
+    //         keystore->DestroyKey(mEncryptionKey);
+    //         keystore->DestroyKey(mPrivacyKey);
+    //     }
 
-        uint16_t GetKeyHash() override { return mKeyHash; }
+    //     uint16_t GetKeyHash() override { return mKeyHash; }
 
-        CHIP_ERROR MessageEncrypt(const ByteSpan & plaintext, const ByteSpan & aad, const ByteSpan & nonce, MutableByteSpan & mic,
-                                  MutableByteSpan & ciphertext) const override;
-        CHIP_ERROR MessageDecrypt(const ByteSpan & ciphertext, const ByteSpan & aad, const ByteSpan & nonce, const ByteSpan & mic,
-                                  MutableByteSpan & plaintext) const override;
-        CHIP_ERROR PrivacyEncrypt(const ByteSpan & input, const ByteSpan & nonce, MutableByteSpan & output) const override;
-        CHIP_ERROR PrivacyDecrypt(const ByteSpan & input, const ByteSpan & nonce, MutableByteSpan & output) const override;
+    //     CHIP_ERROR MessageEncrypt(const ByteSpan & plaintext, const ByteSpan & aad, const ByteSpan & nonce, MutableByteSpan & mic,
+    //                               MutableByteSpan & ciphertext) const override;
+    //     CHIP_ERROR MessageDecrypt(const ByteSpan & ciphertext, const ByteSpan & aad, const ByteSpan & nonce, const ByteSpan & mic,
+    //                               MutableByteSpan & plaintext) const override;
+    //     CHIP_ERROR PrivacyEncrypt(const ByteSpan & input, const ByteSpan & nonce, MutableByteSpan & output) const override;
+    //     CHIP_ERROR PrivacyDecrypt(const ByteSpan & input, const ByteSpan & nonce, MutableByteSpan & output) const override;
 
-        void Release() override;
+    //     void Release() override;
 
-    protected:
-        GroupDataProviderImpl & mProvider;
-        uint16_t mKeyHash = 0;
-        Crypto::Aes128KeyHandle mEncryptionKey;
-        Crypto::Aes128KeyHandle mPrivacyKey;
-    };
+    // protected:
+    //     GroupDataProviderImpl & mProvider;
+    //     uint16_t mKeyHash = 0;
+    //     Crypto::Aes128KeyHandle mEncryptionKey;
+    //     Crypto::Aes128KeyHandle mPrivacyKey;
+    // };
 
-    class KeySetIteratorImpl : public KeySetIterator
-    {
-    public:
-        KeySetIteratorImpl(GroupDataProviderImpl & provider, FabricIndex fabric_index);
-        size_t Count() override;
-        bool Next(KeySet & output) override;
-        void Release() override;
+    // class KeySetIteratorImpl : public KeySetIterator
+    // {
+    // public:
+    //     KeySetIteratorImpl(GroupDataProviderImpl & provider, FabricIndex fabric_index);
+    //     size_t Count() override;
+    //     bool Next(KeySet & output) override;
+    //     void Release() override;
 
-    protected:
-        GroupDataProviderImpl & mProvider;
-        FabricIndex mFabric = kUndefinedFabricIndex;
-        uint16_t mNextId    = 0;
-        size_t mCount       = 0;
-        size_t mTotal       = 0;
-    };
+    // protected:
+    //     GroupDataProviderImpl & mProvider;
+    //     FabricIndex mFabric = kUndefinedFabricIndex;
+    //     uint16_t mNextId    = 0;
+    //     size_t mCount       = 0;
+    //     size_t mTotal       = 0;
+    // };
 
     class GroupSessionIteratorImpl : public GroupSessionIterator
     {
@@ -241,7 +241,6 @@ protected:
         uint16_t mKeyIndex       = 0;
         uint16_t mKeyCount       = 0;
         bool mFirstMap           = true;
-        GroupKeyContext mGroupKeyContext;
     };
     bool IsInitialized() { return (mStorage != nullptr); }
     CHIP_ERROR RemoveEndpoints(FabricIndex fabric_index, GroupId group_id);
@@ -251,9 +250,9 @@ protected:
     ObjectPool<GroupInfoIteratorImpl, kIteratorsMax> mGroupInfoIterators;
     ObjectPool<GroupKeyIteratorImpl, kIteratorsMax> mGroupKeyIterators;
     ObjectPool<EndpointIteratorImpl, kIteratorsMax> mEndpointIterators;
-    ObjectPool<KeySetIteratorImpl, kIteratorsMax> mKeySetIterators;
+    // ObjectPool<KeySetIteratorImpl, kIteratorsMax> mKeySetIterators;
     ObjectPool<GroupSessionIteratorImpl, kIteratorsMax> mGroupSessionsIterator;
-    ObjectPool<GroupKeyContext, kIteratorsMax> mGroupKeyContexPool;
+    // ObjectPool<GroupKeyContext, kIteratorsMax> mGroupKeyContexPool;
 };
 
 } // namespace Credentials

@@ -26,6 +26,7 @@
 #include <lib/core/ClusterEnums.h>
 #include <lib/support/CHIPMemString.h>
 #include <lib/support/CommonIterator.h>
+#include <credentials/KeyManager.h>
 
 namespace chip {
 namespace Credentials {
@@ -33,8 +34,6 @@ namespace Credentials {
 class GroupDataProvider
 {
 public:
-    using SecurityPolicy                                  = app::Clusters::GroupKeyManagement::GroupKeySecurityPolicyEnum;
-    static constexpr KeysetId kIdentityProtectionKeySetId = 0;
 
     struct GroupInfo
     {
@@ -107,64 +106,64 @@ public:
         }
     };
 
-    struct GroupSession
-    {
-        GroupSession()   = default;
-        GroupId group_id = kUndefinedGroupId;
-        FabricIndex fabric_index;
-        SecurityPolicy security_policy;
-        Crypto::SymmetricKeyContext * keyContext = nullptr;
-    };
+    // struct GroupSession
+    // {
+    //     GroupSession()   = default;
+    //     GroupId group_id = kUndefinedGroupId;
+    //     FabricIndex fabric_index;
+    //     SecurityPolicy security_policy;
+    //     Crypto::SymmetricKeyContext * keyContext = nullptr;
+    // };
 
-    // An EpochKey is a single key usable to determine an operational group key
-    struct EpochKey
-    {
-        static constexpr size_t kLengthBytes = Crypto::CHIP_CRYPTO_SYMMETRIC_KEY_LENGTH_BYTES;
-        // Validity start time in microseconds since 2000-01-01T00:00:00 UTC ("the Epoch")
-        uint64_t start_time;
-        // Actual key bits. Depending on context, it may be a raw epoch key (as seen within `SetKeySet` calls)
-        // or it may be the derived operational group key (as seen in any other usage).
-        uint8_t key[kLengthBytes];
+    // // An EpochKey is a single key usable to determine an operational group key
+    // struct EpochKey
+    // {
+    //     static constexpr size_t kLengthBytes = Crypto::CHIP_CRYPTO_SYMMETRIC_KEY_LENGTH_BYTES;
+    //     // Validity start time in microseconds since 2000-01-01T00:00:00 UTC ("the Epoch")
+    //     uint64_t start_time;
+    //     // Actual key bits. Depending on context, it may be a raw epoch key (as seen within `SetKeySet` calls)
+    //     // or it may be the derived operational group key (as seen in any other usage).
+    //     uint8_t key[kLengthBytes];
 
-        void Clear()
-        {
-            start_time = 0;
-            Crypto::ClearSecretData(&key[0], sizeof(key));
-        }
-    };
+    //     void Clear()
+    //     {
+    //         start_time = 0;
+    //         Crypto::ClearSecretData(&key[0], sizeof(key));
+    //     }
+    // };
 
-    // A operational group key set, usable by many GroupState mappings
-    struct KeySet
-    {
-        static constexpr size_t kEpochKeysMax = 3;
+    // // A operational group key set, usable by many GroupState mappings
+    // struct KeySet
+    // {
+    //     static constexpr size_t kEpochKeysMax = 3;
 
-        KeySet() = default;
-        KeySet(uint16_t id, SecurityPolicy policy_id, uint8_t num_keys) : keyset_id(id), policy(policy_id), num_keys_used(num_keys)
-        {}
+    //     KeySet() = default;
+    //     KeySet(uint16_t id, SecurityPolicy policy_id, uint8_t num_keys) : keyset_id(id), policy(policy_id), num_keys_used(num_keys)
+    //     {}
 
-        // The actual keys for the group key set
-        EpochKey epoch_keys[kEpochKeysMax];
-        // Logical id provided by the Administrator that configured the entry
-        uint16_t keyset_id = 0;
-        // Security policy to use for groups that use this keyset
-        SecurityPolicy policy = SecurityPolicy::kCacheAndSync;
-        // Number of keys present
-        uint8_t num_keys_used = 0;
+    //     // The actual keys for the group key set
+    //     EpochKey epoch_keys[kEpochKeysMax];
+    //     // Logical id provided by the Administrator that configured the entry
+    //     uint16_t keyset_id = 0;
+    //     // Security policy to use for groups that use this keyset
+    //     SecurityPolicy policy = SecurityPolicy::kCacheAndSync;
+    //     // Number of keys present
+    //     uint8_t num_keys_used = 0;
 
-        bool operator==(const KeySet & other) const
-        {
-            VerifyOrReturnError(this->policy == other.policy && this->num_keys_used == other.num_keys_used, false);
-            return !memcmp(this->epoch_keys, other.epoch_keys, this->num_keys_used * sizeof(EpochKey));
-        }
+    //     bool operator==(const KeySet & other) const
+    //     {
+    //         VerifyOrReturnError(this->policy == other.policy && this->num_keys_used == other.num_keys_used, false);
+    //         return !memcmp(this->epoch_keys, other.epoch_keys, this->num_keys_used * sizeof(EpochKey));
+    //     }
 
-        void ClearKeys()
-        {
-            for (size_t key_idx = 0; key_idx < kEpochKeysMax; ++key_idx)
-            {
-                epoch_keys[key_idx].Clear();
-            }
-        }
-    };
+    //     void ClearKeys()
+    //     {
+    //         for (size_t key_idx = 0; key_idx < kEpochKeysMax; ++key_idx)
+    //         {
+    //             epoch_keys[key_idx].Clear();
+    //         }
+    //     }
+    // };
 
     /**
      *  Interface to listen for changes in the Group info.
@@ -190,8 +189,8 @@ public:
     using GroupInfoIterator    = CommonIterator<GroupInfo>;
     using GroupKeyIterator     = CommonIterator<GroupKey>;
     using EndpointIterator     = CommonIterator<GroupEndpoint>;
-    using KeySetIterator       = CommonIterator<KeySet>;
-    using GroupSessionIterator = CommonIterator<GroupSession>;
+    // using KeySetIterator       = CommonIterator<KeySet>;
+    // using GroupSessionIterator = CommonIterator<GroupSession>;
 
     GroupDataProvider(uint16_t maxGroupsPerFabric    = CHIP_CONFIG_MAX_GROUPS_PER_FABRIC,
                       uint16_t maxGroupKeysPerFabric = CHIP_CONFIG_MAX_GROUP_KEYS_PER_FABRIC) :
@@ -273,37 +272,37 @@ public:
      */
     virtual GroupKeyIterator * IterateGroupKeys(FabricIndex fabric_index) = 0;
 
-    //
-    // Key Sets
-    //
+    // //
+    // // Key Sets
+    // //
 
-    virtual CHIP_ERROR SetKeySet(FabricIndex fabric_index, const ByteSpan & compressed_fabric_id, const KeySet & keys) = 0;
-    virtual CHIP_ERROR GetKeySet(FabricIndex fabric_index, KeysetId keyset_id, KeySet & keys)                          = 0;
-    virtual CHIP_ERROR RemoveKeySet(FabricIndex fabric_index, KeysetId keyset_id)                                      = 0;
+    // virtual CHIP_ERROR SetKeySet(FabricIndex fabric_index, const ByteSpan & compressed_fabric_id, const KeySet & keys) = 0;
+    // virtual CHIP_ERROR GetKeySet(FabricIndex fabric_index, KeysetId keyset_id, KeySet & keys)                          = 0;
+    // virtual CHIP_ERROR RemoveKeySet(FabricIndex fabric_index, KeysetId keyset_id)                                      = 0;
 
-    /**
-     * @brief Obtain the actual operational Identity Protection Key (IPK) keyset for a given
-     *        fabric. These keys are used by the CASE protocol, and do not participate in
-     *        any direct traffic encryption. Since the identity protection operational keyset
-     *        is used in multiple key derivations and procedures, it cannot be hidden behind a
-     *        SymmetricKeyContext, and must be obtainable by value.
-     *
-     * @param fabric_index - Fabric index for which to get the IPK operational keyset
-     * @param out_keyset - Reference to a KeySet where the IPK keys will be stored on success
-     * @return CHIP_NO_ERROR on success, CHIP_ERROR_NOT_FOUND if the IPK keyset is somehow unavailable
-     *         or another CHIP_ERROR value if an internal storage error occurs.
-     */
-    virtual CHIP_ERROR GetIpkKeySet(FabricIndex fabric_index, KeySet & out_keyset) = 0;
+    // /**
+    //  * @brief Obtain the actual operational Identity Protection Key (IPK) keyset for a given
+    //  *        fabric. These keys are used by the CASE protocol, and do not participate in
+    //  *        any direct traffic encryption. Since the identity protection operational keyset
+    //  *        is used in multiple key derivations and procedures, it cannot be hidden behind a
+    //  *        SymmetricKeyContext, and must be obtainable by value.
+    //  *
+    //  * @param fabric_index - Fabric index for which to get the IPK operational keyset
+    //  * @param out_keyset - Reference to a KeySet where the IPK keys will be stored on success
+    //  * @return CHIP_NO_ERROR on success, CHIP_ERROR_NOT_FOUND if the IPK keyset is somehow unavailable
+    //  *         or another CHIP_ERROR value if an internal storage error occurs.
+    //  */
+    // virtual CHIP_ERROR GetIpkKeySet(FabricIndex fabric_index, KeySet & out_keyset) = 0;
 
-    /**
-     *  Creates an iterator that may be used to obtain the list of key sets associated with the given fabric.
-     *  In order to release the allocated memory, the Release() method must be called after the iteration is finished.
-     *  Modifying the key sets table during the iteration is currently not supported, and may yield unexpected behaviour.
-     *
-     *  @retval An instance of KeySetIterator on success
-     *  @retval nullptr if no iterator instances are available.
-     */
-    virtual KeySetIterator * IterateKeySets(FabricIndex fabric_index) = 0;
+    // /**
+    //  *  Creates an iterator that may be used to obtain the list of key sets associated with the given fabric.
+    //  *  In order to release the allocated memory, the Release() method must be called after the iteration is finished.
+    //  *  Modifying the key sets table during the iteration is currently not supported, and may yield unexpected behaviour.
+    //  *
+    //  *  @retval An instance of KeySetIterator on success
+    //  *  @retval nullptr if no iterator instances are available.
+    //  */
+    // virtual KeySetIterator * IterateKeySets(FabricIndex fabric_index) = 0;
 
     // Fabrics
     virtual CHIP_ERROR RemoveFabric(FabricIndex fabric_index) = 0;
@@ -336,35 +335,35 @@ protected:
     GroupListener * mListener = nullptr;
 };
 
-/**
- * @brief Utility Set the IPK Epoch key on a GroupDataProvider assuming a single IPK
- *
- * This utility replaces having to call `GroupDataProvider::SetKeySet` for the simple situation of a
- * single IPK for a fabric, if a single epoch key is used. Start time will be set to 0 ("was always valid")
- *
- * @param provider - pointer to GroupDataProvider on which to set the IPK
- * @param fabric_index - fabric index within the GroupDataProvider for which to set the IPK
- * @param ipk_epoch_span - Span containing the IPK epoch key
- * @param compressed_fabric_id - Compressed fabric ID associated with the fabric, for key derivation
- * @return CHIP_NO_ERROR on success, CHIP_ERROR_INVALID_ARGUMENT on any bad argument, other CHIP_ERROR values
- *         from implementation on other errors
- */
-inline CHIP_ERROR SetSingleIpkEpochKey(GroupDataProvider * provider, FabricIndex fabric_index, const ByteSpan & ipk_epoch_span,
-                                       const ByteSpan & compressed_fabric_id)
-{
-    GroupDataProvider::KeySet ipkKeySet(GroupDataProvider::kIdentityProtectionKeySetId,
-                                        GroupDataProvider::SecurityPolicy::kTrustFirst, 1);
+// /**
+//  * @brief Utility Set the IPK Epoch key on a GroupDataProvider assuming a single IPK
+//  *
+//  * This utility replaces having to call `GroupDataProvider::SetKeySet` for the simple situation of a
+//  * single IPK for a fabric, if a single epoch key is used. Start time will be set to 0 ("was always valid")
+//  *
+//  * @param provider - pointer to GroupDataProvider on which to set the IPK
+//  * @param fabric_index - fabric index within the GroupDataProvider for which to set the IPK
+//  * @param ipk_epoch_span - Span containing the IPK epoch key
+//  * @param compressed_fabric_id - Compressed fabric ID associated with the fabric, for key derivation
+//  * @return CHIP_NO_ERROR on success, CHIP_ERROR_INVALID_ARGUMENT on any bad argument, other CHIP_ERROR values
+//  *         from implementation on other errors
+//  */
+// inline CHIP_ERROR SetSingleIpkEpochKey(GroupDataProvider * provider, FabricIndex fabric_index, const ByteSpan & ipk_epoch_span,
+//                                        const ByteSpan & compressed_fabric_id)
+// {
+//     GroupDataProvider::KeySet ipkKeySet(GroupDataProvider::kIdentityProtectionKeySetId,
+//                                         GroupDataProvider::SecurityPolicy::kTrustFirst, 1);
 
-    VerifyOrReturnError(provider != nullptr, CHIP_ERROR_INVALID_ARGUMENT);
-    VerifyOrReturnError(ipk_epoch_span.size() == sizeof(ipkKeySet.epoch_keys[0].key), CHIP_ERROR_INVALID_ARGUMENT);
-    VerifyOrReturnError(compressed_fabric_id.size() == sizeof(uint64_t), CHIP_ERROR_INVALID_ARGUMENT);
+//     VerifyOrReturnError(provider != nullptr, CHIP_ERROR_INVALID_ARGUMENT);
+//     VerifyOrReturnError(ipk_epoch_span.size() == sizeof(ipkKeySet.epoch_keys[0].key), CHIP_ERROR_INVALID_ARGUMENT);
+//     VerifyOrReturnError(compressed_fabric_id.size() == sizeof(uint64_t), CHIP_ERROR_INVALID_ARGUMENT);
 
-    ipkKeySet.epoch_keys[0].start_time = 0;
-    memcpy(&ipkKeySet.epoch_keys[0].key, ipk_epoch_span.data(), ipk_epoch_span.size());
+//     ipkKeySet.epoch_keys[0].start_time = 0;
+//     memcpy(&ipkKeySet.epoch_keys[0].key, ipk_epoch_span.data(), ipk_epoch_span.size());
 
-    // Set a single IPK, validate key derivation follows spec
-    return provider->SetKeySet(fabric_index, compressed_fabric_id, ipkKeySet);
-}
+//     // Set a single IPK, validate key derivation follows spec
+//     return provider->SetKeySet(fabric_index, compressed_fabric_id, ipkKeySet);
+// }
 
 /**
  * Instance getter for the global GroupDataProvider.

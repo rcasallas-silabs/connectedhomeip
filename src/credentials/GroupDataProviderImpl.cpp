@@ -30,9 +30,9 @@ namespace Credentials {
 using GroupInfo     = GroupDataProvider::GroupInfo;
 using GroupKey      = GroupDataProvider::GroupKey;
 using GroupEndpoint = GroupDataProvider::GroupEndpoint;
-using EpochKey      = GroupDataProvider::EpochKey;
-using KeySet        = GroupDataProvider::KeySet;
-using GroupSession  = GroupDataProvider::GroupSession;
+// using EpochKey      = GroupDataProvider::EpochKey;
+// using KeySet        = GroupDataProvider::KeySet;
+// using GroupSession  = GroupDataProvider::GroupSession;
 
 struct FabricList : public CommonPersistentData::FabricList
 {
@@ -621,6 +621,7 @@ struct EndpointData : GroupDataProvider::GroupEndpoint, PersistentData<kPersiste
     }
 };
 
+#if 0
 struct KeySetData : PersistentData<kPersistentBufferMax>
 {
     static constexpr TLV::Tag TagPolicy() { return TLV::ContextTag(1); }
@@ -808,6 +809,8 @@ struct KeySetData : PersistentData<kPersistentBufferMax>
     }
 };
 
+#endif
+
 //
 // General
 //
@@ -829,9 +832,9 @@ void GroupDataProviderImpl::Finish()
     mGroupInfoIterators.ReleaseAll();
     mGroupKeyIterators.ReleaseAll();
     mEndpointIterators.ReleaseAll();
-    mKeySetIterators.ReleaseAll();
+    // mKeySetIterators.ReleaseAll();
     mGroupSessionsIterator.ReleaseAll();
-    mGroupKeyContexPool.ReleaseAll();
+    // mGroupKeyContexPool.ReleaseAll();
 }
 
 void GroupDataProviderImpl::SetStorageDelegate(PersistentStorageDelegate * storage)
@@ -1516,178 +1519,181 @@ void GroupDataProviderImpl::GroupKeyIteratorImpl::Release()
 //
 // Key Sets
 //
+#if 0
 
-constexpr size_t GroupDataProvider::EpochKey::kLengthBytes;
+// constexpr size_t GroupDataProvider::EpochKey::kLengthBytes;
 
-CHIP_ERROR GroupDataProviderImpl::SetKeySet(chip::FabricIndex fabric_index, const ByteSpan & compressed_fabric_id,
-                                            const KeySet & in_keyset)
-{
-    VerifyOrReturnError(IsInitialized(), CHIP_ERROR_INTERNAL);
+// CHIP_ERROR GroupDataProviderImpl::SetKeySet(chip::FabricIndex fabric_index, const ByteSpan & compressed_fabric_id,
+//                                             const KeySet & in_keyset)
+// {
+//     VerifyOrReturnError(IsInitialized(), CHIP_ERROR_INTERNAL);
 
-    FabricData fabric(fabric_index);
-    KeySetData keyset;
+//     FabricData fabric(fabric_index);
+//     KeySetData keyset;
 
-    // Load fabric, defaults to zero
-    CHIP_ERROR err = fabric.Load(mStorage);
-    VerifyOrReturnError(CHIP_NO_ERROR == err || CHIP_ERROR_NOT_FOUND == err, err);
+//     // Load fabric, defaults to zero
+//     CHIP_ERROR err = fabric.Load(mStorage);
+//     VerifyOrReturnError(CHIP_NO_ERROR == err || CHIP_ERROR_NOT_FOUND == err, err);
 
-    // Search existing keyset
-    bool found = keyset.Find(mStorage, fabric, in_keyset.keyset_id);
+//     // Search existing keyset
+//     bool found = keyset.Find(mStorage, fabric, in_keyset.keyset_id);
 
-    keyset.keyset_id  = in_keyset.keyset_id;
-    keyset.policy     = in_keyset.policy;
-    keyset.keys_count = in_keyset.num_keys_used;
-    memset(keyset.operational_keys, 0x00, sizeof(keyset.operational_keys));
-    keyset.operational_keys[0].start_time = in_keyset.epoch_keys[0].start_time;
-    keyset.operational_keys[1].start_time = in_keyset.epoch_keys[1].start_time;
-    keyset.operational_keys[2].start_time = in_keyset.epoch_keys[2].start_time;
+//     keyset.keyset_id  = in_keyset.keyset_id;
+//     keyset.policy     = in_keyset.policy;
+//     keyset.keys_count = in_keyset.num_keys_used;
+//     memset(keyset.operational_keys, 0x00, sizeof(keyset.operational_keys));
+//     keyset.operational_keys[0].start_time = in_keyset.epoch_keys[0].start_time;
+//     keyset.operational_keys[1].start_time = in_keyset.epoch_keys[1].start_time;
+//     keyset.operational_keys[2].start_time = in_keyset.epoch_keys[2].start_time;
 
-    // Store the operational keys and hash instead of the epoch keys
-    for (size_t i = 0; i < in_keyset.num_keys_used; ++i)
-    {
-        ByteSpan epoch_key(in_keyset.epoch_keys[i].key, Crypto::CHIP_CRYPTO_SYMMETRIC_KEY_LENGTH_BYTES);
-        ReturnErrorOnFailure(
-            Crypto::DeriveGroupOperationalCredentials(epoch_key, compressed_fabric_id, keyset.operational_keys[i]));
-    }
+//     // Store the operational keys and hash instead of the epoch keys
+//     for (size_t i = 0; i < in_keyset.num_keys_used; ++i)
+//     {
+//         ByteSpan epoch_key(in_keyset.epoch_keys[i].key, Crypto::CHIP_CRYPTO_SYMMETRIC_KEY_LENGTH_BYTES);
+//         ReturnErrorOnFailure(
+//             Crypto::DeriveGroupOperationalCredentials(epoch_key, compressed_fabric_id, keyset.operational_keys[i]));
+//     }
 
-    if (found)
-    {
-        // Update existing keyset info, keep next
-        return keyset.Save(mStorage);
-    }
+//     if (found)
+//     {
+//         // Update existing keyset info, keep next
+//         return keyset.Save(mStorage);
+//     }
 
-    // New keyset
-    VerifyOrReturnError(fabric.keyset_count < mMaxGroupKeysPerFabric, CHIP_ERROR_INVALID_LIST_LENGTH);
+//     // New keyset
+//     VerifyOrReturnError(fabric.keyset_count < mMaxGroupKeysPerFabric, CHIP_ERROR_INVALID_LIST_LENGTH);
 
-    // Insert first
-    keyset.next = fabric.first_keyset;
-    ReturnErrorOnFailure(keyset.Save(mStorage));
-    // Update fabric
-    fabric.keyset_count++;
-    fabric.first_keyset = in_keyset.keyset_id;
-    return fabric.Save(mStorage);
-}
+//     // Insert first
+//     keyset.next = fabric.first_keyset;
+//     ReturnErrorOnFailure(keyset.Save(mStorage));
+//     // Update fabric
+//     fabric.keyset_count++;
+//     fabric.first_keyset = in_keyset.keyset_id;
+//     return fabric.Save(mStorage);
+// }
 
-CHIP_ERROR GroupDataProviderImpl::GetKeySet(chip::FabricIndex fabric_index, uint16_t target_id, KeySet & out_keyset)
-{
-    VerifyOrReturnError(IsInitialized(), CHIP_ERROR_INTERNAL);
+// CHIP_ERROR GroupDataProviderImpl::GetKeySet(chip::FabricIndex fabric_index, uint16_t target_id, KeySet & out_keyset)
+// {
+//     VerifyOrReturnError(IsInitialized(), CHIP_ERROR_INTERNAL);
 
-    FabricData fabric(fabric_index);
-    KeySetData keyset;
+//     FabricData fabric(fabric_index);
+//     KeySetData keyset;
 
-    ReturnErrorOnFailure(fabric.Load(mStorage));
-    VerifyOrReturnError(keyset.Find(mStorage, fabric, target_id), CHIP_ERROR_NOT_FOUND);
+//     ReturnErrorOnFailure(fabric.Load(mStorage));
+//     VerifyOrReturnError(keyset.Find(mStorage, fabric, target_id), CHIP_ERROR_NOT_FOUND);
 
-    // Target keyset found
-    out_keyset.ClearKeys();
-    out_keyset.keyset_id     = keyset.keyset_id;
-    out_keyset.policy        = keyset.policy;
-    out_keyset.num_keys_used = keyset.keys_count;
-    // Epoch keys are not read back, only start times
-    out_keyset.epoch_keys[0].start_time = keyset.operational_keys[0].start_time;
-    out_keyset.epoch_keys[1].start_time = keyset.operational_keys[1].start_time;
-    out_keyset.epoch_keys[2].start_time = keyset.operational_keys[2].start_time;
+//     // Target keyset found
+//     out_keyset.ClearKeys();
+//     out_keyset.keyset_id     = keyset.keyset_id;
+//     out_keyset.policy        = keyset.policy;
+//     out_keyset.num_keys_used = keyset.keys_count;
+//     // Epoch keys are not read back, only start times
+//     out_keyset.epoch_keys[0].start_time = keyset.operational_keys[0].start_time;
+//     out_keyset.epoch_keys[1].start_time = keyset.operational_keys[1].start_time;
+//     out_keyset.epoch_keys[2].start_time = keyset.operational_keys[2].start_time;
 
-    return CHIP_NO_ERROR;
-}
+//     return CHIP_NO_ERROR;
+// }
 
-CHIP_ERROR GroupDataProviderImpl::RemoveKeySet(chip::FabricIndex fabric_index, uint16_t target_id)
-{
-    VerifyOrReturnError(IsInitialized(), CHIP_ERROR_INTERNAL);
+// CHIP_ERROR GroupDataProviderImpl::RemoveKeySet(chip::FabricIndex fabric_index, uint16_t target_id)
+// {
+//     VerifyOrReturnError(IsInitialized(), CHIP_ERROR_INTERNAL);
 
-    FabricData fabric(fabric_index);
-    KeySetData keyset;
+//     FabricData fabric(fabric_index);
+//     KeySetData keyset;
 
-    ReturnErrorOnFailure(fabric.Load(mStorage));
-    VerifyOrReturnError(keyset.Find(mStorage, fabric, target_id), CHIP_ERROR_NOT_FOUND);
-    ReturnErrorOnFailure(keyset.Delete(mStorage));
+//     ReturnErrorOnFailure(fabric.Load(mStorage));
+//     VerifyOrReturnError(keyset.Find(mStorage, fabric, target_id), CHIP_ERROR_NOT_FOUND);
+//     ReturnErrorOnFailure(keyset.Delete(mStorage));
 
-    if (keyset.first)
-    {
-        // Remove first keyset
-        fabric.first_keyset = keyset.next;
-    }
-    else
-    {
-        // Remove intermediate keyset, update previous
-        KeySetData prev_data(fabric_index, keyset.prev);
-        ReturnErrorOnFailure(prev_data.Load(mStorage));
-        prev_data.next = keyset.next;
-        ReturnErrorOnFailure(prev_data.Save(mStorage));
-    }
-    if (fabric.keyset_count > 0)
-    {
-        fabric.keyset_count--;
-    }
-    // Update fabric info
-    ReturnErrorOnFailure(fabric.Save(mStorage));
+//     if (keyset.first)
+//     {
+//         // Remove first keyset
+//         fabric.first_keyset = keyset.next;
+//     }
+//     else
+//     {
+//         // Remove intermediate keyset, update previous
+//         KeySetData prev_data(fabric_index, keyset.prev);
+//         ReturnErrorOnFailure(prev_data.Load(mStorage));
+//         prev_data.next = keyset.next;
+//         ReturnErrorOnFailure(prev_data.Save(mStorage));
+//     }
+//     if (fabric.keyset_count > 0)
+//     {
+//         fabric.keyset_count--;
+//     }
+//     // Update fabric info
+//     ReturnErrorOnFailure(fabric.Save(mStorage));
 
-    // Removing a key set also removes the associated group mappings
-    KeyMapData map;
-    uint16_t original_count = fabric.map_count;
-    for (uint16_t i = 0; i < original_count; ++i)
-    {
-        fabric.Load(mStorage);
-        size_t idx = map.Find(mStorage, fabric, target_id);
-        if (idx == std::numeric_limits<size_t>::max())
-        {
-            break;
-        }
-        // NOTE: It's unclear what should happen here if we have removed the key set
-        // and possibly some mappings before failing. For now, ignoring errors, but
-        // open to suggestsions for the correct behavior.
-        RemoveGroupKeyAt(fabric_index, idx);
-    }
-    return CHIP_NO_ERROR;
-}
+//     // Removing a key set also removes the associated group mappings
+//     KeyMapData map;
+//     uint16_t original_count = fabric.map_count;
+//     for (uint16_t i = 0; i < original_count; ++i)
+//     {
+//         fabric.Load(mStorage);
+//         size_t idx = map.Find(mStorage, fabric, target_id);
+//         if (idx == std::numeric_limits<size_t>::max())
+//         {
+//             break;
+//         }
+//         // NOTE: It's unclear what should happen here if we have removed the key set
+//         // and possibly some mappings before failing. For now, ignoring errors, but
+//         // open to suggestsions for the correct behavior.
+//         RemoveGroupKeyAt(fabric_index, idx);
+//     }
+//     return CHIP_NO_ERROR;
+// }
 
-GroupDataProvider::KeySetIterator * GroupDataProviderImpl::IterateKeySets(chip::FabricIndex fabric_index)
-{
-    VerifyOrReturnError(IsInitialized(), nullptr);
-    return mKeySetIterators.CreateObject(*this, fabric_index);
-}
+// GroupDataProvider::KeySetIterator * GroupDataProviderImpl::IterateKeySets(chip::FabricIndex fabric_index)
+// {
+//     VerifyOrReturnError(IsInitialized(), nullptr);
+//     return mKeySetIterators.CreateObject(*this, fabric_index);
+// }
 
-GroupDataProviderImpl::KeySetIteratorImpl::KeySetIteratorImpl(GroupDataProviderImpl & provider, chip::FabricIndex fabric_index) :
-    mProvider(provider), mFabric(fabric_index)
-{
-    FabricData fabric(fabric_index);
-    if (CHIP_NO_ERROR == fabric.Load(provider.mStorage))
-    {
-        mNextId = fabric.first_keyset;
-        mTotal  = fabric.keyset_count;
-        mCount  = 0;
-    }
-}
+// GroupDataProviderImpl::KeySetIteratorImpl::KeySetIteratorImpl(GroupDataProviderImpl & provider, chip::FabricIndex fabric_index) :
+//     mProvider(provider), mFabric(fabric_index)
+// {
+//     FabricData fabric(fabric_index);
+//     if (CHIP_NO_ERROR == fabric.Load(provider.mStorage))
+//     {
+//         mNextId = fabric.first_keyset;
+//         mTotal  = fabric.keyset_count;
+//         mCount  = 0;
+//     }
+// }
 
-size_t GroupDataProviderImpl::KeySetIteratorImpl::Count()
-{
-    return mTotal;
-}
+// size_t GroupDataProviderImpl::KeySetIteratorImpl::Count()
+// {
+//     return mTotal;
+// }
 
-bool GroupDataProviderImpl::KeySetIteratorImpl::Next(KeySet & output)
-{
-    VerifyOrReturnError(mCount < mTotal, false);
+// bool GroupDataProviderImpl::KeySetIteratorImpl::Next(KeySet & output)
+// {
+//     VerifyOrReturnError(mCount < mTotal, false);
 
-    KeySetData keyset(mFabric, mNextId);
-    VerifyOrReturnError(CHIP_NO_ERROR == keyset.Load(mProvider.mStorage), false);
+//     KeySetData keyset(mFabric, mNextId);
+//     VerifyOrReturnError(CHIP_NO_ERROR == keyset.Load(mProvider.mStorage), false);
 
-    mCount++;
-    mNextId = keyset.next;
-    output.ClearKeys();
-    output.keyset_id     = keyset.keyset_id;
-    output.policy        = keyset.policy;
-    output.num_keys_used = keyset.keys_count;
-    // Epoch keys are not read back, only start times
-    output.epoch_keys[0].start_time = keyset.operational_keys[0].start_time;
-    output.epoch_keys[1].start_time = keyset.operational_keys[1].start_time;
-    output.epoch_keys[2].start_time = keyset.operational_keys[2].start_time;
-    return true;
-}
+//     mCount++;
+//     mNextId = keyset.next;
+//     output.ClearKeys();
+//     output.keyset_id     = keyset.keyset_id;
+//     output.policy        = keyset.policy;
+//     output.num_keys_used = keyset.keys_count;
+//     // Epoch keys are not read back, only start times
+//     output.epoch_keys[0].start_time = keyset.operational_keys[0].start_time;
+//     output.epoch_keys[1].start_time = keyset.operational_keys[1].start_time;
+//     output.epoch_keys[2].start_time = keyset.operational_keys[2].start_time;
+//     return true;
+// }
 
-void GroupDataProviderImpl::KeySetIteratorImpl::Release()
-{
-    mProvider.mKeySetIterators.ReleaseObject(this);
-}
+// void GroupDataProviderImpl::KeySetIteratorImpl::Release()
+// {
+//     mProvider.mKeySetIterators.ReleaseObject(this);
+// }
+
+#endif
 
 //
 // Fabrics
@@ -1718,20 +1724,20 @@ CHIP_ERROR GroupDataProviderImpl::RemoveFabric(chip::FabricIndex fabric_index)
 
     // Remove Keysets
 
-    KeySetData keyset(fabric_index, fabric.first_keyset);
-    size_t keyset_count = 0;
+    // KeySetData keyset(fabric_index, fabric.first_keyset);
+    // size_t keyset_count = 0;
 
-    // Loop the keysets associated with the target fabric
-    while (keyset_count < fabric.keyset_count)
-    {
-        if (CHIP_NO_ERROR != keyset.Load(mStorage))
-        {
-            break;
-        }
-        RemoveKeySet(fabric_index, keyset.keyset_id);
-        keyset.keyset_id = keyset.next;
-        keyset_count++;
-    }
+    // // Loop the keysets associated with the target fabric
+    // while (keyset_count < fabric.keyset_count)
+    // {
+    //     if (CHIP_NO_ERROR != keyset.Load(mStorage))
+    //     {
+    //         break;
+    //     }
+    //     RemoveKeySet(fabric_index, keyset.keyset_id);
+    //     keyset.keyset_id = keyset.next;
+    //     keyset_count++;
+    // }
 
     // Remove fabric
     return fabric.Delete(mStorage);
@@ -1746,7 +1752,7 @@ Crypto::SymmetricKeyContext * GroupDataProviderImpl::GetKeyContext(FabricIndex f
     FabricData fabric(fabric_index);
     VerifyOrReturnError(CHIP_NO_ERROR == fabric.Load(mStorage), nullptr);
 
-    KeyMapData mapping(fabric.fabric_index, fabric.first_map);
+    KeyMapData mapping(fabric.fabric_index, fabric.first_map); // HERE!!!! LOAD THE KEY WITHOUT THE MAPPING!!!!
 
     // Look for the target group in the fabric's keyset-group pairs
     for (uint16_t i = 0; i < fabric.map_count; ++i, mapping.id = mapping.next)
@@ -1767,37 +1773,6 @@ Crypto::SymmetricKeyContext * GroupDataProviderImpl::GetKeyContext(FabricIndex f
         }
     }
     return nullptr;
-}
-
-CHIP_ERROR GroupDataProviderImpl::GetIpkKeySet(FabricIndex fabric_index, KeySet & out_keyset)
-{
-    FabricData fabric(fabric_index);
-    VerifyOrReturnError(CHIP_NO_ERROR == fabric.Load(mStorage), CHIP_ERROR_NOT_FOUND);
-
-    KeyMapData mapping(fabric.fabric_index, fabric.first_map);
-
-    // Fabric found, get the keyset
-    KeySetData keyset;
-    VerifyOrReturnError(keyset.Find(mStorage, fabric, kIdentityProtectionKeySetId), CHIP_ERROR_NOT_FOUND);
-
-    // If the keyset ID doesn't match, we have a ... problem.
-    VerifyOrReturnError(keyset.keyset_id == kIdentityProtectionKeySetId, CHIP_ERROR_INTERNAL);
-
-    out_keyset.keyset_id     = keyset.keyset_id;
-    out_keyset.num_keys_used = keyset.keys_count;
-    out_keyset.policy        = keyset.policy;
-
-    for (size_t key_idx = 0; key_idx < MATTER_ARRAY_SIZE(out_keyset.epoch_keys); ++key_idx)
-    {
-        out_keyset.epoch_keys[key_idx].Clear();
-        if (key_idx < keyset.keys_count)
-        {
-            out_keyset.epoch_keys[key_idx].start_time = keyset.operational_keys[key_idx].start_time;
-            memcpy(&out_keyset.epoch_keys[key_idx].key[0], keyset.operational_keys[key_idx].encryption_key, EpochKey::kLengthBytes);
-        }
-    }
-
-    return CHIP_NO_ERROR;
 }
 
 void GroupDataProviderImpl::GroupKeyContext::Release()

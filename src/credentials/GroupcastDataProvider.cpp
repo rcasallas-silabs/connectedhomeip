@@ -127,115 +127,15 @@ struct GroupList : public PersistentArray<kMaxMembershipCount, MaxPersistentBuff
 };
 
 //
-// Group Iterator
-//
-
-DataProvider::GroupIterator::GroupIterator(DataProvider & group_data, FabricIndex fabric) : mProvider(group_data), mFabric(fabric)
-{
-    GroupList list(fabric, group_data.mStorage);
-    list.Load();
-    mCount = list.Count();
-}
-
-size_t DataProvider::GroupIterator::Count()
-{
-    return mCount;
-}
-
-bool DataProvider::GroupIterator::Next(Group & out)
-{
-    VerifyOrReturnValue(mIndex < mCount, false);
-    Group entry;
-    GroupList list(mFabric, mProvider.mStorage);
-    list.Load();
-    VerifyOrReturnValue(CHIP_NO_ERROR == list.Get(mIndex++, entry), false);
-    out = entry;
-    return true;
-}
-
-void DataProvider::GroupIterator::Release()
-{
-    mProvider.mGroupIteratorPool.ReleaseObject(this);
-}
-
-
-//
-// KeyIterator Iterator
-//
-
-DataProvider::KeyIterator::KeyIterator(DataProvider & group_data, FabricTable *fabrics, GroupId group_id, uint16_t session_id) :
-    mProvider(group_data), mFabrics(fabrics), mGroupId(group_id)
-{
-}
-
-size_t DataProvider::KeyIterator::Count()
-{
-    chip::Credentials::GroupDataProvider *group_data = chip::Credentials::GetGroupDataProvider();
-    size_t count = 0;
-    // Iterate all fabrics
-    for(uint8_t i=0; mFabrics && (i < mFabrics->FabricCount()); ++i)
-    {
-        const FabricInfo *info = mFabrics->FindFabricWithIndex(i);
-        if(info)
-        {
-            // Get the group list for the current fabric
-            chip::Groupcast::GroupList list(info->GetFabricIndex(), mProvider.mStorage);
-            Group entry(mGroupId);
-            size_t index = 0;
-            if(CHIP_NO_ERROR == list.Find(entry, index))
-            {
-                if(nullptr != group_data->GetKeyContext(mFabricIndex, entry.key_id)) {
-                    count++;
-                }
-            }
-        }
-    }
-    return count;
-}
-
-bool DataProvider::KeyIterator::Next(GroupSession &output)
-{
-    chip::Credentials::GroupDataProvider *group_data = chip::Credentials::GetGroupDataProvider();
-    // Iterate all fabrics
-    while (mFabrics && (mFabricIndex < mFabrics->FabricCount()))
-    {
-        const FabricInfo *info = mFabrics->FindFabricWithIndex(mFabricIndex);
-        if(info)
-        {
-            // Get the group list for the current fabric
-            chip::Groupcast::GroupList list(info->GetFabricIndex(), mProvider.mStorage);
-            Group entry(mGroupId);
-            size_t index = 0;
-            if(CHIP_NO_ERROR == list.Find(entry, index))
-            {
-                Crypto::SymmetricKeyContext *context = group_data->GetKeyContext(mFabricIndex, entry.key_id);
-                VerifyOrReturnValue(nullptr != context, false);
-                output.fabric_index = mFabricIndex;
-                output.group_id = entry.group_id;
-                output.keyContext = context;
-                output.security_policy = Credentials::GroupDataProvider::SecurityPolicy::kTrustFirst;
-            }
-        }
-        // No group_id/session_id match in current fabric
-        mFabricIndex++;
-        mKeyIndex = 0;
-    }
-    return false;
-}
-
-void DataProvider::KeyIterator::Release()
-{
-    mProvider.mKeyIteratorPool.ReleaseObject(this);
-}
-
-//
 // DataProvider
 //
 
-CHIP_ERROR DataProvider::Initialize(PersistentStorageDelegate * storage, chip::Crypto::SessionKeystore * keystore)
+CHIP_ERROR DataProvider::Initialize(FabricTable * fabrics, PersistentStorageDelegate * storage, chip::Crypto::SessionKeystore * keystore)
 {
+    VerifyOrReturnError(fabrics != nullptr, CHIP_ERROR_INTERNAL);
     VerifyOrReturnError(storage != nullptr, CHIP_ERROR_INTERNAL);
     VerifyOrReturnError(keystore != nullptr, CHIP_ERROR_INTERNAL);
+    mFabrics  = fabrics;
     mStorage  = storage;
     mKeystore = keystore;
     return CHIP_NO_ERROR;
@@ -306,7 +206,7 @@ CHIP_ERROR DataProvider::RemoveGroup(FabricIndex fabric_idx, GroupId group_id)
     return list.Save();
 }
 
-chip::Crypto::SymmetricKeyContext * DataProvider::CreateKeyContext(FabricIndex fabric, GroupId group_id)
+chip::Crypto::SymmetricKeyContext * DataProvider::GetKeyContext(FabricIndex fabric, GroupId group_id)
 {
     chip::Credentials::GroupDataProvider *group_data = chip::Credentials::GetGroupDataProvider();
     VerifyOrReturnValue(nullptr != group_data, nullptr);
@@ -320,15 +220,116 @@ chip::Crypto::SymmetricKeyContext * DataProvider::CreateKeyContext(FabricIndex f
     return group_data->GetKeyContext(fabric, entry.key_id);
 }
 
+//
+// Group Iterator
+//
 
 DataProvider::GroupIterator * DataProvider::IterateGroups(FabricIndex fabric)
 {
     return mGroupIteratorPool.CreateObject(*this, fabric);
 }
 
-DataProvider::KeyIterator * DataProvider::IterateKeys(FabricTable *fabrics, GroupId group_id, uint16_t session_id)
+DataProvider::GroupIterator::GroupIterator(DataProvider & group_data, FabricIndex fabric) : mProvider(group_data), mFabric(fabric)
 {
-    return mKeyIteratorPool.CreateObject(*this, fabrics, group_id, session_id);
+    GroupList list(fabric, group_data.mStorage);
+    list.Load();
+    mCount = list.Count();
+}
+
+size_t DataProvider::GroupIterator::Count()
+{
+    return mCount;
+}
+
+bool DataProvider::GroupIterator::Next(Group & out)
+{
+    VerifyOrReturnValue(mIndex < mCount, false);
+    Group entry;
+    GroupList list(mFabric, mProvider.mStorage);
+    list.Load();
+    VerifyOrReturnValue(CHIP_NO_ERROR == list.Get(mIndex++, entry), false);
+    out = entry;
+    return true;
+}
+
+void DataProvider::GroupIterator::Release()
+{
+    mProvider.mGroupIteratorPool.ReleaseObject(this);
+}
+
+
+//
+// Session Iterator
+//
+
+Credentials::GroupSessionIterator * DataProvider::IterateGroupSessions(uint16_t session_id)
+{
+    return mSessionIterator.CreateObject(*this, mFabrics, session_id);
+}
+
+DataProvider::SessionIterator::SessionIterator(DataProvider & group_data, FabricTable *fabrics, uint16_t session_id) :
+    mProvider(group_data), mFabrics(fabrics)
+{
+}
+
+size_t DataProvider::SessionIterator::Count()
+{
+    chip::Credentials::GroupDataProvider *group_data = chip::Credentials::GetGroupDataProvider();
+    size_t count = 0;
+    // Iterate all fabrics
+    // for(uint8_t i=0; mFabrics && (i < mFabrics->FabricCount()); ++i)
+    // {
+    //     const FabricInfo *info = mFabrics->FindFabricWithIndex(i);
+    //     if(info)
+    //     {
+    //         // Get the group list for the current fabric
+    //         chip::Groupcast::GroupList list(info->GetFabricIndex(), mProvider.mStorage);
+    //         Group entry(mGroupId);
+    //         size_t index = 0;
+    //         if(CHIP_NO_ERROR == list.Find(entry, index))
+    //         {
+    //             if(nullptr != group_data->GetKeyContext(mFabricIndex, entry.key_id)) {
+    //                 count++;
+    //             }
+    //         }
+    //     }
+    // }
+    return count;
+}
+
+bool DataProvider::SessionIterator::Next(Credentials::GroupSession &output)
+{
+    // chip::Credentials::GroupDataProvider *group_data = chip::Credentials::GetGroupDataProvider();
+    // // Iterate all fabrics
+    // while (mFabrics && (mFabricIndex < mFabrics->FabricCount()))
+    // {
+    //     const FabricInfo *info = mFabrics->FindFabricWithIndex(mFabricIndex);
+    //     if(info)
+    //     {
+    //         // Get the group list for the current fabric
+    //         chip::Groupcast::GroupList list(info->GetFabricIndex(), mProvider.mStorage);
+    //         Group entry(mGroupId);
+    //         size_t index = 0;
+    //         if(CHIP_NO_ERROR == list.Find(entry, index))
+    //         {
+    //             Crypto::SymmetricKeyContext *context = group_data->GetKeyContext(mFabricIndex, entry.key_id);
+    //             VerifyOrReturnValue(nullptr != context, false);
+    //             output.fabric_index = mFabricIndex;
+    //             output.group_id = entry.group_id;
+    //             output.keyContext = context;
+    //             output.security_policy = Credentials::GroupDataProvider::SecurityPolicy::kTrustFirst;
+    //         }
+    //     }
+    //     // No group_id/session_id match in current fabric
+    //     mFabricIndex++;
+    //     mKeyIndex = 0;
+    // }
+    return false;
+}
+
+void DataProvider::SessionIterator::Release()
+{
+    mProvider.mSessionIterator.ReleaseObject(this);
 }
 
 namespace {
