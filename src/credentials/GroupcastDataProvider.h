@@ -78,20 +78,24 @@ struct DataProvider
 
     struct SessionIterator : public Credentials::GroupSessionIterator
     {
-        SessionIterator(DataProvider & provider, FabricTable *fabrics, uint16_t session_id);
+        SessionIterator(DataProvider & provider, FabricTable & fabrics, Credentials::KeyManager & keys, uint16_t session_id);
         size_t Count() override;
         bool Next(Credentials::GroupSession &output) override;
         void Release() override;
     private:
         DataProvider & mProvider;
-        FabricTable * mFabrics = nullptr;
+        FabricTable & mFabrics;
+        Credentials::KeyManager & mKeyManager;
+        uint16_t mSessionId = 0;
         uint8_t mFabricIndex = 0;
         size_t mKeyIndex = 0;
     };
 
+public:
     DataProvider() = default;
 
-    CHIP_ERROR Initialize(FabricTable * fabrics, PersistentStorageDelegate * storage, chip::Crypto::SessionKeystore * keystore);
+    CHIP_ERROR Initialize(PersistentStorageDelegate * storage, Credentials::KeyManager *keys);
+    bool IsInitialized() { return (mStorage != nullptr) && (mKeyManager != nullptr); }
     uint8_t GetMaxMembershipCount();
     CHIP_ERROR AddGroup(chip::FabricIndex fabric_idx, Group & grp);
     CHIP_ERROR GetGroup(FabricIndex fabric_idx, Group & grp);
@@ -99,13 +103,13 @@ struct DataProvider
     CHIP_ERROR SetEndpoints(FabricIndex fabric_idx, Group & grp);
     GroupIterator * IterateGroups(FabricIndex fabric);
     // Decryption
-    Credentials::GroupSessionIterator * IterateGroupSessions(uint16_t session_id);
+    Credentials::GroupSessionIterator * IterateGroupSessions(FabricTable * fabrics, uint16_t session_id);
     Crypto::SymmetricKeyContext * GetKeyContext(FabricIndex fabric_index, GroupId group_id);
 
 private:
-    FabricTable * mFabrics                    = nullptr;
+    // FabricTable * mFabrics                    = nullptr;
     PersistentStorageDelegate * mStorage      = nullptr;
-    chip::Crypto::SessionKeystore * mKeystore = nullptr;
+    Credentials::KeyManager * mKeyManager     = nullptr;
     ObjectPool<GroupIterator, kIteratorMax> mGroupIteratorPool;
     ObjectPool<DataProvider::SessionIterator, Credentials::kIteratorsMax> mSessionIterator;
 };

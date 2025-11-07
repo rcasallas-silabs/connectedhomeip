@@ -207,15 +207,6 @@ public:
     uint16_t GetMaxGroupsPerFabric() const { return mMaxGroupsPerFabric; }
     uint16_t GetMaxGroupKeysPerFabric() const { return mMaxGroupKeysPerFabric; }
 
-    /**
-     *  Initialize the GroupDataProvider, including possibly any persistent
-     *  data store initialization done by the implementation. Must be called once
-     *  before any other API succeeds.
-     *
-     *  @retval #CHIP_ERROR_INCORRECT_STATE if called when already initialized.
-     *  @retval #CHIP_NO_ERROR on success
-     */
-    virtual CHIP_ERROR Init() = 0;
     virtual void Finish()     = 0;
 
     //

@@ -22,6 +22,7 @@
 #include <app/server/Server.h>
 #include <clusters/GroupKeyManagement/ClusterId.h>
 #include <clusters/GroupKeyManagement/Metadata.h>
+#include <credentials/KeyManager.h>
 
 using namespace chip;
 using namespace chip::app;
@@ -109,9 +110,9 @@ struct KeySetReadAllIndicesResponse
     static constexpr CommandId GetCommandId() { return GroupKeyManagement::Commands::KeySetReadAllIndicesResponse::Id; }
     static constexpr ClusterId GetClusterId() { return GroupKeyManagement::Id; }
 
-    GroupDataProvider::KeySetIterator * mIterator = nullptr;
+    KeySetIterator * mIterator = nullptr;
 
-    KeySetReadAllIndicesResponse(GroupDataProvider::KeySetIterator * iter) : mIterator(iter) {}
+    KeySetReadAllIndicesResponse(KeySetIterator * iter) : mIterator(iter) {}
 
     CHIP_ERROR Encode(TLV::TLVWriter & writer, TLV::Tag tag) const
     {
@@ -123,7 +124,7 @@ struct KeySetReadAllIndicesResponse
             TLV::ContextTag(GroupKeyManagement::Commands::KeySetReadAllIndicesResponse::Fields::kGroupKeySetIDs),
             TLV::kTLVType_Array, array));
 
-        GroupDataProvider::KeySet keyset;
+        KeySet keyset;
         while (mIterator && mIterator->Next(keyset))
         {
             ReturnErrorOnFailure(app::DataModel::Encode(writer, TLV::AnonymousTag(), keyset.keyset_id));
@@ -281,6 +282,7 @@ CHIP_ERROR ReadMaxGroupKeysPerFabric(AttributeValueEncoder & aEncoder)
 }
 
 bool GetProviderAndFabric(CommandHandler * commandObj, const ConcreteCommandPath & commandPath,
+                          Credentials::KeyManager ** outKeyManager,
                           Credentials::GroupDataProvider ** outGroupDataProvider, const FabricInfo ** outFabricInfo)
 {
     VerifyOrDie(commandObj != nullptr);
@@ -288,12 +290,19 @@ bool GetProviderAndFabric(CommandHandler * commandObj, const ConcreteCommandPath
     VerifyOrDie(outFabricInfo != nullptr);
 
     // Internal failures on internal inconsistencies.
+    auto keys = GetKeyManager();
     auto provider = GetGroupDataProvider();
     auto fabric   = Server::GetInstance().GetFabricTable().FindFabricWithIndex(commandObj->GetAccessingFabricIndex());
+    
+    if (nullptr == keys)
+    {
+        commandObj->AddStatus(commandPath, Status::Failure, "Internal consistency error on key manager!");
+        return false;
+    }
 
     if (nullptr == provider)
     {
-        commandObj->AddStatus(commandPath, Status::Failure, "Internal consistency error on provider!");
+        commandObj->AddStatus(commandPath, Status::Failure, "Internal consistency error on group provider!");
         return false;
     }
 
@@ -303,6 +312,7 @@ bool GetProviderAndFabric(CommandHandler * commandObj, const ConcreteCommandPath
         return false;
     }
 
+    *outKeyManager = keys;
     *outGroupDataProvider = provider;
     *outFabricInfo        = fabric;
 
@@ -326,12 +336,12 @@ Status ValidateKeySetWriteArguments(const Commands::KeySetWrite::DecodableType &
     }
 
     // By now we at least have epochKey0.
-    static_assert(GroupDataProvider::EpochKey::kLengthBytes == 16,
+    static_assert(EpochKey::kLengthBytes == 16,
                   "Expect EpochKey internal data structure to have a length of 16 bytes.");
 
     // SPEC: If the EpochKey0 field's length is not exactly 16 bytes, then this command SHALL fail with a CONSTRAINT_ERROR status
     // code responded to the client.
-    if (commandData.groupKeySet.epochKey0.Value().size() != GroupDataProvider::EpochKey::kLengthBytes)
+    if (commandData.groupKeySet.epochKey0.Value().size() != EpochKey::kLengthBytes)
     {
         return Status::ConstraintError;
     }
@@ -363,7 +373,7 @@ Status ValidateKeySetWriteArguments(const Commands::KeySetWrite::DecodableType &
 
         // SPEC: If the EpochKey1 field is not null, and the field's length is not exactly 16 bytes, then this command SHALL fail
         // with a CONSTRAINT_ERROR status code responded to the client.
-        if (commandData.groupKeySet.epochKey1.Value().size() != GroupDataProvider::EpochKey::kLengthBytes)
+        if (commandData.groupKeySet.epochKey1.Value().size() != EpochKey::kLengthBytes)
         {
             return Status::ConstraintError;
         }
@@ -402,7 +412,7 @@ Status ValidateKeySetWriteArguments(const Commands::KeySetWrite::DecodableType &
 
         // SPEC: If the EpochKey2 field is not null, and the field's length is not exactly 16 bytes, then this command SHALL fail
         // with a CONSTRAINT_ERROR status code responded to the client.
-        if (commandData.groupKeySet.epochKey2.Value().size() != GroupDataProvider::EpochKey::kLengthBytes)
+        if (commandData.groupKeySet.epochKey2.Value().size() != EpochKey::kLengthBytes)
         {
             return Status::ConstraintError;
         }
@@ -425,7 +435,7 @@ Status ValidateKeySetWriteArguments(const Commands::KeySetWrite::DecodableType &
 
 std::optional<DataModel::ActionReturnStatus> HandleKeySetWrite(CommandHandler * commandObj, const ConcreteCommandPath & commandPath,
                                                                const Commands::KeySetWrite::DecodableType & commandData,
-                                                               Credentials::GroupDataProvider * provider, const FabricInfo * fabric)
+                                                               Credentials::KeyManager * keys, const FabricInfo * fabric)
 {
     // Pre-validate all complex data dependency assumptions about the epoch keys
     Status status = ValidateKeySetWriteArguments(commandData);
@@ -461,11 +471,11 @@ std::optional<DataModel::ActionReturnStatus> HandleKeySetWrite(CommandHandler * 
     bool epoch_key1_present = !commandData.groupKeySet.epochKey1.IsNull();
     bool epoch_key2_present = !commandData.groupKeySet.epochKey2.IsNull();
 
-    GroupDataProvider::KeySet keyset(commandData.groupKeySet.groupKeySetID, commandData.groupKeySet.groupKeySecurityPolicy, 0);
+    KeySet keyset(commandData.groupKeySet.groupKeySetID, commandData.groupKeySet.groupKeySecurityPolicy, 0);
 
     // Epoch Key 0 always present
     keyset.epoch_keys[0].start_time = commandData.groupKeySet.epochStartTime0.Value();
-    memcpy(keyset.epoch_keys[0].key, commandData.groupKeySet.epochKey0.Value().data(), GroupDataProvider::EpochKey::kLengthBytes);
+    memcpy(keyset.epoch_keys[0].key, commandData.groupKeySet.epochKey0.Value().data(), EpochKey::kLengthBytes);
     keyset.num_keys_used++;
 
     // Epoch Key 1
@@ -473,7 +483,7 @@ std::optional<DataModel::ActionReturnStatus> HandleKeySetWrite(CommandHandler * 
     {
         keyset.epoch_keys[1].start_time = commandData.groupKeySet.epochStartTime1.Value();
         memcpy(keyset.epoch_keys[1].key, commandData.groupKeySet.epochKey1.Value().data(),
-               GroupDataProvider::EpochKey::kLengthBytes);
+               EpochKey::kLengthBytes);
         keyset.num_keys_used++;
     }
 
@@ -482,7 +492,7 @@ std::optional<DataModel::ActionReturnStatus> HandleKeySetWrite(CommandHandler * 
     {
         keyset.epoch_keys[2].start_time = commandData.groupKeySet.epochStartTime2.Value();
         memcpy(keyset.epoch_keys[2].key, commandData.groupKeySet.epochKey2.Value().data(),
-               GroupDataProvider::EpochKey::kLengthBytes);
+               EpochKey::kLengthBytes);
         keyset.num_keys_used++;
     }
 
@@ -495,7 +505,7 @@ std::optional<DataModel::ActionReturnStatus> HandleKeySetWrite(CommandHandler * 
     }
 
     // Set KeySet
-    err = provider->SetKeySet(fabric->GetFabricIndex(), compressed_fabric_id, keyset);
+    err = keys->SetKeySet(fabric->GetFabricIndex(), compressed_fabric_id, keyset);
     if (CHIP_ERROR_INVALID_LIST_LENGTH == err)
     {
         commandObj->AddStatus(commandPath, Status::ResourceExhausted, "Not enough space left to add a new KeySet");
@@ -517,11 +527,11 @@ std::optional<DataModel::ActionReturnStatus> HandleKeySetWrite(CommandHandler * 
 
 std::optional<DataModel::ActionReturnStatus> HandleKeySetRead(CommandHandler * commandObj, const ConcreteCommandPath & commandPath,
                                                               const Commands::KeySetRead::DecodableType & commandData,
-                                                              Credentials::GroupDataProvider * provider, const FabricInfo * fabric)
+                                                              Credentials::KeyManager * keys, const FabricInfo * fabric)
 {
     FabricIndex fabricIndex = fabric->GetFabricIndex();
-    GroupDataProvider::KeySet keyset;
-    if (CHIP_NO_ERROR != provider->GetKeySet(fabricIndex, commandData.groupKeySetID, keyset))
+    KeySet keyset;
+    if (CHIP_NO_ERROR != keys->GetKeySet(fabricIndex, commandData.groupKeySetID, keyset))
     {
         // KeySet ID not found
         commandObj->AddStatus(commandPath, Status::NotFound, "Keyset ID not found in KeySetRead");
@@ -573,11 +583,11 @@ std::optional<DataModel::ActionReturnStatus> HandleKeySetRead(CommandHandler * c
 std::optional<DataModel::ActionReturnStatus> HandleKeySetRemove(CommandHandler * commandObj,
                                                                 const ConcreteCommandPath & commandPath,
                                                                 const Commands::KeySetRemove::DecodableType & commandData,
-                                                                Credentials::GroupDataProvider * provider,
+                                                                Credentials::KeyManager * keys,
                                                                 const FabricInfo * fabric)
 
 {
-    if (commandData.groupKeySetID == GroupDataProvider::kIdentityProtectionKeySetId)
+    if (commandData.groupKeySetID == Credentials::kIdentityProtectionKeySetId)
     {
         // SPEC: This command SHALL fail with an INVALID_COMMAND status code back to the initiator if the GroupKeySetID being
         // removed is 0, which is the Key Set associated with the Identity Protection Key (IPK).
@@ -587,7 +597,7 @@ std::optional<DataModel::ActionReturnStatus> HandleKeySetRemove(CommandHandler *
 
     // Remove keyset
     FabricIndex fabricIndex = fabric->GetFabricIndex();
-    CHIP_ERROR err          = provider->RemoveKeySet(fabricIndex, commandData.groupKeySetID);
+    CHIP_ERROR err          = keys->RemoveKeySet(fabricIndex, commandData.groupKeySetID);
 
     if (CHIP_NO_ERROR == err)
     {
@@ -604,10 +614,10 @@ std::optional<DataModel::ActionReturnStatus> HandleKeySetRemove(CommandHandler *
 std::optional<DataModel::ActionReturnStatus>
 HandleKeySetReadAllIndices(CommandHandler * commandObj, const ConcreteCommandPath & commandPath,
                            const Commands::KeySetReadAllIndices::DecodableType & commandData,
-                           Credentials::GroupDataProvider * provider, const FabricInfo * fabric)
+                           Credentials::KeyManager * keys, const FabricInfo * fabric)
 {
     FabricIndex fabricIndex = fabric->GetFabricIndex();
-    auto keysIt             = provider->IterateKeySets(fabricIndex);
+    auto keysIt             = keys->IterateKeySets(fabricIndex);
     if (nullptr == keysIt)
     {
         commandObj->AddStatus(commandPath, Status::Failure, "Failed iteration of key set indices!");
@@ -628,6 +638,7 @@ std::optional<DataModel::ActionReturnStatus> GroupKeyManagementCluster::InvokeCo
                                                                                       chip::TLV::TLVReader & input_arguments,
                                                                                       CommandHandler * handler)
 {
+    Credentials::KeyManager * keys = nullptr;
     Credentials::GroupDataProvider * provider = nullptr;
     const FabricInfo * fabric                 = nullptr;
 
@@ -635,7 +646,7 @@ std::optional<DataModel::ActionReturnStatus> GroupKeyManagementCluster::InvokeCo
      * Fetch provider and fabric before command handling. Provider needed for many of the key set
      * functions and the fabric index is needed for the GroupKeyManagement Decode function.
      */
-    if (!GetProviderAndFabric(handler, request.path, &provider, &fabric))
+    if (!GetProviderAndFabric(handler, request.path, &keys, &provider, &fabric))
     {
         // Command will already have status populated from validation.
         return std::nullopt;
@@ -647,22 +658,22 @@ std::optional<DataModel::ActionReturnStatus> GroupKeyManagementCluster::InvokeCo
     case GroupKeyManagement::Commands::KeySetWrite::Id: {
         GroupKeyManagement::Commands::KeySetWrite::DecodableType request_data;
         ReturnErrorOnFailure(request_data.Decode(input_arguments, fabric_index));
-        return HandleKeySetWrite(handler, request.path, request_data, provider, fabric);
+        return HandleKeySetWrite(handler, request.path, request_data, keys, fabric);
     }
     case GroupKeyManagement::Commands::KeySetRead::Id: {
         GroupKeyManagement::Commands::KeySetRead::DecodableType request_data;
         ReturnErrorOnFailure(request_data.Decode(input_arguments, fabric_index));
-        return HandleKeySetRead(handler, request.path, request_data, provider, fabric);
+        return HandleKeySetRead(handler, request.path, request_data, keys, fabric);
     }
     case GroupKeyManagement::Commands::KeySetRemove::Id: {
         GroupKeyManagement::Commands::KeySetRemove::DecodableType request_data;
         ReturnErrorOnFailure(request_data.Decode(input_arguments, fabric_index));
-        return HandleKeySetRemove(handler, request.path, request_data, provider, fabric);
+        return HandleKeySetRemove(handler, request.path, request_data, keys, fabric);
     }
     case GroupKeyManagement::Commands::KeySetReadAllIndices::Id: {
         GroupKeyManagement::Commands::KeySetReadAllIndices::DecodableType request_data;
         ReturnErrorOnFailure(request_data.Decode(input_arguments, fabric_index));
-        return HandleKeySetReadAllIndices(handler, request.path, request_data, provider, fabric);
+        return HandleKeySetReadAllIndices(handler, request.path, request_data, keys, fabric);
     }
     default:
         return Protocols::InteractionModel::Status::UnsupportedCommand;

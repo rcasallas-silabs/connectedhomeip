@@ -32,6 +32,7 @@
 #include <app/icd/client/DefaultICDClientStorage.h>
 #include <commands/common/CredentialIssuerCommands.h>
 #include <commands/example/ExampleCredentialIssuerCommands.h>
+#include <credentials/KeyManagerImpl.h>
 #include <credentials/GroupDataProviderImpl.h>
 #include <credentials/PersistentStorageOpCertStore.h>
 #include <crypto/PersistentStorageOperationalKeystore.h>
@@ -167,6 +168,7 @@ protected:
     chip::Credentials::PersistentStorageOpCertStore mOpCertStore;
     static chip::Crypto::RawKeySessionKeystore sSessionKeystore;
 
+    static chip::Credentials::KeyManagerImpl sKeyManager;
     static chip::Credentials::GroupDataProviderImpl sGroupDataProvider;
     static chip::Groupcast::DataProvider sGroupcastDataProvider;
     static chip::app::DefaultICDClientStorage sICDClientStorage;

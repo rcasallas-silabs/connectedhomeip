@@ -50,6 +50,7 @@ constexpr char kPAATrustStorePathVariable[]     = "CAMERACONTROLLER_PAA_TRUST_ST
 constexpr char kCDTrustStorePathVariable[]      = "CAMERACONTROLLER_CD_TRUST_STORE_PATH";
 
 const chip::Credentials::AttestationTrustStore * CHIPCommand::sTrustStore = nullptr;
+chip::Credentials::GroupDataProviderImpl CHIPCommand::sKeyManager;
 chip::Credentials::GroupDataProviderImpl CHIPCommand::sGroupDataProvider{ kMaxGroupsPerFabric, kMaxGroupKeysPerFabric };
 chip::Crypto::RawKeySessionKeystore CHIPCommand::sSessionKeystore;
 
@@ -114,14 +115,13 @@ CHIP_ERROR CHIPCommand::MaybeSetUpStack()
     factoryInitParams.sessionKeystore          = &sSessionKeystore;
     factoryInitParams.dataModelProvider        = chip::app::CodegenDataModelProviderInstance(&mDefaultStorage);
 
+    ReturnLogErrorOnFailure(sKeyManager.Initialize(&mDefaultStorage, factoryInitParams.sessionKeystore));
     // Init group data provider that will be used for all group keys and IPKs for the
     // camera-controller-configured fabrics. This is OK to do once since the fabric tables
     // and the DeviceControllerFactory all "share" in the same underlying data.
     // Different commissioner implementations may want to use alternate implementations
     // of GroupDataProvider for injection through factoryInitParams.
-    sGroupDataProvider.SetStorageDelegate(&mDefaultStorage);
-    sGroupDataProvider.SetSessionKeystore(factoryInitParams.sessionKeystore);
-    ReturnLogErrorOnFailure(sGroupDataProvider.Init());
+    ReturnLogErrorOnFailure(sGroupDataProvider.Initialize(&mDefaultStorage, factoryInitParams.sessionKeystore));
     chip::Credentials::SetGroupDataProvider(&sGroupDataProvider);
     factoryInitParams.groupDataProvider = &sGroupDataProvider;
 

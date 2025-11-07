@@ -67,7 +67,9 @@ static bool GroupExists(FabricIndex fabricIndex, EndpointId endpointId, GroupId 
  */
 static bool KeyExists(FabricIndex fabricIndex, GroupId groupId)
 {
+    KeyManager *keys = GetKeyManager();
     GroupDataProvider * provider = GetGroupDataProvider();
+    VerifyOrReturnValue(nullptr != keys, false);
     VerifyOrReturnError(nullptr != provider, false);
     GroupDataProvider::GroupKey entry;
 
@@ -77,8 +79,8 @@ static bool KeyExists(FabricIndex fabricIndex, GroupId groupId)
     {
         if (entry.group_id == groupId)
         {
-            GroupDataProvider::KeySet keys;
-            found = (CHIP_NO_ERROR == provider->GetKeySet(fabricIndex, entry.keyset_id, keys));
+            KeySet ks;
+            found = (CHIP_NO_ERROR == keys->GetKeySet(fabricIndex, entry.keyset_id, ks));
         }
     }
     it->Release();

@@ -133,7 +133,9 @@ CHIP_ERROR Server::Init(const ServerInitParams & initParams)
     VerifyOrExit(initParams.persistentStorageDelegate != nullptr, err = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(initParams.accessDelegate != nullptr, err = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(initParams.aclStorage != nullptr, err = CHIP_ERROR_INVALID_ARGUMENT);
+    VerifyOrExit(initParams.keyManager != nullptr, err = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(initParams.groupDataProvider != nullptr, err = CHIP_ERROR_INVALID_ARGUMENT);
+    VerifyOrExit(initParams.groupcastDataProvider != nullptr, err = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(initParams.sessionKeystore != nullptr, err = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(initParams.operationalKeystore != nullptr, err = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(initParams.opCertStore != nullptr, err = CHIP_ERROR_INVALID_ARGUMENT);
@@ -204,6 +206,7 @@ CHIP_ERROR Server::Init(const ServerInitParams & initParams)
     mAclStorage = initParams.aclStorage;
     SuccessOrExit(err = mAclStorage->Init(*mDeviceStorage, mFabrics.begin(), mFabrics.end()));
 
+    mKeyManager = initParams.keyManager;
     mGroupsProvider = initParams.groupDataProvider;
     SetGroupDataProvider(mGroupsProvider);
     mGroupcastProvider = initParams.groupcastDataProvider;
@@ -389,7 +392,7 @@ CHIP_ERROR Server::Init(const ServerInitParams & initParams)
             .certificateValidityPolicy = &mCertificateValidityPolicy,
             .exchangeMgr       = &mExchangeMgr,
             .fabricTable       = &mFabrics,
-            .groupDataProvider = mGroupsProvider,
+            .keyManager = mKeyManager,
             // Don't provide an MRP local config, so each CASE initiation will use
             // the then-current value.
             .mrpLocalConfig = NullOptional,
@@ -402,7 +405,7 @@ CHIP_ERROR Server::Init(const ServerInitParams & initParams)
     SuccessOrExit(err);
 
     err = mCASEServer.ListenForSessionEstablishment(&mExchangeMgr, &mSessions, &mFabrics, mSessionResumptionStorage,
-                                                    &mCertificateValidityPolicy, mGroupsProvider);
+                                                    &mCertificateValidityPolicy, mKeyManager);
     SuccessOrExit(err);
 
     err = app::InteractionModelEngine::GetInstance()->Init(&mExchangeMgr, &GetFabricTable(), mReportScheduler, &mCASESessionManager,
@@ -841,6 +844,7 @@ Credentials::IgnoreCertificateValidityPeriodPolicy Server::sDefaultCertValidityP
 KvsPersistentStorageDelegate CommonCaseDeviceServerInitParams::sKvsPersistenStorageDelegate;
 PersistentStorageOperationalKeystore CommonCaseDeviceServerInitParams::sPersistentStorageOperationalKeystore;
 Credentials::PersistentStorageOpCertStore CommonCaseDeviceServerInitParams::sPersistentStorageOpCertStore;
+Credentials::KeyManagerImpl CommonCaseDeviceServerInitParams::sKeyManager;
 Credentials::GroupDataProviderImpl CommonCaseDeviceServerInitParams::sGroupDataProvider;
 Groupcast::DataProvider CommonCaseDeviceServerInitParams::sGroupcastDataProvider;
 chip::Access::ExtendedAccessControlDelegate CommonCaseDeviceServerInitParams::sExtendedAccessControlDelegate;

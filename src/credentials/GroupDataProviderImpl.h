@@ -17,6 +17,8 @@
 #pragma once
 
 #include <credentials/GroupDataProvider.h>
+#include <credentials/FabricTable.h>
+#include <credentials/KeyManager.h>
 #include <crypto/SessionKeystore.h>
 #include <lib/core/CHIPPersistentStorageDelegate.h>
 #include <lib/support/Pool.h>
@@ -35,6 +37,10 @@ public:
     {}
     ~GroupDataProviderImpl() override {}
 
+    CHIP_ERROR Initialize(PersistentStorageDelegate * storage, KeyManager * keys);
+    bool IsInitialized() { return (mStorage != nullptr) && (mKeyManager != nullptr); }
+    void Finish() override;
+
     /**
      * @brief Set the storage implementation used for non-volatile storage of configuration data.
      *        This method MUST be called before Init().
@@ -42,12 +48,6 @@ public:
      * @param storage Pointer to storage instance to set. Cannot be nullptr, will assert.
      */
     void SetStorageDelegate(PersistentStorageDelegate * storage);
-
-    void SetSessionKeystore(Crypto::SessionKeystore * keystore) { mSessionKeystore = keystore; }
-    Crypto::SessionKeystore * GetSessionKeystore() const { return mSessionKeystore; }
-
-    CHIP_ERROR Init() override;
-    void Finish() override;
 
     //
     // Group Info
@@ -133,13 +133,14 @@ protected:
     class EndpointIteratorImpl : public EndpointIterator
     {
     public:
-        EndpointIteratorImpl(GroupDataProviderImpl & provider, FabricIndex fabric_index, std::optional<GroupId> group_id);
+        EndpointIteratorImpl(GroupDataProviderImpl & provider, KeyManager & keys, FabricIndex fabric_index, std::optional<GroupId> group_id);
         size_t Count() override;
         bool Next(GroupEndpoint & output) override;
         void Release() override;
 
     protected:
         GroupDataProviderImpl & mProvider;
+        KeyManager & mKeyManager;
         FabricIndex mFabric   = kUndefinedFabricIndex;
         GroupId mFirstGroup   = kUndefinedGroupId;
         uint16_t mGroup       = 0;
@@ -224,13 +225,14 @@ protected:
     class GroupSessionIteratorImpl : public GroupSessionIterator
     {
     public:
-        GroupSessionIteratorImpl(GroupDataProviderImpl & provider, uint16_t session_id);
+        GroupSessionIteratorImpl(GroupDataProviderImpl & provider, KeyManager & keys, uint16_t session_id);
         size_t Count() override;
         bool Next(GroupSession & output) override;
         void Release() override;
 
     protected:
         GroupDataProviderImpl & mProvider;
+        KeyManager & mKeyManager;
         uint16_t mSessionId      = 0;
         FabricIndex mFirstFabric = kUndefinedFabricIndex;
         FabricIndex mFabric      = kUndefinedFabricIndex;
@@ -242,16 +244,17 @@ protected:
         uint16_t mKeyCount       = 0;
         bool mFirstMap           = true;
     };
-    bool IsInitialized() { return (mStorage != nullptr); }
     CHIP_ERROR RemoveEndpoints(FabricIndex fabric_index, GroupId group_id);
 
     PersistentStorageDelegate * mStorage       = nullptr;
-    Crypto::SessionKeystore * mSessionKeystore = nullptr;
+    // FabricTable * mFabrics                    = nullptr;
+    KeyManager * mKeyManager                  = nullptr;
+    // Crypto::SessionKeystore * mSessionKeystore = nullptr;
     ObjectPool<GroupInfoIteratorImpl, kIteratorsMax> mGroupInfoIterators;
     ObjectPool<GroupKeyIteratorImpl, kIteratorsMax> mGroupKeyIterators;
     ObjectPool<EndpointIteratorImpl, kIteratorsMax> mEndpointIterators;
     // ObjectPool<KeySetIteratorImpl, kIteratorsMax> mKeySetIterators;
-    ObjectPool<GroupSessionIteratorImpl, kIteratorsMax> mGroupSessionsIterator;
+    ObjectPool<GroupSessionIteratorImpl, kIteratorsMax> mGroupSessionIterators;
     // ObjectPool<GroupKeyContext, kIteratorsMax> mGroupKeyContexPool;
 };
 

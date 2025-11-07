@@ -108,15 +108,26 @@ public:
                      Optional<ReliableMessageProtocolConfig> mrpLocalConfig);
 
     /**
-     * @brief Set the Group Data Provider which will be used to look up IPKs
+     * @brief Set the KeyManager which will be used to look up IPKs
      *
-     * The GroupDataProvider set MUST have key sets available through `GetIpkKeySet` method
+     * The KeyManager set MUST have key sets available through `GetIpkKeySet` method
      * for the FabricIndex that is associated with the CASESession's FabricInfo.
      *
-     * @param groupDataProvider - Pointer to the group data provider (if nullptr, will error at start of
+     * @param manager - Pointer to the group data provider (if nullptr, will error at start of
      *                            establishment, not here).
      */
-    void SetGroupDataProvider(Credentials::GroupDataProvider * groupDataProvider) { mGroupDataProvider = groupDataProvider; }
+    void SetKeyManager(Credentials::KeyManager * manager) { mKeyManager = manager; }
+
+    // /**
+    //  * @brief Set the Group Data Provider which will be used to look up IPKs
+    //  *
+    //  * The GroupDataProvider set MUST have key sets available through `GetIpkKeySet` method
+    //  * for the FabricIndex that is associated with the CASESession's FabricInfo.
+    //  *
+    //  * @param groupDataProvider - Pointer to the group data provider (if nullptr, will error at start of
+    //  *                            establishment, not here).
+    //  */
+    // void SetGroupDataProvider(Credentials::GroupDataProvider * groupDataProvider) { mGroupDataProvider = groupDataProvider; }
 
     /**
      * @brief
@@ -564,7 +575,8 @@ private:
     Crypto::P256Keypair * mEphemeralKey = nullptr;
     Crypto::P256ECDHDerivedSecret mSharedSecret;
     Credentials::ValidationContext mValidContext;
-    Credentials::GroupDataProvider * mGroupDataProvider = nullptr;
+    Credentials::KeyManager * mKeyManager = nullptr;
+    // Credentials::GroupDataProvider * mGroupDataProvider = nullptr;
 
     uint8_t mMessageDigest[Crypto::kSHA256_Hash_Length];
     uint8_t mIPK[kIPKSize];

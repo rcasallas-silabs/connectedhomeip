@@ -137,6 +137,7 @@ struct FactoryInitParams
     System::Layer * systemLayer                                        = nullptr;
     PersistentStorageDelegate * fabricIndependentStorage               = nullptr;
     Credentials::CertificateValidityPolicy * certificateValidityPolicy = nullptr;
+    Credentials::KeyManager * keyManager                               = nullptr;
     Credentials::GroupDataProvider * groupDataProvider                 = nullptr;
     chip::Groupcast::DataProvider * groupcastDataProvider              = nullptr;
     app::reporting::ReportScheduler::TimerDelegate * timerDelegate     = nullptr;

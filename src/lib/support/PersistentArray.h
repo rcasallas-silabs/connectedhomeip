@@ -30,6 +30,11 @@ struct PersistentArray
 
     size_t Limit() { return this->mLimit; }
     uint16_t Count() { return this->mCount; }
+    CHIP_ERROR At(size_t index, EntryType &entry)
+    {
+        VerifyOrReturnError(index < mCount && (index < mLimit), CHIP_ERROR_NOT_FOUND);
+        return Copy(entry, mEntries[index]);
+    }
 
     void Clear() override
     {

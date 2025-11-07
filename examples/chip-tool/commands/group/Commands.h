@@ -152,8 +152,8 @@ public:
     CHIP_ERROR RunCommand() override
     {
         chip::FabricIndex fabricIndex                            = CurrentCommissioner().GetFabricIndex();
-        chip::Credentials::GroupDataProvider * groupDataProvider = chip::Credentials::GetGroupDataProvider();
-        chip::Credentials::GroupDataProvider::KeySet keySet;
+        chip::Credentials::KeyManager * KeyManager = chip::Credentials::GetKeyManager();
+        chip::Credentials::KeySet keySet;
 
         fprintf(stderr, "\n");
         fprintf(stderr, "  +-------------------------------------------------------------------------------------+\n");
@@ -161,13 +161,13 @@ public:
         fprintf(stderr, "  +-------------------------------------------------------------------------------------+\n");
         fprintf(stderr, "  | KeySet Id   |   Key Policy                                                          |\n");
 
-        auto it = groupDataProvider->IterateKeySets(fabricIndex);
+        auto it = KeyManager->IterateKeySets(fabricIndex);
         if (it)
         {
             while (it->Next(keySet))
             {
                 fprintf(stderr, "  | 0x%-12x  %-66s  |\n", keySet.keyset_id,
-                        (keySet.policy == chip::Credentials::GroupDataProvider::SecurityPolicy::kCacheAndSync) ? "Cache and Sync"
+                        (keySet.policy == chip::Credentials::SecurityPolicy::kCacheAndSync) ? "Cache and Sync"
                                                                                                                : "Trust First");
             }
             it->Release();
@@ -268,25 +268,26 @@ public:
     CHIP_ERROR RunCommand() override
     {
         chip::FabricIndex fabricIndex                            = CurrentCommissioner().GetFabricIndex();
-        chip::Credentials::GroupDataProvider * groupDataProvider = chip::Credentials::GetGroupDataProvider();
+        chip::Credentials::KeyManager * keyManager = chip::Credentials::GetKeyManager();
+        VerifyOrReturnError(nullptr != keyManager, CHIP_ERROR_INCORRECT_STATE);
         uint8_t compressed_fabric_id[sizeof(uint64_t)];
         chip::MutableByteSpan compressed_fabric_id_span(compressed_fabric_id);
         ReturnLogErrorOnFailure(CurrentCommissioner().GetCompressedFabricIdBytes(compressed_fabric_id_span));
 
-        if ((keyPolicy != chip::Credentials::GroupDataProvider::SecurityPolicy::kCacheAndSync &&
-             keyPolicy != chip::Credentials::GroupDataProvider::SecurityPolicy::kTrustFirst) ||
-            (epochKey.size()) != chip::Credentials::GroupDataProvider::EpochKey::kLengthBytes)
+        if ((keyPolicy != chip::Credentials::SecurityPolicy::kCacheAndSync &&
+             keyPolicy != chip::Credentials::SecurityPolicy::kTrustFirst) ||
+            (epochKey.size()) != chip::Credentials::EpochKey::kLengthBytes)
         {
             return CHIP_ERROR_INVALID_ARGUMENT;
         }
 
-        chip::Credentials::GroupDataProvider::KeySet keySet(keysetId, keyPolicy, 1);
-        chip::Credentials::GroupDataProvider::EpochKey epoch_key;
+        chip::Credentials::KeySet keySet(keysetId, keyPolicy, 1);
+        chip::Credentials::EpochKey epoch_key;
         epoch_key.start_time = validityTime;
-        memcpy(epoch_key.key, epochKey.data(), chip::Credentials::GroupDataProvider::EpochKey::kLengthBytes);
+        memcpy(epoch_key.key, epochKey.data(), chip::Credentials::EpochKey::kLengthBytes);
 
-        memcpy(keySet.epoch_keys, &epoch_key, sizeof(chip::Credentials::GroupDataProvider::EpochKey));
-        ReturnErrorOnFailure(groupDataProvider->SetKeySet(fabricIndex, compressed_fabric_id_span, keySet));
+        memcpy(keySet.epoch_keys, &epoch_key, sizeof(chip::Credentials::EpochKey));
+        ReturnErrorOnFailure(keyManager->SetKeySet(fabricIndex, compressed_fabric_id_span, keySet));
 
         SetCommandExitStatus(CHIP_NO_ERROR);
         return CHIP_NO_ERROR;
@@ -294,7 +295,7 @@ public:
 
 private:
     chip::KeysetId keysetId;
-    chip::Credentials::GroupDataProvider::SecurityPolicy keyPolicy;
+    chip::Credentials::SecurityPolicy keyPolicy;
     uint64_t validityTime;
     chip::ByteSpan epochKey;
 };
@@ -312,7 +313,9 @@ public:
     {
         CHIP_ERROR err                                           = CHIP_NO_ERROR;
         chip::FabricIndex fabricIndex                            = CurrentCommissioner().GetFabricIndex();
+        chip::Credentials::KeyManager * keyManager = chip::Credentials::GetKeyManager();
         chip::Credentials::GroupDataProvider * groupDataProvider = chip::Credentials::GetGroupDataProvider();
+        VerifyOrReturnError((nullptr != keyManager) && (nullptr != groupDataProvider), CHIP_ERROR_INCORRECT_STATE);
 
         // Unbind all group
         size_t index = 0;
@@ -333,7 +336,7 @@ public:
         iter->Release();
 
         ReturnErrorOnFailure(err);
-        ReturnErrorOnFailure(groupDataProvider->RemoveKeySet(fabricIndex, keysetId));
+        ReturnErrorOnFailure(keyManager->RemoveKeySet(fabricIndex, keysetId));
 
         SetCommandExitStatus(CHIP_NO_ERROR);
         return CHIP_NO_ERROR;

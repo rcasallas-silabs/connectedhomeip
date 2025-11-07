@@ -290,7 +290,7 @@ CHIP_ERROR DeviceControllerFactory::InitSystemState(FactoryInitParams params)
         // Enable listening for session establishment messages.
         ReturnErrorOnFailure(stateParams.caseServer->ListenForSessionEstablishment(
             stateParams.exchangeMgr, stateParams.sessionMgr, stateParams.fabricTable, sessionResumptionStorage,
-            stateParams.certificateValidityPolicy, stateParams.groupDataProvider));
+            stateParams.certificateValidityPolicy, stateParams.keyManager));
 
         // Our IPv6 transport is at index 0.
         app::DnssdServer::Instance().SetSecuredIPv6Port(
@@ -332,7 +332,7 @@ CHIP_ERROR DeviceControllerFactory::InitSystemState(FactoryInitParams params)
         .certificateValidityPolicy = stateParams.certificateValidityPolicy,
         .exchangeMgr               = stateParams.exchangeMgr,
         .fabricTable               = stateParams.fabricTable,
-        .groupDataProvider         = stateParams.groupDataProvider,
+        .keyManager                = stateParams.keyManager,
         // Don't provide an MRP local config, so each CASE initiation will use
         // the then-current value.
         .mrpLocalConfig            = NullOptional,

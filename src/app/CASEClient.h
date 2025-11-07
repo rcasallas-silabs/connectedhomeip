@@ -33,7 +33,7 @@ struct CASEClientInitParams
     Credentials::CertificateValidityPolicy * certificateValidityPolicy = nullptr;
     Messaging::ExchangeManager * exchangeMgr                           = nullptr;
     FabricTable * fabricTable                                          = nullptr;
-    Credentials::GroupDataProvider * groupDataProvider                 = nullptr;
+    Credentials::KeyManager * keyManager                               = nullptr;
 
     // mrpLocalConfig should not generally be set to anything other than
     // NullOptional.  Doing that can lead to different parts of the system
@@ -55,7 +55,7 @@ struct CASEClientInitParams
         VerifyOrReturnError(sessionManager != nullptr, CHIP_ERROR_INCORRECT_STATE);
         VerifyOrReturnError(exchangeMgr != nullptr, CHIP_ERROR_INCORRECT_STATE);
         VerifyOrReturnError(fabricTable != nullptr, CHIP_ERROR_INCORRECT_STATE);
-        VerifyOrReturnError(groupDataProvider != nullptr, CHIP_ERROR_INCORRECT_STATE);
+        VerifyOrReturnError(keyManager != nullptr, CHIP_ERROR_INCORRECT_STATE);
 
         return CHIP_NO_ERROR;
     }

@@ -1630,13 +1630,13 @@ JNI_METHOD(jobject, getKeySetIds)(JNIEnv * env, jobject self, jlong handle)
     VerifyOrReturnValue(wrapper != nullptr, nullptr, ChipLogError(Controller, "wrapper is null"));
 
     CHIP_ERROR err                                           = CHIP_NO_ERROR;
-    chip::Credentials::GroupDataProvider * groupDataProvider = chip::Credentials::GetGroupDataProvider();
-    auto it = groupDataProvider->IterateKeySets(wrapper->Controller()->GetFabricIndex());
+    chip::Credentials::KeyManager * keyManager = chip::Credentials::GetKeyManager();
+    auto it = keyManager->IterateKeySets(wrapper->Controller()->GetFabricIndex());
 
     jobject keySetIds;
     err = chip::JniReferences::GetInstance().CreateArrayList(keySetIds);
 
-    chip::Credentials::GroupDataProvider::KeySet keySet;
+    chip::Credentials::KeySet keySet;
 
     if (it)
     {
@@ -1660,10 +1660,10 @@ JNI_METHOD(jobject, getKeySecurityPolicy)(JNIEnv * env, jobject self, jlong hand
 
     VerifyOrReturnValue(wrapper != nullptr, nullptr, ChipLogError(Controller, "wrapper is null"));
 
-    chip::Credentials::GroupDataProvider * groupDataProvider = chip::Credentials::GetGroupDataProvider();
-    auto it = groupDataProvider->IterateKeySets(wrapper->Controller()->GetFabricIndex());
+    chip::Credentials::KeyManager * keyManager = chip::Credentials::GetKeyManager();
+    auto it = keyManager->IterateKeySets(wrapper->Controller()->GetFabricIndex());
 
-    chip::Credentials::GroupDataProvider::KeySet keySet;
+    chip::Credentials::KeySet keySet;
 
     uint16_t keySetId = static_cast<uint16_t>(jKeySetId);
     jobject wrapperKeyPolicy;
@@ -1754,22 +1754,22 @@ JNI_METHOD(jboolean, addKeySet)
     chip::MutableByteSpan compressed_fabric_id_span(compressed_fabric_id);
     VerifyOrReturnValue(wrapper->Controller()->GetCompressedFabricIdBytes(compressed_fabric_id_span) == CHIP_NO_ERROR, JNI_FALSE);
 
-    chip::Credentials::GroupDataProvider::SecurityPolicy keyPolicy =
-        static_cast<chip::Credentials::GroupDataProvider::SecurityPolicy>(jKeyPolicy);
+    chip::Credentials::SecurityPolicy keyPolicy =
+        static_cast<chip::Credentials::SecurityPolicy>(jKeyPolicy);
     chip::JniByteArray jniEpochKey(env, epochKey);
     size_t epochKeySize = static_cast<size_t>(jniEpochKey.size());
-    if ((keyPolicy != chip::Credentials::GroupDataProvider::SecurityPolicy::kCacheAndSync &&
-         keyPolicy != chip::Credentials::GroupDataProvider::SecurityPolicy::kTrustFirst) ||
-        epochKeySize != chip::Credentials::GroupDataProvider::EpochKey::kLengthBytes)
+    if ((keyPolicy != chip::Credentials::SecurityPolicy::kCacheAndSync &&
+         keyPolicy != chip::Credentials::SecurityPolicy::kTrustFirst) ||
+        epochKeySize != chip::Credentials::EpochKey::kLengthBytes)
     {
         return JNI_FALSE;
     }
 
-    chip::Credentials::GroupDataProvider::KeySet keySet(static_cast<uint16_t>(jKeySetId), keyPolicy, 1);
-    chip::Credentials::GroupDataProvider::EpochKey epoch_key;
+    chip::Credentials::KeySet keySet(static_cast<uint16_t>(jKeySetId), keyPolicy, 1);
+    chip::Credentials::EpochKey epoch_key;
     epoch_key.start_time = static_cast<uint64_t>(validityTime);
-    memcpy(epoch_key.key, jniEpochKey.byteSpan().data(), chip::Credentials::GroupDataProvider::EpochKey::kLengthBytes);
-    memcpy(keySet.epoch_keys, &epoch_key, sizeof(chip::Credentials::GroupDataProvider::EpochKey));
+    memcpy(epoch_key.key, jniEpochKey.byteSpan().data(), chip::Credentials::EpochKey::kLengthBytes);
+    memcpy(keySet.epoch_keys, &epoch_key, sizeof(chip::Credentials::EpochKey));
 
     VerifyOrReturnValue(groupDataProvider->SetKeySet(wrapper->Controller()->GetFabricIndex(), compressed_fabric_id_span, keySet) ==
                             CHIP_NO_ERROR,

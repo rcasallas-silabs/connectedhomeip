@@ -64,6 +64,7 @@
 #include <controller/python/matter/native/ChipMainLoopWork.h>
 #include <controller/python/matter/native/PyChipError.h>
 
+#include <credentials/KeyManagerImpl.h>
 #include <credentials/GroupDataProviderImpl.h>
 #include <credentials/PersistentStorageOpCertStore.h>
 #include <credentials/attestation_verifier/DefaultDeviceAttestationVerifier.h>
@@ -113,7 +114,9 @@ chip::Platform::ScopedMemoryBuffer<char> sTimeZoneNameBuf;
 chip::Controller::CommissioningParameters sCommissioningParameters;
 chip::app::DefaultICDClientStorage sICDClientStorage;
 chip::Controller::ScriptPairingDeviceDiscoveryDelegate sPairingDeviceDiscoveryDelegate;
+chip::Credentials::KeyManagerImpl sKeyManager;
 chip::Credentials::GroupDataProviderImpl sGroupDataProvider;
+chip::Groupcast::DataProvider sGroupcastDataProvider;
 chip::Credentials::PersistentStorageOpCertStore sPersistentStorageOpCertStore;
 chip::Crypto::RawKeySessionKeystore sSessionKeystore;
 
@@ -293,9 +296,8 @@ PyChipError pychip_DeviceController_StackInit(Controller::Python::StorageAdapter
 
     sICDClientStorage.Init(storageAdapter, &sSessionKeystore);
 
-    sGroupDataProvider.SetStorageDelegate(storageAdapter);
-    sGroupDataProvider.SetSessionKeystore(factoryParams.sessionKeystore);
-    PyReturnErrorOnFailure(ToPyChipError(sGroupDataProvider.Init()));
+    PyReturnErrorOnFailure(ToPyChipError(sKeyManager.Initialize(storageAdapter, factoryParams.sessionKeystore)));
+    PyReturnErrorOnFailure(ToPyChipError(sGroupDataProvider.Initialize(storageAdapter, &sKeyManager)));
     Credentials::SetGroupDataProvider(&sGroupDataProvider);
     factoryParams.groupDataProvider = &sGroupDataProvider;
 

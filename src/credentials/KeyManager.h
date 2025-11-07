@@ -31,6 +31,18 @@ namespace Credentials {
 using SecurityPolicy = app::Clusters::GroupKeyManagement::GroupKeySecurityPolicyEnum;
 static constexpr size_t kIteratorsMax = CHIP_CONFIG_MAX_GROUP_CONCURRENT_ITERATORS;
 
+// typedef struct GroupOperationalCredentials
+// {
+//     /// Validity start time in microseconds since 2000-01-01T00:00:00 UTC ("the Epoch")
+//     uint64_t start_time;
+//     /// Session Id
+//     uint16_t hash;
+//     /// Operational group key
+//     uint8_t encryption_key[Crypto::CHIP_CRYPTO_SYMMETRIC_KEY_LENGTH_BYTES];
+//     /// Privacy key
+//     uint8_t privacy_key[Crypto::CHIP_CRYPTO_SYMMETRIC_KEY_LENGTH_BYTES];
+// } GroupOperationalCredentials;
+
 // An EpochKey is a single key usable to determine an operational group key
 struct EpochKey
 {
@@ -57,14 +69,14 @@ struct KeySet
     KeySet(uint16_t id, SecurityPolicy policy_id, uint8_t num_keys) : keyset_id(id), policy(policy_id), num_keys_used(num_keys)
     {}
 
-    // The actual keys for the group key set
-    EpochKey epoch_keys[kEpochKeysMax];
     // Logical id provided by the Administrator that configured the entry
     uint16_t keyset_id = 0;
     // Security policy to use for groups that use this keyset
     SecurityPolicy policy = SecurityPolicy::kCacheAndSync;
     // Number of keys present
     uint8_t num_keys_used = 0;
+    // The actual keys for the group key set
+    EpochKey epoch_keys[kEpochKeysMax];
 
     bool operator==(const KeySet & other) const
     {
@@ -84,51 +96,25 @@ struct KeySet
 struct GroupSession
 {
     GroupSession()   = default;
-    GroupId group_id = kUndefinedGroupId;
     FabricIndex fabric_index;
+    GroupId group_id = kUndefinedGroupId;
     SecurityPolicy security_policy;
     Crypto::SymmetricKeyContext * keyContext = nullptr;
 };
-
 
 // using KeyContext           = chip::Crypto::SymmetricKeyContext;
 using KeySetIterator       = CommonIterator<KeySet>;
 using KeyContextIterator   = CommonIterator<chip::Crypto::SymmetricKeyContext*&>;
 using GroupSessionIterator = CommonIterator<GroupSession>;
+static constexpr KeysetId kIdentityProtectionKeySetId = 0;
 
 class KeyManager
 {
 public:
-    KeyManager(FabricTable *fabric_table, Crypto::SessionKeystore * key_store):
-        mFabrics(fabric_table), mSessionKeystore(key_store)
-    {}
+    // KeyManager(Crypto::SessionKeystore * store): mKeystore(store) {}
     virtual ~KeyManager() = default;
-
-    static constexpr KeysetId kIdentityProtectionKeySetId = 0;
-
-    struct KeyContext : chip::Crypto::SymmetricKeyContext
-    {
-        KeyContext(KeyManager & manager): mManager(manager) {}
-        KeyContext(KeyManager & manager, const Crypto::GroupOperationalCredentials &creds);
-
-        uint16_t GetKeyHash() override;
-        CHIP_ERROR MessageEncrypt(const ByteSpan & plaintext, const ByteSpan & aad, const ByteSpan & nonce, MutableByteSpan & mic,
-                                  MutableByteSpan & ciphertext) const override;
-        CHIP_ERROR MessageDecrypt(const ByteSpan & ciphertext, const ByteSpan & aad, const ByteSpan & nonce, const ByteSpan & mic,
-                                  MutableByteSpan & plaintext) const override;
-        CHIP_ERROR PrivacyEncrypt(const ByteSpan & input, const ByteSpan & nonce, MutableByteSpan & output) const override;
-        CHIP_ERROR PrivacyDecrypt(const ByteSpan & input, const ByteSpan & nonce, MutableByteSpan & output) const override;
-        void Release() override;
-        
-    protected:
-        void ReleaseKeys();
-
-    private:
-        KeyManager & mManager;
-        uint16_t mHash;
-        Crypto::Aes128KeyHandle mEncryptionKey;
-        Crypto::Aes128KeyHandle mPrivacyKey;
-    };
+    virtual bool IsInitialized() = 0;
+    virtual void Finish() = 0;
 
     virtual CHIP_ERROR SetKeySet(FabricIndex fabric_index, const ByteSpan & compressed_fabric_id, const KeySet & keys) = 0;
     virtual CHIP_ERROR GetKeySet(FabricIndex fabric_index, KeysetId keyset_id, KeySet & keys)                          = 0;
@@ -172,7 +158,7 @@ public:
     */
     inline CHIP_ERROR SetSingleIpkEpochKey(FabricIndex fabric_index, const ByteSpan & ipk_epoch_span, const ByteSpan & compressed_fabric_id)
     {
-        KeySet ipkKeySet(KeyManager::kIdentityProtectionKeySetId, SecurityPolicy::kTrustFirst, 1);
+        KeySet ipkKeySet(kIdentityProtectionKeySetId, SecurityPolicy::kTrustFirst, 1);
 
         VerifyOrReturnError(ipk_epoch_span.size() == sizeof(ipkKeySet.epoch_keys[0].key), CHIP_ERROR_INVALID_ARGUMENT);
         VerifyOrReturnError(compressed_fabric_id.size() == sizeof(uint64_t), CHIP_ERROR_INVALID_ARGUMENT);
@@ -184,12 +170,29 @@ public:
         return SetKeySet(fabric_index, compressed_fabric_id, ipkKeySet);
     }
 
-    virtual KeyContext *CreateKeyContext(const Crypto::GroupOperationalCredentials &creds) = 0;
-
-protected:
-    FabricTable *mFabrics = nullptr;
-    Crypto::SessionKeystore * mSessionKeystore = nullptr;
+    virtual Crypto::SymmetricKeyContext * CreateKeyContext(FabricIndex fabric_index, KeysetId keyset_id) = 0;
+    virtual CHIP_ERROR GetGroupSession(FabricIndex fabric_index, KeysetId keyset_id, uint16_t hash, GroupSession &session) = 0;
 };
+
+/**
+ * Instance getter for the global KeyManager.
+ *
+ * Callers have to externally synchronize usage of this function.
+ *
+ * @return The global Group Data Provider
+ */
+KeyManager * GetKeyManager();
+
+/**
+ * Instance setter for the global KeyManager.
+ *
+ * Callers have to externally synchronize usage of this function.
+ *
+ * The `provider` can be set to nullptr if the owner is done with it fully.
+ *
+ * @param[in] provider pointer to the Group Data Provider global isntance to use
+ */
+void SetKeyManager(KeyManager * provider);
 
 } // namespace Credentials
 } // namespace chip

@@ -55,7 +55,7 @@ public:
     CHIP_ERROR ListenForSessionEstablishment(Messaging::ExchangeManager * exchangeManager, SessionManager * sessionManager,
                                              FabricTable * fabrics, SessionResumptionStorage * sessionResumptionStorage,
                                              Credentials::CertificateValidityPolicy * policy,
-                                             Credentials::GroupDataProvider * responderGroupDataProvider);
+                                             Credentials::KeyManager * keyManager);
 
     //////////// SessionEstablishmentDelegate Implementation ///////////////
     void OnSessionEstablishmentError(CHIP_ERROR error) override;
@@ -94,7 +94,7 @@ private:
     SessionManager * mSessionManager = nullptr;
 
     FabricTable * mFabrics                              = nullptr;
-    Credentials::GroupDataProvider * mGroupDataProvider = nullptr;
+    Credentials::KeyManager * mKeyManager = nullptr;
 
     CHIP_ERROR InitCASEHandshake(Messaging::ExchangeContext * ec);
 

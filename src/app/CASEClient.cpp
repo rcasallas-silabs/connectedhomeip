@@ -52,7 +52,7 @@ CHIP_ERROR CASEClient::EstablishSession(const CASEClientInitParams & params, con
 
     const Optional<ReliableMessageProtocolConfig> & mrpLocalConfig =
         params.mrpLocalConfig.HasValue() ? params.mrpLocalConfig : GetLocalMRPConfig();
-    mCASESession.SetGroupDataProvider(params.groupDataProvider);
+    mCASESession.SetKeyManager(params.keyManager);
     ReturnErrorOnFailure(mCASESession.EstablishSession(*params.sessionManager, params.fabricTable, peer, exchange,
                                                        params.sessionResumptionStorage, params.certificateValidityPolicy, delegate,
                                                        mrpLocalConfig));

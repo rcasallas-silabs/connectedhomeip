@@ -28,6 +28,7 @@
 
 #include "credentials/tests/CHIPCert_test_vectors.h"
 #include <credentials/CHIPCert.h>
+#include <credentials/KeyManagerImpl.h>
 #include <credentials/GroupDataProviderImpl.h>
 #include <credentials/PersistentStorageOpCertStore.h>
 #include <crypto/DefaultSessionKeystore.h>
@@ -259,12 +260,14 @@ constexpr uint32_t sTestCaseResumptionMessageCount = 4;
 
 FabricTable gCommissionerFabrics;
 FabricIndex gCommissionerFabricIndex;
+KeyManagerImpl gCommissionerKeyManager;
 GroupDataProviderImpl gCommissionerGroupDataProvider;
 TestPersistentStorageDelegate gCommissionerStorageDelegate;
 Crypto::DefaultSessionKeystore gCommissionerSessionKeystore;
 
 FabricTable gDeviceFabrics;
 FabricIndex gDeviceFabricIndex;
+KeyManagerImpl gDeviceKeyManager;
 GroupDataProviderImpl gDeviceGroupDataProvider;
 TestPersistentStorageDelegate gDeviceStorageDelegate;
 TestOperationalKeystore gDeviceOperationalKeystore;
@@ -280,13 +283,13 @@ NodeId Node01_02 = 0xDEDEDEDE00010002;
 
 constexpr uint8_t kFaultInjectionSuccessCode = 0;
 
-CHIP_ERROR InitTestIpk(GroupDataProvider & groupDataProvider, const FabricInfo & fabricInfo, size_t numIpks)
+CHIP_ERROR InitTestIpk(KeyManager & keyManager, const FabricInfo & fabricInfo, size_t numIpks)
 {
     VerifyOrReturnError((numIpks > 0) && (numIpks <= 3), CHIP_ERROR_INVALID_ARGUMENT);
-    using KeySet         = chip::Credentials::GroupDataProvider::KeySet;
-    using SecurityPolicy = chip::Credentials::GroupDataProvider::SecurityPolicy;
+    using KeySet         = chip::Credentials::KeySet;
+    using SecurityPolicy = chip::Credentials::SecurityPolicy;
 
-    KeySet ipkKeySet(GroupDataProvider::kIdentityProtectionKeySetId, SecurityPolicy::kTrustFirst, static_cast<uint8_t>(numIpks));
+    KeySet ipkKeySet(kIdentityProtectionKeySetId, SecurityPolicy::kTrustFirst, static_cast<uint8_t>(numIpks));
 
     for (size_t ipkIndex = 0; ipkIndex < numIpks; ++ipkIndex)
     {
@@ -299,15 +302,15 @@ CHIP_ERROR InitTestIpk(GroupDataProvider & groupDataProvider, const FabricInfo &
     uint8_t compressedId[sizeof(uint64_t)];
     MutableByteSpan compressedIdSpan(compressedId);
     ReturnErrorOnFailure(fabricInfo.GetCompressedFabricIdBytes(compressedIdSpan));
-    return groupDataProvider.SetKeySet(fabricInfo.GetFabricIndex(), compressedIdSpan, ipkKeySet);
+    return keyManager.SetKeySet(fabricInfo.GetFabricIndex(), compressedIdSpan, ipkKeySet);
 }
 
 CHIP_ERROR InitCredentialSets()
 {
     gCommissionerStorageDelegate.ClearStorage();
-    gCommissionerGroupDataProvider.SetStorageDelegate(&gCommissionerStorageDelegate);
-    gCommissionerGroupDataProvider.SetSessionKeystore(&gCommissionerSessionKeystore);
-    ReturnErrorOnFailure(gCommissionerGroupDataProvider.Init());
+    
+    ReturnErrorOnFailure(gCommissionerKeyManager.Initialize(&gCommissionerStorageDelegate, &gCommissionerSessionKeystore));
+    ReturnErrorOnFailure(gCommissionerGroupDataProvider.Initialize(&gCommissionerStorageDelegate, &gCommissionerKeyManager));
 
     FabricInfo commissionerFabric;
     {
@@ -331,12 +334,12 @@ CHIP_ERROR InitCredentialSets()
 
     const FabricInfo * newFabric = gCommissionerFabrics.FindFabricWithIndex(gCommissionerFabricIndex);
     VerifyOrReturnError(newFabric != nullptr, CHIP_ERROR_INTERNAL);
-    ReturnErrorOnFailure(InitTestIpk(gCommissionerGroupDataProvider, *newFabric, /* numIpks= */ 1));
+    ReturnErrorOnFailure(InitTestIpk(gCommissionerKeyManager, *newFabric, /* numIpks= */ 1));
 
     gDeviceStorageDelegate.ClearStorage();
-    gDeviceGroupDataProvider.SetStorageDelegate(&gDeviceStorageDelegate);
-    gDeviceGroupDataProvider.SetSessionKeystore(&gDeviceSessionKeystore);
-    ReturnErrorOnFailure(gDeviceGroupDataProvider.Init());
+
+    ReturnErrorOnFailure(gDeviceKeyManager.Initialize(&gDeviceStorageDelegate, &gDeviceSessionKeystore));
+    ReturnErrorOnFailure(gDeviceGroupDataProvider.Initialize(&gDeviceStorageDelegate, &gDeviceKeyManager));
     FabricInfo deviceFabric;
 
     {
@@ -368,7 +371,7 @@ CHIP_ERROR InitCredentialSets()
     // TODO: Validate more cases of number of IPKs on both sides
     newFabric = gDeviceFabrics.FindFabricWithIndex(gDeviceFabricIndex);
     VerifyOrReturnError(newFabric != nullptr, CHIP_ERROR_INTERNAL);
-    ReturnErrorOnFailure(InitTestIpk(gDeviceGroupDataProvider, *newFabric, /* numIpks= */ 1));
+    ReturnErrorOnFailure(InitTestIpk(gDeviceKeyManager, *newFabric, /* numIpks= */ 1));
 
     return CHIP_NO_ERROR;
 }
@@ -412,7 +415,7 @@ TEST_F(TestCASESession, SecurePairingWaitTest)
 
     EXPECT_EQ(caseSession.GetSecureSessionType(), SecureSession::Type::kCASE);
 
-    caseSession.SetGroupDataProvider(&gDeviceGroupDataProvider);
+    caseSession.SetKeyManager(&gDeviceKeyManager);
     EXPECT_EQ(caseSession.PrepareForSessionEstablishment(sessionManager, nullptr, nullptr, nullptr, nullptr, ScopedNodeId(),
                                                          Optional<ReliableMessageProtocolConfig>::Missing()),
               CHIP_ERROR_INVALID_ARGUMENT);
@@ -435,7 +438,7 @@ TEST_F(TestCASESession, SecurePairingStartTest)
     // Test all combinations of invalid parameters
     TestCASESecurePairingDelegate delegate;
     CASESession pairing;
-    pairing.SetGroupDataProvider(&gCommissionerGroupDataProvider);
+    pairing.SetKeyManager(&gCommissionerKeyManager);
 
     ExchangeContext * context = NewUnauthenticatedExchangeToBob(&pairing);
 
@@ -464,7 +467,7 @@ TEST_F(TestCASESession, SecurePairingStartTest)
     loopback.mMessageSendError = CHIP_ERROR_BAD_REQUEST;
 
     CASESession pairing1;
-    pairing1.SetGroupDataProvider(&gCommissionerGroupDataProvider);
+    pairing1.SetKeyManager(&gCommissionerKeyManager);
 
     loopback.mSentMessageCount = 0;
     loopback.mMessageSendError = CHIP_ERROR_BAD_REQUEST;
@@ -498,7 +501,7 @@ void TestCASESession::SecurePairingHandshakeTestCommon(SessionManager & sessionM
 
     ExchangeContext * contextCommissioner = NewUnauthenticatedExchangeToBob(&pairingCommissioner);
 
-    pairingAccessory.SetGroupDataProvider(&gDeviceGroupDataProvider);
+    pairingAccessory.SetKeyManager(&gDeviceKeyManager);
     EXPECT_EQ(pairingAccessory.PrepareForSessionEstablishment(sessionManager, &gDeviceFabrics, nullptr, nullptr, &delegateAccessory,
                                                               ScopedNodeId(), MakeOptional(verySleepyAccessoryRmpConfig)),
               CHIP_NO_ERROR);
@@ -539,7 +542,7 @@ TEST_F(TestCASESession, SecurePairingHandshakeTest)
     TemporarySessionManager sessionManager(*this);
     TestCASESecurePairingDelegate delegateCommissioner;
     CASESession pairingCommissioner;
-    pairingCommissioner.SetGroupDataProvider(&gCommissionerGroupDataProvider);
+    pairingCommissioner.SetKeyManager(&gCommissionerKeyManager);
     SecurePairingHandshakeTestCommon(sessionManager, pairingCommissioner, delegateCommissioner);
 }
 
@@ -550,7 +553,7 @@ TEST_F(TestCASESession, SecurePairingHandshakeServerTest)
     TestCASESecurePairingDelegate delegateCommissioner;
 
     auto * pairingCommissioner = chip::Platform::New<CASESession>();
-    pairingCommissioner->SetGroupDataProvider(&gCommissionerGroupDataProvider);
+    pairingCommissioner->SetKeyManager(&gCommissionerKeyManager);
 
     auto & loopback            = GetLoopback();
     loopback.mSentMessageCount = 0;
@@ -558,7 +561,7 @@ TEST_F(TestCASESession, SecurePairingHandshakeServerTest)
     // Use the same session manager on both CASE client and server sides to validate that both
     // components may work simultaneously on a single device.
     EXPECT_EQ(gPairingServer.ListenForSessionEstablishment(&GetExchangeManager(), &GetSecureSessionManager(), &gDeviceFabrics,
-                                                           nullptr, nullptr, &gDeviceGroupDataProvider),
+                                                           nullptr, nullptr, &gDeviceKeyManager),
               CHIP_NO_ERROR);
 
     ExchangeContext * contextCommissioner = NewUnauthenticatedExchangeToBob(pairingCommissioner);
@@ -579,7 +582,7 @@ TEST_F(TestCASESession, SecurePairingHandshakeServerTest)
     EXPECT_EQ(holder->GetPeer(), (chip::ScopedNodeId{ Node01_01, gCommissionerFabricIndex }));
 
     auto * pairingCommissioner1 = chip::Platform::New<CASESession>();
-    pairingCommissioner1->SetGroupDataProvider(&gCommissionerGroupDataProvider);
+    pairingCommissioner1->SetKeyManager(&gCommissionerKeyManager);
     ExchangeContext * contextCommissioner1 = NewUnauthenticatedExchangeToBob(pairingCommissioner1);
 
     EXPECT_EQ(pairingCommissioner1->EstablishSession(GetSecureSessionManager(), &gCommissionerFabrics,
@@ -602,14 +605,14 @@ TEST_F(TestCASESession, ClientReceivesBusyTest)
     TestCASESecurePairingDelegate delegateCommissioner1, delegateCommissioner2;
     CASESession pairingCommissioner1, pairingCommissioner2;
 
-    pairingCommissioner1.SetGroupDataProvider(&gCommissionerGroupDataProvider);
-    pairingCommissioner2.SetGroupDataProvider(&gCommissionerGroupDataProvider);
+    pairingCommissioner1.SetKeyManager(&gCommissionerKeyManager);
+    pairingCommissioner2.SetKeyManager(&gCommissionerKeyManager);
 
     auto & loopback            = GetLoopback();
     loopback.mSentMessageCount = 0;
 
     EXPECT_EQ(gPairingServer.ListenForSessionEstablishment(&GetExchangeManager(), &GetSecureSessionManager(), &gDeviceFabrics,
-                                                           nullptr, nullptr, &gDeviceGroupDataProvider),
+                                                           nullptr, nullptr, &gDeviceKeyManager),
               CHIP_NO_ERROR);
 
     ExchangeContext * contextCommissioner1 = NewUnauthenticatedExchangeToBob(&pairingCommissioner1);
@@ -663,13 +666,13 @@ TEST_F(TestCASESession, BadSignatureFailsCASE)
         EXPECT_EQ(FaultInjection::GetManager().FailAtFault(faultInjectionID, 0, 1), kFaultInjectionSuccessCode);
 
         // Prepare CASE Handshake
-        pairingInitiator.SetGroupDataProvider(&gCommissionerGroupDataProvider);
+        pairingInitiator.SetKeyManager(&gCommissionerKeyManager);
         ExchangeContext * contextInitiator = NewUnauthenticatedExchangeToBob(&pairingInitiator);
 
         EXPECT_EQ(GetExchangeManager().RegisterUnsolicitedMessageHandlerForType(Protocols::SecureChannel::MsgType::CASE_Sigma1,
                                                                                 &pairingResponder),
                   CHIP_NO_ERROR);
-        pairingResponder.SetGroupDataProvider(&gDeviceGroupDataProvider);
+        pairingResponder.SetKeyManager(&gDeviceKeyManager);
 
         EXPECT_EQ(pairingResponder.PrepareForSessionEstablishment(sessionManager, &gDeviceFabrics, nullptr, nullptr,
                                                                   &delegateResponder, ScopedNodeId(),
@@ -1741,11 +1744,11 @@ TEST_F(TestCASESession, SessionResumptionStorage)
     for (size_t i = 0; i < sizeof(testVectors) / sizeof(testVectors[0]); ++i)
     {
         auto * pairingCommissioner = chip::Platform::New<CASESession>();
-        pairingCommissioner->SetGroupDataProvider(&gCommissionerGroupDataProvider);
+        pairingCommissioner->SetKeyManager(&gCommissionerKeyManager);
         loopback.mSentMessageCount = 0;
         EXPECT_EQ(gPairingServer.ListenForSessionEstablishment(&GetExchangeManager(), &GetSecureSessionManager(), &gDeviceFabrics,
                                                                &testVectors[i].responderStorage, nullptr,
-                                                               &gDeviceGroupDataProvider),
+                                                               &gDeviceKeyManager),
                   CHIP_NO_ERROR);
         ExchangeContext * contextCommissioner = NewUnauthenticatedExchangeToBob(pairingCommissioner);
         auto establishmentReturnVal           = pairingCommissioner->EstablishSession(
@@ -1770,7 +1773,7 @@ TEST_F_FROM_FIXTURE(TestCASESession, SimulateUpdateNOCInvalidatePendingEstablish
     TemporarySessionManager sessionManager(*this);
     TestCASESecurePairingDelegate delegateCommissioner;
     CASESession pairingCommissioner;
-    pairingCommissioner.SetGroupDataProvider(&gCommissionerGroupDataProvider);
+    pairingCommissioner.SetKeyManager(&gCommissionerKeyManager);
 
     TestCASESecurePairingDelegate delegateAccessory;
     CASESession pairingAccessory;
@@ -1788,7 +1791,7 @@ TEST_F_FROM_FIXTURE(TestCASESession, SimulateUpdateNOCInvalidatePendingEstablish
 
     ExchangeContext * contextCommissioner = NewUnauthenticatedExchangeToBob(&pairingCommissioner);
 
-    pairingAccessory.SetGroupDataProvider(&gDeviceGroupDataProvider);
+    pairingAccessory.SetKeyManager(&gDeviceKeyManager);
     EXPECT_EQ(pairingAccessory.PrepareForSessionEstablishment(sessionManager, &gDeviceFabrics, nullptr, nullptr, &delegateAccessory,
                                                               ScopedNodeId(), Optional<ReliableMessageProtocolConfig>::Missing()),
               CHIP_NO_ERROR);
@@ -1879,7 +1882,7 @@ TEST_F(TestCASESession, Sigma1BadDestinationIdTest)
 
     TestCASESecurePairingDelegate caseDelegate;
     CASESession caseSession;
-    caseSession.SetGroupDataProvider(&gDeviceGroupDataProvider);
+    caseSession.SetKeyManager(&gDeviceKeyManager);
     EXPECT_EQ(caseSession.PrepareForSessionEstablishment(sessionManager, &gDeviceFabrics, nullptr, nullptr, &caseDelegate,
                                                          ScopedNodeId(), NullOptional),
               CHIP_NO_ERROR);

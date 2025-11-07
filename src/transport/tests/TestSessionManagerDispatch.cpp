@@ -28,6 +28,7 @@
 #define CHIP_ENABLE_TEST_ENCRYPTED_BUFFER_API // Up here in case some other header
                                               // includes SessionManager.h indirectly
 
+#include <credentials/KeyManagerImpl.h>
 #include <credentials/GroupDataProviderImpl.h>
 #include <credentials/PersistentStorageOpCertStore.h>
 #include <crypto/DefaultSessionKeystore.h>
@@ -53,8 +54,6 @@ using namespace chip::Credentials;
 
 using GroupInfo      = GroupDataProvider::GroupInfo;
 using GroupKey       = GroupDataProvider::GroupKey;
-using KeySet         = GroupDataProvider::KeySet;
-using SecurityPolicy = GroupDataProvider::SecurityPolicy;
 
 using TestContext = chip::Test::LoopbackTransportManager;
 
@@ -417,6 +416,7 @@ constexpr uint16_t kMaxGroupKeysPerFabric = 8;
 
 static chip::TestPersistentStorageDelegate sStorageDelegate;
 static chip::Crypto::DefaultSessionKeystore sSessionKeystore;
+static KeyManagerImpl sKeyManager;
 static GroupDataProviderImpl sProvider(kMaxGroupsPerFabric, kMaxGroupKeysPerFabric);
 class FabricTableHolder
 {
@@ -435,10 +435,10 @@ public:
         ReturnErrorOnFailure(mOpCertStore.Init(&mStorage));
 
         // Initialize Group Data Provider
-        sProvider.SetStorageDelegate(&sStorageDelegate);
-        sProvider.SetSessionKeystore(&sSessionKeystore);
+        ReturnErrorOnFailure(sKeyManager.Initialize(&sStorageDelegate, &sSessionKeystore));
+        Credentials::SetKeyManager(&sKeyManager);
         // sProvider.SetListener(&chip::app::TestGroups::sListener);
-        ReturnErrorOnFailure(sProvider.Init());
+        ReturnErrorOnFailure(sProvider.Initialize(&sStorageDelegate, &sKeyManager));
         Credentials::SetGroupDataProvider(&sProvider);
 
         // Initialize Fabric Table
@@ -524,6 +524,7 @@ CHIP_ERROR InjectGroupSessionWithTestKey(SessionHolder & sessionHolder, MessageT
     constexpr uint16_t kKeySetIndex = 0x0;
 
     GroupId groupId              = testEntry.groupId;
+    KeyManager * keys = GetKeyManager();
     GroupDataProvider * provider = GetGroupDataProvider();
 
     static KeySet sKeySet(kKeySetIndex, SecurityPolicy::kTrustFirst, 1);
@@ -538,7 +539,7 @@ CHIP_ERROR InjectGroupSessionWithTestKey(SessionHolder & sessionHolder, MessageT
         sGroupInfo.group_id              = groupId;
         sGroupKeySet.group_id            = groupId;
 
-        ReturnErrorOnFailure(provider->SetKeySet(kFabricIndex, kCompressedFabricId1, sKeySet));
+        ReturnErrorOnFailure(keys->SetKeySet(kFabricIndex, kCompressedFabricId1, sKeySet));
         ReturnErrorOnFailure(provider->SetGroupKeyAt(kFabricIndex, kGroupIndex, sGroupKeySet));
         ReturnErrorOnFailure(provider->SetGroupInfoAt(kFabricIndex, kGroupIndex, sGroupInfo));
     }

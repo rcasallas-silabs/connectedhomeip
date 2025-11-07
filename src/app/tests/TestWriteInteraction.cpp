@@ -24,7 +24,9 @@
 #include <app/tests/AppTestContext.h>
 #include <app/tests/test-interaction-model-api.h>
 #include <app/util/mock/MockNodeConfig.h>
+#include <credentials/KeyManagerImpl.h>
 #include <credentials/GroupDataProviderImpl.h>
+#include <credentials/GroupcastDataProvider.h>
 #include <crypto/CHIPCryptoPAL.h>
 #include <crypto/DefaultSessionKeystore.h>
 #include <lib/core/CHIPCore.h>
@@ -48,7 +50,9 @@ constexpr uint16_t kMaxGroupKeysPerFabric        = 8;
 
 chip::TestPersistentStorageDelegate gTestStorage;
 chip::Crypto::DefaultSessionKeystore gSessionKeystore;
+chip::Credentials::KeyManagerImpl gKeyManager;
 chip::Credentials::GroupDataProviderImpl gGroupsProvider(kMaxGroupsPerFabric, kMaxGroupKeysPerFabric);
+chip::Groupcast::DataProvider gGroupcastProvider;
 
 } // namespace
 
@@ -130,15 +134,17 @@ public:
         AppContext::SetUp();
 
         gTestStorage.ClearStorage();
-        gGroupsProvider.SetStorageDelegate(&gTestStorage);
-        gGroupsProvider.SetSessionKeystore(&gSessionKeystore);
-        ASSERT_EQ(gGroupsProvider.Init(), CHIP_NO_ERROR);
+        ASSERT_EQ(gKeyManager.Initialize(&gTestStorage, &gSessionKeystore), CHIP_NO_ERROR);
+        ASSERT_EQ(gGroupsProvider.Initialize(&gTestStorage, &gKeyManager), CHIP_NO_ERROR);
         chip::Credentials::SetGroupDataProvider(&gGroupsProvider);
+        ASSERT_EQ(gGroupcastProvider.Initialize(&gTestStorage, &gKeyManager), CHIP_NO_ERROR);
+        chip::Groupcast::SetDataProvider(&gGroupcastProvider);
 
         uint8_t buf[sizeof(chip::CompressedFabricId)];
         chip::MutableByteSpan span(buf);
         ASSERT_EQ(GetBobFabric()->GetCompressedFabricIdBytes(span), CHIP_NO_ERROR);
-        ASSERT_EQ(chip::GroupTesting::InitData(&gGroupsProvider, GetBobFabricIndex(), span), CHIP_NO_ERROR);
+        ASSERT_EQ(gKeyManager.Initialize(&gTestStorage, &gSessionKeystore), CHIP_NO_ERROR);
+        ASSERT_EQ(chip::GroupTesting::InitData(&gKeyManager, &gGroupsProvider, &gGroupcastProvider, GetBobFabricIndex(), span), CHIP_NO_ERROR);
 
         mOldProvider = InteractionModelEngine::GetInstance()->SetDataModelProvider(&TestImCustomDataModel::Instance());
         chip::Test::SetMockNodeConfig(TestMockNodeConfig());

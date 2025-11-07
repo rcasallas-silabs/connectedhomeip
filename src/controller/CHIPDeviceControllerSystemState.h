@@ -119,6 +119,7 @@ struct DeviceControllerSystemStateParams
 #if CHIP_DEVICE_CONFIG_ENABLE_WIFIPAF
     WiFiPAF::WiFiPAFLayer * wifipaf_layer = nullptr;
 #endif
+    Credentials::KeyManager * keyManager = nullptr;
     Credentials::GroupDataProvider * groupDataProvider = nullptr;
     chip::Groupcast::DataProvider * groupcastDataProvider = nullptr;
     Crypto::SessionKeystore * sessionKeystore          = nullptr;

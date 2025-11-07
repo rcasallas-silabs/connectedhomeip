@@ -40,7 +40,9 @@
 
 #include <controller/python/matter/commissioning/PlaceholderOperationalCredentialsIssuer.h>
 #include <controller/python/matter/native/PyChipError.h>
+#include <credentials/KeyManagerImpl.h>
 #include <credentials/GroupDataProviderImpl.h>
+#include <credentials/GroupcastDataProvider.h>
 #include <credentials/attestation_verifier/DefaultDeviceAttestationVerifier.h>
 #include <credentials/attestation_verifier/DeviceAttestationVerifier.h>
 #include <credentials/attestation_verifier/FileAttestationTrustStore.h>
@@ -123,7 +125,9 @@ private:
 } // namespace Controller
 } // namespace chip
 
+extern chip::Credentials::KeyManagerImpl sKeyManager;
 extern chip::Credentials::GroupDataProviderImpl sGroupDataProvider;
+extern chip::Groupcast::DataProvider sGroupcastDataProvider;
 extern chip::Controller::ScriptDevicePairingDelegate sPairingDelegate;
 extern chip::app::DefaultICDClientStorage sICDClientStorage;
 
@@ -508,7 +512,7 @@ PyChipError pychip_OpCreds_AllocateControllerForPythonCommissioningFLow(
     chip::ByteSpan fabricIpk =
         (ipk == nullptr) ? chip::GroupTesting::DefaultIpkValue::GetDefaultIpk() : chip::ByteSpan(ipk, ipkLen);
     err =
-        chip::Credentials::SetSingleIpkEpochKey(&sGroupDataProvider, devCtrl->GetFabricIndex(), fabricIpk, compressedFabricIdSpan);
+        sKeyManager.SetSingleIpkEpochKey(devCtrl->GetFabricIndex(), fabricIpk, compressedFabricIdSpan);
     VerifyOrReturnError(err == CHIP_NO_ERROR, ToPyChipError(err));
 
     *outDevCtrl         = devCtrl.release();
@@ -631,7 +635,7 @@ PyChipError pychip_OpCreds_AllocateController(OpCredsContext * context, chip::Co
 
     chip::ByteSpan defaultIpk = chip::GroupTesting::DefaultIpkValue::GetDefaultIpk();
     err =
-        chip::Credentials::SetSingleIpkEpochKey(&sGroupDataProvider, devCtrl->GetFabricIndex(), defaultIpk, compressedFabricIdSpan);
+        sKeyManager.SetSingleIpkEpochKey(devCtrl->GetFabricIndex(), defaultIpk, compressedFabricIdSpan);
     VerifyOrReturnError(err == CHIP_NO_ERROR, ToPyChipError(err));
 
     sICDClientStorage.UpdateFabricList(devCtrl->GetFabricIndex());
@@ -653,7 +657,7 @@ PyChipError pychip_OpCreds_InitGroupTestingData(chip::Controller::DeviceCommissi
     CHIP_ERROR err = devCtrl->GetCompressedFabricIdBytes(compressedFabricIdSpan);
     VerifyOrReturnError(err == CHIP_NO_ERROR, ToPyChipError(err));
 
-    err = chip::GroupTesting::InitData(&sGroupDataProvider, devCtrl->GetFabricIndex(), compressedFabricIdSpan);
+    err = chip::GroupTesting::InitData(&sKeyManager, &sGroupDataProvider, &sGroupcastDataProvider, devCtrl->GetFabricIndex(), compressedFabricIdSpan);
 
     return ToPyChipError(err);
 }
@@ -717,8 +721,7 @@ PyChipError pychip_DeviceController_SetIpk(chip::Controller::DeviceCommissioner 
     CHIP_ERROR err = devCtrl->GetCompressedFabricIdBytes(compressedFabricIdSpan);
     VerifyOrReturnError(err == CHIP_NO_ERROR, ToPyChipError(err));
 
-    err = chip::Credentials::SetSingleIpkEpochKey(&sGroupDataProvider, devCtrl->GetFabricIndex(), ByteSpan(ipk, ipkLen),
-                                                  compressedFabricIdSpan);
+    err = sKeyManager.SetSingleIpkEpochKey(devCtrl->GetFabricIndex(), ByteSpan(ipk, ipkLen), compressedFabricIdSpan);
 
     return ToPyChipError(err);
 }

@@ -16,7 +16,6 @@
  */
 
 #include "GroupcastDataProvider.h"
-#include <credentials/GroupDataProvider.h>
 #include <crypto/CHIPCryptoPAL.h>
 #include <lib/core/TLVCommon.h>
 #include <lib/support/CodeUtils.h>
@@ -52,8 +51,10 @@ static constexpr size_t MaxPersistentBuffer()
 
 struct GroupList : public PersistentArray<kMaxMembershipCount, MaxPersistentBuffer(), Group>
 {
-    GroupList(FabricIndex fabric, PersistentStorageDelegate * storage) :
-        PersistentArray<kMaxMembershipCount, MaxPersistentBuffer(), Group>(storage), mFabric(fabric)
+    FabricIndex mFabric;
+
+    GroupList(FabricIndex fabric_index, PersistentStorageDelegate * storage) :
+        PersistentArray<kMaxMembershipCount, MaxPersistentBuffer(), Group>(storage), mFabric(fabric_index)
     {}
 
     CHIP_ERROR UpdateKey(StorageKeyName & key) const override
@@ -122,22 +123,20 @@ struct GroupList : public PersistentArray<kMaxMembershipCount, MaxPersistentBuff
         }
         return CHIP_NO_ERROR;
     }
-
-    FabricIndex mFabric;
 };
 
 //
 // DataProvider
 //
 
-CHIP_ERROR DataProvider::Initialize(FabricTable * fabrics, PersistentStorageDelegate * storage, chip::Crypto::SessionKeystore * keystore)
+CHIP_ERROR DataProvider::Initialize(PersistentStorageDelegate * storage, Credentials::KeyManager *keys)
 {
-    VerifyOrReturnError(fabrics != nullptr, CHIP_ERROR_INTERNAL);
+    // VerifyOrReturnError(fabrics != nullptr, CHIP_ERROR_INTERNAL);
     VerifyOrReturnError(storage != nullptr, CHIP_ERROR_INTERNAL);
-    VerifyOrReturnError(keystore != nullptr, CHIP_ERROR_INTERNAL);
-    mFabrics  = fabrics;
+    VerifyOrReturnError(keys != nullptr, CHIP_ERROR_INTERNAL);
+    // mFabrics  = fabrics;
     mStorage  = storage;
-    mKeystore = keystore;
+    mKeyManager = keys;
     return CHIP_NO_ERROR;
 }
 
@@ -148,8 +147,7 @@ uint8_t DataProvider::GetMaxMembershipCount()
 
 CHIP_ERROR DataProvider::AddGroup(chip::FabricIndex fabric_idx, Group & grp)
 {
-    VerifyOrReturnError(mStorage != nullptr, CHIP_ERROR_INCORRECT_STATE);
-    VerifyOrReturnError(mKeystore != nullptr, CHIP_ERROR_INCORRECT_STATE);
+    VerifyOrReturnError(IsInitialized(), CHIP_ERROR_INCORRECT_STATE);
     VerifyOrReturnError(grp.endpoint_count <= kEndpointsMax, CHIP_ERROR_INVALID_ARGUMENT);
 
     // Insert entry
@@ -172,6 +170,7 @@ CHIP_ERROR DataProvider::AddGroup(chip::FabricIndex fabric_idx, Group & grp)
 
 CHIP_ERROR DataProvider::GetGroup(FabricIndex fabric_idx, Group & grp)
 {
+    VerifyOrReturnError(IsInitialized(), CHIP_ERROR_INCORRECT_STATE);
     GroupList list(fabric_idx, mStorage);
     Group entry(grp.group_id);
     size_t index = 0;
@@ -184,6 +183,7 @@ CHIP_ERROR DataProvider::GetGroup(FabricIndex fabric_idx, Group & grp)
 
 CHIP_ERROR DataProvider::SetEndpoints(FabricIndex fabric_idx, Group & grp)
 {
+    VerifyOrReturnError(IsInitialized(), CHIP_ERROR_INCORRECT_STATE);
     VerifyOrReturnError(grp.endpoint_count <= kEndpointsMax, CHIP_ERROR_INVALID_ARGUMENT);
     GroupList list(fabric_idx, mStorage);
     Group entry(grp.group_id);
@@ -201,37 +201,38 @@ CHIP_ERROR DataProvider::SetEndpoints(FabricIndex fabric_idx, Group & grp)
 
 CHIP_ERROR DataProvider::RemoveGroup(FabricIndex fabric_idx, GroupId group_id)
 {
+    VerifyOrReturnError(IsInitialized(), CHIP_ERROR_INCORRECT_STATE);
     GroupList list(fabric_idx, mStorage);
     ReturnErrorOnFailure(list.Remove(Group(group_id)));
     return list.Save();
 }
 
-chip::Crypto::SymmetricKeyContext * DataProvider::GetKeyContext(FabricIndex fabric, GroupId group_id)
+chip::Crypto::SymmetricKeyContext * DataProvider::GetKeyContext(FabricIndex fabric_index, GroupId group_id)
 {
-    chip::Credentials::GroupDataProvider *group_data = chip::Credentials::GetGroupDataProvider();
-    VerifyOrReturnValue(nullptr != group_data, nullptr);
-
+    VerifyOrReturnValue(IsInitialized(), nullptr);
     // Find group in NVM
     Group entry(group_id);
     size_t index = 0;
-    chip::Groupcast::GroupList list(fabric, mStorage);
+    chip::Groupcast::GroupList list(fabric_index, mStorage);
     VerifyOrReturnValue(CHIP_NO_ERROR == list.Find(entry, index), nullptr);
     // Create key context
-    return group_data->GetKeyContext(fabric, entry.key_id);
+    return mKeyManager->CreateKeyContext(fabric_index, entry.key_id);
 }
 
 //
 // Group Iterator
 //
 
-DataProvider::GroupIterator * DataProvider::IterateGroups(FabricIndex fabric)
+DataProvider::GroupIterator * DataProvider::IterateGroups(FabricIndex fabric_index)
 {
-    return mGroupIteratorPool.CreateObject(*this, fabric);
+    VerifyOrReturnValue(IsInitialized(), nullptr);
+    return mGroupIteratorPool.CreateObject(*this, fabric_index);
 }
 
-DataProvider::GroupIterator::GroupIterator(DataProvider & group_data, FabricIndex fabric) : mProvider(group_data), mFabric(fabric)
+DataProvider::GroupIterator::GroupIterator(DataProvider & provider, FabricIndex fabric_index) :
+    mProvider(provider), mFabric(fabric_index)
 {
-    GroupList list(fabric, group_data.mStorage);
+    GroupList list(fabric_index, provider.mStorage);
     list.Load();
     mCount = list.Count();
 }
@@ -262,19 +263,20 @@ void DataProvider::GroupIterator::Release()
 // Session Iterator
 //
 
-Credentials::GroupSessionIterator * DataProvider::IterateGroupSessions(uint16_t session_id)
+Credentials::GroupSessionIterator * DataProvider::IterateGroupSessions(FabricTable * fabrics, uint16_t session_id)
 {
-    return mSessionIterator.CreateObject(*this, mFabrics, session_id);
+    VerifyOrReturnValue(IsInitialized(), nullptr);
+    VerifyOrReturnValue(nullptr != fabrics, nullptr);
+    return mSessionIterator.CreateObject(*this, *fabrics, *mKeyManager, session_id);
 }
 
-DataProvider::SessionIterator::SessionIterator(DataProvider & group_data, FabricTable *fabrics, uint16_t session_id) :
-    mProvider(group_data), mFabrics(fabrics)
+DataProvider::SessionIterator::SessionIterator(DataProvider & provider, FabricTable & fabrics, Credentials::KeyManager & keys, uint16_t session_id) :
+    mProvider(provider), mFabrics(fabrics), mKeyManager(keys), mSessionId(session_id)
 {
 }
 
 size_t DataProvider::SessionIterator::Count()
 {
-    chip::Credentials::GroupDataProvider *group_data = chip::Credentials::GetGroupDataProvider();
     size_t count = 0;
     // Iterate all fabrics
     // for(uint8_t i=0; mFabrics && (i < mFabrics->FabricCount()); ++i)
@@ -282,7 +284,7 @@ size_t DataProvider::SessionIterator::Count()
     //     const FabricInfo *info = mFabrics->FindFabricWithIndex(i);
     //     if(info)
     //     {
-    //         // Get the group list for the current fabric
+    //         // Get the group list for the current fabric_index
     //         chip::Groupcast::GroupList list(info->GetFabricIndex(), mProvider.mStorage);
     //         Group entry(mGroupId);
     //         size_t index = 0;
@@ -306,7 +308,7 @@ bool DataProvider::SessionIterator::Next(Credentials::GroupSession &output)
     //     const FabricInfo *info = mFabrics->FindFabricWithIndex(mFabricIndex);
     //     if(info)
     //     {
-    //         // Get the group list for the current fabric
+    //         // Get the group list for the current fabric_index
     //         chip::Groupcast::GroupList list(info->GetFabricIndex(), mProvider.mStorage);
     //         Group entry(mGroupId);
     //         size_t index = 0;
@@ -317,10 +319,10 @@ bool DataProvider::SessionIterator::Next(Credentials::GroupSession &output)
     //             output.fabric_index = mFabricIndex;
     //             output.group_id = entry.group_id;
     //             output.keyContext = context;
-    //             output.security_policy = Credentials::GroupDataProvider::SecurityPolicy::kTrustFirst;
+    //             output.security_policy = Credentials::SecurityPolicy::kTrustFirst;
     //         }
     //     }
-    //     // No group_id/session_id match in current fabric
+    //     // No group_id/session_id match in current fabric_index
     //     mFabricIndex++;
     //     mKeyIndex = 0;
     // }

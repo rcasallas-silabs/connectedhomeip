@@ -135,9 +135,8 @@ CHIP_ERROR InitCommissioner(uint16_t commissionerPort, uint16_t udcListenPort, F
     factoryParams.sessionKeystore          = &gSessionKeystore;
     factoryParams.dataModelProvider        = chip::app::CodegenDataModelProviderInstance(&gServerStorage);
 
-    gGroupDataProvider.SetStorageDelegate(&gServerStorage);
-    gGroupDataProvider.SetSessionKeystore(factoryParams.sessionKeystore);
-    ReturnErrorOnFailure(gGroupDataProvider.Init());
+
+    ReturnErrorOnFailure(gGroupDataProvider.Initialize(&gServerStorage, factoryParams.sessionKeystore));
     factoryParams.groupDataProvider = &gGroupDataProvider;
 
     params.operationalCredentialsDelegate = &gOpCredsIssuer;

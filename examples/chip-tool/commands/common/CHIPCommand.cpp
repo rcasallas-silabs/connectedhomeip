@@ -53,6 +53,7 @@ constexpr char kCDTrustStorePathVariable[]      = "CHIPTOOL_CD_TRUST_STORE_PATH"
 const chip::Credentials::AttestationTrustStore * CHIPCommand::sTrustStore                 = nullptr;
 chip::Credentials::DeviceAttestationRevocationDelegate * CHIPCommand::sRevocationDelegate = nullptr;
 
+chip::Credentials::KeyManagerImpl CHIPCommand::sKeyManager;
 chip::Credentials::GroupDataProviderImpl CHIPCommand::sGroupDataProvider{ kMaxGroupsPerFabric, kMaxGroupKeysPerFabric };
 chip::Groupcast::DataProvider CHIPCommand::sGroupcastDataProvider;
 // All fabrics share the same ICD client storage.
@@ -141,18 +142,17 @@ CHIP_ERROR CHIPCommand::MaybeSetUpStack()
     factoryInitParams.sessionKeystore          = &sSessionKeystore;
     factoryInitParams.dataModelProvider        = chip::app::CodegenDataModelProviderInstance(&mDefaultStorage);
 
+    ReturnLogErrorOnFailure(sKeyManager.Initialize(&mDefaultStorage, factoryInitParams.sessionKeystore));
     // Init group data provider that will be used for all group keys and IPKs for the
-    // chip-tool-configured fabrics. This is OK to do once since the fabric tables
+    // camera-controller-configured fabrics. This is OK to do once since the fabric tables
     // and the DeviceControllerFactory all "share" in the same underlying data.
     // Different commissioner implementations may want to use alternate implementations
     // of GroupDataProvider for injection through factoryInitParams.
-    sGroupDataProvider.SetStorageDelegate(&mDefaultStorage);
-    sGroupDataProvider.SetSessionKeystore(factoryInitParams.sessionKeystore);
-    ReturnLogErrorOnFailure(sGroupDataProvider.Init());
+    ReturnLogErrorOnFailure(sGroupDataProvider.Initialize(&mDefaultStorage, &sKeyManager));
     chip::Credentials::SetGroupDataProvider(&sGroupDataProvider);
     factoryInitParams.groupDataProvider = &sGroupDataProvider;
     // Groupcast
-    ReturnLogErrorOnFailure(sGroupcastDataProvider.Initialize(&mDefaultStorage, factoryInitParams.sessionKeystore));
+    ReturnLogErrorOnFailure(sGroupcastDataProvider.Initialize(&mDefaultStorage, &sKeyManager));
     chip::Groupcast::SetDataProvider(&sGroupcastDataProvider);
     factoryInitParams.groupcastDataProvider = &sGroupcastDataProvider;
 
@@ -541,13 +541,13 @@ CHIP_ERROR CHIPCommand::InitializeCommissioner(CommissionerIdentity & identity, 
         chip::MutableByteSpan compressed_fabric_id_span(compressed_fabric_id);
         ReturnLogErrorOnFailure(commissioner->GetCompressedFabricIdBytes(compressed_fabric_id_span));
 
-        ReturnLogErrorOnFailure(chip::GroupTesting::InitData(&sGroupDataProvider, &sGroupcastDataProvider, fabricIndex, compressed_fabric_id_span));
+        ReturnLogErrorOnFailure(chip::GroupTesting::InitData(&sKeyManager, &sGroupDataProvider, &sGroupcastDataProvider, fabricIndex, compressed_fabric_id_span));
 
         // Configure the default IPK for all fabrics used by CHIP-tool. The epoch
         // key is the same, but the derived keys will be different for each fabric.
         chip::ByteSpan defaultIpk = chip::GroupTesting::DefaultIpkValue::GetDefaultIpk();
         ReturnLogErrorOnFailure(
-            chip::Credentials::SetSingleIpkEpochKey(&sGroupDataProvider, fabricIndex, defaultIpk, compressed_fabric_id_span));
+            sKeyManager.SetSingleIpkEpochKey(fabricIndex, defaultIpk, compressed_fabric_id_span));
     }
 
     CHIPCommand::sICDClientStorage.UpdateFabricList(commissioner->GetFabricIndex());

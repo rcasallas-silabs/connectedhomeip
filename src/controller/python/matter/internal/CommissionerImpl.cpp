@@ -20,6 +20,7 @@
 #include <controller/CHIPDeviceControllerFactory.h>
 #include <controller/ExampleOperationalCredentialsIssuer.h>
 #include <controller/python/matter/native/PyChipError.h>
+#include <credentials/KeyManagerImpl.h>
 #include <credentials/GroupDataProviderImpl.h>
 #include <credentials/PersistentStorageOpCertStore.h>
 #include <credentials/attestation_verifier/DefaultDeviceAttestationVerifier.h>
@@ -97,6 +98,7 @@ private:
 
 ServerStorageDelegate gServerStorage;
 ScriptDevicePairingDelegate gPairingDelegate;
+chip::Credentials::KeyManagerImpl gKeyManager;
 chip::Credentials::GroupDataProviderImpl gGroupDataProvider;
 chip::Credentials::PersistentStorageOpCertStore gPersistentStorageOpCertStore;
 chip::Controller::ExampleOperationalCredentialsIssuer gOperationalCredentialsIssuer;
@@ -145,9 +147,11 @@ extern "C" chip::Controller::DeviceCommissioner * pychip_internal_Commissioner_N
         factoryParams.dataModelProvider        = chip::app::CodegenDataModelProviderInstance(&gServerStorage);
 
         // Initialize group data provider for local group key state and IPKs
-        gGroupDataProvider.SetStorageDelegate(&gServerStorage);
-        gGroupDataProvider.SetSessionKeystore(factoryParams.sessionKeystore);
-        err = gGroupDataProvider.Init();
+        err = gKeyManager.Initialize(&gServerStorage, factoryParams.sessionKeystore);
+        SuccessOrExit(err);
+        factoryParams.keyManager = &gKeyManager;
+
+        err = gGroupDataProvider.Initialize(&gServerStorage, &gKeyManager);
         SuccessOrExit(err);
         factoryParams.groupDataProvider = &gGroupDataProvider;
 
@@ -201,8 +205,7 @@ extern "C" chip::Controller::DeviceCommissioner * pychip_internal_Commissioner_N
             ChipLogByteSpan(Support, compressedFabricIdSpan);
 
             defaultIpk = chip::GroupTesting::DefaultIpkValue::GetDefaultIpk();
-            SuccessOrExit(err = chip::Credentials::SetSingleIpkEpochKey(&gGroupDataProvider, result->GetFabricIndex(), defaultIpk,
-                                                                        compressedFabricIdSpan));
+            SuccessOrExit(err = gKeyManager.SetSingleIpkEpochKey(result->GetFabricIndex(), defaultIpk, compressedFabricIdSpan));
         }
     exit:
         ChipLogProgress(Controller, "Commissioner initialization status: %" CHIP_ERROR_FORMAT, err.Format());

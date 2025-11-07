@@ -23,6 +23,7 @@
 
 #include <pw_unit_test/framework.h>
 
+#include <credentials/KeyManagerImpl.h>
 #include <credentials/GroupDataProviderImpl.h>
 #include <crypto/DefaultSessionKeystore.h>
 #include <lib/core/StringBuilderAdapters.h>
@@ -35,10 +36,6 @@ using namespace chip::Credentials;
 using GroupInfo      = GroupDataProvider::GroupInfo;
 using GroupKey       = GroupDataProvider::GroupKey;
 using GroupEndpoint  = GroupDataProvider::GroupEndpoint;
-using EpochKey       = GroupDataProvider::EpochKey;
-using KeySet         = GroupDataProvider::KeySet;
-using GroupSession   = GroupDataProvider::GroupSession;
-using SecurityPolicy = GroupDataProvider::SecurityPolicy;
 
 namespace chip {
 namespace app {
@@ -162,6 +159,11 @@ public:
 };
 static TestListener sListener;
 
+void ResetProvider(KeyManager * manager)
+{
+    // TODO
+}
+
 void ResetProvider(GroupDataProvider * provider)
 {
     provider->RemoveFabric(kFabric1);
@@ -194,6 +196,7 @@ struct TestGroupDataProvider : public ::testing::Test
 
     static chip::TestPersistentStorageDelegate sDelegate;
     static chip::Crypto::DefaultSessionKeystore sSessionKeystore;
+    static KeyManagerImpl sKeyManager;
     static GroupDataProviderImpl sProvider;
 
     constexpr static EpochKey kEpochKeys0[] = {
@@ -222,10 +225,9 @@ struct TestGroupDataProvider : public ::testing::Test
         EXPECT_EQ(chip::Platform::MemoryInit(), CHIP_NO_ERROR);
 
         // Initialize Group Data Provider
-        sProvider.SetStorageDelegate(&sDelegate);
-        sProvider.SetSessionKeystore(&sSessionKeystore);
+        EXPECT_EQ(sKeyManager.Initialize(&sDelegate, &sSessionKeystore), CHIP_NO_ERROR);
+        EXPECT_EQ(sProvider.Initialize(&sDelegate, &sKeyManager), CHIP_NO_ERROR);
         sProvider.SetListener(&chip::app::TestGroups::sListener);
-        EXPECT_EQ(sProvider.Init(), CHIP_NO_ERROR);
         SetGroupDataProvider(&sProvider);
 
         memcpy(chip::app::TestGroups::kKeySet0.epoch_keys, kEpochKeys0, sizeof(kEpochKeys0));
@@ -246,6 +248,7 @@ struct TestGroupDataProvider : public ::testing::Test
 
 chip::TestPersistentStorageDelegate TestGroupDataProvider::sDelegate;
 chip::Crypto::DefaultSessionKeystore TestGroupDataProvider::sSessionKeystore;
+KeyManagerImpl TestGroupDataProvider::sKeyManager;
 GroupDataProviderImpl TestGroupDataProvider::sProvider(kMaxGroupsPerFabric, kMaxGroupKeysPerFabric);
 
 TEST_F(TestGroupDataProvider, TestStorageDelegate)
@@ -774,114 +777,114 @@ TEST_F(TestGroupDataProvider, TestGroupKeyIterator)
 
 TEST_F(TestGroupDataProvider, TestKeySets)
 {
-    GroupDataProvider * provider = GetGroupDataProvider();
-    EXPECT_TRUE(provider);
+    KeyManager * keys = GetKeyManager();
+    EXPECT_TRUE(keys);
 
     // Reset test
-    ResetProvider(provider);
+    ResetProvider(keys);
 
     KeySet keyset;
 
     // Add KeySets
 
-    EXPECT_EQ(provider->SetKeySet(kFabric1, kCompressedFabricId1, kKeySet1), CHIP_NO_ERROR);
-    EXPECT_EQ(provider->SetKeySet(kFabric1, kCompressedFabricId1, kKeySet0), CHIP_NO_ERROR);
-    EXPECT_EQ(provider->SetKeySet(kFabric1, kCompressedFabricId1, kKeySet2), CHIP_NO_ERROR);
-    EXPECT_EQ(provider->SetKeySet(kFabric1, kCompressedFabricId1, kKeySet3), CHIP_NO_ERROR);
-    EXPECT_NE(CHIP_NO_ERROR, provider->SetKeySet(kFabric1, kCompressedFabricId1, kKeySet4));
-    EXPECT_EQ(provider->SetKeySet(kFabric2, kCompressedFabricId2, kKeySet3), CHIP_NO_ERROR);
-    EXPECT_EQ(provider->SetKeySet(kFabric2, kCompressedFabricId2, kKeySet0), CHIP_NO_ERROR);
-    EXPECT_EQ(provider->SetKeySet(kFabric2, kCompressedFabricId2, kKeySet2), CHIP_NO_ERROR);
-    EXPECT_EQ(provider->SetKeySet(kFabric2, kCompressedFabricId2, kKeySet1), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->SetKeySet(kFabric1, kCompressedFabricId1, kKeySet1), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->SetKeySet(kFabric1, kCompressedFabricId1, kKeySet0), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->SetKeySet(kFabric1, kCompressedFabricId1, kKeySet2), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->SetKeySet(kFabric1, kCompressedFabricId1, kKeySet3), CHIP_NO_ERROR);
+    EXPECT_NE(CHIP_NO_ERROR, keys->SetKeySet(kFabric1, kCompressedFabricId1, kKeySet4));
+    EXPECT_EQ(keys->SetKeySet(kFabric2, kCompressedFabricId2, kKeySet3), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->SetKeySet(kFabric2, kCompressedFabricId2, kKeySet0), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->SetKeySet(kFabric2, kCompressedFabricId2, kKeySet2), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->SetKeySet(kFabric2, kCompressedFabricId2, kKeySet1), CHIP_NO_ERROR);
 
     // Get KeySets
 
-    EXPECT_EQ(provider->GetKeySet(kFabric1, kKeysetId3, keyset), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->GetKeySet(kFabric1, kKeysetId3, keyset), CHIP_NO_ERROR);
     EXPECT_TRUE(CompareKeySets(keyset, kKeySet3));
 
-    EXPECT_EQ(provider->GetKeySet(kFabric1, kKeysetId1, keyset), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->GetKeySet(kFabric1, kKeysetId1, keyset), CHIP_NO_ERROR);
     EXPECT_TRUE(CompareKeySets(keyset, kKeySet1));
 
-    EXPECT_EQ(provider->GetKeySet(kFabric1, kKeysetId0, keyset), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->GetKeySet(kFabric1, kKeysetId0, keyset), CHIP_NO_ERROR);
     EXPECT_TRUE(CompareKeySets(keyset, kKeySet0));
 
-    EXPECT_EQ(provider->GetKeySet(kFabric1, kKeysetId2, keyset), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->GetKeySet(kFabric1, kKeysetId2, keyset), CHIP_NO_ERROR);
     EXPECT_TRUE(CompareKeySets(keyset, kKeySet2));
 
-    EXPECT_EQ(provider->GetKeySet(kFabric2, kKeysetId3, keyset), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->GetKeySet(kFabric2, kKeysetId3, keyset), CHIP_NO_ERROR);
     EXPECT_TRUE(CompareKeySets(keyset, kKeySet3));
 
-    EXPECT_EQ(provider->GetKeySet(kFabric2, kKeysetId2, keyset), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->GetKeySet(kFabric2, kKeysetId2, keyset), CHIP_NO_ERROR);
     EXPECT_TRUE(CompareKeySets(keyset, kKeySet2));
 
-    EXPECT_EQ(provider->GetKeySet(kFabric2, kKeysetId1, keyset), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->GetKeySet(kFabric2, kKeysetId1, keyset), CHIP_NO_ERROR);
     EXPECT_TRUE(CompareKeySets(keyset, kKeySet1));
 
-    EXPECT_EQ(provider->GetKeySet(kFabric2, kKeysetId0, keyset), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->GetKeySet(kFabric2, kKeysetId0, keyset), CHIP_NO_ERROR);
     EXPECT_TRUE(CompareKeySets(keyset, kKeySet0));
 
     // Remove Keysets
 
-    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, provider->RemoveKeySet(kFabric1, 0xffff));
+    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, keys->RemoveKeySet(kFabric1, 0xffff));
 
-    EXPECT_EQ(provider->RemoveKeySet(kFabric1, kKeysetId1), CHIP_NO_ERROR); // First
-    EXPECT_EQ(provider->RemoveKeySet(kFabric1, kKeysetId3), CHIP_NO_ERROR); // Last
-    EXPECT_EQ(provider->RemoveKeySet(kFabric2, kKeysetId2), CHIP_NO_ERROR); // Middle
+    EXPECT_EQ(keys->RemoveKeySet(kFabric1, kKeysetId1), CHIP_NO_ERROR); // First
+    EXPECT_EQ(keys->RemoveKeySet(kFabric1, kKeysetId3), CHIP_NO_ERROR); // Last
+    EXPECT_EQ(keys->RemoveKeySet(kFabric2, kKeysetId2), CHIP_NO_ERROR); // Middle
 
-    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, provider->GetKeySet(kFabric1, kKeysetId3, keyset));
-    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, provider->GetKeySet(kFabric1, kKeysetId1, keyset));
-    EXPECT_EQ(provider->GetKeySet(kFabric1, kKeysetId0, keyset), CHIP_NO_ERROR);
+    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, keys->GetKeySet(kFabric1, kKeysetId3, keyset));
+    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, keys->GetKeySet(kFabric1, kKeysetId1, keyset));
+    EXPECT_EQ(keys->GetKeySet(kFabric1, kKeysetId0, keyset), CHIP_NO_ERROR);
     EXPECT_TRUE(CompareKeySets(keyset, kKeySet0));
 
-    EXPECT_EQ(provider->GetKeySet(kFabric1, kKeysetId2, keyset), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->GetKeySet(kFabric1, kKeysetId2, keyset), CHIP_NO_ERROR);
     EXPECT_TRUE(CompareKeySets(keyset, kKeySet2));
 
-    EXPECT_EQ(provider->GetKeySet(kFabric2, kKeysetId3, keyset), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->GetKeySet(kFabric2, kKeysetId3, keyset), CHIP_NO_ERROR);
     EXPECT_TRUE(CompareKeySets(keyset, kKeySet3));
 
-    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, provider->GetKeySet(kFabric2, kKeysetId2, keyset));
-    EXPECT_EQ(provider->GetKeySet(kFabric2, kKeysetId1, keyset), CHIP_NO_ERROR);
+    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, keys->GetKeySet(kFabric2, kKeysetId2, keyset));
+    EXPECT_EQ(keys->GetKeySet(kFabric2, kKeysetId1, keyset), CHIP_NO_ERROR);
     EXPECT_TRUE(CompareKeySets(keyset, kKeySet1));
 
-    EXPECT_EQ(provider->GetKeySet(kFabric2, kKeysetId0, keyset), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->GetKeySet(kFabric2, kKeysetId0, keyset), CHIP_NO_ERROR);
     EXPECT_TRUE(CompareKeySets(keyset, kKeySet0));
 
     // Remove all
 
-    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, provider->RemoveKeySet(kFabric1, kKeysetId3));
-    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, provider->RemoveKeySet(kFabric1, kKeysetId1));
-    EXPECT_EQ(provider->RemoveKeySet(kFabric1, kKeysetId0), CHIP_NO_ERROR);
-    EXPECT_EQ(provider->RemoveKeySet(kFabric1, kKeysetId2), CHIP_NO_ERROR);
-    EXPECT_EQ(provider->RemoveKeySet(kFabric2, kKeysetId3), CHIP_NO_ERROR);
-    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, provider->RemoveKeySet(kFabric2, kKeysetId2));
-    EXPECT_EQ(provider->RemoveKeySet(kFabric2, kKeysetId1), CHIP_NO_ERROR);
-    EXPECT_EQ(provider->RemoveKeySet(kFabric2, kKeysetId0), CHIP_NO_ERROR);
+    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, keys->RemoveKeySet(kFabric1, kKeysetId3));
+    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, keys->RemoveKeySet(kFabric1, kKeysetId1));
+    EXPECT_EQ(keys->RemoveKeySet(kFabric1, kKeysetId0), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->RemoveKeySet(kFabric1, kKeysetId2), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->RemoveKeySet(kFabric2, kKeysetId3), CHIP_NO_ERROR);
+    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, keys->RemoveKeySet(kFabric2, kKeysetId2));
+    EXPECT_EQ(keys->RemoveKeySet(kFabric2, kKeysetId1), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->RemoveKeySet(kFabric2, kKeysetId0), CHIP_NO_ERROR);
 
-    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, provider->GetKeySet(kFabric1, kKeysetId3, keyset));
-    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, provider->GetKeySet(kFabric1, kKeysetId1, keyset));
-    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, provider->GetKeySet(kFabric1, kKeysetId0, keyset));
-    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, provider->GetKeySet(kFabric1, kKeysetId2, keyset));
-    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, provider->GetKeySet(kFabric2, kKeysetId3, keyset));
-    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, provider->GetKeySet(kFabric2, kKeysetId2, keyset));
-    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, provider->GetKeySet(kFabric2, kKeysetId1, keyset));
-    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, provider->GetKeySet(kFabric2, kKeysetId0, keyset));
+    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, keys->GetKeySet(kFabric1, kKeysetId3, keyset));
+    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, keys->GetKeySet(kFabric1, kKeysetId1, keyset));
+    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, keys->GetKeySet(kFabric1, kKeysetId0, keyset));
+    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, keys->GetKeySet(kFabric1, kKeysetId2, keyset));
+    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, keys->GetKeySet(kFabric2, kKeysetId3, keyset));
+    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, keys->GetKeySet(kFabric2, kKeysetId2, keyset));
+    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, keys->GetKeySet(kFabric2, kKeysetId1, keyset));
+    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, keys->GetKeySet(kFabric2, kKeysetId0, keyset));
 }
 
 TEST_F(TestGroupDataProvider, TestIpk)
 {
-    GroupDataProvider * provider = GetGroupDataProvider();
-    EXPECT_TRUE(provider);
+    KeyManager * keys = GetKeyManager();
+    EXPECT_TRUE(keys);
 
     // Reset test
-    ResetProvider(provider);
+    ResetProvider(keys);
 
-    // Make sure IPK set is not found on a fresh provider
+    // Make sure IPK set is not found on a fresh keys
     KeySet ipkOperationalKeySet;
-    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, provider->GetIpkKeySet(kFabric1, ipkOperationalKeySet));
+    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, keys->GetIpkKeySet(kFabric1, ipkOperationalKeySet));
 
     // Add a non-IPK key, make sure the IPK set is not found
-    EXPECT_EQ(provider->SetKeySet(kFabric1, kCompressedFabricId1, kKeySet3), CHIP_NO_ERROR);
-    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, provider->GetIpkKeySet(kFabric1, ipkOperationalKeySet));
+    EXPECT_EQ(keys->SetKeySet(kFabric1, kCompressedFabricId1, kKeySet3), CHIP_NO_ERROR);
+    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, keys->GetIpkKeySet(kFabric1, ipkOperationalKeySet));
 
     const uint8_t kIpkEpochKeyFromSpec[] = { 0x23, 0x5b, 0xf7, 0xe6, 0x28, 0x23, 0xd3, 0x58,
                                              0xdc, 0xa4, 0xba, 0x50, 0xb1, 0x53, 0x5f, 0x4b };
@@ -891,8 +894,8 @@ TEST_F(TestGroupDataProvider, TestIpk)
     memcpy(&fabric1KeySet0.epoch_keys[0].key, &kIpkEpochKeyFromSpec[0], sizeof(kIpkEpochKeyFromSpec));
 
     // Set a single IPK, validate key derivation follows spec
-    EXPECT_EQ(provider->SetKeySet(kFabric1, kCompressedFabricId1, fabric1KeySet0), CHIP_NO_ERROR);
-    EXPECT_EQ(provider->GetIpkKeySet(kFabric1, ipkOperationalKeySet), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->SetKeySet(kFabric1, kCompressedFabricId1, fabric1KeySet0), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->GetIpkKeySet(kFabric1, ipkOperationalKeySet), CHIP_NO_ERROR);
 
     // Make sure the derived key matches spec test vector
     const uint8_t kExpectedIpkFromSpec[] = { 0xa6, 0xf5, 0x30, 0x6b, 0xaf, 0x6d, 0x05, 0x0a,
@@ -905,13 +908,13 @@ TEST_F(TestGroupDataProvider, TestIpk)
     EXPECT_EQ(memcmp(ipkOperationalKeySet.epoch_keys[0].key, kExpectedIpkFromSpec, sizeof(kExpectedIpkFromSpec)), 0);
 
     // Remove IPK, verify removal
-    EXPECT_EQ(provider->RemoveKeySet(kFabric1, kKeysetId0), CHIP_NO_ERROR);
-    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, provider->GetIpkKeySet(kFabric1, ipkOperationalKeySet));
+    EXPECT_EQ(keys->RemoveKeySet(kFabric1, kKeysetId0), CHIP_NO_ERROR);
+    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, keys->GetIpkKeySet(kFabric1, ipkOperationalKeySet));
 
     // Set a single IPK with the SetSingleIpkEpochKey helper, validate key derivation follows spec
-    EXPECT_EQ(chip::Credentials::SetSingleIpkEpochKey(provider, kFabric1, ByteSpan(kIpkEpochKeyFromSpec), kCompressedFabricId1),
+    EXPECT_EQ(keys->SetSingleIpkEpochKey(kFabric1, ByteSpan(kIpkEpochKeyFromSpec), kCompressedFabricId1),
               CHIP_NO_ERROR);
-    EXPECT_EQ(provider->GetIpkKeySet(kFabric1, ipkOperationalKeySet), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->GetIpkKeySet(kFabric1, ipkOperationalKeySet), CHIP_NO_ERROR);
 
     EXPECT_EQ(ipkOperationalKeySet.keyset_id, 0u);
     EXPECT_EQ(ipkOperationalKeySet.num_keys_used, 1u);
@@ -922,20 +925,20 @@ TEST_F(TestGroupDataProvider, TestIpk)
 
 TEST_F(TestGroupDataProvider, TestKeySetIterator)
 {
-    GroupDataProvider * provider = GetGroupDataProvider();
-    EXPECT_TRUE(provider);
+    KeyManager * keys = GetKeyManager();
+    EXPECT_TRUE(keys);
 
     // Reset test
-    ResetProvider(provider);
+    ResetProvider(keys);
 
     // Add data to iterate
-    EXPECT_EQ(provider->SetKeySet(kFabric1, kCompressedFabricId1, kKeySet1), CHIP_NO_ERROR);
-    EXPECT_EQ(provider->SetKeySet(kFabric1, kCompressedFabricId1, kKeySet0), CHIP_NO_ERROR);
-    EXPECT_EQ(provider->SetKeySet(kFabric1, kCompressedFabricId1, kKeySet2), CHIP_NO_ERROR);
-    EXPECT_EQ(provider->SetKeySet(kFabric1, kCompressedFabricId1, kKeySet3), CHIP_NO_ERROR);
-    EXPECT_EQ(provider->SetKeySet(kFabric2, kCompressedFabricId2, kKeySet3), CHIP_NO_ERROR);
-    EXPECT_EQ(provider->SetKeySet(kFabric2, kCompressedFabricId2, kKeySet2), CHIP_NO_ERROR);
-    EXPECT_EQ(provider->SetKeySet(kFabric2, kCompressedFabricId2, kKeySet1), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->SetKeySet(kFabric1, kCompressedFabricId1, kKeySet1), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->SetKeySet(kFabric1, kCompressedFabricId1, kKeySet0), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->SetKeySet(kFabric1, kCompressedFabricId1, kKeySet2), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->SetKeySet(kFabric1, kCompressedFabricId1, kKeySet3), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->SetKeySet(kFabric2, kCompressedFabricId2, kKeySet3), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->SetKeySet(kFabric2, kCompressedFabricId2, kKeySet2), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->SetKeySet(kFabric2, kCompressedFabricId2, kKeySet1), CHIP_NO_ERROR);
 
     // Iterate Fabric 1
 
@@ -945,7 +948,7 @@ TEST_F(TestGroupDataProvider, TestKeySetIterator)
         { kKeysetId0, kKeySet0 }, { kKeysetId1, kKeySet1 }, { kKeysetId2, kKeySet2 }, { kKeysetId3, kKeySet3 }
     };
 
-    auto it = provider->IterateKeySets(kFabric1);
+    auto it = keys->IterateKeySets(kFabric1);
     ASSERT_TRUE(it);
     size_t count = 0;
     EXPECT_EQ(expected_f1.size(), it->Count());
@@ -963,7 +966,7 @@ TEST_F(TestGroupDataProvider, TestKeySetIterator)
 
     std::map<uint16_t, const KeySet> expected_f2{ { kKeysetId1, kKeySet1 }, { kKeysetId2, kKeySet2 }, { kKeysetId3, kKeySet3 } };
 
-    it = provider->IterateKeySets(kFabric2);
+    it = keys->IterateKeySets(kFabric2);
     ASSERT_TRUE(it);
     count = 0;
     EXPECT_EQ(expected_f2.size(), it->Count());
@@ -980,6 +983,8 @@ TEST_F(TestGroupDataProvider, TestKeySetIterator)
 
 TEST_F(TestGroupDataProvider, TestPerFabricData)
 {
+    KeyManager * keys = GetKeyManager();
+    EXPECT_TRUE(keys);
     GroupDataProvider * provider = GetGroupDataProvider();
     EXPECT_TRUE(provider);
 
@@ -1039,29 +1044,29 @@ TEST_F(TestGroupDataProvider, TestPerFabricData)
 
     KeySet keyset;
 
-    EXPECT_EQ(provider->SetKeySet(kFabric2, kCompressedFabricId2, kKeySet0), CHIP_NO_ERROR);
-    EXPECT_EQ(provider->SetKeySet(kFabric1, kCompressedFabricId1, kKeySet2), CHIP_NO_ERROR);
-    EXPECT_EQ(provider->SetKeySet(kFabric2, kCompressedFabricId2, kKeySet1), CHIP_NO_ERROR);
-    EXPECT_EQ(provider->SetKeySet(kFabric1, kCompressedFabricId1, kKeySet1), CHIP_NO_ERROR);
-    EXPECT_EQ(provider->SetKeySet(kFabric2, kCompressedFabricId2, kKeySet2), CHIP_NO_ERROR);
-    EXPECT_EQ(provider->SetKeySet(kFabric1, kCompressedFabricId1, kKeySet0), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->SetKeySet(kFabric2, kCompressedFabricId2, kKeySet0), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->SetKeySet(kFabric1, kCompressedFabricId1, kKeySet2), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->SetKeySet(kFabric2, kCompressedFabricId2, kKeySet1), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->SetKeySet(kFabric1, kCompressedFabricId1, kKeySet1), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->SetKeySet(kFabric2, kCompressedFabricId2, kKeySet2), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->SetKeySet(kFabric1, kCompressedFabricId1, kKeySet0), CHIP_NO_ERROR);
 
-    EXPECT_EQ(provider->GetKeySet(kFabric2, kKeysetId0, keyset), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->GetKeySet(kFabric2, kKeysetId0, keyset), CHIP_NO_ERROR);
     EXPECT_TRUE(CompareKeySets(keyset, kKeySet0));
 
-    EXPECT_EQ(provider->GetKeySet(kFabric2, kKeysetId1, keyset), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->GetKeySet(kFabric2, kKeysetId1, keyset), CHIP_NO_ERROR);
     EXPECT_TRUE(CompareKeySets(keyset, kKeySet1));
 
-    EXPECT_EQ(provider->GetKeySet(kFabric2, kKeysetId2, keyset), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->GetKeySet(kFabric2, kKeysetId2, keyset), CHIP_NO_ERROR);
     EXPECT_TRUE(CompareKeySets(keyset, kKeySet2));
 
-    EXPECT_EQ(provider->GetKeySet(kFabric1, kKeysetId2, keyset), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->GetKeySet(kFabric1, kKeysetId2, keyset), CHIP_NO_ERROR);
     EXPECT_TRUE(CompareKeySets(keyset, kKeySet2));
 
-    EXPECT_EQ(provider->GetKeySet(kFabric1, kKeysetId1, keyset), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->GetKeySet(kFabric1, kKeysetId1, keyset), CHIP_NO_ERROR);
     EXPECT_TRUE(CompareKeySets(keyset, kKeySet1));
 
-    EXPECT_EQ(provider->GetKeySet(kFabric1, kKeysetId0, keyset), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->GetKeySet(kFabric1, kKeysetId0, keyset), CHIP_NO_ERROR);
     EXPECT_TRUE(CompareKeySets(keyset, kKeySet0));
 
     //
@@ -1095,19 +1100,21 @@ TEST_F(TestGroupDataProvider, TestPerFabricData)
 
     // Keys
 
-    EXPECT_EQ(provider->GetKeySet(kFabric2, kKeysetId1, keyset), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->GetKeySet(kFabric2, kKeysetId1, keyset), CHIP_NO_ERROR);
     EXPECT_TRUE(CompareKeySets(keyset, kKeySet1));
 
-    EXPECT_EQ(provider->GetKeySet(kFabric2, kKeysetId0, keyset), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->GetKeySet(kFabric2, kKeysetId0, keyset), CHIP_NO_ERROR);
     EXPECT_TRUE(CompareKeySets(keyset, kKeySet0));
 
-    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, provider->GetKeySet(kFabric1, 202, keyset));
-    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, provider->GetKeySet(kFabric1, 404, keyset));
-    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, provider->GetKeySet(kFabric1, 606, keyset));
+    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, keys->GetKeySet(kFabric1, 202, keyset));
+    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, keys->GetKeySet(kFabric1, 404, keyset));
+    EXPECT_EQ(CHIP_ERROR_NOT_FOUND, keys->GetKeySet(kFabric1, 606, keyset));
 }
 
 TEST_F(TestGroupDataProvider, TestGroupDecryption)
 {
+    KeyManager * keys = GetKeyManager();
+    EXPECT_TRUE(keys);
     GroupDataProvider * provider = GetGroupDataProvider();
     EXPECT_TRUE(provider);
 
@@ -1134,10 +1141,10 @@ TEST_F(TestGroupDataProvider, TestGroupDecryption)
     EXPECT_EQ(provider->AddEndpoint(kFabric2, kGroup3, kEndpointId3), CHIP_NO_ERROR);
     EXPECT_EQ(provider->AddEndpoint(kFabric2, kGroup3, kEndpointId4), CHIP_NO_ERROR);
 
-    EXPECT_EQ(provider->SetKeySet(kFabric1, kCompressedFabricId1, kKeySet0), CHIP_NO_ERROR);
-    EXPECT_EQ(provider->SetKeySet(kFabric1, kCompressedFabricId1, kKeySet2), CHIP_NO_ERROR);
-    EXPECT_EQ(provider->SetKeySet(kFabric2, kCompressedFabricId2, kKeySet1), CHIP_NO_ERROR);
-    EXPECT_EQ(provider->SetKeySet(kFabric2, kCompressedFabricId2, kKeySet3), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->SetKeySet(kFabric1, kCompressedFabricId1, kKeySet0), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->SetKeySet(kFabric1, kCompressedFabricId1, kKeySet2), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->SetKeySet(kFabric2, kCompressedFabricId2, kKeySet1), CHIP_NO_ERROR);
+    EXPECT_EQ(keys->SetKeySet(kFabric2, kCompressedFabricId2, kKeySet3), CHIP_NO_ERROR);
 
     EXPECT_EQ(provider->SetGroupKeyAt(kFabric1, 0, kGroup1Keyset0), CHIP_NO_ERROR);
     EXPECT_EQ(provider->SetGroupKeyAt(kFabric1, 1, kGroup1Keyset2), CHIP_NO_ERROR);

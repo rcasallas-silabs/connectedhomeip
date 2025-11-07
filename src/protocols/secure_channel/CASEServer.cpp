@@ -34,21 +34,21 @@ namespace chip {
 CHIP_ERROR CASEServer::ListenForSessionEstablishment(Messaging::ExchangeManager * exchangeManager, SessionManager * sessionManager,
                                                      FabricTable * fabrics, SessionResumptionStorage * sessionResumptionStorage,
                                                      Credentials::CertificateValidityPolicy * certificateValidityPolicy,
-                                                     Credentials::GroupDataProvider * responderGroupDataProvider)
+                                                     Credentials::KeyManager * keyManager)
 {
     VerifyOrReturnError(exchangeManager != nullptr, CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrReturnError(sessionManager != nullptr, CHIP_ERROR_INVALID_ARGUMENT);
-    VerifyOrReturnError(responderGroupDataProvider != nullptr, CHIP_ERROR_INVALID_ARGUMENT);
+    VerifyOrReturnError(keyManager != nullptr, CHIP_ERROR_INVALID_ARGUMENT);
 
     mSessionManager            = sessionManager;
     mSessionResumptionStorage  = sessionResumptionStorage;
     mCertificateValidityPolicy = certificateValidityPolicy;
     mFabrics                   = fabrics;
     mExchangeManager           = exchangeManager;
-    mGroupDataProvider         = responderGroupDataProvider;
+    mKeyManager                = keyManager;
 
     // Set up the group state provider that persists across all handshakes.
-    GetSession().SetGroupDataProvider(mGroupDataProvider);
+    GetSession().SetKeyManager(keyManager);
 
     ChipLogProgress(Inet, "CASE Server enabling CASE session setups");
     mExchangeManager->RegisterUnsolicitedMessageHandlerForType(Protocols::SecureChannel::MsgType::CASE_Sigma1, this);

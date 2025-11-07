@@ -153,9 +153,7 @@ CHIP_ERROR CHIPCommand::MaybeSetUpStack()
     // and the DeviceControllerFactory all "share" in the same underlying data.
     // Different commissioner implementations may want to use alternate implementations
     // of GroupDataProvider for injection through factoryInitParams.
-    sGroupDataProvider.SetStorageDelegate(&mDefaultStorage);
-    sGroupDataProvider.SetSessionKeystore(factoryInitParams.sessionKeystore);
-    ReturnLogErrorOnFailure(sGroupDataProvider.Init());
+    ReturnLogErrorOnFailure(sGroupDataProvider.Initialize(&mDefaultStorage, factoryInitParams.sessionKeystore));
     chip::Credentials::SetGroupDataProvider(&sGroupDataProvider);
     factoryInitParams.groupDataProvider = &sGroupDataProvider;
 

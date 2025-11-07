@@ -1,5 +1,6 @@
 #include "GroupcastLogic.h"
 #include <app/server/Server.h>
+#include <credentials/KeyManager.h>
 #include <credentials/GroupDataProvider.h>
 
 namespace chip {
@@ -76,8 +77,8 @@ CHIP_ERROR GroupcastLogic::JoinGroup(FabricIndex fabric_index, const Groupcast::
 
     // Key handing
     {
-        GroupDataProvider *groups = GetGroupDataProvider();
-        VerifyOrReturnValue(nullptr != groups, CHIP_ERROR_INTERNAL);
+        KeyManager *keys = GetKeyManager();
+        VerifyOrReturnValue(nullptr != keys, CHIP_ERROR_INTERNAL);
 
         // struct KeySet
         //     static constexpr size_t kEpochKeysMax = 3;
@@ -87,8 +88,8 @@ CHIP_ERROR GroupcastLogic::JoinGroup(FabricIndex fabric_index, const Groupcast::
         //     uint16_t keyset_id = 0;
         //     uint8_t num_keys_used = 0;
 
-        GroupDataProvider::KeySet ks;
-        if(CHIP_NO_ERROR == groups->GetKeySet(fabric_index, data.keyID, ks)) {
+        KeySet ks;
+        if(CHIP_NO_ERROR == keys->GetKeySet(fabric_index, data.keyID, ks)) {
             // Existing key
             VerifyOrReturnValue(!data.key.HasValue(), CHIP_ERROR_INTERNAL);
         } else {
@@ -100,10 +101,10 @@ CHIP_ERROR GroupcastLogic::JoinGroup(FabricIndex fabric_index, const Groupcast::
 
             // Translate HEX key to binary
             const chip::ByteSpan &key = data.key.Value();
-            GroupDataProvider::EpochKey &epoch = ks.epoch_keys[0];
-            VerifyOrReturnValue(key.size() == 2 * GroupDataProvider::EpochKey::kLengthBytes, CHIP_ERROR_INTERNAL);
-            size_t key_size = chip::Encoding::HexToBytes((char *) key.data(), key.size(), epoch.key, GroupDataProvider::EpochKey::kLengthBytes);
-            VerifyOrReturnValue(key_size == GroupDataProvider::EpochKey::kLengthBytes, CHIP_ERROR_INTERNAL);
+            EpochKey &epoch = ks.epoch_keys[0];
+            VerifyOrReturnValue(key.size() == 2 * EpochKey::kLengthBytes, CHIP_ERROR_INTERNAL);
+            size_t key_size = chip::Encoding::HexToBytes((char *) key.data(), key.size(), epoch.key, EpochKey::kLengthBytes);
+            VerifyOrReturnValue(key_size == EpochKey::kLengthBytes, CHIP_ERROR_INTERNAL);
             ks.num_keys_used = 1;
             {
                 // Get compressed fabric
@@ -111,7 +112,7 @@ CHIP_ERROR GroupcastLogic::JoinGroup(FabricIndex fabric_index, const Groupcast::
                 MutableByteSpan compressed_fabric_id(compressed_fabric_id_buffer);        
                 ReturnErrorOnFailure(fabric->GetCompressedFabricIdBytes(compressed_fabric_id));
                 // Set keys
-                ReturnErrorOnFailure(groups->SetKeySet(fabric_index, compressed_fabric_id, ks));
+                ReturnErrorOnFailure(keys->SetKeySet(fabric_index, compressed_fabric_id, ks));
             }
         }
     }

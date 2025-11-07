@@ -409,6 +409,7 @@ std::optional<DataModel::ActionReturnStatus> HandleAddNOC(CommandHandler * comma
     auto & ICACValue         = commandData.ICACValue;
     auto & adminVendorId     = commandData.adminVendorId;
     auto & ipkValue          = commandData.IPKValue;
+    auto * keyManager        = Credentials::GetKeyManager();
     auto * groupDataProvider = Credentials::GetGroupDataProvider();
     auto nocResponse         = NodeOperationalCertStatusEnum::kOk;
     auto errorStatus         = Status::Success;
@@ -416,7 +417,7 @@ std::optional<DataModel::ActionReturnStatus> HandleAddNOC(CommandHandler * comma
 
     CHIP_ERROR err             = CHIP_NO_ERROR;
     FabricIndex newFabricIndex = kUndefinedFabricIndex;
-    Credentials::GroupDataProvider::KeySet keyset;
+    Credentials::KeySet keyset;
     const FabricInfo * newFabricInfo = nullptr;
 
     auto * secureSession = commandObj->GetExchangeContext()->GetSessionHandle()->AsSecureSession();
@@ -444,6 +445,7 @@ std::optional<DataModel::ActionReturnStatus> HandleAddNOC(CommandHandler * comma
     VerifyOrExit(!csrWasForUpdateNoc, errorStatus = Status::ConstraintError);
 
     // Internal error that would prevent IPK from being added
+    VerifyOrExit(keyManager != nullptr, errorStatus = Status::Failure);
     VerifyOrExit(groupDataProvider != nullptr, errorStatus = Status::Failure);
 
     // We can't possibly have a matching root based on the fact that we don't have
@@ -485,7 +487,7 @@ std::optional<DataModel::ActionReturnStatus> HandleAddNOC(CommandHandler * comma
 
     // Set the Identity Protection Key (IPK)
     // The IPK SHALL be the operational group key under GroupKeySetID of 0
-    keyset.keyset_id                = Credentials::GroupDataProvider::kIdentityProtectionKeySetId;
+    keyset.keyset_id                = Credentials::kIdentityProtectionKeySetId;
     keyset.policy                   = GroupKeyManagement::GroupKeySecurityPolicyEnum::kTrustFirst;
     keyset.num_keys_used            = 1;
     keyset.epoch_keys[0].start_time = 0;
@@ -494,7 +496,7 @@ std::optional<DataModel::ActionReturnStatus> HandleAddNOC(CommandHandler * comma
     err = newFabricInfo->GetCompressedFabricIdBytes(compressed_fabric_id);
     VerifyOrExit(err == CHIP_NO_ERROR, errorStatus = Status::Failure);
 
-    err = groupDataProvider->SetKeySet(newFabricIndex, compressed_fabric_id, keyset);
+    err = keyManager->SetKeySet(newFabricIndex, compressed_fabric_id, keyset);
     VerifyOrExit(err == CHIP_NO_ERROR, nocResponse = ConvertToNOCResponseStatus(err));
 
     /**
