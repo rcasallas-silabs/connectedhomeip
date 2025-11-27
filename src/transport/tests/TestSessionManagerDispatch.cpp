@@ -53,7 +53,7 @@ using namespace chip::Credentials;
 
 using GroupInfo      = GroupDataProvider::GroupInfo;
 using GroupKey       = GroupDataProvider::GroupKey;
-using KeySet         = GroupDataProvider::KeySet;
+using KeySet         = Credentials::KeySet;
 using SecurityPolicy = GroupDataProvider::SecurityPolicy;
 
 using TestContext = chip::Test::LoopbackTransportManager;

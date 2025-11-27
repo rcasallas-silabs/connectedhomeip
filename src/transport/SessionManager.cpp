@@ -220,7 +220,7 @@ CHIP_ERROR SessionManager::PrepareMessage(const SessionHandle & sessionHandle, P
             // Groupcast message
             Groupcast::DataProvider * provider = Groupcast::GetDataProvider();
             VerifyOrReturnError(nullptr != provider, CHIP_ERROR_INTERNAL);
-            keyContext = provider->CreateKeyContext(groupSession->GetFabricIndex(), groupSession->GetGroupId());
+            keyContext = provider->GetKeyContext(groupSession->GetFabricIndex(), groupSession->GetGroupId());
             VerifyOrReturnError(nullptr != keyContext, CHIP_ERROR_INTERNAL);
             packetHeader.SetSessionId(keyContext->GetKeyHash());
             destination_address = Transport::PeerAddress::Groupcast();
@@ -1081,7 +1081,7 @@ void SessionManager::SecureGroupMessageDispatch(const PacketHeader & partialPack
     }
 
     // Trial decryption with GroupDataProvider
-    Credentials::GroupDataProvider::GroupSession session;
+    Credentials::GroupSession session;
 
     // Extract MIC from the end of the message.
     uint8_t * data     = msg->Start();
@@ -1139,7 +1139,7 @@ void SessionManager::SecureGroupMessageDispatch(const PacketHeader & partialPack
         gGroupPeerTable->FindOrAddPeer(session.fabric_index, packetHeaderCopy.GetSourceNodeId().Value(),
                                        packetHeaderCopy.IsSecureSessionControlMsg(), counter))
     {
-        if (Credentials::GroupDataProvider::SecurityPolicy::kTrustFirst == session.security_policy)
+        if (Credentials::SecurityPolicy::kTrustFirst == session.security_policy)
         {
             err = counter->VerifyOrTrustFirstGroup(packetHeaderCopy.GetMessageCounter());
         }
@@ -1193,7 +1193,7 @@ void SessionManager::SecureGroupMessageDispatch(const PacketHeader & partialPack
 
 bool SessionManager::GroupDecrypt(const PacketHeader & partialPacketHeader, PacketHeader & packetHeader,
                                   PayloadHeader & payloadHeader, MessageAuthenticationCode & mac,
-                                  Credentials::GroupDataProvider::GroupSession & session, System::PacketBufferHandle && msg)
+                                  Credentials::GroupSession & session, System::PacketBufferHandle && msg)
 {
     Credentials::GroupDataProvider * groups = Credentials::GetGroupDataProvider();
     VerifyOrReturnValue(nullptr != groups, false);
@@ -1210,7 +1210,7 @@ bool SessionManager::GroupDecrypt(const PacketHeader & partialPacketHeader, Pack
 
     // Trial decryption with GroupDataProvider
 
-    AutoRelease<Credentials::GroupDataProvider::GroupSessionIterator> iter(
+    AutoRelease<Credentials::GroupSessionIterator> iter(
         groups->IterateGroupSessions(partialPacketHeader.GetSessionId()));
 
     if (iter.IsNull())
@@ -1254,18 +1254,22 @@ bool SessionManager::GroupDecrypt(const PacketHeader & partialPacketHeader, Pack
 
 bool SessionManager::GroupcastDecrypt(const PacketHeader & partialPacketHeader, PacketHeader & packetHeader,
                                       PayloadHeader & payloadHeader, MessageAuthenticationCode & mac,
-                                      Credentials::GroupDataProvider::GroupSession & session, System::PacketBufferHandle && msg)
+                                      Credentials::GroupSession & session, System::PacketBufferHandle && msg)
 {
     VerifyOrReturnValue(partialPacketHeader.HasDestinationGroupId(), false);
     System::PacketBufferHandle msgCopy;
 
-    GroupId group_id = partialPacketHeader.GetDestinationGroupId().Value();
-    uint16_t session_id = partialPacketHeader.GetSessionId();
+    Groupcast::DataProvider * groups = Groupcast::GetDataProvider();
+    VerifyOrReturnError(nullptr != groups, false);
 
-    Groupcast::DataProvider * provider = Groupcast::GetDataProvider();
-    VerifyOrReturnError(nullptr != provider, false);
-    Groupcast::DataProvider::KeyIterator * iter = provider->IterateKeys(mFabricTable, group_id, session_id);
-    VerifyOrReturnError(nullptr != iter, false);
+    AutoRelease<Credentials::GroupSessionIterator> iter(
+        groups->IterateGroupSessions(mFabricTable, partialPacketHeader.GetSessionId()));
+
+    if (iter.IsNull())
+    {
+        ChipLogError(Inet, "Failed to retrieve Groups iterator. Discarding everything");
+        return false;
+    }
 
     bool decrypted = false;
     while (!decrypted && iter->Next(session))

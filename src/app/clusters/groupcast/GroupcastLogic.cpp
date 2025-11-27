@@ -87,7 +87,7 @@ CHIP_ERROR GroupcastLogic::JoinGroup(FabricIndex fabric_index, const Groupcast::
         //     uint16_t keyset_id = 0;
         //     uint8_t num_keys_used = 0;
 
-        GroupDataProvider::KeySet ks;
+        Credentials::KeySet ks;
         if(CHIP_NO_ERROR == groups->GetKeySet(fabric_index, data.keyID, ks)) {
             // Existing key
             VerifyOrReturnValue(!data.key.HasValue(), CHIP_ERROR_INTERNAL);
@@ -100,10 +100,10 @@ CHIP_ERROR GroupcastLogic::JoinGroup(FabricIndex fabric_index, const Groupcast::
 
             // Translate HEX key to binary
             const chip::ByteSpan &key = data.key.Value();
-            GroupDataProvider::EpochKey &epoch = ks.epoch_keys[0];
-            VerifyOrReturnValue(key.size() == 2 * GroupDataProvider::EpochKey::kLengthBytes, CHIP_ERROR_INTERNAL);
-            size_t key_size = chip::Encoding::HexToBytes((char *) key.data(), key.size(), epoch.key, GroupDataProvider::EpochKey::kLengthBytes);
-            VerifyOrReturnValue(key_size == GroupDataProvider::EpochKey::kLengthBytes, CHIP_ERROR_INTERNAL);
+            Credentials::EpochKey &epoch = ks.epoch_keys[0];
+            VerifyOrReturnValue(key.size() == 2 * Credentials::EpochKey::kLengthBytes, CHIP_ERROR_INTERNAL);
+            size_t key_size = chip::Encoding::HexToBytes((char *) key.data(), key.size(), epoch.key, Credentials::EpochKey::kLengthBytes);
+            VerifyOrReturnValue(key_size == Credentials::EpochKey::kLengthBytes, CHIP_ERROR_INTERNAL);
             ks.num_keys_used = 1;
             {
                 // Get compressed fabric

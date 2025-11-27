@@ -626,10 +626,10 @@ private:
 
     bool GroupDecrypt(const PacketHeader & partialPacketHeader, PacketHeader & packetHeader,
                       PayloadHeader & payloadHeader, MessageAuthenticationCode & mac,
-                      Credentials::GroupDataProvider::GroupSession & session, System::PacketBufferHandle && msg);
+                      Credentials::GroupSession & session, System::PacketBufferHandle && msg);
     bool GroupcastDecrypt(const PacketHeader & partialPacketHeader, PacketHeader & packetHeader,
                          PayloadHeader & payloadHeader, MessageAuthenticationCode & mac,
-                         Credentials::GroupDataProvider::GroupSession & session, System::PacketBufferHandle && msg);
+                         Credentials::GroupSession & session, System::PacketBufferHandle && msg);
 };
 
 namespace MessagePacketBuffer {

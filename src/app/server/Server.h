@@ -37,6 +37,7 @@
 #include <app/server/DefaultAclStorage.h>
 #include <credentials/CertificateValidityPolicy.h>
 #include <credentials/FabricTable.h>
+#include <credentials/KeyManagerImpl.h>
 #include <credentials/GroupDataProvider.h>
 #include <credentials/GroupDataProviderImpl.h>
 #include <credentials/GroupcastDataProvider.h>
@@ -173,6 +174,8 @@ struct ServerInitParams
     // Certificate validity policy: Optional. If none is injected, CHIPCert
     // enforces a default policy.
     Credentials::CertificateValidityPolicy * certificateValidityPolicy = nullptr;
+    // Key manager: To be injected. Must be initialized before being provided.
+    Credentials::KeyManager * keyManager = nullptr;
     // Group data provider: MUST be injected. Used to maintain critical keys such as the Identity
     // Protection Key (IPK) for CASE. Must be initialized before being provided.
     Credentials::GroupDataProvider * groupDataProvider = nullptr;
@@ -305,13 +308,16 @@ struct CommonCaseDeviceServerInitParams : public ServerInitParams
         // Session Keystore injection
         this->sessionKeystore = &sSessionKeystore;
 
+        // Key manager
+        ReturnErrorOnFailure(sKeyManager.Initialize(this->persistentStorageDelegate, this->sessionKeystore));
+        this->keyManager = &sKeyManager;
         // Group Data provider injection
         sGroupDataProvider.SetStorageDelegate(this->persistentStorageDelegate);
         sGroupDataProvider.SetSessionKeystore(this->sessionKeystore);
         ReturnErrorOnFailure(sGroupDataProvider.Init());
         this->groupDataProvider = &sGroupDataProvider;
         // Groupcast
-        sGroupcastDataProvider.Initialize(this->persistentStorageDelegate, this->sessionKeystore);
+        ReturnErrorOnFailure(sGroupcastDataProvider.Initialize(this->persistentStorageDelegate, this->keyManager));
         this->groupcastDataProvider = &sGroupcastDataProvider;
 
 #if CHIP_CONFIG_ENABLE_SESSION_RESUMPTION
@@ -350,6 +356,7 @@ private:
     static KvsPersistentStorageDelegate sKvsPersistenStorageDelegate;
     static PersistentStorageOperationalKeystore sPersistentStorageOperationalKeystore;
     static Credentials::PersistentStorageOpCertStore sPersistentStorageOpCertStore;
+    static Credentials::KeyManagerImpl sKeyManager;
     static Credentials::GroupDataProviderImpl sGroupDataProvider;
 	static Groupcast::DataProvider sGroupcastDataProvider;
     static chip::Access::ExtendedAccessControlDelegate sExtendedAccessControlDelegate;

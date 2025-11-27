@@ -26,6 +26,7 @@
 #include <lib/core/ClusterEnums.h>
 #include <lib/support/CHIPMemString.h>
 #include <lib/support/CommonIterator.h>
+#include <credentials/KeyManager.h>
 
 namespace chip {
 namespace Credentials {
@@ -107,64 +108,71 @@ public:
         }
     };
 
-    struct GroupSession
-    {
-        GroupSession()   = default;
-        GroupId group_id = kUndefinedGroupId;
-        FabricIndex fabric_index;
-        SecurityPolicy security_policy;
-        Crypto::SymmetricKeyContext * keyContext = nullptr;
-    };
+    // struct GroupSession
+    // {
+    //     GroupSession()   = default;
+    //     GroupId group_id = kUndefinedGroupId;
+    //     FabricIndex fabric_index;
+    //     SecurityPolicy security_policy;
+    //     Crypto::SymmetricKeyContext * keyContext = nullptr;
+    // };
 
     // An EpochKey is a single key usable to determine an operational group key
-    struct EpochKey
-    {
-        static constexpr size_t kLengthBytes = Crypto::CHIP_CRYPTO_SYMMETRIC_KEY_LENGTH_BYTES;
-        // Validity start time in microseconds since 2000-01-01T00:00:00 UTC ("the Epoch")
-        uint64_t start_time;
-        // Actual key bits. Depending on context, it may be a raw epoch key (as seen within `SetKeySet` calls)
-        // or it may be the derived operational group key (as seen in any other usage).
-        uint8_t key[kLengthBytes];
+    // struct EpochKey
+    // {
+    //     static constexpr size_t kLengthBytes = Crypto::CHIP_CRYPTO_SYMMETRIC_KEY_LENGTH_BYTES;
+    //     // Validity start time in microseconds since 2000-01-01T00:00:00 UTC ("the Epoch")
+    //     uint64_t start_time;
+    //     // Actual key bits. Depending on context, it may be a raw epoch key (as seen within `SetKeySet` calls)
+    //     // or it may be the derived operational group key (as seen in any other usage).
+    //     uint8_t key[kLengthBytes];
 
-        void Clear()
-        {
-            start_time = 0;
-            Crypto::ClearSecretData(&key[0], sizeof(key));
-        }
-    };
+    //     void Clear()
+    //     {
+    //         start_time = 0;
+    //         Crypto::ClearSecretData(&key[0], sizeof(key));
+    //     }
+    // };
 
+    // struct KeySet: public Credentials::KeySet
+    // {
+    //     KeySet() = default;
+    //     KeySet(uint16_t id, SecurityPolicy policy_id, uint8_t num_keys) : Credentials::KeySet(id, policy_id, num_keys) {}
+    // };
+
+    
     // A operational group key set, usable by many GroupState mappings
-    struct KeySet
-    {
-        static constexpr size_t kEpochKeysMax = 3;
+    // struct KeySet
+    // {
+    //     static constexpr size_t kEpochKeysMax = 3;
 
-        KeySet() = default;
-        KeySet(uint16_t id, SecurityPolicy policy_id, uint8_t num_keys) : keyset_id(id), policy(policy_id), num_keys_used(num_keys)
-        {}
+    //     KeySet() = default;
+    //     KeySet(uint16_t id, SecurityPolicy policy_id, uint8_t num_keys) : keyset_id(id), policy(policy_id), num_keys_used(num_keys)
+    //     {}
 
-        // The actual keys for the group key set
-        EpochKey epoch_keys[kEpochKeysMax];
-        // Logical id provided by the Administrator that configured the entry
-        uint16_t keyset_id = 0;
-        // Security policy to use for groups that use this keyset
-        SecurityPolicy policy = SecurityPolicy::kCacheAndSync;
-        // Number of keys present
-        uint8_t num_keys_used = 0;
+    //     // The actual keys for the group key set
+    //     EpochKey epoch_keys[kEpochKeysMax];
+    //     // Logical id provided by the Administrator that configured the entry
+    //     uint16_t keyset_id = 0;
+    //     // Security policy to use for groups that use this keyset
+    //     SecurityPolicy policy = SecurityPolicy::kCacheAndSync;
+    //     // Number of keys present
+    //     uint8_t num_keys_used = 0;
 
-        bool operator==(const KeySet & other) const
-        {
-            VerifyOrReturnError(this->policy == other.policy && this->num_keys_used == other.num_keys_used, false);
-            return !memcmp(this->epoch_keys, other.epoch_keys, this->num_keys_used * sizeof(EpochKey));
-        }
+    //     bool operator==(const KeySet & other) const
+    //     {
+    //         VerifyOrReturnError(this->policy == other.policy && this->num_keys_used == other.num_keys_used, false);
+    //         return !memcmp(this->epoch_keys, other.epoch_keys, this->num_keys_used * sizeof(EpochKey));
+    //     }
 
-        void ClearKeys()
-        {
-            for (size_t key_idx = 0; key_idx < kEpochKeysMax; ++key_idx)
-            {
-                epoch_keys[key_idx].Clear();
-            }
-        }
-    };
+    //     void ClearKeys()
+    //     {
+    //         for (size_t key_idx = 0; key_idx < kEpochKeysMax; ++key_idx)
+    //         {
+    //             epoch_keys[key_idx].Clear();
+    //         }
+    //     }
+    // };
 
     /**
      *  Interface to listen for changes in the Group info.
@@ -190,8 +198,8 @@ public:
     using GroupInfoIterator    = CommonIterator<GroupInfo>;
     using GroupKeyIterator     = CommonIterator<GroupKey>;
     using EndpointIterator     = CommonIterator<GroupEndpoint>;
-    using KeySetIterator       = CommonIterator<KeySet>;
-    using GroupSessionIterator = CommonIterator<GroupSession>;
+    // using KeySetIterator       = CommonIterator<KeySet>;
+    // using GroupSessionIterator = CommonIterator<GroupSession>;
 
     GroupDataProvider(uint16_t maxGroupsPerFabric    = CHIP_CONFIG_MAX_GROUPS_PER_FABRIC,
                       uint16_t maxGroupKeysPerFabric = CHIP_CONFIG_MAX_GROUP_KEYS_PER_FABRIC) :
@@ -352,7 +360,7 @@ protected:
 inline CHIP_ERROR SetSingleIpkEpochKey(GroupDataProvider * provider, FabricIndex fabric_index, const ByteSpan & ipk_epoch_span,
                                        const ByteSpan & compressed_fabric_id)
 {
-    GroupDataProvider::KeySet ipkKeySet(GroupDataProvider::kIdentityProtectionKeySetId,
+    Credentials::KeySet ipkKeySet(GroupDataProvider::kIdentityProtectionKeySetId,
                                         GroupDataProvider::SecurityPolicy::kTrustFirst, 1);
 
     VerifyOrReturnError(provider != nullptr, CHIP_ERROR_INVALID_ARGUMENT);

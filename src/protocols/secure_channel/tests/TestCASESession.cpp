@@ -283,7 +283,7 @@ constexpr uint8_t kFaultInjectionSuccessCode = 0;
 CHIP_ERROR InitTestIpk(GroupDataProvider & groupDataProvider, const FabricInfo & fabricInfo, size_t numIpks)
 {
     VerifyOrReturnError((numIpks > 0) && (numIpks <= 3), CHIP_ERROR_INVALID_ARGUMENT);
-    using KeySet         = chip::Credentials::GroupDataProvider::KeySet;
+    using KeySet         = chip::Credentials::KeySet;
     using SecurityPolicy = chip::Credentials::GroupDataProvider::SecurityPolicy;
 
     KeySet ipkKeySet(GroupDataProvider::kIdentityProtectionKeySetId, SecurityPolicy::kTrustFirst, static_cast<uint8_t>(numIpks));
