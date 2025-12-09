@@ -109,9 +109,9 @@ struct KeySetReadAllIndicesResponse
     static constexpr CommandId GetCommandId() { return GroupKeyManagement::Commands::KeySetReadAllIndicesResponse::Id; }
     static constexpr ClusterId GetClusterId() { return GroupKeyManagement::Id; }
 
-    GroupDataProvider::KeySetIterator * mIterator = nullptr;
+    Credentials::KeySetIterator * mIterator = nullptr;
 
-    KeySetReadAllIndicesResponse(GroupDataProvider::KeySetIterator * iter) : mIterator(iter) {}
+    KeySetReadAllIndicesResponse(Credentials::KeySetIterator * iter) : mIterator(iter) {}
 
     CHIP_ERROR Encode(TLV::TLVWriter & writer, TLV::Tag tag) const
     {
@@ -123,7 +123,7 @@ struct KeySetReadAllIndicesResponse
             TLV::ContextTag(GroupKeyManagement::Commands::KeySetReadAllIndicesResponse::Fields::kGroupKeySetIDs),
             TLV::kTLVType_Array, array));
 
-        GroupDataProvider::KeySet keyset;
+        Credentials::KeySet keyset;
         while (mIterator && mIterator->Next(keyset))
         {
             ReturnErrorOnFailure(app::DataModel::Encode(writer, TLV::AnonymousTag(), keyset.keyset_id));
@@ -326,12 +326,12 @@ Status ValidateKeySetWriteArguments(const Commands::KeySetWrite::DecodableType &
     }
 
     // By now we at least have epochKey0.
-    static_assert(GroupDataProvider::EpochKey::kLengthBytes == 16,
+    static_assert(Credentials::EpochKey::kLengthBytes == 16,
                   "Expect EpochKey internal data structure to have a length of 16 bytes.");
 
     // SPEC: If the EpochKey0 field's length is not exactly 16 bytes, then this command SHALL fail with a CONSTRAINT_ERROR status
     // code responded to the client.
-    if (commandData.groupKeySet.epochKey0.Value().size() != GroupDataProvider::EpochKey::kLengthBytes)
+    if (commandData.groupKeySet.epochKey0.Value().size() != Credentials::EpochKey::kLengthBytes)
     {
         return Status::ConstraintError;
     }
@@ -363,7 +363,7 @@ Status ValidateKeySetWriteArguments(const Commands::KeySetWrite::DecodableType &
 
         // SPEC: If the EpochKey1 field is not null, and the field's length is not exactly 16 bytes, then this command SHALL fail
         // with a CONSTRAINT_ERROR status code responded to the client.
-        if (commandData.groupKeySet.epochKey1.Value().size() != GroupDataProvider::EpochKey::kLengthBytes)
+        if (commandData.groupKeySet.epochKey1.Value().size() != Credentials::EpochKey::kLengthBytes)
         {
             return Status::ConstraintError;
         }
@@ -402,7 +402,7 @@ Status ValidateKeySetWriteArguments(const Commands::KeySetWrite::DecodableType &
 
         // SPEC: If the EpochKey2 field is not null, and the field's length is not exactly 16 bytes, then this command SHALL fail
         // with a CONSTRAINT_ERROR status code responded to the client.
-        if (commandData.groupKeySet.epochKey2.Value().size() != GroupDataProvider::EpochKey::kLengthBytes)
+        if (commandData.groupKeySet.epochKey2.Value().size() != Credentials::EpochKey::kLengthBytes)
         {
             return Status::ConstraintError;
         }
@@ -461,11 +461,11 @@ std::optional<DataModel::ActionReturnStatus> HandleKeySetWrite(CommandHandler * 
     bool epoch_key1_present = !commandData.groupKeySet.epochKey1.IsNull();
     bool epoch_key2_present = !commandData.groupKeySet.epochKey2.IsNull();
 
-    GroupDataProvider::KeySet keyset(commandData.groupKeySet.groupKeySetID, commandData.groupKeySet.groupKeySecurityPolicy, 0);
+    Credentials::KeySet keyset(commandData.groupKeySet.groupKeySetID, commandData.groupKeySet.groupKeySecurityPolicy, 0);
 
     // Epoch Key 0 always present
     keyset.epoch_keys[0].start_time = commandData.groupKeySet.epochStartTime0.Value();
-    memcpy(keyset.epoch_keys[0].key, commandData.groupKeySet.epochKey0.Value().data(), GroupDataProvider::EpochKey::kLengthBytes);
+    memcpy(keyset.epoch_keys[0].key, commandData.groupKeySet.epochKey0.Value().data(), Credentials::EpochKey::kLengthBytes);
     keyset.num_keys_used++;
 
     // Epoch Key 1
@@ -473,7 +473,7 @@ std::optional<DataModel::ActionReturnStatus> HandleKeySetWrite(CommandHandler * 
     {
         keyset.epoch_keys[1].start_time = commandData.groupKeySet.epochStartTime1.Value();
         memcpy(keyset.epoch_keys[1].key, commandData.groupKeySet.epochKey1.Value().data(),
-               GroupDataProvider::EpochKey::kLengthBytes);
+               Credentials::EpochKey::kLengthBytes);
         keyset.num_keys_used++;
     }
 
@@ -482,7 +482,7 @@ std::optional<DataModel::ActionReturnStatus> HandleKeySetWrite(CommandHandler * 
     {
         keyset.epoch_keys[2].start_time = commandData.groupKeySet.epochStartTime2.Value();
         memcpy(keyset.epoch_keys[2].key, commandData.groupKeySet.epochKey2.Value().data(),
-               GroupDataProvider::EpochKey::kLengthBytes);
+               Credentials::EpochKey::kLengthBytes);
         keyset.num_keys_used++;
     }
 
@@ -520,7 +520,7 @@ std::optional<DataModel::ActionReturnStatus> HandleKeySetRead(CommandHandler * c
                                                               Credentials::GroupDataProvider * provider, const FabricInfo * fabric)
 {
     FabricIndex fabricIndex = fabric->GetFabricIndex();
-    GroupDataProvider::KeySet keyset;
+    Credentials::KeySet keyset;
     if (CHIP_NO_ERROR != provider->GetKeySet(fabricIndex, commandData.groupKeySetID, keyset))
     {
         // KeySet ID not found

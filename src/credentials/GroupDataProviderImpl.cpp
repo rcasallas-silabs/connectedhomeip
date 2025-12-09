@@ -30,8 +30,8 @@ namespace Credentials {
 using GroupInfo     = GroupDataProvider::GroupInfo;
 using GroupKey      = GroupDataProvider::GroupKey;
 using GroupEndpoint = GroupDataProvider::GroupEndpoint;
-using EpochKey      = GroupDataProvider::EpochKey;
-using KeySet        = GroupDataProvider::KeySet;
+using EpochKey      = Credentials::EpochKey;
+using KeySet        = Credentials::KeySet;
 using GroupSession  = GroupDataProvider::GroupSession;
 
 struct FabricList : public CommonPersistentData::FabricList
@@ -1517,7 +1517,7 @@ void GroupDataProviderImpl::GroupKeyIteratorImpl::Release()
 // Key Sets
 //
 
-constexpr size_t GroupDataProvider::EpochKey::kLengthBytes;
+constexpr size_t Credentials::EpochKey::kLengthBytes;
 
 CHIP_ERROR GroupDataProviderImpl::SetKeySet(chip::FabricIndex fabric_index, const ByteSpan & compressed_fabric_id,
                                             const KeySet & in_keyset)
@@ -1641,7 +1641,7 @@ CHIP_ERROR GroupDataProviderImpl::RemoveKeySet(chip::FabricIndex fabric_index, u
     return CHIP_NO_ERROR;
 }
 
-GroupDataProvider::KeySetIterator * GroupDataProviderImpl::IterateKeySets(chip::FabricIndex fabric_index)
+Credentials::KeySetIterator * GroupDataProviderImpl::IterateKeySets(chip::FabricIndex fabric_index)
 {
     VerifyOrReturnError(IsInitialized(), nullptr);
     return mKeySetIterators.CreateObject(*this, fabric_index);
@@ -1836,7 +1836,7 @@ CHIP_ERROR GroupDataProviderImpl::GroupKeyContext::PrivacyDecrypt(const ByteSpan
     return Crypto::AES_CTR_crypt(input.data(), input.size(), mPrivacyKey, nonce.data(), nonce.size(), output.data());
 }
 
-GroupDataProviderImpl::GroupSessionIterator * GroupDataProviderImpl::IterateGroupSessions(uint16_t session_id)
+Credentials::GroupSessionIterator * GroupDataProviderImpl::IterateGroupSessions(uint16_t session_id)
 {
     VerifyOrReturnError(IsInitialized(), nullptr);
     return mGroupSessionsIterator.CreateObject(*this, session_id);

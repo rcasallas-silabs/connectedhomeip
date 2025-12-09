@@ -352,7 +352,7 @@ protected:
 inline CHIP_ERROR SetSingleIpkEpochKey(GroupDataProvider * provider, FabricIndex fabric_index, const ByteSpan & ipk_epoch_span,
                                        const ByteSpan & compressed_fabric_id)
 {
-    GroupDataProvider::KeySet ipkKeySet(GroupDataProvider::kIdentityProtectionKeySetId,
+    Credentials::KeySet ipkKeySet(GroupDataProvider::kIdentityProtectionKeySetId,
                                         GroupDataProvider::SecurityPolicy::kTrustFirst, 1);
 
     VerifyOrReturnError(provider != nullptr, CHIP_ERROR_INVALID_ARGUMENT);

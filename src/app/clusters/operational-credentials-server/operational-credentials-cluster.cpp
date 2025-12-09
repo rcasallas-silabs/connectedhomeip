@@ -416,7 +416,7 @@ std::optional<DataModel::ActionReturnStatus> HandleAddNOC(CommandHandler * comma
 
     CHIP_ERROR err             = CHIP_NO_ERROR;
     FabricIndex newFabricIndex = kUndefinedFabricIndex;
-    Credentials::GroupDataProvider::KeySet keyset;
+    Credentials::KeySet keyset;
     const FabricInfo * newFabricInfo = nullptr;
 
     auto * secureSession = commandObj->GetExchangeContext()->GetSessionHandle()->AsSecureSession();

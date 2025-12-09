@@ -36,8 +36,8 @@ using namespace chip::Credentials;
 using GroupInfo      = GroupDataProvider::GroupInfo;
 using GroupKey       = GroupDataProvider::GroupKey;
 using GroupEndpoint  = GroupDataProvider::GroupEndpoint;
-using EpochKey       = GroupDataProvider::EpochKey;
-using KeySet         = GroupDataProvider::KeySet;
+using EpochKey       = Credentials::EpochKey;
+using KeySet         = Credentials::KeySet;
 using GroupSession   = GroupDataProvider::GroupSession;
 using SecurityPolicy = GroupDataProvider::SecurityPolicy;
 

@@ -77,7 +77,7 @@ static bool KeyExists(FabricIndex fabricIndex, GroupId groupId)
     {
         if (entry.group_id == groupId)
         {
-            GroupDataProvider::KeySet keys;
+            Credentials::KeySet keys;
             found = (CHIP_NO_ERROR == provider->GetKeySet(fabricIndex, entry.keyset_id, keys));
         }
     }
