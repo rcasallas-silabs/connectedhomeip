@@ -311,6 +311,7 @@ public:
     // Decryption
     virtual GroupSessionIterator * IterateGroupSessions(uint16_t session_id)                        = 0;
     virtual Crypto::SymmetricKeyContext * GetKeyContext(FabricIndex fabric_index, GroupId group_id) = 0;
+    virtual Crypto::SymmetricKeyContext * GetKeysetContext(FabricIndex fabric_index, KeysetId keyset_id) = 0;
 
     // Listener
     void SetListener(GroupListener * listener) { mListener = listener; };
