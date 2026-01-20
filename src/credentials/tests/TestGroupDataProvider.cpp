@@ -110,6 +110,7 @@ static const GroupInfo kGroupInfo3_2(kGroup2, "Group-3.2");
 static const GroupInfo kGroupInfo3_3(kGroup3, "Group-3.3");
 static const GroupInfo kGroupInfo3_4(kGroup4, "Group-3.4");
 static const GroupInfo kGroupInfo3_5(kGroup4, "Group-3.5");
+static const GroupInfo kGroupInfo3_6(kGroup4, "Group-3.5");
 
 static const GroupKey kGroup1Keyset0(kGroup1, kKeysetId0);
 static const GroupKey kGroup1Keyset1(kGroup1, kKeysetId1);
@@ -626,11 +627,12 @@ TEST_F(TestGroupDataProvider, TestGroupKeys)
 
     // Out-of-order
     EXPECT_EQ(CHIP_ERROR_INVALID_ARGUMENT, provider->SetGroupKeyAt(kFabric1, 2, kGroup1Keyset0));
-
+    // By index
     EXPECT_EQ(provider->SetGroupKeyAt(kFabric1, 0, kGroup1Keyset0), CHIP_NO_ERROR);
-    EXPECT_EQ(provider->SetGroupKeyAt(kFabric1, 1, kGroup1Keyset1), CHIP_NO_ERROR);
-    EXPECT_EQ(provider->SetGroupKeyAt(kFabric1, 2, kGroup1Keyset2), CHIP_NO_ERROR);
-    EXPECT_EQ(provider->SetGroupKeyAt(kFabric1, 3, kGroup1Keyset3), CHIP_NO_ERROR);
+    EXPECT_EQ(provider->SetGroupKeyAt(kFabric1, 1, kGroup1Keyset2), CHIP_NO_ERROR);
+    EXPECT_EQ(provider->SetGroupKeyAt(kFabric1, 2, kGroup1Keyset3), CHIP_NO_ERROR);
+    // Add last
+    EXPECT_EQ(provider->SetGroupKey(kFabric1, kGroup1, kKeysetId1), CHIP_NO_ERROR);
     // Duplicated
     EXPECT_EQ(CHIP_ERROR_DUPLICATE_KEY_ID, provider->SetGroupKeyAt(kFabric1, 4, kGroup1Keyset2));
 
@@ -646,6 +648,9 @@ TEST_F(TestGroupDataProvider, TestGroupKeys)
     EXPECT_EQ(CHIP_ERROR_INVALID_FABRIC_INDEX, provider->GetGroupKeyAt(kUndefinedFabricIndex, 0, pair));
     EXPECT_EQ(CHIP_ERROR_NOT_FOUND, provider->GetGroupKeyAt(kFabric2, 999, pair));
 
+    KeysetId keyset_id = 0;
+    EXPECT_EQ(provider->GetGroupKey(kFabric1, kGroup1, keyset_id), CHIP_NO_ERROR);
+    EXPECT_EQ(keyset_id, kKeysetId0);
     EXPECT_EQ(provider->GetGroupKeyAt(kFabric1, 3, pair), CHIP_NO_ERROR);
     EXPECT_EQ(pair, kGroup1Keyset3);
     EXPECT_EQ(provider->GetGroupKeyAt(kFabric1, 2, pair), CHIP_NO_ERROR);

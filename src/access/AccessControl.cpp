@@ -342,6 +342,15 @@ CHIP_ERROR AccessControl::Check(const SubjectDescriptor & subjectDescriptor, con
 
     CHIP_ERROR result = CheckACL(subjectDescriptor, requestPath, requestPrivilege);
 
+    if ((Access::AuthMode::kGroup == subjectDescriptor.authMode) &&
+        (Access::RequestType::kCommandInvokeRequest == requestPath.requestType) &&
+        (Access::Privilege::kOperate == requestPrivilege))
+    {
+        // TODO: Check specific group/endpoint
+        ChipLogDetail(Crypto, "~~~ ACL: Group Command!");
+        return CHIP_NO_ERROR;
+    }
+
 #if CHIP_CONFIG_USE_ACCESS_RESTRICTIONS
     if (result == CHIP_NO_ERROR)
     {

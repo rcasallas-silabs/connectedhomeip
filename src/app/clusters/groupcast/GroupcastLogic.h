@@ -37,10 +37,14 @@ namespace Clusters {
 class GroupcastLogic
 {
 public:
+    static constexpr size_t kMaxMermbershipEndpoints = 20;
+
+    GroupcastLogic() {}
     GroupcastLogic(BitFlags<Groupcast::Feature> features) : mFeatures(features) {}
     const BitFlags<Groupcast::Feature> & Features() const { return mFeatures; }
 
-    CHIP_ERROR ReadMembership(EndpointId endpoint, AttributeValueEncoder & aEncoder);
+    CHIP_ERROR ReadMembership(const chip::Access::SubjectDescriptor * subject, EndpointId endpoint,
+                              AttributeValueEncoder & aEncoder);
     CHIP_ERROR ReadMaxMembershipCount(EndpointId endpoint, AttributeValueEncoder & aEncoder);
 
     CHIP_ERROR JoinGroup(FabricIndex fabric_index, const Groupcast::Commands::JoinGroup::DecodableType & data);
@@ -51,9 +55,8 @@ public:
                                      const Groupcast::Commands::ConfigureAuxiliaryACL::DecodableType & data);
 
 private:
-    CHIP_ERROR RegisterAccessControl(FabricIndex fabric_index, GroupId group_id);
-
     const BitFlags<Groupcast::Feature> mFeatures;
+    EndpointId mEndpoints[kMaxMermbershipEndpoints];
 };
 
 } // namespace Clusters
