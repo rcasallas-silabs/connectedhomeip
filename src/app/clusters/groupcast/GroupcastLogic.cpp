@@ -92,46 +92,16 @@ CHIP_ERROR GroupcastLogic::JoinGroup(FabricIndex fabric_index, const Groupcast::
     // Key handing
     if (data.key.HasValue())
     {
-        GroupDataProvider::KeySet ks;
-        if (CHIP_NO_ERROR == groups->GetKeySet(fabric_index, static_cast<KeysetId>(data.keySetID), ks))
-        {
-            // Existing key
-            VerifyOrReturnValue(!data.key.HasValue(), CHIP_ERROR_INTERNAL);
-        }
-        else
-        {
-            const FabricInfo * fabric = Server::GetInstance().GetFabricTable().FindFabricWithIndex(fabric_index);
-            VerifyOrReturnValue(nullptr != fabric, CHIP_ERROR_INTERNAL);
-
-            // New key
-            ks.keyset_id     = static_cast<KeysetId>(data.keySetID);
-            ks.policy        = GroupDataProvider::SecurityPolicy::kTrustFirst;
-            ks.num_keys_used = 1;
-
-            // Translate HEX key to binary
-            const chip::ByteSpan & key          = data.key.Value();
-            GroupDataProvider::EpochKey & epoch = ks.epoch_keys[0];
-            VerifyOrReturnValue(key.size() == 2 * GroupDataProvider::EpochKey::kLengthBytes, CHIP_ERROR_INTERNAL);
-            size_t key_size =
-                chip::Encoding::HexToBytes((char *) key.data(), key.size(), epoch.key, GroupDataProvider::EpochKey::kLengthBytes);
-            VerifyOrReturnValue(key_size == GroupDataProvider::EpochKey::kLengthBytes, CHIP_ERROR_INTERNAL);
-            {
-                // Get compressed fabric
-                uint8_t compressed_fabric_id_buffer[sizeof(uint64_t)];
-                MutableByteSpan compressed_fabric_id(compressed_fabric_id_buffer);
-                ReturnErrorOnFailure(fabric->GetCompressedFabricIdBytes(compressed_fabric_id));
-                // Set keys
-                ReturnErrorOnFailure(groups->SetKeySet(fabric_index, compressed_fabric_id, ks));
-            }
-        }
+        // Create a new keyset
+        ReturnErrorOnFailure(SetKeySet(fabric_index, data.keySetID, data.key.Value()));
     }
+    // Assign keyset to group
+    ReturnErrorOnFailure(groups->SetGroupKey(fabric_index, data.groupID, data.keySetID));
 
     // Add a new entry to the GroupTable
     bool aux_acl = data.useAuxiliaryACL.HasValue() && data.useAuxiliaryACL.Value();
     GroupDataProvider::GroupInfo info(data.groupID, aux_acl);
     ReturnErrorOnFailure(groups->SetGroupInfo(fabric_index, info));
-    // Associate the group with the keyset
-    ReturnErrorOnFailure(groups->SetGroupKey(fabric_index, data.groupID, data.keySetID));
 
     // Add Endpoints
     auto iter = data.endpoints.begin();
@@ -188,13 +158,76 @@ CHIP_ERROR GroupcastLogic::LeaveGroup(FabricIndex fabric_index, const Groupcast:
 
 CHIP_ERROR GroupcastLogic::UpdateGroupKey(FabricIndex fabric_index, const Groupcast::Commands::UpdateGroupKey::DecodableType & data)
 {
-    return CHIP_ERROR_NOT_IMPLEMENTED;
+    GroupDataProvider * groups =  Credentials::GetGroupDataProvider();
+    VerifyOrReturnValue(nullptr != groups, CHIP_ERROR_INCORRECT_STATE);
+
+    // Key handing
+    if (data.key.HasValue())
+    {
+        // Create a new keyset
+        ReturnErrorOnFailure(SetKeySet(fabric_index, data.keySetID, data.key.Value()));
+    }
+    // Assign keyset to group
+    ReturnErrorOnFailure(groups->SetGroupKey(fabric_index, data.groupID, data.keySetID));
+    return CHIP_NO_ERROR;
 }
 
 CHIP_ERROR GroupcastLogic::ConfigureAuxiliaryACL(FabricIndex fabric_index,
                                                  const Groupcast::Commands::ConfigureAuxiliaryACL::DecodableType & data)
 {
-    return CHIP_ERROR_NOT_IMPLEMENTED;
+    GroupDataProvider * groups =  Credentials::GetGroupDataProvider();
+    VerifyOrReturnError(nullptr != groups, CHIP_ERROR_INCORRECT_STATE);
+
+    // Get group info
+    GroupDataProvider::GroupInfo info;
+    ReturnErrorOnFailure(groups->GetGroupInfo(fabric_index, data.groupID, info));
+
+    // Update group info
+    info.use_aux_acl = data.useAuxiliaryACL;
+    ReturnErrorOnFailure(groups->SetGroupInfo(fabric_index, info));
+
+    return CHIP_NO_ERROR;
+}
+
+CHIP_ERROR GroupcastLogic::SetKeySet(FabricIndex fabric_index, KeysetId keyset_id, const chip::ByteSpan & key)
+{
+    GroupDataProvider * groups =  Credentials::GetGroupDataProvider();
+    VerifyOrReturnError(nullptr != groups, CHIP_ERROR_INCORRECT_STATE);
+
+    GroupDataProvider::KeySet ks;
+    
+    CHIP_ERROR err = groups->GetKeySet(fabric_index, static_cast<KeysetId>(keyset_id), ks);
+    if (CHIP_ERROR_NOT_FOUND == err)
+    {
+        // New key
+        const FabricInfo * fabric = Server::GetInstance().GetFabricTable().FindFabricWithIndex(fabric_index);
+        VerifyOrReturnValue(nullptr != fabric, CHIP_ERROR_INTERNAL);
+
+        ks.keyset_id     = static_cast<KeysetId>(keyset_id);
+        ks.policy        = GroupDataProvider::SecurityPolicy::kTrustFirst;
+        ks.num_keys_used = 1;
+
+        // Translate HEX key to binary
+        GroupDataProvider::EpochKey & epoch = ks.epoch_keys[0];
+        VerifyOrReturnValue(key.size() == 2 * GroupDataProvider::EpochKey::kLengthBytes, CHIP_ERROR_INTERNAL);
+        size_t key_size =
+            chip::Encoding::HexToBytes((char *) key.data(), key.size(), epoch.key, GroupDataProvider::EpochKey::kLengthBytes);
+        VerifyOrReturnValue(key_size == GroupDataProvider::EpochKey::kLengthBytes, CHIP_ERROR_INTERNAL);
+        {
+            // Get compressed fabric
+            uint8_t compressed_fabric_id_buffer[sizeof(uint64_t)];
+            MutableByteSpan compressed_fabric_id(compressed_fabric_id_buffer);
+            ReturnErrorOnFailure(fabric->GetCompressedFabricIdBytes(compressed_fabric_id));
+            // Set keys
+            err = groups->SetKeySet(fabric_index, compressed_fabric_id, ks);
+        }
+    }
+    else if (CHIP_NO_ERROR == err)
+    {
+        // Existing key
+        return CHIP_ERROR_DUPLICATE_KEY_ID;
+    }
+    return err;
 }
 
 } // namespace Clusters

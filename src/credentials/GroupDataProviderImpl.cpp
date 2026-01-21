@@ -869,6 +869,7 @@ CHIP_ERROR GroupDataProviderImpl::SetGroupInfo(chip::FabricIndex fabric_index, c
     if (group.Find(mStorage, fabric, info.group_id))
     {
         // Existing group_id
+        group.use_aux_acl = info.use_aux_acl;
         group.SetName(info.name);
         return group.Save(mStorage);
     }

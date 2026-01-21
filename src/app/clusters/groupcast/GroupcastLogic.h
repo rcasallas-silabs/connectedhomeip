@@ -55,6 +55,8 @@ public:
                                      const Groupcast::Commands::ConfigureAuxiliaryACL::DecodableType & data);
 
 private:
+    CHIP_ERROR SetKeySet(FabricIndex fabric_index, KeysetId keyset_id, const chip::ByteSpan & key);
+
     const BitFlags<Groupcast::Feature> mFeatures;
     EndpointId mEndpoints[kMaxMermbershipEndpoints];
 };
