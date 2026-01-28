@@ -267,6 +267,7 @@ struct GroupData : public GroupDataProvider::GroupInfo, PersistableData<kPersist
     static constexpr TLV::Tag TagEndpointCount() { return TLV::ContextTag(3); }
     static constexpr TLV::Tag TagNext() { return TLV::ContextTag(4); }
     static constexpr TLV::Tag TagHasAuxiliaryAcl() { return TLV::ContextTag(5); }
+    static constexpr TLV::Tag TagUseIANAaddr() { return TLV::ContextTag(6); }
 
     chip::FabricIndex fabric_index  = kUndefinedFabricIndex;
     chip::EndpointId first_endpoint = kInvalidEndpointId;
@@ -294,6 +295,7 @@ struct GroupData : public GroupDataProvider::GroupInfo, PersistableData<kPersist
         endpoint_count = 0;
         next           = 0;
         use_aux_acl    = false;
+        use_iana_addr  = false;
     }
 
     CHIP_ERROR Serialize(TLV::TLVWriter & writer) const override
@@ -307,6 +309,7 @@ struct GroupData : public GroupDataProvider::GroupInfo, PersistableData<kPersist
         ReturnErrorOnFailure(writer.Put(TagEndpointCount(), static_cast<uint16_t>(endpoint_count)));
         ReturnErrorOnFailure(writer.Put(TagNext(), static_cast<uint16_t>(next)));
         ReturnErrorOnFailure(writer.Put(TagHasAuxiliaryAcl(), static_cast<uint8_t>(use_aux_acl)));
+        ReturnErrorOnFailure(writer.Put(TagUseIANAaddr(), static_cast<uint8_t>(use_iana_addr)));
         return writer.EndContainer(container);
     }
 
@@ -332,13 +335,18 @@ struct GroupData : public GroupDataProvider::GroupInfo, PersistableData<kPersist
         // next
         ReturnErrorOnFailure(reader.Next(TagNext()));
         ReturnErrorOnFailure(reader.Get(next));
-        // use_aux_acl
+        // Groupcast
         CHIP_ERROR err = reader.Next(TagHasAuxiliaryAcl());
         if (CHIP_NO_ERROR == err)
         {
-            uint8_t aux_acl = 0;
-            ReturnErrorOnFailure(reader.Get(aux_acl));
-            use_aux_acl = aux_acl;
+            // use_aux_acl
+            uint8_t flag = 0;
+            ReturnErrorOnFailure(reader.Get(flag));
+            use_aux_acl = flag;
+            // use_iana_addr
+            ReturnErrorOnFailure(reader.Next(TagUseIANAaddr()));
+            ReturnErrorOnFailure(reader.Get(flag));
+            use_iana_addr = flag;
         }
         return reader.ExitContainer(container);
     }
@@ -868,15 +876,12 @@ CHIP_ERROR GroupDataProviderImpl::SetGroupInfo(chip::FabricIndex fabric_index, c
     if (group.Find(mStorage, fabric, info.group_id))
     {
         // Existing group_id
-        group.use_aux_acl = info.use_aux_acl;
-        group.SetName(info.name);
+        group.Copy(info);
         return group.Save(mStorage);
     }
 
     // New group_id
-    group.group_id    = info.group_id;
-    group.use_aux_acl = info.use_aux_acl;
-    group.SetName(info.name);
+    group.Copy(info);
     return SetGroupInfoAt(fabric_index, fabric.group_count, group);
 }
 
@@ -889,9 +894,7 @@ CHIP_ERROR GroupDataProviderImpl::GetGroupInfo(chip::FabricIndex fabric_index, c
     info.count = fabric.group_count;
     VerifyOrReturnError(group.Find(mStorage, fabric, group_id), CHIP_ERROR_NOT_FOUND);
 
-    info.group_id    = group.group_id;
-    info.use_aux_acl = group.use_aux_acl;
-    info.SetName(group.name);
+    info.Copy(group);
     return CHIP_NO_ERROR;
 }
 
@@ -921,10 +924,7 @@ CHIP_ERROR GroupDataProviderImpl::SetGroupInfoAt(chip::FabricIndex fabric_index,
     bool found = group.Find(mStorage, fabric, info.group_id);
     VerifyOrReturnError(!found || (group.index == index), CHIP_ERROR_DUPLICATE_KEY_ID);
 
-    group.group_id       = info.group_id;
-    group.use_aux_acl    = info.use_aux_acl;
-    group.endpoint_count = 0;
-    group.SetName(info.name);
+    group.Copy(info);
 
     if (found)
     {
@@ -984,9 +984,7 @@ CHIP_ERROR GroupDataProviderImpl::GetGroupInfoAt(chip::FabricIndex fabric_index,
     VerifyOrReturnError(group.Get(mStorage, fabric, index), CHIP_ERROR_NOT_FOUND);
 
     // Target group found
-    info.group_id    = group.group_id;
-    info.use_aux_acl = group.use_aux_acl;
-    info.SetName(group.name);
+    info.Copy(group);
     return CHIP_NO_ERROR;
 }
 
@@ -1213,10 +1211,8 @@ bool GroupDataProviderImpl::GroupInfoIteratorImpl::Next(GroupInfo & output)
     VerifyOrReturnError(CHIP_NO_ERROR == err, false);
 
     mCount++;
-    mNextId            = group.next;
-    output.group_id    = group.group_id;
-    output.use_aux_acl = group.use_aux_acl;
-    output.SetName(group.name);
+    mNextId = group.next;
+    output.Copy(group);
     return true;
 }
 
