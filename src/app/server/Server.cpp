@@ -788,6 +788,8 @@ void Server::RejoinExistingMulticastGroups()
 {
     ChipLogProgress(AppServer, "Joining Multicast groups");
     CHIP_ERROR err = CHIP_NO_ERROR;
+
+    bool groupcast_joined = false;
     for (const FabricInfo & fabric : mFabrics)
     {
         Credentials::GroupDataProvider::GroupInfo groupInfo;
@@ -798,8 +800,19 @@ void Server::RejoinExistingMulticastGroups()
             // GroupDataProvider was able to allocate rescources for an iterator
             while (iterator->Next(groupInfo))
             {
-                err = mTransports.MulticastGroupJoinLeave(
-                    Transport::PeerAddress::Multicast(fabric.GetFabricId(), groupInfo.group_id), true);
+                bool use_iana_addr =
+                    !(groupInfo.flags & static_cast<uint8_t>(Credentials::GroupDataProvider::GroupInfo::Flags::kMcastAddrPolicy));
+                if (use_iana_addr and groupcast_joined)
+                {
+                    // Already joined groupcast address
+                    continue;
+                }
+
+                const Transport::PeerAddress & address = use_iana_addr
+                    ? Transport::PeerAddress::Groupcast()
+                    : Transport::PeerAddress::Multicast(fabric.GetFabricId(), groupInfo.group_id);
+
+                err = mTransports.MulticastGroupJoinLeave(address, true);
                 if (err != CHIP_NO_ERROR)
                 {
                     ChipLogError(AppServer, "Error when trying to join Group %u of fabric index %u : %" CHIP_ERROR_FORMAT,
@@ -810,6 +823,8 @@ void Server::RejoinExistingMulticastGroups()
                     iterator->Release();
                     return;
                 }
+                if (use_iana_addr)
+                    groupcast_joined = true;
             }
 
             iterator->Release();

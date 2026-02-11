@@ -236,6 +236,9 @@ Status GroupcastLogic::ConfigureAuxiliaryACL(FabricIndex fabric_index,
     GroupDataProvider & groups = Provider();
     CHIP_ERROR err             = CHIP_NO_ERROR;
 
+    // AuxiliaryACL can only be present if LN feature is supported
+    VerifyOrReturnError(mFeatures.Has(Groupcast::Feature::kListener), Status::ConstraintError);
+
     // Get group info
     GroupDataProvider::GroupInfo info;
     err = groups.GetGroupInfo(fabric_index, data.groupID, info);
