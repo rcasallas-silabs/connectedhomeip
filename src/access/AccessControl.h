@@ -27,6 +27,7 @@
 #include "Privilege.h"
 #include "RequestPath.h"
 #include "SubjectDescriptor.h"
+#include "AuxiliaryACL.h"
 
 #include <lib/core/CHIPCore.h>
 #include <lib/core/Global.h>
@@ -669,6 +670,8 @@ public:
      */
     CHIP_ERROR Check(const SubjectDescriptor & subjectDescriptor, const RequestPath & requestPath, Privilege requestPrivilege);
 
+    AuxiliaryChecker & GetAuxiliaryChecker() { return mAuxChecker; }
+
 #if CHIP_ACCESS_CONTROL_DUMP_ENABLED
     CHIP_ERROR Dump(const Entry & entry);
 #endif
@@ -692,12 +695,15 @@ private:
      */
     CHIP_ERROR CheckARL(const SubjectDescriptor & subjectDescriptor, const RequestPath & requestPath, Privilege requestPrivilege);
 
+
 private:
     Delegate * mDelegate = nullptr;
 
     DeviceTypeResolver * mDeviceTypeResolver = nullptr;
 
     EntryListener * mEntryListener = nullptr;
+
+    AuxiliaryChecker mAuxChecker;
 
 #if CHIP_CONFIG_USE_ACCESS_RESTRICTIONS
     AccessRestrictionProvider * mAccessRestrictionProvider;

@@ -36,10 +36,9 @@ CHIP_ERROR MakeInstanceName(char * buffer, size_t bufferLen, const PeerId & peer
     NodeId nodeId               = peerId.GetNodeId();
     CompressedFabricId fabricId = peerId.GetCompressedFabricId();
 
-    StringBuilderBase builder(buffer, bufferLen);
-    builder.AddFormat("%016" PRIX64 "-%016" PRIX64, fabricId, nodeId);
+    snprintf(buffer, bufferLen, "%08" PRIX32 "%08" PRIX32 "-%08" PRIX32 "%08" PRIX32, static_cast<uint32_t>(fabricId >> 32),
+             static_cast<uint32_t>(fabricId), static_cast<uint32_t>(nodeId >> 32), static_cast<uint32_t>(nodeId));
 
-    VerifyOrReturnError(builder.Fit(), CHIP_ERROR_BUFFER_TOO_SMALL);
     return CHIP_NO_ERROR;
 }
 

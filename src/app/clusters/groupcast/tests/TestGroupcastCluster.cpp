@@ -678,6 +678,21 @@ TEST_F(TestGroupcastCluster, TestConfigureAuxiliaryACL)
         }
     }
 
+    // Update Sender (false to true), invalid
+    {
+        chip::Testing::ClusterTester sender_tester(mListener);
+        sender_tester.SetFabricIndex(kTestFabricIndex);
+
+        Commands::ConfigureAuxiliaryACL::Type data;
+        data.groupID         = kGroupId;
+        data.useAuxiliaryACL = true;
+
+        auto result = sender_tester.Invoke(Commands::ConfigureAuxiliaryACL::Id, data);
+        ASSERT_TRUE(result.status.has_value());
+        EXPECT_EQ(result.status.value().GetStatusCode().GetStatus(), // NOLINT(bugprone-unchecked-optional-access)
+                  Protocols::InteractionModel::Status::ConstraintError);
+    }
+
     // Update (false to true)
     {
         Commands::ConfigureAuxiliaryACL::Type data;
