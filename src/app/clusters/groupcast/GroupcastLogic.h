@@ -52,8 +52,8 @@ public:
         uint16_t count = 0;
     };
 
-    GroupcastLogic(GroupcastContext & context) : mContext(context) {}
-    GroupcastLogic(GroupcastContext & context, BitFlags<Groupcast::Feature> features) : mContext(context), mFeatures(features) {}
+    GroupcastLogic(GroupcastContext & context);
+    GroupcastLogic(GroupcastContext & context, BitFlags<Groupcast::Feature> features);
     const BitFlags<Groupcast::Feature> & Features() const { return mFeatures; }
 
     CHIP_ERROR ReadMembership(const chip::Access::SubjectDescriptor * subject, EndpointId endpoint,
@@ -77,6 +77,8 @@ private:
     Status RemoveGroup(FabricIndex fabric_index, GroupId group_id, const Groupcast::Commands::LeaveGroup::DecodableType & data,
                        EndpointList & endpoints);
     Status RemoveGroupEndpoint(FabricIndex fabric_index, GroupId group_id, EndpointId endpoint_id, EndpointList & endpoints);
+    Status UpdateAuxiliaryACL(FabricIndex fabric_index);
+    void UpdateAuxiliaryACLs();
 
     GroupcastContext & mContext;
     const BitFlags<Groupcast::Feature> mFeatures;
