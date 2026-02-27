@@ -194,10 +194,6 @@ Status GroupcastLogic::JoinGroup(FabricIndex fabric_index, const Groupcast::Comm
     uint16_t max_fabric_memberships = static_cast<uint16_t>(groups.getMaxMembershipCount() / 2);
     VerifyOrReturnError(new_count <= max_fabric_memberships, Status::ResourceExhausted);
 
-    // Key handling
-    Status stat = SetKeySet(fabric_index, data.groupID, data.keySetID, data.key);
-    VerifyOrReturnError(Status::Success == stat, stat);
-
     // Add/update entry in the group table
     info.group_id = data.groupID;
     info.flags    = 0;
@@ -208,9 +204,15 @@ Status GroupcastLogic::JoinGroup(FabricIndex fabric_index, const Groupcast::Comm
 
     if (data.mcastAddrPolicy.HasValue() && (Groupcast::MulticastAddrPolicyEnum::kPerGroup == data.mcastAddrPolicy.Value()))
     {
+        VerifyOrReturnError(mUsedMcastAddrCount < groups.getMaxMembershipCount(), Status::ResourceExhausted);
         info.flags |= chip::to_underlying(GroupInfo::Flags::kMcastAddrPolicy);
     }
 
+    // Key handling
+    Status stat = SetKeySet(fabric_index, data.groupID, data.keySetID, data.key);
+    VerifyOrReturnError(Status::Success == stat, stat);
+
+    // Create group
     err = groups.SetGroupInfo(fabric_index, info);
     VerifyOrReturnError(CHIP_NO_ERROR == err, Status::Failure);
 
