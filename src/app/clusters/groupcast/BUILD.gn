@@ -22,6 +22,8 @@ source_set("groupcast") {
   public_deps = [
     "${chip_root}/src/app/server",
     "${chip_root}/src/app/server-cluster",
+    "${chip_root}/src/credentials",
+    "${chip_root}/src/transport",
     "${chip_root}/zzz_generated/app-common/clusters/Groupcast",
   ]
 }

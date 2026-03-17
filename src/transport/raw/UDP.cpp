@@ -26,6 +26,7 @@
 #include <lib/support/CHIPFaultInjection.h>
 #include <lib/support/CodeUtils.h>
 #include <lib/support/logging/CHIPLogging.h>
+#include <transport/raw/GroupcastTesting.h>
 #include <transport/raw/MessageHeader.h>
 
 #include <inttypes.h>
@@ -107,6 +108,15 @@ void UDP::OnUdpReceive(Inet::UDPEndPoint * endPoint, System::PacketBufferHandle 
     CHIP_ERROR err          = CHIP_NO_ERROR;
     UDP * udp               = reinterpret_cast<UDP *>(endPoint->mAppState);
     PeerAddress peerAddress = PeerAddress::UDP(pktInfo->SrcAddress, pktInfo->SrcPort, pktInfo->Interface);
+    PeerAddress destAddress = PeerAddress::UDP(pktInfo->DestAddress, pktInfo->DestPort, pktInfo->Interface);
+
+    auto & testing = Groupcast::GetTesting();
+    if (testing.IsEnabled())
+    {
+        ChipLogProgress(Inet, "~~~ GROUP");
+        testing.SetSourceIpAddress(peerAddress.GetIPAddress());
+        testing.SetDestinationIpAddress(destAddress.GetIPAddress());
+    }
 
     CHIP_FAULT_INJECT(FaultInjection::kFault_DropIncomingUDPMsg, buffer = nullptr; return;);
 

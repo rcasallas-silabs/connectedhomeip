@@ -26,6 +26,8 @@ static_library("raw") {
 
   sources = [
     "Base.h",
+    "GroupcastTesting.cpp",
+    "GroupcastTesting.h",
     "MessageHeader.cpp",
     "MessageHeader.h",
     "PeerAddress.cpp",
@@ -68,6 +70,7 @@ static_library("raw") {
   cflags = [ "-Wconversion" ]
 
   public_deps = [
+    "${chip_root}/src/credentials",
     "${chip_root}/src/crypto",
     "${chip_root}/src/inet",
     "${chip_root}/src/lib/core",

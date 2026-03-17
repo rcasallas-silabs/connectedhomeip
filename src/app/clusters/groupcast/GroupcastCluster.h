@@ -114,6 +114,7 @@ private:
     void UpdateUsedMcastAddrCount();
     void NotifyUsedMcastAddrCountOnChange();
     void NotifyMembershipChanged();
+    void Debug();
 
     GroupcastContext mContext;
     const BitFlags<Groupcast::Feature> mFeatures;
@@ -123,6 +124,7 @@ private:
 
     Groupcast::GroupcastTestingEnum mTestingState = Groupcast::GroupcastTestingEnum::kDisableTesting;
     FabricIndex mFabricUnderTest                  = kUndefinedFabricIndex;
+
     class MembershipChangedTimer : public TimerContext
     {
     public:

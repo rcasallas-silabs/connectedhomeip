@@ -1,15 +1,17 @@
 #include "GroupcastCluster.h"
 #include <access/AccessControl.h>
+#include <app/data-model/Nullable.h>
 #include <app/server-cluster/AttributeListBuilder.h>
 #include <clusters/Groupcast/AttributeIds.h>
 #include <clusters/Groupcast/Attributes.h>
 #include <clusters/Groupcast/Metadata.h>
 #include <credentials/GroupDataProvider.h>
+#include <transport/raw/GroupcastTesting.h>
+#include <cstring>
 
 using chip::Protocols::InteractionModel::Status;
 
 using namespace chip::Credentials;
-using GroupDataProvider = GroupDataProvider;
 using GroupInfo         = GroupDataProvider::GroupInfo;
 using GroupEndpoint     = GroupDataProvider::GroupEndpoint;
 using GroupInfoIterator = GroupDataProvider::GroupInfoIterator;
@@ -147,6 +149,7 @@ std::optional<DataModel::ActionReturnStatus> GroupcastCluster::InvokeCommand(con
         break;
     }
 
+    Debug();
     return status;
 }
 
@@ -165,6 +168,8 @@ Status GroupcastCluster::GroupcastTesting(FabricIndex fabricIndex, Groupcast::Co
 {
     VerifyOrReturnError(mFabricUnderTest == kUndefinedFabricIndex || mFabricUnderTest == fabricIndex, Status::ConstraintError);
 
+    auto & testing = chip::Groupcast::GetTesting();
+    testing.Clear();
     if (data.testOperation == Groupcast::GroupcastTestingEnum::kDisableTesting)
     {
         // cancel any existing GroupcastTesting timer
@@ -189,6 +194,8 @@ Status GroupcastCluster::GroupcastTesting(FabricIndex fabricIndex, Groupcast::Co
 
     mTestingState = data.testOperation;
     SetFabricUnderTest(fabricIndex);
+    testing.SetEnabled(true);
+    testing.SetFabricIndex(fabricIndex);
     return Status::Success;
 }
 
@@ -236,6 +243,7 @@ void GroupcastCluster::GroupcastTestingTimer::TimerFired()
 {
     mCluster.SetFabricUnderTest(kUndefinedFabricIndex);
     mCluster.mTestingState = Groupcast::GroupcastTestingEnum::kDisableTesting;
+    chip::Groupcast::GetTesting().Clear();
 }
 
 CHIP_ERROR GroupcastCluster::ReadMembership(const chip::Access::SubjectDescriptor & subject, EndpointId endpoint,
@@ -716,6 +724,38 @@ void GroupcastCluster::NotifyUsedMcastAddrCountOnChange()
         NotifyAttributeChanged(Groupcast::Attributes::UsedMcastAddrCount::Id);
     }
 }
+
+void GroupcastCluster::Debug()
+{
+    printf("GroupcastCluster::Debug()\n");
+    
+    // Access the base class mContext (ServerClusterContext *)
+    if (DefaultServerCluster::mContext != nullptr)
+    {
+        Groupcast::Events::GroupcastTesting::Type event;
+        auto & testing = chip::Groupcast::GetTesting();
+        testing.ToEventType(event);
+
+        // event.groupcastTestResult = Groupcast::GroupcastTestResultEnum::kSuccess;
+        // event.fabricIndex = mFabricUnderTest;
+        // const char * sourceIp = "192.168.1.1";
+        // const char * destIp = "192.168.1.2";
+        // event.sourceIpAddress = MakeOptional(ByteSpan(reinterpret_cast<const uint8_t *>(sourceIp), strlen(sourceIp)));
+        // event.destinationIpAddress = MakeOptional(ByteSpan(reinterpret_cast<const uint8_t *>(destIp), strlen(destIp)));
+        // event.groupID = MakeOptional<chip::GroupId>(1);
+        // event.endpointID = MakeOptional<chip::EndpointId>(1);
+        // event.clusterID = MakeOptional<chip::ClusterId>(1);
+        // event.elementID = MakeOptional<uint32_t>(1);
+        // Send
+        DataModel::EventsGenerator & eventsGenerator = DefaultServerCluster::mContext->interactionContext.eventsGenerator;
+        eventsGenerator.GenerateEvent(event, kRootEndpointId);
+        eventsGenerator.ScheduleUrgentEventDeliverySync();
+    }
+    
+    // Note: To access GroupcastCluster's own mContext, use just mContext
+    // Example: mContext.groupDataProvider
+}
+
 } // namespace Clusters
 } // namespace app
 } // namespace chip

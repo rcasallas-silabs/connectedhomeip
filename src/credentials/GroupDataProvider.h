@@ -27,6 +27,7 @@
 #include <lib/support/CHIPMemString.h>
 #include <lib/support/CommonIterator.h>
 
+
 namespace chip {
 namespace Credentials {
 

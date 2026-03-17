@@ -37,6 +37,7 @@
 #include <app/data-model-provider/ActionReturnStatus.h>
 #include <app/data-model-provider/MetadataLookup.h>
 #include <app/data-model-provider/MetadataTypes.h>
+#include <app/data-model-provider/EventsGenerator.h>
 #include <app/data-model-provider/OperationTypes.h>
 #include <app/data-model/List.h>
 #include <app/util/IMClusterCommandHandler.h>
@@ -51,6 +52,10 @@
 #include <lib/support/FibonacciUtils.h>
 #include <lib/support/ReadOnlyBuffer.h>
 #include <protocols/interaction_model/StatusCode.h>
+#include <clusters/Groupcast/Events.h>
+#include <credentials/GroupDataProvider.h>
+#include <transport/raw/GroupcastTesting.h>
+#include <transport/GroupSession.h>
 
 #include <cinttypes>
 
@@ -1097,10 +1102,29 @@ CHIP_ERROR InteractionModelEngine::OnMessageReceived(Messaging::ExchangeContext 
         status = Status::InvalidAction;
     }
 
+    auto & testing = Groupcast::GetTesting();
+    if (testing.IsEnabled())
+    {
+        Clusters::Groupcast::Events::GroupcastTesting::Type event;
+
+        testing.SetFabricIndex(apExchangeContext->GetSessionHandle()->GetFabricIndex());
+        testing.ToEventType(event);
+        if((event.groupcastTestResult == Clusters::Groupcast::GroupcastTestResultEnum::kSuccess) &&
+            (status != Status::Success))
+        {
+            event.groupcastTestResult = Clusters::Groupcast::GroupcastTestResultEnum::kGeneralError;
+        }
+        DataModel::EventsGenerator & eventGenerator = EventManagement::GetInstance();
+        eventGenerator.GenerateEvent(event, kRootEndpointId);
+        eventGenerator.ScheduleUrgentEventDeliverySync();
+    }
+
     if (status != Status::Success && !apExchangeContext->IsGroupExchangeContext())
     {
         return StatusResponse::Send(status, apExchangeContext, false /*aExpectResponse*/);
     }
+
+
 
     return CHIP_NO_ERROR;
 }
