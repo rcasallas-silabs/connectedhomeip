@@ -15,7 +15,7 @@
  *    limitations under the License.
  */
 
-#include "GroupcastTesting.h"
+#include <transport/GroupcastTesting.h>
 
 namespace chip {
 namespace Groupcast {

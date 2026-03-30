@@ -51,7 +51,7 @@
 #include <lib/support/FibonacciUtils.h>
 #include <lib/support/ReadOnlyBuffer.h>
 #include <protocols/interaction_model/StatusCode.h>
-#include <transport/raw/GroupcastTesting.h>
+#include <transport/GroupcastTesting.h>
 
 #include <cinttypes>
 

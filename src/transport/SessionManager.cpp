@@ -48,7 +48,6 @@
 #include <transport/SecureMessageCodec.h>
 #include <transport/TracingStructs.h>
 #include <transport/TransportMgr.h>
-#include <transport/raw/GroupcastTesting.h>
 
 namespace chip {
 
@@ -654,10 +653,16 @@ CHIP_ERROR SessionManager::InjectCaseSessionWithTestKey(SessionHolder & sessionH
     return CHIP_NO_ERROR;
 }
 
-void SessionManager::OnMessageReceived(const PeerAddress & peerAddress, System::PacketBufferHandle && msg,
-                                       Transport::MessageTransportContext * ctxt)
+void SessionManager::OnMessageReceived(const PeerAddress & peerAddress, const PeerAddress & destAddress,
+                                       System::PacketBufferHandle && msg, Transport::MessageTransportContext * ctxt)
 {
     PacketHeader partialPacketHeader;
+
+    if (mGroupcastTesting.IsEnabled())
+    {
+        mGroupcastTesting.SetSourceIpAddress(peerAddress.GetIPAddress());
+        mGroupcastTesting.SetDestinationIpAddress(destAddress.GetIPAddress());
+    }
 
     CHIP_ERROR err = partialPacketHeader.DecodeFixed(msg);
     if (err != CHIP_NO_ERROR)
@@ -670,16 +675,16 @@ void SessionManager::OnMessageReceived(const PeerAddress & peerAddress, System::
     {
         if (partialPacketHeader.IsGroupSession())
         {
-            SecureGroupMessageDispatch(partialPacketHeader, peerAddress, std::move(msg));
+            SecureGroupMessageDispatch(partialPacketHeader, peerAddress, destAddress, std::move(msg));
         }
         else
         {
-            SecureUnicastMessageDispatch(partialPacketHeader, peerAddress, std::move(msg), ctxt);
+            SecureUnicastMessageDispatch(partialPacketHeader, peerAddress, destAddress, std::move(msg), ctxt);
         }
     }
     else
     {
-        UnauthenticatedMessageDispatch(partialPacketHeader, peerAddress, std::move(msg), ctxt);
+        UnauthenticatedMessageDispatch(partialPacketHeader, peerAddress, destAddress, std::move(msg), ctxt);
     }
 }
 
@@ -748,9 +753,11 @@ CHIP_ERROR SessionManager::TCPConnect(const PeerAddress & peerAddress, Transport
 #endif // INET_CONFIG_ENABLE_TCP_ENDPOINT
 
 void SessionManager::UnauthenticatedMessageDispatch(const PacketHeader & partialPacketHeader,
-                                                    const Transport::PeerAddress & peerAddress, System::PacketBufferHandle && msg,
+                                                    const Transport::PeerAddress & peerAddress,
+                                                    const Transport::PeerAddress & destAddress, System::PacketBufferHandle && msg,
                                                     Transport::MessageTransportContext * ctxt)
 {
+    (void) destAddress;
     MATTER_TRACE_SCOPE("Unauthenticated Message Dispatch", "SessionManager");
 
 #if INET_CONFIG_ENABLE_TCP_ENDPOINT
@@ -874,9 +881,11 @@ void SessionManager::UnauthenticatedMessageDispatch(const PacketHeader & partial
 }
 
 void SessionManager::SecureUnicastMessageDispatch(const PacketHeader & partialPacketHeader,
-                                                  const Transport::PeerAddress & peerAddress, System::PacketBufferHandle && msg,
+                                                  const Transport::PeerAddress & peerAddress,
+                                                  const Transport::PeerAddress & destAddress, System::PacketBufferHandle && msg,
                                                   Transport::MessageTransportContext * ctxt)
 {
+    (void) destAddress;
     MATTER_TRACE_SCOPE("Secure Unicast Message Dispatch", "SessionManager");
 
     CHIP_ERROR err = CHIP_NO_ERROR;
@@ -1087,8 +1096,10 @@ static bool GroupKeyDecryptAttempt(const PacketHeader & partialPacketHeader, Pac
 }
 
 void SessionManager::SecureGroupMessageDispatch(const PacketHeader & partialPacketHeader,
-                                                const Transport::PeerAddress & peerAddress, System::PacketBufferHandle && msg)
+                                                const Transport::PeerAddress & peerAddress,
+                                                const Transport::PeerAddress & destAddress, System::PacketBufferHandle && msg)
 {
+    (void) destAddress;
     MATTER_TRACE_SCOPE("Group Message Dispatch", "SessionManager");
 
     // Capture length before consuming headers.

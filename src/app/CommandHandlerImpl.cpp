@@ -34,7 +34,7 @@
 #include <platform/LockTracker.h>
 #include <protocols/interaction_model/StatusCode.h>
 #include <protocols/secure_channel/Constants.h>
-#include <transport/raw/GroupcastTesting.h>
+#include <transport/GroupcastTesting.h>
 
 namespace chip {
 namespace app {

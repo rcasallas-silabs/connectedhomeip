@@ -40,7 +40,7 @@
 #include <lib/support/logging/TextOnlyLogging.h>
 #include <messaging/ExchangeContext.h>
 #include <protocols/interaction_model/StatusCode.h>
-#include <transport/raw/GroupcastTesting.h>
+#include <transport/GroupcastTesting.h>
 
 #include <optional>
 

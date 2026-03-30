@@ -16,7 +16,6 @@
  */
 #pragma once
 
-#include "GroupcastContext.h"
 #include <app/server-cluster/DefaultServerCluster.h>
 #include <clusters/Groupcast/AttributeIds.h>
 #include <clusters/Groupcast/ClusterId.h>
@@ -33,6 +32,13 @@
 namespace chip {
 namespace app {
 namespace Clusters {
+
+struct GroupcastContext
+{
+    chip::FabricTable & fabricTable;
+    chip::Credentials::GroupDataProvider & groupDataProvider;
+    chip::TimerDelegate & timerDelegate;
+};
 
 /**
  * @brief Provides code-driven implementation for the Groupcast cluster server.
