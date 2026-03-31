@@ -658,10 +658,11 @@ void SessionManager::OnMessageReceived(const PeerAddress & peerAddress, const Pe
 {
     PacketHeader partialPacketHeader;
 
-    if (mGroupcastTesting.IsEnabled())
+    auto & testing = GetGroupcastTesting();
+    if (testing.IsEnabled())
     {
-        mGroupcastTesting.SetSourceIpAddress(peerAddress.GetIPAddress());
-        mGroupcastTesting.SetDestinationIpAddress(destAddress.GetIPAddress());
+        testing.SetSourceIpAddress(peerAddress.GetIPAddress());
+        testing.SetDestinationIpAddress(destAddress.GetIPAddress());
     }
 
     CHIP_ERROR err = partialPacketHeader.DecodeFixed(msg);
@@ -1179,7 +1180,7 @@ void SessionManager::SecureGroupMessageDispatch(const PacketHeader & partialPack
     }
     iter.Release();
     // Groupcast Testing
-    auto & testing = chip::Groupcast::GetTesting();
+    auto & testing = GetGroupcastTesting();
     if (testing.IsEnabled() && testing.IsFabricUnderTest(groupContext.fabric_index))
     {
         testing.SetGroupID(packetHeaderCopy.GetDestinationGroupId().Value());
