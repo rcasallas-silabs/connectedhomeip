@@ -222,7 +222,7 @@ void ApplicationInit()
 
 #if CHIP_CONFIG_ENABLE_GROUPCAST
     gGroupcastCluster.Create(
-        Clusters::GroupcastContext{
+        Clusters::GroupcastCluster::Context{
             .fabricTable       = Server::GetInstance().GetFabricTable(),
             .groupDataProvider = *Credentials::GetGroupDataProvider(),
             .timerDelegate     = sTimerDelegate,

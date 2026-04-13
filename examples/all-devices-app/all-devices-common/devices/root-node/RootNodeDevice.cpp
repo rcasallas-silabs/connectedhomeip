@@ -20,7 +20,6 @@
 #include <app-common/zap-generated/ids/Clusters.h>
 #include <app/InteractionModelEngine.h>
 #include <app/clusters/groupcast/GroupcastCluster.h>
-#include <app/clusters/groupcast/GroupcastContext.h>
 #include <lib/support/CHIPMem.h>
 #include <lib/support/CodeUtils.h>
 #include <platform/CHIPDeviceLayer.h>
@@ -94,10 +93,10 @@ CHIP_ERROR RootNodeDevice::Register(EndpointId endpointId, CodeDrivenDataModelPr
 
 #if CHIP_CONFIG_ENABLE_GROUPCAST
     mGroupcastCluster.Create(
-        GroupcastContext{ .fabricTable       = mContext.fabricTable,
-                          .groupDataProvider = mContext.groupDataProvider,
-                          .timerDelegate     = mContext.timerDelegate,
-                          .accessControl     = mContext.accessControl },
+        GroupcastCluster::Context{ .fabricTable       = mContext.fabricTable,
+                                   .groupDataProvider = mContext.groupDataProvider,
+                                   .timerDelegate     = mContext.timerDelegate,
+                                   .accessControl     = mContext.accessControl },
         BitFlags<Clusters::Groupcast::Feature>(Clusters::Groupcast::Feature::kListener, Clusters::Groupcast::Feature::kSender));
     ReturnErrorOnFailure(provider.AddCluster(mGroupcastCluster.Registration()));
 #endif // CHIP_CONFIG_ENABLE_GROUPCAST

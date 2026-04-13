@@ -16,7 +16,6 @@
  */
 #pragma once
 
-#include "GroupcastContext.h"
 #include <access/AccessControl.h>
 #include <app/server-cluster/DefaultServerCluster.h>
 #include <clusters/Groupcast/AttributeIds.h>
@@ -41,11 +40,18 @@ namespace Clusters {
 class GroupcastCluster : public DefaultServerCluster, public Credentials::GroupDataProvider::GroupListener
 {
 public:
+    struct Context
+    {
+        chip::FabricTable & fabricTable;
+        chip::Credentials::GroupDataProvider & groupDataProvider;
+        chip::TimerDelegate & timerDelegate;
+        chip::Access::AccessControl & accessControl;
+    };
     static constexpr uint16_t kMaxMembershipEndpoints = 255;
     static constexpr uint16_t kMaxCommandEndpoints    = 20;
 
-    GroupcastCluster(GroupcastContext && context);
-    GroupcastCluster(GroupcastContext && context, BitFlags<Groupcast::Feature> features);
+    GroupcastCluster(Context && ctx);
+    GroupcastCluster(Context && ctx, BitFlags<Groupcast::Feature> features);
     virtual ~GroupcastCluster() override;
 
     CHIP_ERROR Startup(ServerClusterContext & context) override;
@@ -122,7 +128,7 @@ private:
 
     void EmitAuxiliaryAccessUpdated(const chip::Access::SubjectDescriptor & subjectDescriptor);
 
-    GroupcastContext mGroupcastContext;
+    Context mGroupcastContext;
     const BitFlags<Groupcast::Feature> mFeatures;
     DataModel::Provider * mDataModelProvider = nullptr;
     uint16_t mUsedMcastAddrCount             = 0;

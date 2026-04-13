@@ -16,7 +16,6 @@
  */
 #include <app-common/zap-generated/attributes/Accessors.h>
 #include <app/clusters/groupcast/GroupcastCluster.h>
-#include <app/clusters/groupcast/GroupcastContext.h>
 #include <app/server/Server.h>
 #include <app/static-cluster-config/Groupcast.h>
 #include <app/util/attribute-storage.h>
@@ -56,7 +55,7 @@ public:
         VerifyOrDie(groupDataProvider != nullptr); // we require app main to set this before cluster startup
 
         gServer.Create(
-            GroupcastContext{
+            GroupcastCluster::Context{
                 .fabricTable       = Server::GetInstance().GetFabricTable(),
                 .groupDataProvider = *groupDataProvider,
                 .timerDelegate     = sTimerDelegate,

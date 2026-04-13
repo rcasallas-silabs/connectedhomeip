@@ -43,10 +43,10 @@ bool HasAdminPrivileges(Access::AccessControl & accessControl, const chip::Acces
 
 } // namespace
 
-GroupcastCluster::GroupcastCluster(GroupcastContext && context) : GroupcastCluster(std::move(context), {}) {}
+GroupcastCluster::GroupcastCluster(Context && ctx) : GroupcastCluster(std::move(ctx), {}) {}
 
-GroupcastCluster::GroupcastCluster(GroupcastContext && context, BitFlags<Groupcast::Feature> features) :
-    DefaultServerCluster({ kRootEndpointId, Groupcast::Id }), mGroupcastContext(std::move(context)), mFeatures(features),
+GroupcastCluster::GroupcastCluster(Context && ctx, BitFlags<Groupcast::Feature> features) :
+    DefaultServerCluster({ kRootEndpointId, Groupcast::Id }), mGroupcastContext(std::move(ctx)), mFeatures(features),
     mMembershipChangedTimer(*this), mGroupcastTestingTimer(*this)
 {}
 
