@@ -3283,8 +3283,18 @@ endpoint 0 {
     callback attribute idleModeDuration;
     callback attribute activeModeDuration;
     callback attribute activeModeThreshold;
+    callback attribute registeredClients;
+    callback attribute ICDCounter;
+    callback attribute clientsSupportedPerFabric;
+    ram      attribute userActiveModeTriggerHint default = 0x00000000;
+    callback attribute operatingMode;
+    callback attribute maximumCheckInBackOff;
     callback attribute featureMap;
     callback attribute clusterRevision;
+
+    handle command RegisterClient;
+    handle command UnregisterClient;
+    handle command StayActiveRequest;
   }
 }
 endpoint 1 {

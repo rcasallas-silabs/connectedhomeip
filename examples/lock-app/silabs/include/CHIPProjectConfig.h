@@ -142,3 +142,15 @@ static constexpr uint8_t kNumCredentialTypes         = 6;
 #ifndef CHIP_CONFIG_ENABLE_ACL_EXTENSIONS
 #define CHIP_CONFIG_ENABLE_ACL_EXTENSIONS 1
 #endif
+
+/**
+ * @brief CHIP_CONFIG_ICD_OBSERVERS_POOL_SIZE
+ *
+ * Server::Init() already registers three ICDStateObservers (mReportScheduler,
+ * DnssdServer, ICDManagementCluster). AppTask registers itself as a fourth so
+ * the LCD can reflect ICD Active/Idle transitions; without bumping this past
+ * the default of 3, that registration would silently fail.
+ */
+#ifndef CHIP_CONFIG_ICD_OBSERVERS_POOL_SIZE
+#define CHIP_CONFIG_ICD_OBSERVERS_POOL_SIZE 4
+#endif

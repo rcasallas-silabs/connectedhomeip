@@ -152,6 +152,8 @@ void demoUIClearMainScreen(uint8_t * name);
  *****************************************************************************/
 sl_status_t updateDisplay(void);
 
+void demoWriteDebug(bool state);
+
 #ifdef __cplusplus
 }
 #endif

@@ -29,6 +29,7 @@
 #include "AppEvent.h"
 #include "BaseApplication.h"
 #include "LockManager.h"
+#include <app/icd/server/ICDStateObserver.h>
 #include <ble/Ble.h>
 #include <cmsis_os2.h>
 #include <lib/core/CHIPError.h>
@@ -54,13 +55,35 @@
  * AppTask Declaration
  *********************************************************/
 
-class AppTask : public BaseApplication
+class AppTask : public BaseApplication, public chip::app::ICDStateObserver
 {
 
 public:
     AppTask() = default;
 
     static AppTask & GetAppTask() { return sAppTask; }
+
+    /**
+     * @brief When the ICD enters ActiveMode, draw an outlined square in the
+     *        center of the LCD to reflect the ICD active state.
+     */
+    void OnEnterActiveMode() override;
+
+    /**
+     * @brief When the ICD enters IdleMode, draw a filled square in the
+     *        center of the LCD to reflect the ICD idle state.
+     */
+    void OnEnterIdleMode() override;
+
+    /**
+     * @brief AppTask has no action to do on this ICD event.
+     */
+    void OnTransitionToIdle() override {}
+
+    /**
+     * @brief AppTask has no action to do on this ICD event.
+     */
+    void OnICDModeChange() override {}
 
     /**
      * @brief AppTask task main loop function

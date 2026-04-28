@@ -121,6 +121,50 @@ using namespace chip::app;
 using namespace ::chip::DeviceLayer;
 using namespace ::chip::DeviceLayer::Silabs;
 
+
+
+#if CHIP_CONFIG_ENABLE_ICD_CIP
+// Iterates the per-fabric ICDMonitoring tables and logs the total number of
+// registered ICD clients (RegisteredClients attribute count). Must be called
+// off the Matter task; locks the CHIP stack while reading storage.
+void LogICDRegistrationCount(void)
+{
+    auto & server             = chip::Server::GetInstance();
+    auto & storage            = server.GetPersistentStorage();
+    auto & fabricTable        = server.GetFabricTable();
+    auto * keyStore           = server.GetSessionKeystore();
+    uint16_t supportedClients = chip::ICDConfigurationData::GetInstance().GetClientsSupportedPerFabric();
+
+    uint32_t total = 0;
+    chip::DeviceLayer::PlatformMgr().LockChipStack();
+    for (const auto & fabricInfo : fabricTable)
+    {
+        chip::ICDMonitoringTable table(storage, fabricInfo.GetFabricIndex(), supportedClients, keyStore);
+        chip::ICDMonitoringEntry entry(keyStore);
+        for (uint16_t i = 0; i < table.Limit(); ++i)
+        {
+            CHIP_ERROR err = table.Get(i, entry);
+            if (err == CHIP_ERROR_NOT_FOUND)
+            {
+                break;
+            }
+            if (err != CHIP_NO_ERROR)
+            {
+                ChipLogError(AppServer, "Failed reading ICD entry %u on fabric %u: %" CHIP_ERROR_FORMAT, i,
+                             fabricInfo.GetFabricIndex(), err.Format());
+                break;
+            }
+            ++total;
+        }
+    }
+    chip::DeviceLayer::PlatformMgr().UnlockChipStack();
+
+    auto & icdman = chip::Server::GetInstance().GetICDManager();
+    const char *state = icdman.GetOperaionalState() == chip::app::ICDManager::OperationalState::IdleMode ? "Idle" : "Active";
+    SILABS_LOG("~~~ ICD registrations: %u, state: %s", static_cast<unsigned>(total), state);
+}
+#endif // CHIP_CONFIG_ENABLE_ICD_CIP
+
 namespace {
 
 /**********************************************************
@@ -598,36 +642,19 @@ void BaseApplication::ButtonHandler(AppEvent * aEvent)
             // - Output qr code in logs
             // - Cycle LCD screen
             CancelFunctionTimer();
+#if CHIP_CONFIG_ENABLE_ICD_CIP
+            LogICDRegistrationCount();
+#endif // CHIP_CONFIG_ENABLE_ICD_CIP
 
-#ifdef SL_WIFI
-            if (!ConnectivityMgr().IsWiFiStationProvisioned())
-#else
-            if (!BaseApplication::sIsProvisioned)
-#endif /* !SL_WIFI */
-            {
-                // Open Basic CommissioningWindow. Will start BLE advertisements
-                chip::DeviceLayer::PlatformMgr().LockChipStack();
-                CHIP_ERROR err = chip::Server::GetInstance().GetCommissioningWindowManager().OpenBasicCommissioningWindow();
-                chip::DeviceLayer::PlatformMgr().UnlockChipStack();
-                if (err != CHIP_NO_ERROR)
-                {
-                    ChipLogError(AppServer, "Failed to open the Basic Commissioning Window");
-                }
-            }
-            else
-            {
-                ChipLogProgress(AppServer, "Network is already provisioned, Ble advertisement not enabled");
 #if CHIP_CONFIG_ENABLE_ICD_SERVER
-                // Temporarily claim network activity, until we implement a "user trigger" reason for ICD wakeups.
-                TEMPORARY_RETURN_IGNORED PlatformMgr().ScheduleWork(
-                    [](intptr_t) { ICDNotifier::GetInstance().NotifyNetworkActivityNotification(); });
+
+            // Wake the LIT-ICD on every BTN0 press so the rest of the function-button
+            // handling (commissioning window open, QR code, factory-reset arming)
+            // runs while the device is in ActiveMode. ICDNotifier must be invoked
+            // from the Matter task, so dispatch via PlatformMgr().
+            TEMPORARY_RETURN_IGNORED PlatformMgr().ScheduleWork(
+                [](intptr_t) { chip::app::ICDNotifier::GetInstance().NotifyNetworkActivityNotification(); });
 #endif // CHIP_CONFIG_ENABLE_ICD_SERVER
-            }
-            // Print the QR Code
-            OutputQrCode(false);
-#ifdef DISPLAY_ENABLED
-            PostUpdateDisplayEvent(SilabsLCD::Screen_e::CycleScreen);
-#endif // DISPLAY_ENABLED
         }
     }
 }

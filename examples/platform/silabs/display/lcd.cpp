@@ -16,6 +16,9 @@
  *    limitations under the License.
  */
 
+#include <array>
+#include <cstddef>
+#include <cstdint>
 #include <stdio.h>
 #include <string.h>
 
@@ -46,6 +49,7 @@
 static uint8_t qrCode[qrcodegen_BUFFER_LEN_FOR_VERSION(QR_CODE_VERSION)];
 static uint8_t workBuffer[qrcodegen_BUFFER_LEN_FOR_VERSION(QR_CODE_VERSION)];
 #endif // QR_CODE_ENABLED
+
 
 CHIP_ERROR SilabsLCD::Init(uint8_t * name, bool initialState)
 {
@@ -152,6 +156,11 @@ void SilabsLCD::WriteDemoUI()
         demoUIClearMainScreen(mName);
         demoUIDisplayApp(dState.mainState);
     }
+}
+
+void SilabsLCD::WriteDebug(bool state)
+{
+    demoWriteDebug(state);
 }
 
 void SilabsLCD::WriteStatus()

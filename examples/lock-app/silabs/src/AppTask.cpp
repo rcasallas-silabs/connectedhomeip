@@ -38,6 +38,7 @@
 #include <app-common/zap-generated/cluster-objects.h>
 
 #include <app/clusters/door-lock-server/door-lock-server.h>
+#include <app/icd/server/ICDConfigurationData.h>
 #include <app/server/Server.h>
 #include <app/util/attribute-storage.h>
 #include <setup_payload/OnboardingCodesUtil.h>
@@ -50,6 +51,12 @@
 #include <lib/support/CodeUtils.h>
 
 #include <platform/silabs/platformAbstraction/SilabsPlatform.h>
+
+#include <app/icd/server/ICDServerConfig.h>
+#if CHIP_CONFIG_ENABLE_ICD_CIP
+#include <app/icd/server/ICDConfigurationData.h>
+#include <app/icd/server/ICDMonitoringTable.h>
+#endif // CHIP_CONFIG_ENABLE_ICD_CIP
 
 #include <platform/CHIPDeviceLayer.h>
 #define SYSTEM_STATE_LED 0
@@ -72,6 +79,43 @@ using namespace SilabsDoorLock::LockInitParams;
 namespace {
 LEDWidget sLockLED;
 TimerHandle_t sUnlatchTimer;
+
+// #ifdef DISPLAY_ENABLED
+// // 128x128 monochrome LCD; draw a 40x40 square centered on the panel to
+// // indicate ICD active (outlined) vs idle (filled) state.
+// constexpr int32_t kLcdSize          = 128;
+// constexpr int32_t kIcdSquareSize    = 40;
+// constexpr int32_t kIcdSquareOriginX = (kLcdSize - kIcdSquareSize) / 2;
+// constexpr int32_t kIcdSquareOriginY = (kLcdSize - kIcdSquareSize) / 2;
+
+// void DrawIcdSquare(SilabsLCD & lcd, bool filled)
+// {
+//     void * context = lcd.Context();
+//     lcd.Clear();
+//     if (filled)
+//     {
+//         for (int32_t y = 0; y < kIcdSquareSize; ++y)
+//         {
+//             for (int32_t x = 0; x < kIcdSquareSize; ++x)
+//             {
+//                 lcd.DrawPixel(context, kIcdSquareOriginX + x, kIcdSquareOriginY + y);
+//             }
+//         }
+//     }
+//     else
+//     {
+//         for (int32_t i = 0; i < kIcdSquareSize; ++i)
+//         {
+//             lcd.DrawPixel(context, kIcdSquareOriginX + i, kIcdSquareOriginY);
+//             lcd.DrawPixel(context, kIcdSquareOriginX + i, kIcdSquareOriginY + kIcdSquareSize - 1);
+//             lcd.DrawPixel(context, kIcdSquareOriginX, kIcdSquareOriginY + i);
+//             lcd.DrawPixel(context, kIcdSquareOriginX + kIcdSquareSize - 1, kIcdSquareOriginY + i);
+//         }
+//     }
+//     lcd.Update();
+// }
+// #endif // DISPLAY_ENABLED
+
 
 void UpdateClusterStateAfterUnlatch(intptr_t context)
 {
@@ -245,12 +289,33 @@ void AppTask::AppTaskMain(void * pvParameter)
     AppEvent event;
     osMessageQueueId_t sAppEventQueue = *(static_cast<osMessageQueueId_t *>(pvParameter));
 
+    auto & icdManager = chip::Server::GetInstance().GetICDManager();
+    // RegisterObserver returns nullptr when mStateObserverPool is full
+    // (CHIP_CONFIG_ICD_OBSERVERS_POOL_SIZE). Server::Init() already consumes
+    // three slots, so this app's CHIPProjectConfig.h bumps the pool to 4. If
+    // this ever fires again, bump the pool further rather than ignoring it.
+    VerifyOrDie(icdManager.RegisterObserver(&sAppTask) != nullptr);
+
     CHIP_ERROR err = sAppTask.Init();
     if (err != CHIP_NO_ERROR)
     {
         SILABS_LOG("AppTask.Init() failed");
         appError(err);
     }
+
+    // // ICDManager::Init() emits a single OnEnterIdleMode synchronously during
+    // // Server::Init, which runs before this AppTask exists. With
+    // // ActiveModeDuration = 0, no further observer events are emitted until
+    // // there is network activity, so the LCD would remain blank until then.
+    // // Paint the square that matches the current state right now.
+    // if (icdManager.GetOperaionalState() == chip::app::ICDManager::OperationalState::ActiveMode)
+    // {
+    //     sAppTask.OnEnterActiveMode();
+    // }
+    // else
+    // {
+    //     sAppTask.OnEnterIdleMode();
+    // }
 
 #if !(defined(CHIP_CONFIG_ENABLE_ICD_SERVER) && CHIP_CONFIG_ENABLE_ICD_SERVER)
     sAppTask.StartStatusLEDTimer();
@@ -401,4 +466,20 @@ void AppTask::UpdateClusterState(intptr_t context)
     {
         SILABS_LOG("ERR: updating lock state %x", to_underlying(status));
     }
+}
+
+void AppTask::OnEnterActiveMode()
+{
+    SILABS_LOG("~~~ ACTIVE!")
+#ifdef DISPLAY_ENABLED
+    sAppTask.GetLCD().WriteDebug(true);
+#endif
+}
+
+void AppTask::OnEnterIdleMode()
+{
+    SILABS_LOG("~~~ IDLE!")
+#ifdef DISPLAY_ENABLED
+    sAppTask.GetLCD().WriteDebug(false);
+#endif
 }

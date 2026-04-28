@@ -36,6 +36,9 @@ ICDCheckInSender::ICDCheckInSender(Messaging::ExchangeManager * exchangeManager)
 
 void ICDCheckInSender::OnNodeAddressResolved(const PeerId & peerId, const AddressResolve::ResolveResult & result)
 {
+    char addrBuf[Transport::PeerAddress::kMaxToStringSize];
+    result.address.ToString(addrBuf);
+    ChipLogProgress(AppServer, "~~~ OnNodeAddressResolved: %s", addrBuf);
     if (CHIP_NO_ERROR != SendCheckInMsg(result.address))
     {
         ChipLogError(AppServer, "Failed to send the ICD Check-In message");
@@ -46,6 +49,7 @@ void ICDCheckInSender::OnNodeAddressResolved(const PeerId & peerId, const Addres
 
 void ICDCheckInSender::OnNodeAddressResolutionFailed(const PeerId & peerId, CHIP_ERROR reason)
 {
+    ChipLogProgress(AppServer, "~~~ OnNodeAddressResolutionFailed, peer: #04%x, reason: %s", (unsigned) peerId.GetNodeId(), reason.AsString());
     ICDNotifier::GetInstance().NotifyActiveRequestWithdrawal(ICDListener::KeepActiveFlag::kCheckInInProgress);
     ChipLogProgress(AppServer, "Node Address resolution failed for ICD Check-In with Node ID " ChipLogFormatX64,
                     ChipLogValueX64(peerId.GetNodeId()));

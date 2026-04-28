@@ -168,3 +168,70 @@ void demoUIClearMainScreen(uint8_t * name)
     demoUIDisplayHeader((char *) name);
     demoUIDisplayProtocols();
 }
+
+
+
+
+
+
+
+
+// APP_BITMAP_WIDTH x APP_BITMAP_HEIGHT 1-bpp bitmaps consumed by
+// GLIB_drawBitmap (see DMD_writeData in dmd_memlcd.c). Each row is packed
+// into APP_BITMAP_WIDTH / 8 bytes; rows are stored top-to-bottom. The
+// row-pattern macros below (SQUARE_FULL_ROW / SQUARE_FRAME_ROW) and the
+// per-row repeat counts in the array initializers encode the current 64x64
+// layout; if either dimension changes, the SQUARE_BYTES bound check on
+// the arrays will fail at compile time so the mismatch is caught
+// immediately.
+//
+// GLIB convention (do NOT confuse with most other 1-bpp formats):
+//   * Bit value 1 = white pixel (background, invisible on the memlcd).
+//   * Bit value 0 = black pixel (foreground, visible).
+//   * Pixels are packed LSB-first within each byte: pixel 0 of a row is
+//     bit 0 of byte 0, pixel 7 is bit 7, pixel 8 is bit 0 of byte 1, etc.
+#define SQUARE_BORDER 2
+#define SQUARE_ROW_BYTES (APP_BITMAP_WIDTH / 8)
+#define SQUARE_BYTES (SQUARE_ROW_BYTES * APP_BITMAP_HEIGHT)
+
+// One row, all pixels black (visible).
+#define SQUARE_FULL_ROW 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+// One row with a 2-pixel-thick black border on the left and right and white
+// (background) in the middle. With LSB-first packing the leftmost 2 pixels
+// are bits 0..1 of byte 0 (cleared -> 0xFC) and the rightmost 2 pixels are
+// bits 6..7 of byte 7 (cleared -> 0x3F).
+#define SQUARE_FRAME_ROW 0xFC, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x3F
+
+// Row-repeat helpers. Variadic so a row macro that itself expands to a
+// comma-separated list of bytes is forwarded as a single __VA_ARGS__ rather
+// than several arguments. The frame uses 60 middle rows = 8*7 + 4.
+#define SQUARE_REPEAT_2(...) __VA_ARGS__, __VA_ARGS__
+#define SQUARE_REPEAT_4(...) SQUARE_REPEAT_2(__VA_ARGS__), SQUARE_REPEAT_2(__VA_ARGS__)
+#define SQUARE_REPEAT_8(...) SQUARE_REPEAT_4(__VA_ARGS__), SQUARE_REPEAT_4(__VA_ARGS__)
+
+static const uint8_t SolidSquare[SQUARE_BYTES] = {
+    SQUARE_REPEAT_8(SQUARE_FULL_ROW), SQUARE_REPEAT_8(SQUARE_FULL_ROW), SQUARE_REPEAT_8(SQUARE_FULL_ROW),
+    SQUARE_REPEAT_8(SQUARE_FULL_ROW), SQUARE_REPEAT_8(SQUARE_FULL_ROW), SQUARE_REPEAT_8(SQUARE_FULL_ROW),
+    SQUARE_REPEAT_8(SQUARE_FULL_ROW), SQUARE_REPEAT_8(SQUARE_FULL_ROW),
+};
+
+static const uint8_t EmptySquare[SQUARE_BYTES] = {
+    // Top border: 2 rows.
+    SQUARE_REPEAT_2(SQUARE_FULL_ROW),
+    // Middle: 60 rows (8*7 + 4) with only the side pixels set.
+    SQUARE_REPEAT_8(SQUARE_FRAME_ROW), SQUARE_REPEAT_8(SQUARE_FRAME_ROW), SQUARE_REPEAT_8(SQUARE_FRAME_ROW),
+    SQUARE_REPEAT_8(SQUARE_FRAME_ROW), SQUARE_REPEAT_8(SQUARE_FRAME_ROW), SQUARE_REPEAT_8(SQUARE_FRAME_ROW),
+    SQUARE_REPEAT_8(SQUARE_FRAME_ROW), SQUARE_REPEAT_4(SQUARE_FRAME_ROW),
+    // Bottom border: 2 rows.
+    SQUARE_REPEAT_2(SQUARE_FULL_ROW),
+};
+
+void demoWriteDebug(bool state)
+{
+    // 8byte per line, 64 lines
+    // uint8_t bitmap_solid[512];
+    // uint8_t bitmap_empty[512];
+    GLIB_drawBitmap(&glibContext, APP_X_POSITION, APP_Y_POSITION, APP_BITMAP_WIDTH, APP_BITMAP_HEIGHT,
+                    (state ? SolidSquare : EmptySquare));
+    updateDisplay();
+}

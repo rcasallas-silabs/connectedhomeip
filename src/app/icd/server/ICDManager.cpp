@@ -207,7 +207,9 @@ void ICDManager::SendCheckInMsgs(Optional<Access::SubjectDescriptor> specificSub
             ICDCheckInSender * sender = mICDSenderPool.CreateObject(mExchangeManager);
             VerifyOrReturn(sender != nullptr, ChipLogError(AppServer, "Failed to allocate ICDCheckinSender"));
 
-            if (CHIP_NO_ERROR != sender->RequestResolve(entry, mFabricTable, counterValue))
+            err = sender->RequestResolve(entry, mFabricTable, counterValue);
+            ChipLogProgress(AppServer, "~~~ RequestResolve: %" CHIP_ERROR_FORMAT, err.Format());
+            if (CHIP_NO_ERROR != err)
             {
                 ChipLogError(AppServer, "Failed to send ICD Check-In");
             }

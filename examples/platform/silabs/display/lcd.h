@@ -74,6 +74,7 @@ public:
     void CycleScreens(void);
     void SetStatus(DisplayStatus_t & status);
     void WriteStatus();
+    void WriteDebug(bool state);
 
 #ifdef QR_CODE_ENABLED
     void SetQRCode(uint8_t * str, uint32_t size);
