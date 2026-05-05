@@ -494,15 +494,16 @@ IPAddress IPAddress::MakeIPv6PrefixMulticast(uint8_t aScope, uint8_t aPrefixLeng
     return (MakeIPv6TransientMulticast(lFlags, aScope, lGroupId));
 }
 
-IPAddress IPAddress::MakeIPv6WellKnownMulticast()
+IPAddress IPAddress::MakeIPv6MatterIANAMulticastAddr()
 {
     IPAddress addr;
-    addr.Addr[0] = htonl(0xFF050000ul);
-    addr.Addr[1] = htonl(0);
-    addr.Addr[2] = htonl(0);
-    addr.Addr[3] = htonl(0xFAul);
+    addr.Addr[0] = htonl(0xFF050000);
+    addr.Addr[1] = 0;
+    addr.Addr[2] = 0;
+    addr.Addr[3] = htonl(0xFA);
     return addr;
 }
+
 IPAddress IPAddress::MakeIPv4Broadcast()
 {
     IPAddress ipAddr;

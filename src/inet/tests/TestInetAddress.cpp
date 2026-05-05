@@ -1693,6 +1693,16 @@ TEST_F(TestInetAddress, TestCheckMakeIPv6PrefixMulticast)
     }
 }
 
+TEST_F(TestInetAddress, TestMakeIPv6MatterIANAMulticastAddr)
+{
+    IPAddress lAddress = IPAddress::MakeIPv6MatterIANAMulticastAddr();
+
+    EXPECT_EQ(lAddress.Addr[0], htonl(0xFF050000));
+    EXPECT_EQ(lAddress.Addr[1], 0u);
+    EXPECT_EQ(lAddress.Addr[2], 0u);
+    EXPECT_EQ(lAddress.Addr[3], htonl(0xFA));
+}
+
 /**
  *  Test IPPrefix.
  */

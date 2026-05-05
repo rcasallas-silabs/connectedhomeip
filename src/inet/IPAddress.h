@@ -694,7 +694,7 @@ public:
      *
      * @return  The constructed IP address.
      */
-    static IPAddress MakeIPv6WellKnownMulticast();
+    static IPAddress MakeIPv6MatterIANAMulticastAddr();
 
     /**
      * @brief   Construct an IPv4 broadcast address.

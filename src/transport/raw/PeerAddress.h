@@ -259,7 +259,7 @@ public:
         return UDP(Inet::IPAddress::MakeIPv6PrefixMulticast(scope, prefixLength, prefix, groupId));
     }
 
-    static PeerAddress Groupcast() { return UDP(Inet::IPAddress::MakeIPv6WellKnownMulticast()); }
+    static PeerAddress Groupcast() { return UDP(Inet::IPAddress::MakeIPv6MatterIANAMulticastAddr()); }
 
 private:
     constexpr PeerAddress(uint16_t shortId) : mTransportType(Type::kNfc), mId{ .mNFCShortId = shortId } {}
