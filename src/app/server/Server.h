@@ -597,8 +597,8 @@ private:
                             {
                                 in_use = !group.UsePerGroupAddress();
                             }
+                            iter->Release();
                         }
-                        iter->Release();
                         if (in_use)
                             break;
                     }
