@@ -44,4 +44,5 @@ src/app/clusters/camera-av-stream-management-server/CameraAVStreamManagementClus
 src/app/clusters/mode-base-server/mode-base-server.cpp
 src/app/clusters/resource-monitoring-server/ResourceMonitoringCluster.cpp
 src/app/clusters/resource-monitoring-server/tests/TestResourceMonitoringCluster.cpp
-src/app/clusters/thread-network-directory-server/thread-network-directory-server.cpp
+src/app/clusters/thread-network-directory-server/ThreadNetworkDirectoryCluster.cpp
+src/app/clusters/thread-network-directory-server/tests/TestThreadNetworkDirectoryCluster.cpp
