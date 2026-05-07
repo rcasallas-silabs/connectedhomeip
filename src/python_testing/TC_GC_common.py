@@ -347,3 +347,24 @@ async def get_operate_only_commands(dev_ctrl: ChipDeviceController, node_id: int
             find_commands_on_endpoint_and_cluster(endpoint_id, endpoint_data, operate_only_commands)
 
     return operate_only_commands
+
+def get_iana_multicast_address() -> bytes:
+    """Returns the 16-byte IANA-assigned multicast address for Groupcast (ff35:40:ff05::fa)."""
+    return bytes.fromhex("ff350040ff05000000000000000000fa")
+
+def get_per_group_multicast_address(fabric_id: int, group_id: int) -> bytes:
+    """Returns the 16-byte per-group multicast address (ff35:0040:fd<Fabric ID>00:<Group ID>)."""
+    # Convert Fabric ID to a 16-character (8-byte) hex string
+    fabric_hex = f"{fabric_id:016x}"
+
+    # Prefix (8 bytes): 'fd' + upper 7 bytes (14 chars) of Fabric ID
+    prefix_hex = "fd" + fabric_hex[:14]
+
+    # Group Field (4 bytes): lower 1 byte (2 chars) of Fabric ID + '00' + 2 bytes (4 chars) of Group ID
+    group_hex = f"{group_id:04x}"
+    group_field_hex = fabric_hex[14:16] + "00" + group_hex
+
+    # Concatenate: ff35:0040 (4 bytes) + prefix (8 bytes) + group field (4 bytes)
+    full_hex = "ff350040" + prefix_hex + group_field_hex
+
+    return bytes.fromhex(full_hex)
