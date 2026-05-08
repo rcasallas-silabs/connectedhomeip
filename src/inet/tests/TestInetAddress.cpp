@@ -1701,6 +1701,14 @@ TEST_F(TestInetAddress, TestMakeIPv6MatterIANAMulticastAddr)
     EXPECT_EQ(lAddress.Addr[1], 0u);
     EXPECT_EQ(lAddress.Addr[2], 0u);
     EXPECT_EQ(lAddress.Addr[3], htonl(0xFA));
+
+    EXPECT_TRUE(lAddress.IsIPv6());
+    EXPECT_TRUE(lAddress.IsIPv6Multicast());
+    EXPECT_TRUE(lAddress.IsMulticast());
+    EXPECT_FALSE(lAddress.IsIPv4());
+    EXPECT_FALSE(lAddress.IsIPv4Multicast());
+    EXPECT_FALSE(lAddress.IsIPv4Broadcast());
+    EXPECT_EQ(lAddress.Type(), IPAddressType::kIPv6);
 }
 
 /**
