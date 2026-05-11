@@ -371,6 +371,6 @@ def get_per_group_multicast_address(fabric_id: int, group_id: int) -> bytes:
     # a reserved 0x00 byte, then followed by 16 bit group id
     group_id_field = ((fabric_id << 24) & 0xff000000) | (group_id & 0xffff)
 
-    # Combine all portions into 96-bit address
+    # Combine all portions into 128-bit address
     addr_int = (prefix_scope_plen << 96) | (network_prefix << 32) | group_id_field
     return ipaddress.IPv6Address(addr_int).packed
