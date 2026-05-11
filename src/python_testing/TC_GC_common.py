@@ -15,6 +15,7 @@
 #    limitations under the License.
 #
 
+import ipaddress
 import logging
 from dataclasses import dataclass
 from typing import Optional
@@ -356,17 +357,20 @@ def get_iana_multicast_address() -> bytes:
 
 def get_per_group_multicast_address(fabric_id: int, group_id: int) -> bytes:
     """Returns the 16-byte per-group multicast address (ff35:0040:fd<Fabric ID>00:<Group ID>)."""
-    # Convert Fabric ID to a 16-character (8-byte) hex string
-    fabric_hex = f"{fabric_id:016x}"
 
-    # Prefix (8 bytes): 'fd' + upper 7 bytes (14 chars) of Fabric ID
-    prefix_hex = "fd" + fabric_hex[:14]
+    # The first 32 bits will always be a fixed value. 0xFF3 defined by RFC 3306, 
+    # 0x05 represents scope, 0x00 is a reserved byte, and 0x40 represents length 
+    # of network prefix (64 bits)
+    prefix_scope_plen = 0xFF350040
 
-    # Group Field (4 bytes): lower 1 byte (2 chars) of Fabric ID + '00' + 2 bytes (4 chars) of Group ID
-    group_hex = f"{group_id:04x}"
-    group_field_hex = fabric_hex[14:16] + "00" + group_hex
+    # Create 64 bit network prefix. Consists of FD (locally assigned ULA prefix) and then 
+    # the upper 56 bits of fabric index (in big endian format)
+    network_prefix = 0xfd00000000000000 | ((fabric_id >> 8) & 0x00ffffffffffffff)
 
-    # Concatenate: ff35:0040 (4 bytes) + prefix (8 bytes) + group field (4 bytes)
-    full_hex = "ff350040" + prefix_hex + group_field_hex
+    # Create 32 bit group identifier portion. Constists of the lower 8 bits of fabric id, 
+    # a reserved 0x00 byte, then followed by 16 bit group id
+    group_id_field = ((fabric_id << 24) & 0xff000000) | (group_id & 0xffff)
 
-    return bytes.fromhex(full_hex)
+    # Combine all portions into 96-bit address
+    addr_int = (prefix_scope_plen << 96) | (network_prefix << 32) | group_id_field
+    return ipaddress.IPv6Address(addr_int).packed

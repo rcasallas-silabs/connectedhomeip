@@ -243,7 +243,7 @@ public:
 
     static constexpr PeerAddress WiFiPAF(NodeId remoteId) { return PeerAddress(Type::kWiFiPAF, remoteId); }
 
-    static PeerAddress Multicast(chip::FabricId fabric, chip::GroupId group)
+    static PeerAddress BuildMatterPerGroupMulticastAddress(chip::FabricId fabric, chip::GroupId group)
     {
         constexpr uint8_t scope        = 0x05; // Site-Local
         constexpr uint8_t prefixLength = 0x40; // 64-bit long network prefix field
@@ -259,7 +259,7 @@ public:
         return UDP(Inet::IPAddress::MakeIPv6PrefixMulticast(scope, prefixLength, prefix, groupId));
     }
 
-    static PeerAddress Groupcast() { return UDP(Inet::IPAddress::MakeIPv6MatterIANAMulticastAddr()); }
+    static PeerAddress BuildMatterIanaMulticastAddress() { return UDP(Inet::IPAddress::MakeIPv6MatterIANAMulticastAddr()); }
 
 private:
     constexpr PeerAddress(uint16_t shortId) : mTransportType(Type::kNfc), mId{ .mNFCShortId = shortId } {}
