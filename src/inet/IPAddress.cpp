@@ -504,16 +504,6 @@ IPAddress IPAddress::MakeIPv6MatterIANAMulticastAddr()
     return addr;
 }
 
-IPAddress IPAddress::MakeIPv4Broadcast()
-{
-    IPAddress ipAddr;
-    ipAddr.Addr[0] = 0;
-    ipAddr.Addr[1] = 0;
-    ipAddr.Addr[2] = htonl(0xFFFF);
-    ipAddr.Addr[3] = 0xFFFFFFFF;
-    return ipAddr;
-}
-
 IPAddress IPAddress::Loopback(IPAddressType type)
 {
     IPAddress address;

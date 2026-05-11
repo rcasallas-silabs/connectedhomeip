@@ -697,13 +697,6 @@ public:
     static IPAddress MakeIPv6MatterIANAMulticastAddr();
 
     /**
-     * @brief   Construct an IPv4 broadcast address.
-     *
-     * @return  The constructed IP address.
-     */
-    static IPAddress MakeIPv4Broadcast();
-
-    /**
      * @brief   The distinguished unspecified IP address object.
      *
      * @details
