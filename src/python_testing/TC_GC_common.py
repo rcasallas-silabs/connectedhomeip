@@ -364,7 +364,7 @@ def get_per_group_multicast_address(fabric_id: int, group_id: int) -> bytes:
     prefix_scope_plen = 0xFF350040
 
     # Create 64 bit network prefix. Consists of FD (locally assigned ULA prefix) and then
-    # the upper 56 bits of fabric index (in big endian format)
+    # the upper 56 bits of fabric ID (in big endian format)
     network_prefix = 0xfd00000000000000 | ((fabric_id >> 8) & 0x00ffffffffffffff)
 
     # Create 32 bit group identifier portion. Constists of the lower 8 bits of fabric id,
