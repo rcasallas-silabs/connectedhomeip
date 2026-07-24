@@ -175,6 +175,7 @@ bootloader
 cmsis
 common_15_4
 freertos
+generative_ai
 openthread
 openthread_stack
 platform_core

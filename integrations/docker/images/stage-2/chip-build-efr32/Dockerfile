@@ -15,14 +15,23 @@ RUN set -x \
     && chmod +x /tmp/slt_install/slt \
     && : # last line
 
-# Install packages via SLT (simplicity-sdk, wiseconnect, slc-cli) and copy to /tmp for final image
+# Install packages via SLT (simplicity-sdk, wiseconnect, slc-cli, python) and copy to /tmp for final image.
+# SLT python (+ java21 pulled for slc-cli) must be retained: agents_md Jinja generation uses Jep
+# against the SLT python apack; discarding it causes
+# "python script did not properly register a template generator".
 RUN set -x \
     && /tmp/slt_install/slt install -f /tmp/wiseconnect-pkg.slt \
     && /tmp/slt_install/slt install slc-cli \
+    && /tmp/slt_install/slt install python \
     && cp -a $(/tmp/slt_install/slt where wiseconnect) /tmp/wifi_sdk \
     && cp -a $(/tmp/slt_install/slt where slc-cli) /tmp/slc_cli \
     && /tmp/slt_install/slt install -f /tmp/sisdk-pkg.slt \
     && cp -a $(/tmp/slt_install/slt where simplicity-sdk) /tmp/simplicity_sdk \
+    && mkdir -p /tmp/slt_archive \
+    && cp -a /root/.silabs/slt/installs/archive/python-v* /tmp/slt_archive/ \
+    && cp -a /root/.silabs/slt/installs/archive/java21-v* /tmp/slt_archive/ \
+    && cp -a /root/.silabs/slt/installs/archive/local.json /tmp/slt_archive/ \
+    && (cp -a /root/.silabs/slt/installs/archive/apack-link.json /tmp/slt_archive/ || true) \
     && rm -rf /tmp/slt_install /tmp/sisdk-pkg.slt /tmp/wiseconnect-pkg.slt \
     && : # last line
 
@@ -58,7 +67,7 @@ RUN set -x \
     && DEBIAN_FRONTEND=noninteractive apt-get install -fy --no-install-recommends \
     gcc-arm-none-eabi \
     binutils-arm-none-eabi \
-    openjdk-17-jdk-headless \
+    openjdk-21-jdk-headless \
     ccache \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/ \
@@ -76,3 +85,5 @@ ENV PATH="${PATH}:/opt/silabs/slc_cli/"
 COPY --from=build /tmp/simplicity_sdk /opt/silabs/simplicity_sdk
 COPY --from=build /tmp/wifi_sdk /opt/silabs/wifi_sdk
 COPY --from=build /tmp/slc_cli /opt/silabs/slc_cli
+# Preserve SLT paths so slc_java_loc.txt and apack python discovery keep working
+COPY --from=build /tmp/slt_archive/ /root/.silabs/slt/installs/archive/
